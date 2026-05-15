@@ -1,0 +1,47 @@
+name: Daily Teacher Bot
+
+on:
+  schedule:
+    # Run daily at 8:00 AM IST (02:30 UTC)
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  teacher-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+
+      - name: Create directories
+        run: |
+          mkdir -p data/books temp_frames temp_audio outputs
+
+      - name: Write YouTube credentials
+        run: |
+          echo "${{ secrets.TOKEN_JSON }}" > token.json
+          echo "${{ secrets.CLIENT_SECRETS_JSON }}" > client_secrets.json
+
+      - name: Run Teacher Bot
+        run: python main.py
+
+      - name: Upload artifacts (if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: teacher-bot-logs
+          path: |
+            *.log
+            data/*.json
+          retention-days: 7

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NCERT Lesson - Teacher Bot</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: #FFFFFF;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Noto Sans Devanagari', 'Mangal', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    width: 900px;
+    padding: 60px;
+    position: relative;
+}
+
+.class-badge {
+    position: absolute;
+    top: 30px;
+    left: 60px;
+    background: #1a1a1a;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.chapter-label {
+    position: absolute;
+    top: 30px;
+    right: 60px;
+    color: #888;
+    font-size: 16px;
+}
+
+.topic-text {
+    font-size: 42px;
+    line-height: 2;
+    color: #1a1a1a;
+    font-weight: 500;
+}
+
+.line {
+    display: block;
+    opacity: 0;
+    position: relative;
+}
+
+.line.visible {
+    opacity: 1;
+}
+
+/* Pencil SVG */
+.pencil {
+    position: fixed;
+    bottom: 40px;
+    right: 60px;
+    width: 80px;
+    height: 300px;
+    transform: rotate(-30deg);
+    transform-origin: bottom center;
+    transition: transform 0.5s ease;
+}
+
+.pencil-writing {
+    animation: pencilMove 0.8s ease-in-out infinite;
+}
+
+@keyframes pencilMove {
+    0%, 100% { transform: rotate(-30deg) translateY(0); }
+    50% { transform: rotate(-25deg) translateY(-5px); }
+}
+
+.pencil-body {
+    fill: #FFD700;
+}
+
+.pencil-tip {
+    fill: #333;
+}
+
+.pencil-eraser {
+    fill: #FF6B6B;
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="class-badge" id="classBadge">Class 6</div>
+    <div class="chapter-label" id="chapterLabel">Chapter 1</div>
+    <div class="topic-text" id="topicText"></div>
+</div>
+
+<!-- Animated Pencil SVG -->
+<svg class="pencil" id="pencil" viewBox="0 0 80 300">
+    <!-- Eraser -->
+    <rect class="pencil-eraser" x="25" y="0" width="30" height="40" rx="5"/>
+    <!-- Metal band -->
+    <rect fill="#C0C0C0" x="25" y="40" width="30" height="20"/>
+    <!-- Body -->
+    <rect class="pencil-body" x="25" y="60" width="30" height="200"/>
+    <!-- Tip -->
+    <polygon class="pencil-tip" points="25,260 55,260 40,300"/>
+</svg>
+
+<script>
+const lines = {{LINES_JSON | safe}};
+const container = document.getElementById('topicText');
+let currentLine = 0;
+
+function typeLine(text) {
+    const lineEl = document.createElement('span');
+    lineEl.className = 'line';
+    lineEl.textContent = text;
+    container.appendChild(lineEl);
+
+    // Trigger animation
+    setTimeout(() => {
+        lineEl.classList.add('visible');
+    }, 50);
+
+    currentLine++;
+}
+
+function animateLesson() {
+    let delay = 0;
+    lines.forEach((line, idx) => {
+        setTimeout(() => {
+            typeLine(line);
+            // Move pencil
+            const pencil = document.getElementById('pencil');
+            pencil.classList.add('pencil-writing');
+        }, delay);
+        delay += 2000; // Each line appears every 2 seconds
+    });
+}
+
+// Initialize
+document.getElementById('classBadge').textContent = '{{CLASS_LABEL}}';
+document.getElementById('chapterLabel').textContent = '{{CHAPTER_LABEL}}';
+
+// Start animation when page loads
+window.onload = animateLesson;
+</script>
+</body>
+</html>

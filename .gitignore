@@ -1,0 +1,34 @@
+# Teacher Bot YT - Git ignore
+
+# Environment
+.env
+
+# Credentials
+token.json
+client_secrets.json
+*.json (except curriculum.json)
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Temp files
+temp_frames/
+temp_audio/
+temp_*.html
+
+# Output
+outputs/
+*.mp4
+*.mp3
+
+# Progress (optional - uncomment if you don't want to track progress in git)
+# data/
+# topics_progress.json
+# topics_index.json
+
+# OS
+.DS_Store
+Thumbs.db

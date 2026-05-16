@@ -9,20 +9,41 @@ class AudioEngine:
         self.voice = "hi-IN-MadhurNeural"  # Female Hindi voice
 
     async def generate_audio(self, text, output_path):
-        """Generate audio using Edge-TTS (free, female Hindi)."""
-        try:
-            import edge_tts
-        except ImportError:
-            print("Installing edge-tts...")
-            os.system("pip install edge-tts -q")
-            import edge_tts
+        """Generate audio using ElevenLabs API (hardcoded key as requested)."""
+        import requests
+        
+        url = "https://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL"  # Bella voice (female)
+        
+        headers = {
+            "Accept": "audio/mpeg",
+            "Content-Type": "application/json",
+            "xi-api-key": "1b5004d419d62f06736e976f09bf4bc1cbd44b72bd92f4cb8387aa0602bbd504"
+        }
+        
+        data = {
+            "text": text,
+            "model_id": "eleven_multilingual_v2",
+            "voice_settings": {
+                "stability": 0.5,
+                "similarity_boost": 0.75
+            }
+        }
 
         try:
-            communicate = edge_tts.Communicate(text, self.voice)
-            await communicate.save(output_path)
-            return os.path.exists(output_path)
+            print("    🎙️ Generating voice via ElevenLabs...")
+            response = requests.post(url, json=data, headers=headers)
+            
+            if response.status_code == 200:
+                with open(output_path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=1024):
+                        if chunk:
+                            f.write(chunk)
+                return os.path.exists(output_path)
+            else:
+                print(f"    ❌ ElevenLabs failed: {response.status_code} - {response.text}")
+                return False
         except Exception as e:
-            print(f"Edge-TTS failed: {e}")
+            print(f"    ❌ ElevenLabs Exception: {e}")
             return False
 
     async def generate_lesson_audio(self, topic, lesson_text):

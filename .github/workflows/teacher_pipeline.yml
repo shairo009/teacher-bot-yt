@@ -1,0 +1,77 @@
+name: Teacher Bot YT - Daily Auto Upload
+
+on:
+  schedule:
+    # Daily at 9 AM UTC (2:30 PM IST)
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      upload_to_youtube:
+        description: 'Upload to YouTube'
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  run-bot:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libgl1-mesa-glx libsm6 libxrender1 libxext6
+
+      - name: Install Python Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Load YouTube API Credentials
+        env:
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET_JSON }}
+          TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
+        run: |
+          echo "$CLIENT_SECRET" > client_secrets.json
+          echo "$TOKEN_JSON" > token.json
+          echo "✅ Credentials loaded"
+
+      - name: Run Teacher Bot
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${{ github.event.inputs.upload_to_youtube }}" = "true" ]; then
+              python main.py
+            else
+              python main.py --dry-run
+            fi
+          else
+            python main.py
+          fi
+
+      - name: Upload video for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-video-${{ github.run_id }}
+          path: |
+            lesson_*.mp4
+            outputs/*.mp4
+          retention-days: 2
+          if-no-files-found: warn
+
+      - name: Save progress
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -f data/topics_progress.json 2>/dev/null || true
+          git commit -m "Update progress [skip ci]" || echo "No progress to save"
+          git push || echo "Skipped push"

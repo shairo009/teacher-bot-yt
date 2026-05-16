@@ -7,9 +7,9 @@ load_dotenv()
 
 class LLMEngine:
     def __init__(self, api_key=None, base_url=None):
-        self.api_key = api_key or os.getenv("OPENCODE_API_KEY")
-        self.base_url = base_url or os.getenv("OPENCODE_BASE_URL") or "https://opencode.ai/zen"
-        self.model_name = os.getenv("OPENCODE_MODEL") or "minimax-m2.5-free"
+        self.api_key = "sk-LsQ51RwzWpzDhqPoum8hHcZp4twSJrXL9pKOZeKHAEC1CNlUfLvvTacBJFKgqdng"
+        self.base_url = "https://opencode.ai/zen"
+        self.model_name = "minimax-m2.5-free"
 
     def explain_topic(self, raw_text, class_num=1):
         """Read raw textbook text and generate a teaching script."""

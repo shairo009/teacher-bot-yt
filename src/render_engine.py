@@ -45,7 +45,8 @@ class RenderEngine:
         return {
             'class_label': f"Class {class_num}",
             'chapter_label': chapter,
-            'lines': lines
+            'lines': lines,
+            'image_url': Path(topic.get('image')).absolute().as_uri() if topic.get('image') else "None"
         }
 
     async def render_lesson(self, topic):
@@ -63,6 +64,7 @@ class RenderEngine:
         template = Template(self.template_content)
         html_content = template.render(
             LINES_JSON=lines_json,
+            IMAGE_URL=lesson_data['image_url'],
             CLASS_LABEL=lesson_data['class_label'],
             CHAPTER_LABEL=lesson_data['chapter_label']
         )
@@ -92,9 +94,9 @@ class RenderEngine:
                 total_lines = len(lesson_data['lines'])
                 capture_times = [0.5]  # Initial frame
 
-                # Capture each line appearance
+                # Capture each line appearance (matches template 2.5s delay)
                 for i in range(total_lines):
-                    capture_times.append(2.5 + i * 1.5)
+                    capture_times.append(2.5 + i * 2.5)
 
                 for idx, delay in enumerate(capture_times):
                     frame_num = str(idx + 1).zfill(3)
@@ -102,9 +104,9 @@ class RenderEngine:
                     await page.screenshot(path=str(path))
                     frame_paths.append(str(path))
 
-                    if idx < total_lines:
+                    if idx < len(capture_times) - 1:
                         # Wait for next line to appear
-                        await asyncio.sleep(1.5)
+                        await asyncio.sleep(2.5)
 
                 await browser.close()
 

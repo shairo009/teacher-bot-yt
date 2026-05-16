@@ -38,12 +38,32 @@ class PDFExtractor:
             for pdf_path in pdf_files:
                 print(f"  Extracting {pdf_path.name}...")
                 text_content = ""
+                chapter_images = []
+                
                 try:
                     with pdfplumber.open(pdf_path) as pdf:
-                        for page in pdf.pages:
+                        for i, page in enumerate(pdf.pages):
+                            # Extract text
                             text = page.extract_text()
                             if text:
                                 text_content += text + "\n"
+                            
+                            # Extract images
+                            for j, img in enumerate(page.images):
+                                try:
+                                    # Create image path
+                                    img_name = f"{pdf_path.stem}_p{i}_i{j}.png"
+                                    img_dir = Path("data/extracted_images")
+                                    img_dir.mkdir(parents=True, exist_ok=True)
+                                    img_path = img_dir / img_name
+                                    
+                                    # Crop image from page
+                                    bbox = (img['x0'], img['top'], img['x1'], img['bottom'])
+                                    cropped = page.within_bbox(bbox).to_image(resolution=300)
+                                    cropped.save(str(img_path))
+                                    chapter_images.append(str(img_path))
+                                except:
+                                    continue
                 except Exception as e:
                     print(f"    Failed to read PDF: {e}")
                     continue
@@ -57,9 +77,11 @@ class PDFExtractor:
                 # Use filename as chapter name
                 chapter_name = pdf_path.stem
                 
+                # Map images to paragraphs (simple round-robin or sequence)
                 chapters.append({
                     'chapter': chapter_name,
-                    'topics': paragraphs  # Each paragraph is a "topic"
+                    'topics': paragraphs,
+                    'images': chapter_images
                 })
             
             if chapters:
@@ -85,16 +107,21 @@ class PDFExtractor:
             for chapter in chapters:
                 chapter_name = chapter['chapter']
                 topics = chapter['topics']
+                images = chapter.get('images', [])
 
                 for topic_idx, topic_text in enumerate(topics):
                     topic_id += 1
+                    # Assign an image if available
+                    img_path = images[topic_idx % len(images)] if images else None
+                    
                     index.append({
                         'id': topic_id,
                         'class': class_num,
                         'medium': medium,
                         'chapter': chapter_name,
                         'topic_idx': topic_idx,
-                        'topic': topic_text,  # This is now the raw textbook paragraph!
+                        'topic': topic_text,
+                        'image': img_path,
                         'source': 'pdf'
                     })
 

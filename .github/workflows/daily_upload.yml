@@ -35,11 +35,24 @@ jobs:
 
       - name: Write YouTube credentials
         run: |
-          echo "${{ secrets.TOKEN_JSON }}" > token.json
-          echo "${{ secrets.CLIENT_SECRETS_JSON }}" > client_secrets.json
+          if [ -n "${{ secrets.TOKEN_JSON }}" ]; then
+            echo "${{ secrets.TOKEN_JSON }}" > token.json
+          fi
+          if [ -n "${{ secrets.CLIENT_SECRETS_JSON }}" ]; then
+            echo "${{ secrets.CLIENT_SECRETS_JSON }}" > client_secrets.json
+          fi
 
       - name: Run Teacher Bot
         run: python main.py
+
+      - name: Commit and push progress
+        if: always()
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add token.json data/topics_index.json data/curriculum.json || true
+          git commit -m "chore: update token and progress [skip ci]" || true
+          git push
 
       - name: Upload artifacts (if any)
         if: always()

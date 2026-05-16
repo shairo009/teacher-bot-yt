@@ -152,6 +152,9 @@ class TeacherBot:
                     description=f"NCERT Math Lesson\nClass {topic['class']}\nChapter: {topic['chapter']}\n\n#ncert #math #class{topic['class']} #education #hindi"
                 )
                 print(f"   Uploaded! Video ID: {video_id}")
+                
+                # Only delete the video after successful upload
+                self.cleanup(video_path)
             else:
                 print("   ⚠️ YouTube upload not configured")
         else:
@@ -160,28 +163,16 @@ class TeacherBot:
         # Mark topic as completed
         self.topic_manager.mark_completed(topic['id'])
 
-        # Cleanup
-        self.cleanup()
-
         return True
 
-    def cleanup(self):
-        """Clean up temporary files."""
-        import shutil
-        for dir_path in ["temp_frames", "temp_audio"]:
-            if os.path.exists(dir_path):
-                try:
-                    shutil.rmtree(dir_path)
-                except:
-                    pass
-
-        if os.path.exists("temp_lesson.html"):
-            os.remove("temp_lesson.html")
-
-        if os.path.exists("temp_audio"):
-            os.makedirs("temp_audio", exist_ok=True)
-
-        print("\n🧹 Cleanup done")
+    def cleanup(self, video_path=None):
+        """Clean up video file after upload, keep other files."""
+        if video_path and os.path.exists(video_path):
+            try:
+                os.remove(video_path)
+                print(f"\n🧹 Deleted uploaded video: {video_path}")
+            except Exception as e:
+                print(f"Could not delete video: {e}")
 
 
 async def main():

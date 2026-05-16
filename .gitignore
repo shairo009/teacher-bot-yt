@@ -4,9 +4,16 @@
 .env
 
 # Credentials
-token.json
-client_secrets.json
-*.json (except curriculum.json)
+# We want to track tokens so they don't disappear on push
+!token.json
+!client_secrets.json
+
+# Ignore generic json files but explicitly keep curriculum and progress
+*.json
+!curriculum.json
+!topics_index.json
+!data/topics_index.json
+!data/curriculum.json
 
 # Python
 __pycache__/

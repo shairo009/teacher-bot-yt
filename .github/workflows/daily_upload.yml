@@ -22,7 +22,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-noto-c fonts-noto-c-extra
+          sudo apt-get install -y ffmpeg fonts-noto fonts-noto-extra
 
       - name: Install Python dependencies
         run: |

@@ -69,14 +69,16 @@ class TopicManager:
         return index
 
     def get_current_topic(self):
-        """Get the next topic to be taught."""
+        """Get the next topic to be taught. Loops infinitely."""
         if not self.index:
             return None
 
         idx = self.progress.get('current_idx', 0)
         if idx >= len(self.index):
-            # All topics completed
-            return None
+            # All topics completed - RESET for infinite lifetime loop!
+            print("🔄 Reached end of book! Restarting from Chapter 1 for infinite loop...")
+            self.reset()
+            idx = 0
 
         return self.index[idx]
 

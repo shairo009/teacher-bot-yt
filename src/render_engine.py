@@ -17,21 +17,22 @@ class RenderEngine:
 
     def prepare_lesson_data(self, topic):
         """Convert topic text into lines for rendering."""
-        topic_text = topic['topic']
         lines = []
-
-        # Split topic text into lines (max 5 words per line for visual appeal)
-        words = topic_text.split()
-
-        # Group words into lines of 4-6 words
-        current_line = []
-        for word in words:
-            current_line.append(word)
-            if len(current_line) >= 5 or len(' '.join(current_line)) > 40:
+        
+        if 'lines' in topic and isinstance(topic['lines'], list):
+            lines = topic['lines']
+        else:
+            topic_text = topic['topic']
+            # Split topic text into lines (max 5 words per line for visual appeal)
+            words = topic_text.split()
+            current_line = []
+            for word in words:
+                current_line.append(word)
+                if len(current_line) >= 5 or len(' '.join(current_line)) > 40:
+                    lines.append(' '.join(current_line))
+                    current_line = []
+            if current_line:
                 lines.append(' '.join(current_line))
-                current_line = []
-        if current_line:
-            lines.append(' '.join(current_line))
 
         # Ensure minimum 5 lines, maximum 12 lines
         while len(lines) < 5:

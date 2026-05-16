@@ -45,6 +45,8 @@ jobs:
           fi
 
       - name: Run Teacher Bot
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         run: python main.py
 
       - name: Commit and push progress

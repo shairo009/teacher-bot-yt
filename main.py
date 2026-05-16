@@ -12,6 +12,7 @@ from src.topic_manager import TopicManager
 from src.render_engine import RenderEngine
 from src.audio_engine import AudioEngine
 from src.video_engine import VideoEngine
+from src.llm_engine import LLMEngine
 
 
 class TeacherBot:
@@ -26,6 +27,7 @@ class TeacherBot:
         self.render_engine = RenderEngine()
         self.audio_engine = AudioEngine()
         self.video_engine = VideoEngine()
+        self.llm_engine = LLMEngine()
 
         self.uploader = None  # Lazy load
 
@@ -95,6 +97,12 @@ class TeacherBot:
         print(f"\n📚 Current: Class {topic['class']} | {topic['chapter']}")
         print(f"   Topic: {topic['topic'][:80]}...")
 
+        # AI reads the raw PDF text and explains it
+        print("   🤖 AI is studying the book...")
+        explanation = self.llm_engine.explain_topic(topic['topic'], class_num=topic['class'])
+        topic['lines'] = explanation['screen_bullet_points']
+        topic['script'] = explanation['narration_script']
+
         # Create temp directories
         os.makedirs("temp_frames", exist_ok=True)
         os.makedirs("temp_audio", exist_ok=True)
@@ -116,7 +124,7 @@ class TeacherBot:
 
         # Generate audio
         print("   Generating audio...")
-        audios = await self.audio_engine.generate_lesson_audio(topic, topic['topic'])
+        audios = await self.audio_engine.generate_lesson_audio(topic, topic['script'])
 
         if not audios:
             print("WARNING: No audio generated, video will be silent")

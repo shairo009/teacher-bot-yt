@@ -41,8 +41,12 @@ jobs:
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET_JSON }}
           TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
         run: |
-          echo "$CLIENT_SECRET" > client_secrets.json
-          echo "$TOKEN_JSON" > token.json
+          if [ -n "$CLIENT_SECRET" ]; then
+            echo "$CLIENT_SECRET" > client_secrets.json
+          fi
+          if [ -n "$TOKEN_JSON" ]; then
+            echo "$TOKEN_JSON" > token.json
+          fi
           echo "✅ Credentials loaded"
 
       - name: Run Teacher Bot

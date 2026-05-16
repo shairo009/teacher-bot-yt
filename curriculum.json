@@ -1,7 +1,3 @@
-# NCERT Curriculum Content - Class 1 to 10
-# Source: NCERT Official Syllabus
-# Used as primary content source for Teacher Bot YT
-
 {
   "curriculum": [
     {"class": 1, "chapter": 1, "topic": "Shapes and Space", "subtopics": ["Inside/Outside", "Top/Bottom", "Near/Far", "Shapes Recognition", "Big/Small", "Taller/Shorter"]},

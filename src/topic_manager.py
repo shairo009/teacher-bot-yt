@@ -87,7 +87,14 @@ class TopicManager:
         if topic_id not in self.progress.get('completed_ids', []):
             self.progress['completed_ids'].append(topic_id)
 
+        # Move to next index
         self.progress['current_idx'] += 1
+        
+        # Check if we reached the end
+        if self.progress['current_idx'] >= len(self.index):
+            print("🔄 Reached end of book! Resetting index for next run...")
+            self.progress['current_idx'] = 0
+
         self.progress['total_completed'] = len(self.progress['completed_ids'])
         self._save_progress()
 

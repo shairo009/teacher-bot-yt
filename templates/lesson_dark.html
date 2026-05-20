@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Mastery - Dark Style</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: #000000;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Outfit', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.grid {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 100px 100px;
+    z-index: 0;
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+    width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 20px;
+}
+
+.level-badge {
+    background: #00f2ff;
+    color: black;
+    padding: 10px 25px;
+    border-radius: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.topic-title {
+    font-size: 32px;
+    color: #ff007f;
+    font-weight: 700;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.line {
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.3;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease-out;
+    text-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+}
+
+.line.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.line:nth-child(odd) { color: #00f2ff; }
+.line:nth-child(even) { color: #ff007f; }
+
+.footer {
+    position: absolute;
+    bottom: 100px;
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 5px;
+}
+
+.glow-circle {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+}
+
+</style>
+</head>
+<body>
+    <div class="grid"></div>
+    <div class="glow-circle"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="level-badge" id="levelBadge">BASIC</div>
+            <div class="topic-title" id="topicTitle">MATH MASTERY</div>
+        </div>
+        
+        <div class="content" id="mainContent">
+            <!-- Lines injected here -->
+        </div>
+    </div>
+
+    <div class="footer">TEACHER BOT YT • SERIES 01</div>
+
+<script>
+const lines = {{LINES_JSON | safe}};
+const container = document.getElementById('mainContent');
+
+function startAnimation() {
+    let delay = 500;
+    lines.forEach((line, idx) => {
+        setTimeout(() => {
+            const lineEl = document.createElement('div');
+            lineEl.className = 'line';
+            lineEl.textContent = line;
+            container.appendChild(lineEl);
+            
+            setTimeout(() => lineEl.classList.add('visible'), 50);
+        }, delay);
+        delay += 2500;
+    });
+}
+
+document.getElementById('levelBadge').textContent = '{{LEVEL_LABEL}}';
+document.getElementById('topicTitle').textContent = '{{TOPIC_LABEL}}';
+
+window.onload = startAnimation;
+</script>
+</body>
+</html>

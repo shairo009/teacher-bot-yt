@@ -24,27 +24,31 @@ class LLMEngine:
             "content-type": "application/json"
         }
         
+        level = "Basic" # Default
+        if isinstance(raw_text, dict) and 'level' in raw_text:
+            level = raw_text['level']
+            raw_text = raw_text['topic']
+
         prompt = f"""
-        Read the following text extracted from a Class {class_num} textbook.
-        Your task is to EXPLAIN this concept simply to a Class {class_num} student in Hinglish (Hindi written in English alphabet).
+        Topic: {raw_text}
+        Level: {level} (Class {class_num})
         
-        Raw Textbook Text:
-        ---
-        {raw_text}
-        ---
+        Your task is to EXPLAIN this math concept in Hinglish (Hindi in English script).
+        Since this is a {level} level video, keep the tone appropriate.
+        - If Basic: Use very simple examples, slow pace.
+        - If Advanced: Use professional terms but explain them simply.
         
         Return the response in valid JSON format:
         {{
             "screen_bullet_points": [
-                "Short line 1 to show on screen",
-                "Short line 2 to show on screen",
-                "Short line 3 to show on screen"
+                "Point 1 (max 5 words)",
+                "Point 2 (max 5 words)",
+                "Point 3 (max 5 words)"
             ],
-            "narration_script": "The full spoken explanation in Hinglish, engaging and friendly like a teacher explaining to a child."
+            "narration_script": "Engaging Hinglish script for a YouTube Short. Start with a hook, explain the concept, and end with a call to action."
         }}
         
-        Keep screen bullet points extremely short (max 5-6 words each). Maximum 5 bullet points.
-        Keep the narration script under 150 words.
+        Maximum 6 bullet points. Narration script should be around 40-60 seconds when spoken (approx 100-120 words).
         """
         
         system_prompt = "You are a friendly, engaging primary school teacher. Output strictly JSON."

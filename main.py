@@ -67,11 +67,15 @@ class TeacherBot:
             return False
 
         # Build and save topic index
-        print("\n[3/4] Building topic index...")
-        index = self.topic_manager.load_index(all_content)
+        print("\n[3/4] Building topic index from curriculum...")
+        index = self.topic_manager.build_from_curriculum()
 
         if not index:
-            print("ERROR: No topics found in books!")
+            print("Falling back to PDF extraction...")
+            index = self.topic_manager.load_index(all_content)
+
+        if not index:
+            print("ERROR: No topics found!")
             return False
 
         # Save index for reference

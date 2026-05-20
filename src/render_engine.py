@@ -6,7 +6,7 @@ from jinja2 import Template
 
 
 class RenderEngine:
-    def __init__(self, template_path="templates/lesson_template.html", frames_dir="temp_frames"):
+    def __init__(self, template_path="templates/lesson_dark.html", frames_dir="temp_frames"):
         self.template_path = Path(template_path)
         self.frames_dir = Path(frames_dir)
         self.frames_dir.mkdir(parents=True, exist_ok=True)
@@ -34,17 +34,17 @@ class RenderEngine:
             if current_line:
                 lines.append(' '.join(current_line))
 
-        # Ensure minimum 5 lines, maximum 12 lines
-        while len(lines) < 5:
-            lines.append("")  # Empty line
-        lines = lines[:12]
+        # Ensure minimum 5 lines, maximum 8 lines for dark theme
+        while len(lines) < 3:
+            lines.append("") 
+        lines = lines[:8]
 
-        class_num = topic.get('class', 6)
-        chapter = topic.get('chapter', 'Chapter 1')
+        level = topic.get('level', 'Basic')
+        topic_name = topic.get('topic', 'Math Lesson').split(':')[0]
 
         return {
-            'class_label': f"Class {class_num}",
-            'chapter_label': chapter,
+            'level_label': level,
+            'topic_label': topic_name,
             'lines': lines,
             'image_url': Path(topic.get('image')).absolute().as_uri() if topic.get('image') else "None"
         }
@@ -65,8 +65,8 @@ class RenderEngine:
         html_content = template.render(
             LINES_JSON=lines_json,
             IMAGE_URL=lesson_data['image_url'],
-            CLASS_LABEL=lesson_data['class_label'],
-            CHAPTER_LABEL=lesson_data['chapter_label']
+            LEVEL_LABEL=lesson_data['level_label'],
+            TOPIC_LABEL=lesson_data['topic_label']
         )
 
         # Save HTML

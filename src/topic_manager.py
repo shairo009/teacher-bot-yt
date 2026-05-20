@@ -4,17 +4,49 @@ from pathlib import Path
 
 
 class TopicManager:
-    def __init__(self, progress_file="data/topics_progress.json", index_file="data/topics_index.json"):
+    def __init__(self, progress_file="data/topics_progress.json", index_file="data/topics_index.json", curriculum_file="curriculum_v2.json"):
         self.progress_file = Path(progress_file)
         self.index_file = Path(index_file)
+        self.curriculum_file = Path(curriculum_file)
         self.index = []
         self.progress = {
             "current_idx": 0,
             "completed_ids": [],
             "total_completed": 0,
-            "last_updated": None
+            "last_updated": None,
+            "current_level": "Basic"
         }
         self._load()
+
+    def _load_curriculum(self):
+        """Load the level-based curriculum."""
+        if self.curriculum_file.exists():
+            with open(self.curriculum_file, 'r') as f:
+                return json.load(f)
+        return None
+
+    def build_from_curriculum(self):
+        """Build index based on the level-based curriculum."""
+        curr = self._load_curriculum()
+        if not curr: return []
+        
+        index = []
+        topic_id = 0
+        for level_data in curr['levels']:
+            level_name = level_data['level']
+            for topic_data in level_data['topics']:
+                for sub in topic_data['subtopics']:
+                    topic_id += 1
+                    index.append({
+                        'id': topic_id,
+                        'level': level_name,
+                        'class': topic_data['class'],
+                        'chapter': topic_data['chapter'],
+                        'topic': f"{topic_data['topic']}: {sub}",
+                        'source': 'curriculum'
+                    })
+        self.index = index
+        return index
 
     def _load(self):
         # Load progress

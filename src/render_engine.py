@@ -148,11 +148,14 @@ class RenderEngine:
                 draw = ImageDraw.Draw(img)
 
                 # Draw class badge
+                class_label = lesson_data.get('class_label', f"Class {topic.get('class', '1')}")
+                chapter_label = lesson_data.get('chapter_label', f"Chapter {topic.get('chapter', '1')}")
+                
                 draw.rounded_rectangle([(60, 40), (200, 90)], radius=15, fill='#1a1a1a')
-                draw.text((90, 55), lesson_data['class_label'], fill='white')
+                draw.text((90, 55), class_label, fill='white')
 
                 # Draw chapter
-                draw.text((800, 55), lesson_data['chapter_label'], fill='#888')
+                draw.text((800, 55), chapter_label, fill='#888')
 
                 # Draw pencil icon
                 draw.polygon([(950, 1700), (1000, 1750), (930, 1800)], fill='#FFD700')

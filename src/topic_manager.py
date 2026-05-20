@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 class TopicManager:
-    def __init__(self, progress_file="data/topics_progress.json", index_file="data/topics_index.json", curriculum_file="curriculum_v2.json"):
+    def __init__(self, progress_file="data/topics_progress.json", index_file="data/topics_index.json", curriculum_file="curriculum_master.json"):
         self.progress_file = Path(progress_file)
         self.index_file = Path(index_file)
         self.curriculum_file = Path(curriculum_file)
@@ -14,35 +14,38 @@ class TopicManager:
             "completed_ids": [],
             "total_completed": 0,
             "last_updated": None,
-            "current_level": "Basic"
+            "current_class": 1
         }
         self._load()
 
     def _load_curriculum(self):
-        """Load the level-based curriculum."""
+        """Load the master curriculum."""
         if self.curriculum_file.exists():
             with open(self.curriculum_file, 'r') as f:
                 return json.load(f)
         return None
 
     def build_from_curriculum(self):
-        """Build index based on the level-based curriculum."""
+        """Build index based on the master curriculum (Class 1 to 10)."""
         curr = self._load_curriculum()
         if not curr: return []
         
         index = []
         topic_id = 0
-        for level_data in curr['levels']:
-            level_name = level_data['level']
-            for topic_data in level_data['topics']:
-                for sub in topic_data['subtopics']:
+        # Sort by class then chapter to ensure sequential progress
+        for class_data in sorted(curr['classes'], key=lambda x: x['class']):
+            class_num = class_data['class']
+            for chapter_data in sorted(class_data['chapters'], key=lambda x: x['chapter']):
+                chapter_num = chapter_data['chapter']
+                topic_name = chapter_data['topic']
+                for sub in chapter_data['subtopics']:
                     topic_id += 1
                     index.append({
                         'id': topic_id,
-                        'level': level_name,
-                        'class': topic_data['class'],
-                        'chapter': topic_data['chapter'],
-                        'topic': f"{topic_data['topic']}: {sub}",
+                        'class': class_num,
+                        'chapter': f"Chapter {chapter_num}: {topic_name}",
+                        'topic': sub,
+                        'level': f"Class {class_num}",
                         'source': 'curriculum'
                     })
         self.index = index

@@ -94,9 +94,9 @@ class RenderEngine:
                 total_lines = len(lesson_data['lines'])
                 capture_times = [0.5]  # Initial frame
 
-                # Capture each line appearance (matches template 2.5s delay)
+                # Capture each line appearance (matches new typing delay)
                 for i in range(total_lines):
-                    capture_times.append(2.5 + i * 2.5)
+                    capture_times.append(3.0 + i * 3.0)
 
                 for idx, delay in enumerate(capture_times):
                     frame_num = str(idx + 1).zfill(3)
@@ -106,7 +106,7 @@ class RenderEngine:
 
                     if idx < len(capture_times) - 1:
                         # Wait for next line to appear
-                        await asyncio.sleep(2.5)
+                        await asyncio.sleep(3.0)
 
                 await browser.close()
 

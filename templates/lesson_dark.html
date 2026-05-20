@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Math Mastery - Dark Style</title>
+<title>Math Mastery - Dynamic Animation</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&display=swap');
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -22,98 +24,155 @@ body {
 
 .grid {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    width: 200%;
+    height: 200%;
     background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        linear-gradient(rgba(0, 242, 255, 0.1) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(0, 242, 255, 0.1) 2px, transparent 2px);
     background-size: 100px 100px;
     z-index: 0;
+    animation: gridMove 20s linear infinite;
+    transform: perspective(1000px) rotateX(60deg);
+    top: -50%;
+}
+
+@keyframes gridMove {
+    from { transform: perspective(1000px) rotateX(60deg) translateY(0); }
+    to { transform: perspective(1000px) rotateX(60deg) translateY(100px); }
 }
 
 .container {
     position: relative;
     z-index: 1;
     width: 900px;
+    height: 1600px;
     display: flex;
     flex-direction: column;
-    gap: 60px;
+    gap: 80px;
+    padding: 60px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid rgba(0, 242, 255, 0.3);
+    border-radius: 40px;
+    box-shadow: 0 0 100px rgba(0, 242, 255, 0.1);
+    backdrop-filter: blur(10px);
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 20px;
+    border-bottom: 4px solid #ff007f;
+    padding-bottom: 30px;
 }
 
 .level-badge {
     background: #00f2ff;
     color: black;
-    padding: 10px 25px;
-    border-radius: 10px;
+    padding: 15px 35px;
+    border-radius: 15px;
     font-weight: 800;
+    font-size: 32px;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 4px;
+    box-shadow: 0 0 30px #00f2ff;
 }
 
 .topic-title {
-    font-size: 32px;
-    color: #ff007f;
-    font-weight: 700;
+    font-size: 40px;
+    color: #ffffff;
+    font-weight: 800;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
 .content {
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: 60px;
+    flex-grow: 1;
+}
+
+.line-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+}
+
+.bullet {
+    width: 20px;
+    height: 20px;
+    background: #ff007f;
+    border-radius: 50%;
+    margin-top: 25px;
+    box-shadow: 0 0 20px #ff007f;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bullet.visible {
+    opacity: 1;
+    transform: scale(1);
 }
 
 .line {
-    font-size: 56px;
+    font-size: 64px;
     font-weight: 700;
-    line-height: 1.3;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.6s ease-out;
-    text-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+    line-height: 1.2;
+    color: #00f2ff;
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+    overflow: hidden;
+    border-right: 4px solid transparent;
+    white-space: nowrap;
+    width: 0;
 }
 
-.line.visible {
-    opacity: 1;
-    transform: translateY(0);
+.line.typing {
+    animation: typing 1.5s steps(30, end) forwards, blink 0.75s step-end infinite;
 }
 
-.line:nth-child(odd) { color: #00f2ff; }
-.line:nth-child(even) { color: #ff007f; }
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink {
+    from, to { border-color: transparent; }
+    50% { border-color: #ff007f; }
+}
 
 .footer {
     position: absolute;
-    bottom: 100px;
+    bottom: 80px;
     width: 100%;
     text-align: center;
-    font-size: 24px;
-    color: rgba(255, 255, 255, 0.3);
-    letter-spacing: 5px;
+    font-size: 28px;
+    color: #ff007f;
+    font-weight: 700;
+    letter-spacing: 8px;
+    text-transform: uppercase;
 }
 
-.glow-circle {
+.glow-orb {
     position: absolute;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, transparent 70%);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(255, 0, 127, 0.1) 0%, transparent 70%);
+    top: 20%;
+    right: -10%;
     z-index: 0;
+    animation: pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 0.8; }
 }
 
 </style>
 </head>
 <body>
     <div class="grid"></div>
-    <div class="glow-circle"></div>
+    <div class="glow-orb"></div>
     
     <div class="container">
         <div class="header">
@@ -122,7 +181,7 @@ body {
         </div>
         
         <div class="content" id="mainContent">
-            <!-- Lines injected here -->
+            <!-- Lines will be injected here -->
         </div>
     </div>
 
@@ -132,23 +191,40 @@ body {
 const lines = {{LINES_JSON | safe}};
 const container = document.getElementById('mainContent');
 
-function startAnimation() {
-    let delay = 500;
-    lines.forEach((line, idx) => {
-        setTimeout(() => {
-            const lineEl = document.createElement('div');
-            lineEl.className = 'line';
-            lineEl.textContent = line;
-            container.appendChild(lineEl);
-            
-            setTimeout(() => lineEl.classList.add('visible'), 50);
-        }, delay);
-        delay += 2500;
-    });
-}
+async function startAnimation() {
+    document.getElementById('levelBadge').textContent = '{{LEVEL_LABEL}}';
+    document.getElementById('topicTitle').textContent = '{{TOPIC_LABEL}}';
 
-document.getElementById('levelBadge').textContent = '{{LEVEL_LABEL}}';
-document.getElementById('topicTitle').textContent = '{{TOPIC_LABEL}}';
+    for (let i = 0; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+
+        const lineWrapper = document.createElement('div');
+        lineWrapper.className = 'line-container';
+        
+        const bullet = document.createElement('div');
+        bullet.className = 'bullet';
+        
+        const lineEl = document.createElement('div');
+        lineEl.className = 'line';
+        lineEl.textContent = lines[i];
+        
+        lineWrapper.appendChild(bullet);
+        lineWrapper.appendChild(lineEl);
+        container.appendChild(lineWrapper);
+
+        // Animate bullet
+        await new Promise(r => setTimeout(r, 200));
+        bullet.classList.add('visible');
+        
+        // Start typing
+        await new Promise(r => setTimeout(r, 300));
+        lineEl.classList.add('typing');
+        
+        // Wait for typing to finish before next line
+        await new Promise(r => setTimeout(r, 2000));
+        lineEl.style.borderRight = 'none'; // Stop blinking
+    }
+}
 
 window.onload = startAnimation;
 </script>

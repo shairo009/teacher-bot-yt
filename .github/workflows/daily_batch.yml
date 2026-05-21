@@ -89,7 +89,9 @@ jobs:
       # ─── 7. Run the video generation pipeline ───────────────────
       - name: 🎬 Generate Math Videos
         env:
-          MINIMAX_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENCODE_BASE_URL: ${{ secrets.OPENCODE_BASE_URL }}
+          OPENCODE_MODEL_NAME: ${{ secrets.OPENCODE_MODEL_NAME }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
         run: |
           BATCH=${{ github.event.inputs.batch_size || '5' }}

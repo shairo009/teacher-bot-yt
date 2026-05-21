@@ -1,0 +1,138 @@
+name: 🎬 Daily Math Videos - 5 per Day
+
+on:
+  schedule:
+    # Roz 9:00 AM IST = 3:30 UTC
+    - cron: '30 3 * * *'
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: 'Kitne videos banane hain?'
+        required: false
+        default: '5'
+        type: string
+      dry_run:
+        description: 'Dry run (YouTube upload skip karo)'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  generate-videos:
+    name: Generate & Upload Math Videos
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # ─── 1. Repo checkout ───────────────────────────────────────
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ─── 2. Python setup ────────────────────────────────────────
+      - name: 🐍 Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # ─── 3. System dependencies (FFmpeg + Manim requirements) ───
+      - name: 📦 Install System Dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            ffmpeg \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libgdk-pixbuf2.0-dev \
+            python3-gi \
+            texlive-latex-extra \
+            texlive-fonts-extra \
+            dvipng \
+            fonts-noto \
+            fonts-noto-cjk \
+            cm-super
+          echo "✅ System deps installed"
+
+      # ─── 4. Python pip deps ─────────────────────────────────────
+      - name: 📦 Install Python Dependencies
+        run: |
+          pip install --upgrade pip wheel
+          pip install manim==0.18.1
+          pip install edge-tts moviepy==1.0.3 pillow requests python-dotenv aiofiles
+          pip install google-api-python-client google-auth-oauthlib google-auth-httplib2
+          echo "✅ Python deps installed"
+
+      # ─── 5. Create required directories ─────────────────────────
+      - name: 📁 Create Directories
+        run: |
+          mkdir -p data/books temp_frames temp_audio temp_media outputs
+          echo "✅ Directories ready"
+
+      # ─── 6. Write YouTube credentials from secrets ───────────────
+      - name: 🔑 Write YouTube Credentials
+        run: |
+          if [ -n "${{ secrets.TOKEN_JSON }}" ]; then
+            echo '${{ secrets.TOKEN_JSON }}' > token.json
+            echo "✅ token.json written"
+          else
+            echo "⚠️ TOKEN_JSON secret not set - upload will be skipped"
+          fi
+          if [ -n "${{ secrets.CLIENT_SECRETS_JSON }}" ]; then
+            echo '${{ secrets.CLIENT_SECRETS_JSON }}' > client_secrets.json
+            echo "✅ client_secrets.json written"
+          fi
+
+      # ─── 7. Run the video generation pipeline ───────────────────
+      - name: 🎬 Generate Math Videos
+        env:
+          MINIMAX_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: |
+          BATCH=${{ github.event.inputs.batch_size || '5' }}
+          DRY=${{ github.event.inputs.dry_run || 'true' }}
+
+          if [ "$DRY" = "true" ] || [ -z "${{ secrets.TOKEN_JSON }}" ]; then
+            echo "🎯 Running in DRY RUN mode (no YouTube upload)"
+            python main.py --dry-run --batch $BATCH
+          else
+            echo "🚀 Running FULL mode (with YouTube upload)"
+            python main.py --batch $BATCH
+          fi
+
+      # ─── 8. Upload generated videos as GitHub Artifacts ─────────
+      - name: 📤 Upload Videos as Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: math-videos-${{ github.run_number }}
+          path: outputs/*.mp4
+          retention-days: 7
+          if-no-files-found: warn
+
+      # ─── 9. Save progress back to repo ──────────────────────────
+      - name: 💾 Save Progress to Repository
+        if: always()
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git pull --rebase origin main || true
+          git add data/topics_progress.json
+          git commit -m "🤖 Auto: daily batch complete - progress updated [skip ci]" || echo "Nothing to commit"
+          git push origin main || echo "Push failed - continuing"
+          echo "✅ Progress saved!"
+
+      # ─── 10. Summary ─────────────────────────────────────────────
+      - name: 📊 Print Summary
+        if: always()
+        run: |
+          echo "=============================="
+          echo "  BATCH COMPLETE - SUMMARY"
+          echo "=============================="
+          cat data/topics_progress.json
+          echo ""
+          echo "Videos in outputs/:"
+          ls -lh outputs/*.mp4 2>/dev/null | tail -10 || echo "No videos found"

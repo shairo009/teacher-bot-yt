@@ -9,7 +9,7 @@ class LLMEngine:
     def __init__(self, api_key=None, base_url=None):
         self.api_key = api_key or os.environ.get("OPENCODE_API_KEY") or "sk-LsQ51RwzWpzDhqPoum8hHcZp4twSJrXL9pKOZeKHAEC1CNlUfLvvTacBJFKgqdng"
         self.base_url = base_url or os.environ.get("OPENCODE_BASE_URL") or "https://opencode.ai/zen"
-        self.model_name = os.environ.get("OPENCODE_MODEL_NAME") or "minimax-m2.5-free"
+        self.model_name = os.environ.get("OPENCODE_MODEL_NAME") or "deepseek-v4-flash-free"
 
     def explain_topic(self, raw_text, class_num=1):
         """Read raw textbook text and generate a teaching script."""
@@ -17,11 +17,10 @@ class LLMEngine:
             print("⚠️ OPENCODE_API_KEY not found. Using fallback text directly.")
             return self._fallback_response(raw_text)
 
-        url = f"{self.base_url}/v1/messages"
+        url = f"{self.base_url}/v1/chat/completions"
         headers = {
-            "x-api-key": self.api_key,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json"
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
         }
         
         level = "Basic" # Default
@@ -70,34 +69,72 @@ class LLMEngine:
         
         system_prompt = "You are a professional, high-concept mathematics professor. Output strictly JSON."
         
-        data = {
-            "model": self.model_name,
-            "max_tokens": 1024,
-            "messages": [
-                {"role": "user", "content": prompt}
-            ],
-            "system": system_prompt
-        }
+        candidates = [self.model_name]
+        for m in ["deepseek-v4-flash-free", "nemotron-3-super-free", "qwen3.6-plus-free"]:
+            if m not in candidates:
+                candidates.append(m)
         
-        print(f"    🧠 Thinking (AI formulating 3D Math Equation with Split Scripts...)")
+        last_error = ""
+        for model in candidates:
+            print(f"    🧠 Thinking (AI model: {model}...)")
+            data = {
+                "model": model,
+                "max_tokens": 1024,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ]
+            }
+            try:
+                response = requests.post(url, headers=headers, json=data, timeout=30)
+                if response.status_code == 200:
+                    result = response.json()
+                    content = result["choices"][0]["message"]["content"].strip()
+                    print(f"    ✅ Success with model: {model}")
+                    return self.parse_and_clean(content, raw_text)
+                else:
+                    print(f"    ⚠️ Model {model} failed: {response.status_code} - {response.text[:200]}")
+                    last_error = f"{response.status_code}: {response.text}"
+            except Exception as e:
+                print(f"    ⚠️ Exception with model {model}: {e}")
+                last_error = str(e)
         
-        try:
-            response = requests.post(url, headers=headers, json=data)
-            if response.status_code == 200:
-                result = response.json()
-                content = ""
-                for block in result.get("content", []):
-                    if block.get("type") == "text":
-                        content = block.get("text", "").strip()
-                        break
-                
-                return self.parse_and_clean(content, raw_text)
-            else:
-                print(f"    ❌ AI Error: {response.status_code} - {response.text}")
-                return self._fallback_response(raw_text)
-        except Exception as e:
-            print(f"    ❌ AI Exception: {e}")
-            return self._fallback_response(raw_text)
+        # Fallback to local Ollama
+        print(f"    🔄 All cloud models failed. Trying local Ollama fallback...")
+        return self._try_ollama(prompt, system_prompt, raw_text)
+
+    def _try_ollama(self, prompt, system_prompt, raw_text):
+        """Fallback to locally running Ollama server."""
+        ollama_models = ["llama3.1:8b", "gemma4:e2b"]
+        ollama_url = os.environ.get("OLLAMA_URL", "http://localhost:11434") + "/api/chat"
+        
+        for model in ollama_models:
+            print(f"    🦙 Trying Ollama model: {model}...")
+            data = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ],
+                "stream": False
+            }
+            try:
+                response = requests.post(ollama_url, json=data, timeout=60)
+                if response.status_code == 200:
+                    result = response.json()
+                    content = result.get("message", {}).get("content", "").strip()
+                    if content:
+                        print(f"    ✅ Ollama success with: {model}")
+                        return self.parse_and_clean(content, raw_text)
+                    else:
+                        print(f"    ⚠️ Ollama {model} returned empty content")
+                else:
+                    print(f"    ⚠️ Ollama {model} failed: {response.status_code}")
+            except Exception as e:
+                print(f"    ⚠️ Ollama {model} exception: {e}")
+        
+        print(f"    ❌ All AI backends exhausted. Using keyword-based fallback.")
+        return self._fallback_response(raw_text)
 
     def _fallback_response(self, raw_text):
         """Fallback to raw text if AI fails. Cleans garbage metadata, indd tags, dates, and print specs."""

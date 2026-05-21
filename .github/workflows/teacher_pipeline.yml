@@ -35,20 +35,11 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Load YouTube API Credentials
-        env:
-          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET_JSON }}
-          TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
-        run: |
-          if [ -n "$CLIENT_SECRET" ]; then
-            echo "$CLIENT_SECRET" > client_secrets.json
-          fi
-          if [ -n "$TOKEN_JSON" ]; then
-            echo "$TOKEN_JSON" > token.json
-          fi
-          echo "✅ Credentials loaded"
-
       - name: Run Teacher Bot
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CLIENT_SECRETS_JSON: ${{ secrets.CLIENT_SECRETS_JSON }}
+          TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             if [ "${{ github.event.inputs.upload_to_youtube }}" = "true" ]; then

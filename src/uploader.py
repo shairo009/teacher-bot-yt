@@ -28,28 +28,55 @@ class YouTubeUploader:
     def authenticate(self):
         """Authenticate with YouTube API using OAuth2."""
         creds = None
+        from google.oauth2.credentials import Credentials
 
-        # Load existing token
-        if self.token_path.exists():
+        # 1. Try to load from environment variables first (for GitHub Actions)
+        token_json_env = os.environ.get('TOKEN_JSON')
+        if token_json_env:
             try:
-                creds = self.TOKEN_PATH = self.token_path
-                from google.oauth2.credentials import Credentials
+                token_data = json.loads(token_json_env)
+                creds = Credentials.from_authorized_user_info(token_data, self.SCOPES)
+                print("✅ Authenticated using TOKEN_JSON environment variable")
+            except Exception as e:
+                print(f"Warning: Failed to load credentials from TOKEN_JSON env: {e}")
+
+        # 2. Load existing token file
+        if not creds and self.token_path.exists():
+            try:
                 creds = Credentials.from_authorized_user_file(str(self.token_path), self.SCOPES)
+                print("✅ Authenticated using token.json file")
             except Exception:
                 pass
 
         # If no valid credentials, get new ones
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                if not self.secrets_path.exists():
-                    print(f"ERROR: {self.secrets_path} not found!")
-                    return False
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    str(self.secrets_path), self.SCOPES
-                )
-                creds = flow.run_local_server(port=0)
+                try:
+                    creds.refresh(Request())
+                    print("✅ Credentials refreshed")
+                except Exception as e:
+                    print(f"Error refreshing credentials: {e}")
+                    creds = None
+            
+            if not creds:
+                # 3. Try to load client secrets from environment
+                client_secrets_env = os.environ.get('CLIENT_SECRETS_JSON')
+                if client_secrets_env:
+                    try:
+                        secrets_data = json.loads(client_secrets_env)
+                        flow = InstalledAppFlow.from_client_config(secrets_data, self.SCOPES)
+                        creds = flow.run_local_server(port=0)
+                    except Exception as e:
+                        print(f"Error using CLIENT_SECRETS_JSON env: {e}")
+
+                if not creds:
+                    if not self.secrets_path.exists():
+                        print(f"ERROR: No credentials found in environment or {self.secrets_path}!")
+                        return False
+                    flow = InstalledAppFlow.from_client_secrets_file(
+                        str(self.secrets_path), self.SCOPES
+                    )
+                    creds = flow.run_local_server(port=0)
 
             # Save credentials
             with open(self.token_path, 'w') as f:

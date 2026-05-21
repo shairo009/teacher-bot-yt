@@ -62,8 +62,7 @@ jobs:
         run: |
           pip install --upgrade pip wheel
           pip install manim==0.18.1
-          pip install edge-tts moviepy==1.0.3 pillow requests python-dotenv aiofiles
-          pip install google-api-python-client google-auth-oauthlib google-auth-httplib2
+          pip install -r requirements.txt
           echo "✅ Python deps installed"
 
       # ─── 5. Create required directories ─────────────────────────

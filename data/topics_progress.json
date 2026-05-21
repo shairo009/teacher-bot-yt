@@ -1,13 +1,18 @@
 {
-  "current_idx": 5,
+  "current_idx": 10,
   "completed_ids": [
     1,
     2,
     3,
     4,
-    5
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
   ],
-  "total_completed": 5,
+  "total_completed": 10,
   "last_updated": "1779374094.5399222",
   "current_class": 1,
   "formula_idx": 0

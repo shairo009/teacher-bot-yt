@@ -45,8 +45,22 @@ class TeacherBot:
         print("  Teacher Bot YT - Premium Formula Book Presenter")
         print("=" * 60)
 
-        # 0. Check if index already exists to skip slow extraction/building step
+        # 0. Check if we have curriculum_master.json to build/load the master index directly
+        curriculum_path = Path("curriculum_master.json")
         index_path = Path("data/topics_index.json")
+        
+        if curriculum_path.exists():
+            print("\n[Direct Load] Found curriculum_master.json! Building master index...")
+            index = self.topic_manager.build_from_curriculum()
+            if index:
+                # Save index for reference
+                os.makedirs("data", exist_ok=True)
+                with open(index_path, 'w', encoding='utf-8') as f:
+                    json.dump({'total_topics': len(index), 'topics': index}, f, ensure_ascii=False, indent=2)
+                print(f"✅ Loaded and saved master index with {len(index)} progressive topics (Class 1 to PhD Level)!")
+                return True
+
+        # Fallback to loading existing topic index
         if index_path.exists() and not self.force_redownload:
             try:
                 with open(index_path, 'r', encoding='utf-8') as f:
@@ -104,52 +118,21 @@ class TeacherBot:
         """Create a video for the current topic."""
         print("\n[4/4] Creating video...")
 
-        # 0. Check if we should prioritize the premium Formula Book JSON (default behavior for monetization)
-        formula_book_path = Path("data/formula_book.json")
-        topic = None
-        
-        # Load from formula book if it exists
-        if formula_book_path.exists():
-            try:
-                with open(formula_book_path, 'r', encoding='utf-8') as f:
-                    book_data = json.load(f)
-                    formulas = book_data.get("formulas", [])
-                    if formulas:
-                        idx = self.topic_manager.progress.get("formula_idx", 0)
-                        if idx >= len(formulas):
-                            idx = 0
-                            self.topic_manager.progress["formula_idx"] = 0
-                            self.topic_manager._save_progress()
-                        
-                        topic = formulas[idx]
-                        print(f"\n📚 Premium Formula Book Active! Loaded: {topic['formula_title']}")
-                        print(f"   Formula: {topic['formula_text']}")
-            except Exception as e:
-                print(f"Warning: Could not load formula book: {e}")
-
-        # Fallback to general topic manager if formula book is empty/failed
-        if not topic:
-            topic = self.topic_manager.get_current_topic()
+        # Load current topic from master curriculum index
+        topic = self.topic_manager.get_current_topic()
 
         if not topic:
             print("All topics completed! 🎉")
             return True
 
-        # Process script and parameters
-        if 'formula_title' in topic and 'intro_script' in topic:
-            # Already pre-designed in formula book! Skip LLM explanation
-            print("   ✨ Curated formula metadata found, skipping LLM engine call...")
-            topic['lines'] = [topic['formula_title'], topic['formula_text']]
-            topic['script'] = topic.get('narration_script', "")
-        else:
-            # AI reads the raw PDF text and explains it
-            print("   🤖 AI is studying the book...")
-            explanation = self.llm_engine.explain_topic(topic['topic'], class_num=topic['class'])
-            topic['lines'] = explanation['screen_bullet_points']
-            topic['script'] = explanation['narration_script']
-            # Copy split scripts
-            for k, v in explanation.items():
-                topic[k] = v
+        # Process script and parameters via LLM
+        print("   🤖 AI is studying the topic...")
+        explanation = self.llm_engine.explain_topic(topic['topic'], class_num=topic['class'])
+        topic['lines'] = explanation['screen_bullet_points']
+        topic['script'] = explanation['narration_script']
+        # Copy split scripts
+        for k, v in explanation.items():
+            topic[k] = v
 
         # Create temp directories
         os.makedirs("temp_frames", exist_ok=True)
@@ -218,8 +201,8 @@ class TeacherBot:
                 print("\n   Uploading to YouTube...")
                 video_id = self.uploader.upload_video(
                     video_path,
-                    title=f"Class {topic['class']} - {topic['chapter']} | NCERT Hindi",
-                    description=f"NCERT Math Lesson\nClass {topic['class']}\nChapter: {topic['chapter']}\n\n#ncert #math #class{topic['class']} #education #hindi"
+                    title=f"{topic['level']} - {topic['chapter']}",
+                    description=f"Math Lesson\nLevel: {topic['level']}\nChapter: {topic['chapter']}\nTopic: {topic['topic']}\n\n#math #education #{topic['level'].lower().replace(' ', '')}"
                 )
                 print(f"   Uploaded! Video ID: {video_id}")
                 
@@ -230,13 +213,8 @@ class TeacherBot:
         else:
             print(f"\n   ✅ Dry run complete! Video saved: {video_path}")
 
-        # Mark topic as completed (and increment formula index if from formula book)
-        if 'formula_title' in topic and formula_book_path.exists():
-            self.topic_manager.progress["formula_idx"] = self.topic_manager.progress.get("formula_idx", 0) + 1
-            self.topic_manager._save_progress()
-            print(f"Formula book topic completed. Next index: {self.topic_manager.progress['formula_idx']}")
-        else:
-            self.topic_manager.mark_completed(topic['id'])
+        # Mark topic as completed
+        self.topic_manager.mark_completed(topic['id'])
 
         return True
 
@@ -253,20 +231,39 @@ class TeacherBot:
 async def main():
     dry_run = "--dry-run" in sys.argv or "-d" in sys.argv
     force_redownload = "--force" in sys.argv or "-f" in sys.argv
+    
+    # Parse batch size: e.g. --batch 5
+    batch_size = 5
+    for idx, arg in enumerate(sys.argv):
+        if arg == "--batch" and idx + 1 < len(sys.argv):
+            try:
+                batch_size = int(sys.argv[idx + 1])
+            except ValueError:
+                pass
 
     bot = TeacherBot(dry_run=dry_run, force_redownload=force_redownload)
 
-    # Initialize (download PDFs, build index)
+    # Initialize (download/load curriculum and index)
     if not await bot.initialize():
         print("\n❌ Initialization failed!")
         sys.exit(1)
 
-    # Create video for current topic
-    if not await bot.create_video():
-        print("\n❌ Video creation failed!")
-        sys.exit(1)
+    print(f"\n🚀 Running video generation batch: {batch_size} videos to create sequentially...\n")
 
-    print("\n✅ Teacher Bot completed successfully!")
+    successful_videos = 0
+    for i in range(batch_size):
+        print(f"\n🎬 === Video {i+1}/{batch_size} ===")
+        try:
+            if await bot.create_video():
+                successful_videos += 1
+            else:
+                print(f"❌ Failed to create video {i+1}!")
+                break
+        except Exception as e:
+            print(f"❌ Exception in video {i+1}: {e}")
+            break
+
+    print(f"\n✅ Batch run complete! {successful_videos}/{batch_size} videos created successfully.")
 
 
 if __name__ == "__main__":

@@ -30,12 +30,26 @@ class TopicManager:
         return None
 
     def build_from_curriculum(self):
-        """Build index based on the master curriculum (Class 1 to 10)."""
+        """Build index based on the master curriculum (Class 1 to 15)."""
         curr = self._load_curriculum()
         if not curr: return []
         
         index = []
         topic_id = 0
+        
+        def get_level_str(class_num):
+            if class_num == 11:
+                return "Class 11"
+            elif class_num == 12:
+                return "Class 12"
+            elif class_num == 13:
+                return "Undergraduate"
+            elif class_num == 14:
+                return "Masters Level"
+            elif class_num == 15:
+                return "PhD Level"
+            else:
+                return f"Class {class_num}"
         
         # Check if it has the flat 'curriculum' key structure or the nested 'classes' structure
         if 'curriculum' in curr:
@@ -52,7 +66,7 @@ class TopicManager:
                         'class': class_num,
                         'chapter': f"Chapter {chapter_num}: {chapter_name}",
                         'topic': sub,
-                        'level': f"Class {class_num}",
+                        'level': get_level_str(class_num),
                         'source': 'curriculum'
                     })
         elif 'classes' in curr:
@@ -69,7 +83,7 @@ class TopicManager:
                             'class': class_num,
                             'chapter': f"Chapter {chapter_num}: {topic_name}",
                             'topic': sub,
-                            'level': f"Class {class_num}",
+                            'level': get_level_str(class_num),
                             'source': 'curriculum'
                         })
         self.index = index

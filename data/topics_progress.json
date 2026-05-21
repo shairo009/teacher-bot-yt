@@ -1,12 +1,17 @@
 {
-  "current_idx": 4,
+  "current_idx": 8,
   "completed_ids": [
     1000,
     2000,
     3000,
-    4000
+    4000,
+    5000,
+    6000,
+    7000,
+    8000
   ],
-  "total_completed": 4,
-  "last_updated": "1779366214.3377151",
-  "current_class": 1
+  "total_completed": 8,
+  "last_updated": "1779336207.8926938",
+  "current_class": 1,
+  "formula_idx": 0
 }

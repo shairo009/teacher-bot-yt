@@ -21,7 +21,11 @@ class TopicManager:
     def _load_curriculum(self):
         """Load the master curriculum."""
         if self.curriculum_file.exists():
-            with open(self.curriculum_file, 'r') as f:
+            with open(self.curriculum_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        fallback_file = Path("curriculum.json")
+        if fallback_file.exists():
+            with open(fallback_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
         return None
 
@@ -32,22 +36,42 @@ class TopicManager:
         
         index = []
         topic_id = 0
-        # Sort by class then chapter to ensure sequential progress
-        for class_data in sorted(curr['classes'], key=lambda x: x['class']):
-            class_num = class_data['class']
-            for chapter_data in sorted(class_data['chapters'], key=lambda x: x['chapter']):
-                chapter_num = chapter_data['chapter']
-                topic_name = chapter_data['topic']
-                for sub in chapter_data['subtopics']:
+        
+        # Check if it has the flat 'curriculum' key structure or the nested 'classes' structure
+        if 'curriculum' in curr:
+            # Flat list of chapter entries
+            for entry in sorted(curr['curriculum'], key=lambda x: (x.get('class', 1), x.get('chapter', 1))):
+                class_num = entry.get('class', 1)
+                chapter_num = entry.get('chapter', 1)
+                chapter_name = entry.get('topic', '')
+                subtopics = entry.get('subtopics', [])
+                for sub in subtopics:
                     topic_id += 1
                     index.append({
                         'id': topic_id,
                         'class': class_num,
-                        'chapter': f"Chapter {chapter_num}: {topic_name}",
+                        'chapter': f"Chapter {chapter_num}: {chapter_name}",
                         'topic': sub,
                         'level': f"Class {class_num}",
                         'source': 'curriculum'
                     })
+        elif 'classes' in curr:
+            # Nested structure
+            for class_data in sorted(curr['classes'], key=lambda x: x['class']):
+                class_num = class_data['class']
+                for chapter_data in sorted(class_data['chapters'], key=lambda x: x['chapter']):
+                    chapter_num = chapter_data['chapter']
+                    topic_name = chapter_data['topic']
+                    for sub in chapter_data['subtopics']:
+                        topic_id += 1
+                        index.append({
+                            'id': topic_id,
+                            'class': class_num,
+                            'chapter': f"Chapter {chapter_num}: {topic_name}",
+                            'topic': sub,
+                            'level': f"Class {class_num}",
+                            'source': 'curriculum'
+                        })
         self.index = index
         return index
 

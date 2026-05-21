@@ -10,37 +10,41 @@ class VideoEngine:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def compose_video(self, frame_paths, audio_paths, output_name="lesson.mp4"):
-        """Compose video from frames and audio using MoviePy."""
+        """Compose video from frames or direct video, and audio using MoviePy."""
         try:
-            from moviepy.editor import (ImageClip, AudioFileClip,
+            from moviepy.editor import (ImageClip, AudioFileClip, VideoFileClip,
                                         concatenate_videoclips, concatenate_audioclips)
         except ImportError:
             print("MoviePy not installed. Installing...")
             os.system("pip install moviepy -q")
-            from moviepy.editor import (ImageClip, AudioFileClip,
+            from moviepy.editor import (ImageClip, AudioFileClip, VideoFileClip,
                                         concatenate_videoclips, concatenate_audioclips)
 
         if not frame_paths:
-            print("No frames to compose")
+            print("No frames/videos to compose")
             return None
 
         output_path = self.output_dir / output_name
+        is_direct_video = len(frame_paths) == 1 and frame_paths[0].endswith(".mp4")
 
         try:
-            clips = []
+            if is_direct_video:
+                print(f"🎬 Loading direct video clip (stripping pre-existing audio): {frame_paths[0]}")
+                video = VideoFileClip(frame_paths[0]).without_audio()
+            else:
+                clips = []
+                # Create image clips from frames
+                for frame_path in frame_paths:
+                    if os.path.exists(frame_path):
+                        clip = ImageClip(frame_path).set_duration(0.5)  # 0.5s per frame
+                        clips.append(clip)
 
-            # Create image clips from frames
-            for frame_path in frame_paths:
-                if os.path.exists(frame_path):
-                    clip = ImageClip(frame_path).set_duration(0.5)  # 0.5s per frame
-                    clips.append(clip)
+                if not clips:
+                    print("No valid frame clips created")
+                    return None
 
-            if not clips:
-                print("No valid frame clips created")
-                return None
-
-            # Concatenate frames
-            video = concatenate_videoclips(clips, method="compose")
+                # Concatenate frames
+                video = concatenate_videoclips(clips, method="compose")
 
             # Add audio if available
             if audio_paths:
@@ -51,17 +55,19 @@ class VideoEngine:
 
                 if audio_clips:
                     combined_audio = concatenate_audioclips(audio_clips)
-                    video = video.set_audio(combined_audio)
-                    # Match audio duration
+                    
+                    # Match silent video/audio duration dynamically and smoothly first
                     if video.duration < combined_audio.duration:
-                        video = video.set_duration(combined_audio.duration)
+                        # Loop silent video smoothly to match audio duration
+                        repeats = int(combined_audio.duration / video.duration) + 1
+                        video = concatenate_videoclips([video] * repeats)
+                        video = video.subclip(0, combined_audio.duration)
                     elif combined_audio.duration < video.duration:
-                        # Loop audio if needed
-                        repeats = int(video.duration / combined_audio.duration) + 1
-                        repeated = combined_audio
-                        for _ in range(repeats - 1):
-                            repeated = concatenate_audioclips([repeated, combined_audio])
-                        video = video.set_audio(repeated.subclip(0, video.duration))
+                        # Trim silent video to match audio
+                        video = video.subclip(0, combined_audio.duration)
+
+                    # Bind the combined audio exactly once to the final looped/trimmed silent video
+                    video = video.set_audio(combined_audio)
 
             # Write video
             video.write_videofile(

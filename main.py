@@ -42,8 +42,22 @@ class TeacherBot:
     async def initialize(self):
         """Download PDFs and build topic index if needed."""
         print("=" * 60)
-        print("  Teacher Bot YT - NCERT Video Creator")
+        print("  Teacher Bot YT - Premium Formula Book Presenter")
         print("=" * 60)
+
+        # 0. Check if index already exists to skip slow extraction/building step
+        index_path = Path("data/topics_index.json")
+        if index_path.exists() and not self.force_redownload:
+            try:
+                with open(index_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    index = data.get('topics', [])
+                    if index:
+                        self.topic_manager.index = index
+                        print(f"Loaded existing topic index with {len(index)} topics from data/topics_index.json")
+                        return True
+            except Exception as e:
+                print(f"Warning: Could not load existing index: {e}")
 
         # Check if we need to download PDFs
         pdf_files = self.pdf_downloader.get_available_pdfs()
@@ -90,30 +104,84 @@ class TeacherBot:
         """Create a video for the current topic."""
         print("\n[4/4] Creating video...")
 
-        # Get current topic
-        topic = self.topic_manager.get_current_topic()
+        # 0. Check if we should prioritize the premium Formula Book JSON (default behavior for monetization)
+        formula_book_path = Path("data/formula_book.json")
+        topic = None
+        
+        # Load from formula book if it exists
+        if formula_book_path.exists():
+            try:
+                with open(formula_book_path, 'r', encoding='utf-8') as f:
+                    book_data = json.load(f)
+                    formulas = book_data.get("formulas", [])
+                    if formulas:
+                        idx = self.topic_manager.progress.get("formula_idx", 0)
+                        if idx >= len(formulas):
+                            idx = 0
+                            self.topic_manager.progress["formula_idx"] = 0
+                            self.topic_manager._save_progress()
+                        
+                        topic = formulas[idx]
+                        print(f"\n📚 Premium Formula Book Active! Loaded: {topic['formula_title']}")
+                        print(f"   Formula: {topic['formula_text']}")
+            except Exception as e:
+                print(f"Warning: Could not load formula book: {e}")
+
+        # Fallback to general topic manager if formula book is empty/failed
+        if not topic:
+            topic = self.topic_manager.get_current_topic()
 
         if not topic:
             print("All topics completed! 🎉")
             return True
 
-        # Display current topic info
-        print(f"\n📚 Current: Class {topic['class']} | {topic['chapter']}")
-        print(f"   Topic: {topic['topic'][:80]}...")
-
-        # AI reads the raw PDF text and explains it
-        print("   🤖 AI is studying the book...")
-        explanation = self.llm_engine.explain_topic(topic['topic'], class_num=topic['class'])
-        topic['lines'] = explanation['screen_bullet_points']
-        topic['script'] = explanation['narration_script']
+        # Process script and parameters
+        if 'formula_title' in topic and 'intro_script' in topic:
+            # Already pre-designed in formula book! Skip LLM explanation
+            print("   ✨ Curated formula metadata found, skipping LLM engine call...")
+            topic['lines'] = [topic['formula_title'], topic['formula_text']]
+            topic['script'] = topic.get('narration_script', "")
+        else:
+            # AI reads the raw PDF text and explains it
+            print("   🤖 AI is studying the book...")
+            explanation = self.llm_engine.explain_topic(topic['topic'], class_num=topic['class'])
+            topic['lines'] = explanation['screen_bullet_points']
+            topic['script'] = explanation['narration_script']
+            # Copy split scripts
+            for k, v in explanation.items():
+                topic[k] = v
 
         # Create temp directories
         os.makedirs("temp_frames", exist_ok=True)
         os.makedirs("temp_audio", exist_ok=True)
 
-        # Render frames
-        print("   Rendering frames...")
-        frames = await self.render_engine.render_lesson(topic)
+        # Generate audio parts
+        print("   🎙️ Generating split step-based audio...")
+        audios = await self.audio_engine.generate_lesson_audio(topic)
+
+        if not audios:
+            print("WARNING: No audio generated, video will be silent")
+            audios = []
+
+        print(f"   Created {len(audios)} audio parts")
+
+        # Extract audio durations dynamically
+        audio_durations = {}
+        if audios:
+            try:
+                from moviepy.editor import AudioFileClip
+                for audio_path in audios:
+                    name = Path(audio_path).stem  # 'intro', 'step1', 'step2', 'step3', 'outro'
+                    clip = AudioFileClip(audio_path)
+                    audio_durations[name] = clip.duration
+                    clip.close()
+                print(f"   Dynamic Audio durations: {audio_durations}")
+            except Exception as e:
+                print(f"   Error reading audio durations: {e}")
+
+        # Render frames with exact audio timing
+        print("   Rendering frames with dynamic sync...")
+        frames = await self.render_engine.render_lesson(topic, audio_durations)
 
         if not frames:
             # Fallback to simple render
@@ -125,16 +193,6 @@ class TeacherBot:
             return False
 
         print(f"   Created {len(frames)} frames")
-
-        # Generate audio
-        print("   Generating audio...")
-        audios = await self.audio_engine.generate_lesson_audio(topic, topic['script'])
-
-        if not audios:
-            print("WARNING: No audio generated, video will be silent")
-            audios = []
-
-        print(f"   Created {len(audios)} audio parts")
 
         # Compose video
         print("   Composing video...")
@@ -172,8 +230,13 @@ class TeacherBot:
         else:
             print(f"\n   ✅ Dry run complete! Video saved: {video_path}")
 
-        # Mark topic as completed
-        self.topic_manager.mark_completed(topic['id'])
+        # Mark topic as completed (and increment formula index if from formula book)
+        if 'formula_title' in topic and formula_book_path.exists():
+            self.topic_manager.progress["formula_idx"] = self.topic_manager.progress.get("formula_idx", 0) + 1
+            self.topic_manager._save_progress()
+            print(f"Formula book topic completed. Next index: {self.topic_manager.progress['formula_idx']}")
+        else:
+            self.topic_manager.mark_completed(topic['id'])
 
         return True
 

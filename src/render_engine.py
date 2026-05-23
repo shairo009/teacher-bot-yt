@@ -231,7 +231,7 @@ class RenderEngine:
                         fill_color="#0B0C10",   # Translucent dark body
                         fill_opacity=0.9,
                         stroke_width=2.5
-                    ).shift(DOWN * 5.2)
+                    ).shift(DOWN * 5.5)
                     self.add_fixed_in_frame_mobjects(hud_card)
 
                     # Header Pill showing title & formula equation
@@ -246,7 +246,7 @@ class RenderEngine:
 
                     # 2. Setup 3D camera orientation (phi=75 deg, theta=-45 deg)
                     if not is_trig_identity:
-                        self.set_camera_orientation(phi=75 * DEGREES, theta=-45 * DEGREES)
+                        self.set_camera_orientation(phi=70 * DEGREES, theta=0 * DEGREES)
 
                     # 3. Create Axes
                     if is_trig_identity:
@@ -258,7 +258,7 @@ class RenderEngine:
                             y_length=6.8,
                             z_length=0.1,
                             axis_config={"color": "#45A29E", "stroke_width": 2}
-                        ).shift(UP * 1.8)
+                        ).shift(UP * 2.5)
                         
                         circle_radius = np.linalg.norm(axes.c2p(2.0, 0, 0) - axes.c2p(0, 0, 0))
                         circle = Circle(radius=circle_radius, color="#45A29E", stroke_width=3).move_to(axes.c2p(0, 0, 0))
@@ -274,7 +274,7 @@ class RenderEngine:
                             y_length=5.2,
                             z_length=5.2,
                             axis_config={"color": "#45A29E", "stroke_width": 2}
-                        ).shift(UP * 1.6)
+                        ).shift(UP * 2.5)
                         self.play(Create(axes), run_time=intro_anim_axes)
 
                     # Display Intro Live Script Subtitles

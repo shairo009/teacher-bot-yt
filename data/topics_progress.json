@@ -1,5 +1,5 @@
 {
-  "current_idx": 27,
+  "current_idx": 28,
   "completed_ids": [
     1,
     2,
@@ -27,10 +27,11 @@
     24,
     25,
     26,
-    27
+    27,
+    28
   ],
-  "total_completed": 27,
-  "last_updated": "1779647733.8040922",
+  "total_completed": 28,
+  "last_updated": "1779661733.6507854",
   "current_class": 1,
   "formula_idx": 0
 }

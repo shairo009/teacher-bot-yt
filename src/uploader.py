@@ -1,7 +1,7 @@
 """
 YouTube Uploader — Super Human Edition
 Smart metadata, custom thumbnails, playlists, scheduling.
-Looks like a real Hindi education creator, not a bot.
+Looks like a real education creator, not a bot.
 """
 
 import os
@@ -99,12 +99,12 @@ class YouTubeUploader:
     def _generate_title(self, topic_name, class_num, chapter):
         """Generate SEO-friendly title with random variation."""
         templates = [
-            f"Class {class_num} का गणित | {topic_name} | NCERT Hindi",
-            f"{topic_name} सीखो आसानी से | Class {class_num} Math | NCERT",
-            f"Class {class_num} Math | {topic_name} | हिंदी में समझो",
-            f"गणित सीखो: {topic_name} | Class {class_num} NCERT",
-            f"{topic_name} | Class {class_num} | NCERT Mathematics Hindi",
-            f"Class {class_num} | {topic_name} | गणित का मज़ा | NCERT",
+            f"Class {class_num} Math | {topic_name} | NCERT English",
+            f"Learn {topic_name} easily | Class {class_num} Math | NCERT",
+            f"Class {class_num} Math | {topic_name} | Learn in English",
+            f"Math Fun: {topic_name} | Class {class_num} NCERT",
+            f"{topic_name} | Class {class_num} | NCERT Mathematics",
+            f"Class {class_num} | {topic_name} | Fun with Math | NCERT",
         ]
         title = random.choice(templates)
         # YouTube title limit: 100 chars
@@ -130,9 +130,9 @@ class YouTubeUploader:
             f"⏱️ Timestamps:",
             timestamps,
             "",
-            f"📝 यह video NCERT Class {class_num} Math curriculum पर based है।",
-            "अगर video पसंद आई तो Like 👍 और Subscribe करो!",
-            "Bell 🔔 icon दबाना मत भूलना!",
+            f"📝 This video is based on NCERT Class {class_num} Math curriculum.",
+            "If you liked the video, hit Like 👍 and Subscribe!",
+            "Don't forget to press the Bell 🔔 icon!",
             "",
             "📌 More Class-wise Videos:",
             "https://www.youtube.com/@shairo009/playlists",
@@ -145,35 +145,36 @@ class YouTubeUploader:
         topic_clean = topic_name.replace(' ', '')
         hashtags = [
             f"#NCERT", f"#Class{class_num}Math", f"#{topic_clean}",
-            "#गणित", "#HindiMath", "#MathTutorial",
-            f"#Class{class_num}", "#NCERTHindi", "#MathShorts",
+            "#MathTutorial", "#MathForKids", "#Mathematics",
+            f"#Class{class_num}", "#NCERTMath", "#MathShorts",
         ]
 
         description = "\n".join(intros) + "\n" + " ".join(hashtags)
         return description[:5000]  # YouTube limit
 
     def _generate_tags(self, topic_name, class_num, chapter, subtopics):
-        """Generate 15-20 SEO tags mixing Hindi and English."""
+        """Generate 15-20 SEO tags."""
         tags = [
             topic_name,
             f"class {class_num} math",
-            f"class {class_num} maths hindi",
-            "ncert math hindi",
+            f"class {class_num} maths",
+            "ncert math",
             f"ncert class {class_num}",
             f"math class {class_num}",
-            "गणित",
-            "गणित सीखो",
-            "math tutorial hindi",
-            "ncert hindi medium",
+            "mathematics",
+            "learn math",
+            "math tutorial",
+            "ncert english",
             "maths for kids",
-            "hindi math tutorial",
+            "math tutorial for kids",
             f"class {class_num} ncert",
+            "math basics",
         ]
 
         # Add chapter name
         if chapter:
             tags.append(chapter.lower())
-            tags.append(f"{chapter} hindi")
+            tags.append(f"{chapter} english")
 
         # Add subtopics as tags
         for sub in subtopics[:5]:
@@ -214,7 +215,7 @@ class YouTubeUploader:
                     'snippet': {
                         'title': title,
                         'description': description,
-                        'defaultLanguage': 'hi'
+                        'defaultLanguage': 'en'
                     },
                     'status': {
                         'privacyStatus': 'public'
@@ -349,8 +350,8 @@ class YouTubeUploader:
                 'description': description,
                 'tags': tags,
                 'categoryId': '27',  # Education
-                'defaultLanguage': 'hi',
-                'defaultAudioLanguage': 'hi',
+                'defaultLanguage': 'en',
+                'defaultAudioLanguage': 'en',
             },
             'status': {
                 'privacyStatus': privacy,

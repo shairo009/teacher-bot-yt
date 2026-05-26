@@ -1484,7 +1484,7 @@ class MathEffects:
 def _build_equation_steps(equation_str):
     """Build step-by-step equation solving steps from an equation string like '2x + 5 = 15'."""
     colors = ['#2563EB', '#7C3AED', '#F59E0B', '#10B981', '#EF4444']
-    steps = [{'equation': equation_str, 'explanation': 'Shuru karte hain!', 'highlight_color': colors[0]}]
+    steps = [{'equation': equation_str, 'explanation': "Let's start!", 'highlight_color': colors[0]}]
 
     # Parse simple linear equations: ax + b = c
     import re
@@ -1498,24 +1498,24 @@ def _build_equation_steps(equation_str):
 
         if op == '+':
             new_rhs = c - b
-            steps.append({'equation': f'{a}{var} = {c} - {b}', 'explanation': f'{b} dono side se hatao', 'highlight_color': colors[1]})
-            steps.append({'equation': f'{a}{var} = {new_rhs}', 'explanation': 'Ab simplify karo', 'highlight_color': colors[2]})
+            steps.append({'equation': f'{a}{var} = {c} - {b}', 'explanation': f'Remove {b} from both sides', 'highlight_color': colors[1]})
+            steps.append({'equation': f'{a}{var} = {new_rhs}', 'explanation': 'Now simplify', 'highlight_color': colors[2]})
             if a != 1:
                 result = new_rhs // a
-                steps.append({'equation': f'{var} = {new_rhs} / {a}', 'explanation': f'Dono side ko {a} se divide karo', 'highlight_color': colors[3]})
-                steps.append({'equation': f'{var} = {result}', 'explanation': 'Jawab mil gaya!', 'highlight_color': colors[4]})
+                steps.append({'equation': f'{var} = {new_rhs} / {a}', 'explanation': f'Divide both sides by {a}', 'highlight_color': colors[3]})
+                steps.append({'equation': f'{var} = {result}', 'explanation': 'Got the answer!', 'highlight_color': colors[4]})
             else:
-                steps.append({'equation': f'{var} = {new_rhs}', 'explanation': 'Jawab mil gaya!', 'highlight_color': colors[4]})
+                steps.append({'equation': f'{var} = {new_rhs}', 'explanation': 'Got the answer!', 'highlight_color': colors[4]})
         elif op == '-':
             new_rhs = c + b
-            steps.append({'equation': f'{a}{var} = {c} + {b}', 'explanation': f'{b} dono side me jodo', 'highlight_color': colors[1]})
-            steps.append({'equation': f'{a}{var} = {new_rhs}', 'explanation': 'Ab simplify karo', 'highlight_color': colors[2]})
+            steps.append({'equation': f'{a}{var} = {c} + {b}', 'explanation': f'Add {b} to both sides', 'highlight_color': colors[1]})
+            steps.append({'equation': f'{a}{var} = {new_rhs}', 'explanation': 'Now simplify', 'highlight_color': colors[2]})
             if a != 1:
                 result = new_rhs // a
-                steps.append({'equation': f'{var} = {new_rhs} / {a}', 'explanation': f'Dono side ko {a} se divide karo', 'highlight_color': colors[3]})
-                steps.append({'equation': f'{var} = {result}', 'explanation': 'Jawab mil gaya!', 'highlight_color': colors[4]})
+                steps.append({'equation': f'{var} = {new_rhs} / {a}', 'explanation': f'Divide both sides by {a}', 'highlight_color': colors[3]})
+                steps.append({'equation': f'{var} = {result}', 'explanation': 'Got the answer!', 'highlight_color': colors[4]})
             else:
-                steps.append({'equation': f'{var} = {new_rhs}', 'explanation': 'Jawab mil gaya!', 'highlight_color': colors[4]})
+                steps.append({'equation': f'{var} = {new_rhs}', 'explanation': 'Got the answer!', 'highlight_color': colors[4]})
 
     return steps
 
@@ -1674,11 +1674,11 @@ def auto_detect_and_generate(topic, frames_dir="temp_frames"):
             steps = _build_equation_steps(eq)
         else:
             steps = [
-                {'equation': '2x + 5 = 15', 'explanation': 'Shuru karte hain!', 'highlight_color': '#2563EB'},
+                {'equation': '2x + 5 = 15', 'explanation': "Let's start!", 'highlight_color': '#2563EB'},
                 {'equation': '2x = 15 - 5', 'explanation': '5 dono side se hatao', 'highlight_color': '#7C3AED'},
-                {'equation': '2x = 10', 'explanation': 'Ab simplify karo', 'highlight_color': '#F59E0B'},
+                {'equation': '2x = 10', 'explanation': 'Now simplify', 'highlight_color': '#F59E0B'},
                 {'equation': 'x = 10 / 2', 'explanation': 'Dono side ko 2 se divide karo', 'highlight_color': '#10B981'},
-                {'equation': 'x = 5', 'explanation': 'Jawab mil gaya!', 'highlight_color': '#EF4444'},
+                {'equation': 'x = 5', 'explanation': 'Got the answer!', 'highlight_color': '#EF4444'},
             ]
         return engine.generate_equation_frames(title, steps, class_label, chapter)
 

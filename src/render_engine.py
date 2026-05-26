@@ -187,45 +187,45 @@ class RenderEngine:
 
         # Random intro variations — so every video sounds different
         intro_variants = [
-            f"नमस्ते बच्चों! आज हम \"{topic_text}\" के बारे में सीखेंगे। यह कक्षा {class_num} का महत्वपूर्ण टॉपिक है। ध्यान से देखो!",
-            f"हेलो बच्चों! तैयार हो? आज का टॉपिक है \"{topic_text}\"। बहुत मज़ेदार है, चलो शुरू करते हैं!",
-            f"बच्चों, आज हम एक नया टॉपिक सीखेंगे — \"{topic_text}\"। कक्षा {class_num} के लिए बहुत ज़रूरी है। ध्यान दो!",
-            f"आज का lesson है \"{topic_text}\"! बहुत आसान है, बस मेरे साथ चलो। शुरू करते हैं!",
-            f"तैयार हो जाओ बच्चों! आज \"{topic_text}\" सीखेंगे। यह बहुत interesting है!",
+            f"Hello kids! Today we'll learn about \"{topic_text}\". This is an important topic for Class {class_num}. Watch carefully!",
+            f"Hey kids! Ready? Today's topic is \"{topic_text}\". It's really fun, let's get started!",
+            f"Kids, today we'll learn a new topic — \"{topic_text}\". It's very important for Class {class_num}. Pay attention!",
+            f"Today's lesson is \"{topic_text}\"! It's very easy, just follow along. Let's begin!",
+            f"Get ready kids! Today we're learning \"{topic_text}\". It's very interesting!",
         ]
         narrations.append(random.choice(intro_variants))
 
         # Build teaching narrations from subtopics with random connectors
         subtopic_connectors = [
-            "अब हम", "चलो अब समझते हैं", "अगला topic है", "अब बात करते हैं",
-            "इसके बाद देखो", "अब आता है", "चलो अब देखते हैं",
+            "Now let's understand", "Let's look at", "Next topic is", "Now let's talk about",
+            "After this, watch", "Now comes", "Let's see",
         ]
         if subtopics:
             for i, sub in enumerate(subtopics[:5]):
                 connector = random.choice(subtopic_connectors)
                 narrations.append(
-                    f"{connector} \"{sub}\"। "
+                    f"{connector} \"{sub}\". "
                     f"{self._subtopic_explanation(sub, topic_text, class_num)}"
                 )
         else:
             words = topic_text.split()
             if len(words) > 3:
                 narrations.append(
-                    f"सबसे पहले समझते हैं कि \"{topic_text}\" क्या होता है। "
-                    f"यह बहुत आसान है, बस ध्यान से देखो!"
+                    f"First, let's understand what \"{topic_text}\" is. "
+                    f"It's very easy, just watch carefully!"
                 )
             narrations.append(
-                f"अब देखो कैसे \"{topic_text}\" में यह काम करता है। "
-                f"हर चीज़ कदम-दर-कदम सीखेंगे!"
+                f"Now see how \"{topic_text}\" works. "
+                f"We'll learn everything step by step!"
             )
 
         # Random outro variations
         outro_variants = [
-            f"बहुत अच्छे बच्चों! \"{topic_text}\" समझ आ गया होगा। अभ्यास ज़रूर करो। धन्यवाद!",
-            f"वाह बच्चों! आज \"{topic_text}\" बहुत अच्छे से सीखा। अब खुद practice करो!",
-            f"शाबाश! \"{topic_text}\" हो गया। याद रखो, रोज़ अभ्यास करोगे तो master बन जाओगे!",
-            f"बच्चों, \"{topic_text}\" खत्म हुआ। अब अपने दोस्तों को भी सिखाओ! धन्यवाद!",
-            f"great job! \"{topic_text}\" आ गया। homework मत भूलना! अगले lesson में मिलते हैं!",
+            f"Great job kids! You must have understood \"{topic_text}\". Keep practicing. Thank you!",
+            f"Wow kids! You learned \"{topic_text}\" really well today. Now practice on your own!",
+            f"Well done! \"{topic_text}\" is complete. Remember, practice daily and you'll master it!",
+            f"Kids, \"{topic_text}\" is done. Now teach your friends too! Thank you!",
+            f"Great job! \"{topic_text}\" is done. Don't forget your homework! See you in the next lesson!",
         ]
         narrations.append(random.choice(outro_variants))
 
@@ -233,23 +233,23 @@ class RenderEngine:
 
     @staticmethod
     def _subtopic_explanation(sub, topic_text, class_num):
-        """Generate a Hindi explanation sentence for a subtopic."""
+        """Generate an English explanation sentence for a subtopic."""
         sub_lower = sub.lower()
 
         if any(k in sub_lower for k in ['example', 'problem', 'word problem', 'practice']):
-            return f"उदाहरण देखो: {sub}। इसे ध्यान से हल करो।"
+            return f"Let's look at an example: {sub}. Solve it carefully."
         if any(k in sub_lower for k in ['definition', 'introduction', 'what is', 'basics']):
-            return f"पहले यह समझो कि {sub} क्या होता है।"
+            return f"First, let's understand what {sub} is."
         if any(k in sub_lower for k in ['property', 'properties', 'rule']):
-            return f"इसके नियम याद रखो: {sub}।"
+            return f"Remember the rules of {sub}."
         if any(k in sub_lower for k in ['formula', 'equation']):
-            return f"यह फ़ॉर्मूला याद रखो: {sub}।"
+            return f"Remember this formula: {sub}."
         if any(k in sub_lower for k in ['application', 'real life', 'real world']):
-            return f"रोज़मर्रा की ज़िंदगी में {sub} कैसे काम आता है, देखो।"
+            return f"See how {sub} is used in everyday life."
         if class_num is not None and class_num <= 3:
-            return f"बहुत आसान है! {sub} देखो और समझो।"
+            return f"It's very easy! Watch and learn {sub}."
 
-        return f"{sub} को अच्छे से समझो।"
+        return f"Understand {sub} thoroughly."
 
 
 if __name__ == "__main__":

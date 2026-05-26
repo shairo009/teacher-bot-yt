@@ -39,8 +39,8 @@ def hex_to_rgb(hex_color):
 
 def get_font(size, bold=False):
     font_paths = [
-        'assets/fonts/hindi_font.ttf',  # Hindi Devanagari font (project-local)
-        'assets/fonts/hindi_font.ttf',  # Same for bold (we only have one Hindi font)
+        'assets/fonts/hindi_font.ttf',  # Devanagari font (project-local, fallback)
+        'assets/fonts/hindi_font.ttf',  # Same for bold (only one font available)
         '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
         '/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf',
     ]
@@ -208,7 +208,7 @@ def call_llm(topic, subtopics, class_num):
     """Call OpenGateway API to generate visual scene description."""
     model = os.environ.get('OPENAI_MODEL', 'mimo-v2.5-pro')
 
-    prompt = f"""You are a math teacher creating visual frames AND Hindi narration for a Class {class_num} NCERT math video.
+    prompt = f"""You are a math teacher creating visual frames AND English narration for a Class {class_num} NCERT math video.
 
 Topic: {topic}
 Subtopics: {', '.join(subtopics)}
@@ -221,7 +221,7 @@ Return ONLY valid JSON (no markdown, no explanation) with this exact format:
   "steps": [
     {{
       "label": "Step 1 title",
-      "narration": "Hindi text that teacher speaks while this visual is shown - explain what the student sees",
+      "narration": "English text that teacher speaks while this visual is shown - explain what the student sees",
       "elements": [
         {{"type": "text", "x": 540, "y": 200, "text": "Hello", "size": 48, "color": "#2563EB", "bold": true}},
         {{"type": "circle", "cx": 300, "cy": 500, "r": 50, "fill": "#DBEAFE", "outline": "#2563EB"}},
@@ -262,14 +262,14 @@ Rules:
 - For data handling: use bar_chart to visualize data.
 - For patterns: use repeating shapes (star, hexagon, circle) in sequence.
 - Colors: primary blue #2563EB, success green #10B981, accent amber #F59E0B, danger red #EF4444, purple #7C3AED.
-- All text should be in English (the audio will be in Hindi).
+- All text should be in English.
 """
 
     try:
         print(f"    [debug] model={model}, base_url={os.environ.get('OPENAI_BASE_URL', 'default')}", flush=True)
         content = _call_api(
             messages=[
-                {"role": "system", "content": "You are a friendly Hindi math teacher making a YouTube video for kids. Narration MUST be in Hindi (Devanagari) — warm, encouraging, simple words. Like: 'बहुत अच्छे बच्चों!', 'चलो देखते हैं', 'समझ गए?' Return only valid JSON, no markdown."},
+                {"role": "system", "content": "You are a friendly English math teacher making a YouTube video for kids. Narration must be in English — warm, encouraging, simple words. Like: 'Very good kids!', 'Let us see', 'Understood?' Return only valid JSON, no markdown."},
                 {"role": "user", "content": prompt}
             ],
             model=model, temperature=0.7, max_tokens=3000
@@ -308,15 +308,15 @@ def _retry_llm_simple(model, topic, class_num):
     """Retry LLM with a simpler prompt after JSON parse failure."""
     simple_prompt = f"""Generate a JSON scene for teaching "{topic}" to Class {class_num} students.
 Return ONLY valid JSON, no markdown, no explanation.
-Format: {{"title":"...","steps":[{{"label":"...","narration":"Hindi narration here","elements":[{{"type":"text","x":540,"y":200,"text":"...","size":48,"color":"#2563EB"}}]}}]}}
+Format: {{"title":"...","steps":[{{"label":"...","narration":"English narration here","elements":[{{"type":"text","x":540,"y":200,"text":"...","size":48,"color":"#2563EB"}}]}}]}}
 Use 4 steps with elements: text, circle, rect, dots_group, fraction_bar, number_line.
 Canvas: 1080x1920. Bounds: x 50-1030, y 50-1870.
-IMPORTANT: Each step MUST have a "narration" field in Hindi (Devanagari) that explains the visual to a child."""
+IMPORTANT: Each step MUST have a "narration" field in English that explains the visual to a child."""
 
     try:
         content = _call_api(
             messages=[
-                {"role": "system", "content": "Return only valid JSON. Narration MUST be in Hindi (Devanagari)."},
+                {"role": "system", "content": "Return only valid JSON. Narration must be in English."},
                 {"role": "user", "content": simple_prompt}
             ],
             model=model, temperature=0.5, max_tokens=2000
@@ -869,7 +869,7 @@ def generate_visual(topic, frames_dir="temp_frames"):
 
     Returns (frames, narrations) tuple:
       - frames: list of frame file paths
-      - narrations: list of Hindi narration strings (one per step, synced with frames)
+      - narrations: list of English narration strings (one per step, synced with frames)
     Returns (None, None) on failure.
     """
     topic_text = topic.get('topic', '')
@@ -1039,7 +1039,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         a, b = 3, 2
         steps.append({
             'label': 'What is Addition?',
-            'narration': f'नमस्ते बच्चों! आज हम जोड़ यानी Addition सीखेंगे। जोड़ का मतलब है दो या दो से ज़्यादा चीज़ों को मिलाना। बहुत आसान है!',
+            'narration': f'Hello kids! Today we will learn Addition. Addition means combining two or more things together. It is very easy!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 200, 'text': 'Addition (+)', 'size': 56, 'color': '#2563EB', 'bold': True},
                 {'type': 'text', 'x': 540, 'y': 400, 'text': 'Adding things together', 'size': 36, 'color': '#64748B'},
@@ -1052,7 +1052,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         })
         steps.append({
             'label': f'Let\'s Add: {a} + {b}',
-            'narration': f'चलो {a} और {b} को जोड़ते हैं। पहले {a} गेंदें देखो, फिर {b} और गेंदें मिलाओ। एक-एक करके गिनो!',
+            'narration': f'Let us add {a} and {b}. First look at {a} balls, then add {b} more balls. Count them one by one!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': f'{a} + {b}', 'size': 56, 'color': '#2563EB', 'bold': True},
                 {'type': 'dots_group', 'x': 250, 'y': 400, 'count': a, 'color': '#2563EB', 'spacing': 80},
@@ -1063,7 +1063,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         })
         steps.append({
             'label': f'Answer: {a} + {b} = {a+b}',
-            'narration': f'बहुत अच्छे! सारी गेंदें मिलाकर गिनो — {a} प्लस {b} बराबर {a+b}! बिल्कुल सही!',
+            'narration': f'Very good! Count all the balls together — {a} plus {b} equals {a+b}! Absolutely correct!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': f'{a} + {b} = {a+b}', 'size': 56, 'color': '#10B981', 'bold': True},
                 {'type': 'dots_group', 'x': 150, 'y': 400, 'count': a + b, 'color': '#10B981', 'spacing': 70},
@@ -1073,7 +1073,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         })
         steps.append({
             'label': 'Try Another: 4 + 3',
-            'narration': f'अब तुम्हारी बारी! चार और तीन को जोड़ो। गेंदें गिनो और बताओ — कितनी हुईं?',
+            'narration': f'Now it is your turn! Add four and three. Count the balls and tell — how many are there?',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': 'Your Turn!', 'size': 48, 'color': '#7C3AED', 'bold': True},
                 {'type': 'text', 'x': 540, 'y': 300, 'text': '4 + 3 = ?', 'size': 56, 'color': '#2563EB', 'bold': True},
@@ -1089,7 +1089,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         # Subtraction — 4 steps: intro → concept → example → practice
         steps.append({
             'label': 'What is Subtraction?',
-            'narration': 'नमस्ते बच्चों! आज हम घटाना यानी Subtraction सीखेंगे। घटाने का मतलब है कुछ हटाना या कम करना। चलो देखते हैं!',
+            'narration': 'Hello kids! Today we will learn Subtraction. Subtraction means taking away or reducing. Let us see!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 200, 'text': 'Subtraction (-)', 'size': 56, 'color': '#EF4444', 'bold': True},
                 {'type': 'text', 'x': 540, 'y': 400, 'text': 'Taking away things', 'size': 36, 'color': '#64748B'},
@@ -1100,7 +1100,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         })
         steps.append({
             'label': 'Remove 2 from 5',
-            'narration': 'देखो यहाँ पाँच गेंदें हैं। अब दो गेंदें हटा दो। एक-एक करके हटाओ!',
+            'narration': 'Look here, there are five balls. Now remove two balls. Remove them one by one!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': '5 - 2', 'size': 56, 'color': '#EF4444', 'bold': True},
                 {'type': 'dots_group', 'x': 200, 'y': 400, 'count': 5, 'color': '#2563EB', 'spacing': 80},
@@ -1111,7 +1111,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         })
         steps.append({
             'label': 'Answer: 5 - 2 = 3',
-            'narration': 'बहुत अच्छे! पाँच में से दो हटाओ तो तीन बचते हैं। पाँच माइनस दो बराबर तीन!',
+            'narration': 'Very good! Take away two from five and three are left. Five minus two equals three!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': '5 - 2 = 3', 'size': 64, 'color': '#10B981', 'bold': True},
                 {'type': 'dots_group', 'x': 250, 'y': 400, 'count': 3, 'color': '#10B981', 'spacing': 80},
@@ -1121,7 +1121,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         })
         steps.append({
             'label': 'Try: 7 - 3',
-            'narration': 'अब तुम बताओ! सात गेंदों में से तीन हटाओ। कितनी बचीं? गिनकर बताओ!',
+            'narration': 'Now you tell! Remove three from seven balls. How many are left? Count and tell!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': 'Your Turn!', 'size': 48, 'color': '#7C3AED', 'bold': True},
                 {'type': 'text', 'x': 540, 'y': 300, 'text': '7 - 3 = ?', 'size': 56, 'color': '#EF4444', 'bold': True},
@@ -1134,7 +1134,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         # Multiplication — 4 steps: intro → concept → example → practice
         steps.append({
             'label': 'What is Multiplication?',
-            'narration': 'नमस्ते बच्चों! आज हम गुणा यानी Multiplication सीखेंगे। गुणा का मतलब है बार-बार जोड़ना। बहुत आसान है!',
+            'narration': 'Hello kids! Today we will learn Multiplication. Multiplication means repeated addition. It is very easy!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 200, 'text': 'Multiplication (x)', 'size': 52, 'color': '#7C3AED', 'bold': True},
                 {'type': 'text', 'x': 540, 'y': 400, 'text': 'Repeated Addition', 'size': 36, 'color': '#64748B'},
@@ -1143,7 +1143,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         })
         steps.append({
             'label': '2 x 3 with Grid',
-            'narration': 'देखो! दो पंक्तियाँ बनाओ, हर पंक्ति में तीन गेंदें रखो। कुल गिनो — छह गेंदें! दो गुणा तीन बराबर छह।',
+            'narration': 'Look! Make two rows, put three balls in each row. Count the total — six balls! Two times three equals six.',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': '2 x 3 = 6', 'size': 56, 'color': '#7C3AED', 'bold': True},
                 {'type': 'grid', 'x': 250, 'y': 350, 'w': 500, 'h': 350, 'rows': 2, 'cols': 3},
@@ -1153,7 +1153,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         })
         steps.append({
             'label': '3 x 4 = 12',
-            'narration': 'अब तीन पंक्तियाँ, हर पंक्ति में चार। तीन गुणा चार बराबर बारह! गिनकर देखो!',
+            'narration': 'Now three rows, four in each. Three times four equals twelve! Count and see!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': '3 x 4 = 12', 'size': 56, 'color': '#7C3AED', 'bold': True},
                 {'type': 'grid', 'x': 250, 'y': 350, 'w': 500, 'h': 350, 'rows': 3, 'cols': 4},
@@ -1163,7 +1163,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         })
         steps.append({
             'label': 'Your Turn: 4 x 5',
-            'narration': 'अब तुम्हारी बारी! चार पंक्तियाँ, हर पंक्ति में पाँच। कुल कितने हुए? गिनकर बताओ!',
+            'narration': 'Now it is your turn! Four rows, five in each. How many total? Count and tell!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': '4 x 5 = ?', 'size': 56, 'color': '#7C3AED', 'bold': True},
                 {'type': 'grid', 'x': 250, 'y': 350, 'w': 500, 'h': 400, 'rows': 4, 'cols': 5},
@@ -1176,7 +1176,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         # Division — 4 steps: intro → concept → example → practice
         steps.append({
             'label': 'What is Division?',
-            'narration': 'नमस्ते बच्चों! आज हम भाग यानी Division सीखेंगे। भाग का मतलब है बराबर बाँटना। जैसे चॉकलेट बाँटना!',
+            'narration': 'Hello kids! Today we will learn Division. Division means sharing equally. Like sharing chocolates!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 200, 'text': 'Division (÷)', 'size': 56, 'color': '#2563EB', 'bold': True},
                 {'type': 'text', 'x': 540, 'y': 400, 'text': 'Equal Sharing', 'size': 36, 'color': '#64748B'},
@@ -1186,7 +1186,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         })
         steps.append({
             'label': '6 ÷ 2 = 3',
-            'narration': 'छह गेंदें हैं। दो बराबर भागों में बाँटो। हर भाग में तीन गेंदें आईं। छह बटे दो बराबर तीन!',
+            'narration': 'There are six balls. Divide them into two equal parts. Each part gets three balls. Six divided by two equals three!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': '6 ÷ 2 = 3', 'size': 56, 'color': '#2563EB', 'bold': True},
                 {'type': 'dots_group', 'x': 150, 'y': 400, 'count': 3, 'color': '#2563EB', 'spacing': 70},
@@ -1198,7 +1198,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         })
         steps.append({
             'label': '8 ÷ 4 = 2',
-            'narration': 'आठ गेंदें, चार बराबर भागों में बाँटो। हर भाग में दो-दो गेंदें। आठ बटे चार बराबर दो!',
+            'narration': 'Eight balls, divide into four equal parts. Each part gets two balls. Eight divided by four equals two!',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': '8 ÷ 4 = 2', 'size': 56, 'color': '#2563EB', 'bold': True},
                 {'type': 'dots_group', 'x': 150, 'y': 400, 'count': 2, 'color': '#2563EB', 'spacing': 70},
@@ -1211,7 +1211,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         })
         steps.append({
             'label': 'Try: 9 ÷ 3',
-            'narration': 'अब तुम बताओ! नौ गेंदें तीन बराबर भागों में बाँटो। हर भाग में कितनी?',
+            'narration': 'Now you tell! Divide nine balls into three equal parts. How many in each part?',
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': 'Your Turn!', 'size': 48, 'color': '#7C3AED', 'bold': True},
                 {'type': 'text', 'x': 540, 'y': 300, 'text': '9 ÷ 3 = ?', 'size': 56, 'color': '#2563EB', 'bold': True},
@@ -1224,11 +1224,11 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
     elif any(kw in topic_lower for kw in ['fraction', 'fractions', 'half', 'quarter', 'part', 'hissa', 'ansh']):
         # Fraction visual
         fractions = [(1, 2), (1, 4), (3, 4), (2, 3)]
-        fraction_hindi = {(1,2): 'आधा', (1,4): 'चौथाई', (3,4): 'तीन चौथाई', (2,3): 'दो तिहाई'}
+        fraction_names = {(1,2): 'one half', (1,4): 'one quarter', (3,4): 'three quarters', (2,3): 'two thirds'}
         for num, den in fractions:
             steps.append({
                 'label': f'Fraction {num}/{den}',
-                'narration': f'{num} बटे {den} यानी {fraction_hindi.get((num, den), "")}। पूरे को {den} बराबर भागों में बाँटो, इनमें से {num} भाग लो। यही है {num}/{den}।',
+                'narration': f'{num} divided by {den}, that is {fraction_names.get((num, den), "")}. Divide the whole into {den} equal parts, take {num} of them. This is {num}/{den}.',
                 'elements': [
                     {'type': 'text', 'x': 540, 'y': 150, 'text': f'Fraction: {num}/{den}', 'size': 42, 'color': '#7C3AED', 'bold': True},
                     {'type': 'fraction_bar', 'x': 140, 'y': 400, 'w': 800, 'h': 80, 'num': num, 'den': den, 'color': '#7C3AED'},
@@ -1243,7 +1243,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
             ('rect', 500, 350, 80, '#D1FAE5', '#10B981'),
             ('triangle', 800, 400, 80, '#EDE9FE', '#7C3AED'),
         ]
-        shape_hindi = {'circle': 'वृत्त', 'rect': 'आयत', 'triangle': 'त्रिकोण'}
+        shape_names = {'circle': 'Circle', 'rect': 'Rectangle', 'triangle': 'Triangle'}
         for i, (shape, cx, cy, size, fill, outline) in enumerate(shapes):
             elements = [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': f'Geometry: {shape.title()}', 'size': 42, 'color': '#2563EB', 'bold': True},
@@ -1255,7 +1255,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
             else:
                 elements.append({'type': 'triangle', 'points': [[cx, cy-size], [cx+size, cy+size], [cx-size, cy+size]], 'fill': fill, 'outline': outline})
             elements.append({'type': 'text', 'x': cx, 'y': cy + size + 40, 'text': shape.title(), 'size': 32, 'color': outline, 'bold': True})
-            steps.append({'label': f'Shape: {shape.title()}', 'narration': f'यह है {shape_hindi.get(shape, shape)}। इसे ध्यान से देखो, इसकी अपनी विशेषताएँ हैं। {shape.title()} को पहचानो।', 'elements': elements})
+            steps.append({'label': f'Shape: {shape.title()}', 'narration': f'This is a {shape_names.get(shape, shape)}. Look at it carefully, it has its own characteristics. Identify the {shape.title()}.', 'elements': elements})
 
     elif any(kw in topic_lower for kw in ['time', 'clock', 'hour', 'minute', 'ghanta']):
         # Time/clock visual
@@ -1263,7 +1263,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         for h, m in times:
             steps.append({
                 'label': f'Time: {h:02d}:{m:02d}',
-                'narration': f'घड़ी देखो। बड़ी सुई {m} पर है और छोटी सुई {h} पर। यह {h} बजकर {m} मिनट है।',
+                'narration': f'Look at the clock. The big hand is on {m} and the small hand is on {h}. It is {h} hours and {m} minutes.',
                 'elements': [
                     {'type': 'text', 'x': 540, 'y': 150, 'text': f'Time: {h:02d}:{m:02d}', 'size': 42, 'color': '#2563EB', 'bold': True},
                     {'type': 'clock_face', 'cx': 540, 'cy': 600, 'r': 200, 'hour': h, 'minute': m},
@@ -1280,7 +1280,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
             names = ', '.join(d['label'] for d in data)
             steps.append({
                 'label': 'Bar Chart',
-                'narration': f'यह एक बार चार्ट है। {names} के डेटा को देखो। सबसे लंबी पट्टी देखकर बताओ कौन सा फल सबसे ज़्यादा पसंद है?',
+                'narration': f'This is a bar chart. Look at the data for {names}. Tell which fruit is most liked by looking at the tallest bar?',
                 'elements': [
                     {'type': 'text', 'x': 540, 'y': 150, 'text': 'Data Handling - Bar Chart', 'size': 38, 'color': '#2563EB', 'bold': True},
                     {'type': 'bar_chart', 'x': 140, 'y': 350, 'w': 800, 'h': 500, 'data': data},
@@ -1294,7 +1294,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         for val, unit in measurements:
             steps.append({
                 'label': f'Measurement: {val} {unit}',
-                'narration': f'माप लो। यह {val} {unit} लंबा है। रूलर पर देखो, शून्य से {val} तक कितने {unit} हैं?',
+                'narration': f'Measure it. This is {val} {unit} long. Look at the ruler, how many {unit} from zero to {val}?',
                 'elements': [
                     {'type': 'text', 'x': 540, 'y': 150, 'text': f'Measurement: {val} {unit}', 'size': 42, 'color': '#2563EB', 'bold': True},
                     {'type': 'ruler', 'x': 140, 'y': 500, 'w': 800, 'min': 0, 'max': val + 5, 'unit': unit},
@@ -1306,46 +1306,46 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
     else:
         # Default: topic with visual elements (teacher-style) — RICH narration
         sub_explanations = {
-            'skip counting': 'दो-दो, तीन-तीन, पाँच-पाँच करके गिनो — यही Skip Counting है!',
-            'counting': 'एक-एक करके गिनती सीखो',
-            'group counting': 'गिनती को समूहों में बाँटो, जैसे दो-दो, तीन-तीन',
-            'dozen': 'एक दर्जन यानी बारह — ऐसे ही गिनते हैं समूहों में',
-            'pair': 'जोड़ी — दो-दो करके गिनो',
-            'array': 'एरे — पंक्तियों और स्तंभों में सजाकर गिनो',
-            'row': 'पंक्ति — एक लाइन में गिनो',
-            'column': 'स्तंभ — ऊपर से नीचे गिनो',
-            'pattern': 'पैटर्न देखो — कौन सा अंक आता है? पैटर्न पहचानो!',
-            'place value': 'हर अंक की एक जगह होती है — इकाई, दहाई, सैकड़ा',
-            'even': 'जो अंक दो से पूरा बँटे — वह सम (Even) है',
-            'odd': 'जो दो से न बँटे — वह विषम (Odd) है',
-            'prime': 'जो सिर्फ़ 1 और खुद से भाग हो — वह अभाज्य (Prime) है',
-            'composite': 'जिसके और भी गुणनखंड हों — वह भाज्य (Composite) है',
-            'factor': 'गुणनखंड वे अंक हैं जिनसे कोई संख्या पूरी बँट जाए',
-            'multiple': 'गुणित वे अंक हैं जो किसी संख्या के पहाड़े में आते हैं',
-            'symmetry': 'सममिति — दोनों तरफ़ एक जैसा दिखे',
-            'angle': 'कोण — दो सीधों के बीच का कोना',
-            'perimeter': 'परिमाप — आकार के चारों तरफ़ की दूरी',
-            'area': 'क्षेत्रफल — आकार के अंदर की जगह',
-            'volume': 'आयतन — कितना सामान आ सकता है',
-            'decimal': 'दशमलव — बिंदु के बाद के अंक',
-            'percentage': 'प्रतिशत — सौ में से कितने',
-            'ratio': 'अनुपात — दो चीज़ों की तुलना',
-            'profit': 'लाभ — खरीद से ज़्यादा में बेचो',
-            'loss': 'हानि — खरीद से कम में बेचो',
-            'interest': 'ब्याज — पैसे पर पैसा मिलता है',
-            'equation': 'समीकरण — दोनों तरफ़ बराबर',
-            'polynomial': 'बहुपद — x की घात वाले पद',
-            'linear': 'रेखीय — सीधी रेखा जैसा',
-            'quadratic': 'द्विघात — x वर्ग वाला',
+            'skip counting': 'Count by twos, threes, fives — this is Skip Counting!',
+            'counting': 'Learn to count one by one',
+            'group counting': 'Divide counting into groups, like twos and threes',
+            'dozen': 'A dozen means twelve — count in groups like this',
+            'pair': 'A pair — count by twos',
+            'array': 'An array — arrange in rows and columns to count',
+            'row': 'A row — count in a line',
+            'column': 'A column — count from top to bottom',
+            'pattern': 'Look at the pattern — which number comes next? Recognize the pattern!',
+            'place value': 'Every digit has a place — ones, tens, hundreds',
+            'even': 'A number divisible by two is Even',
+            'odd': 'A number not divisible by two is Odd',
+            'prime': 'A number divisible only by 1 and itself is Prime',
+            'composite': 'A number that has more factors is Composite',
+            'factor': 'Factors are numbers that divide a number exactly',
+            'multiple': 'Multiples are numbers that appear in a number\'s table',
+            'symmetry': 'Symmetry — both sides look the same',
+            'angle': 'Angle — the corner between two lines',
+            'perimeter': 'Perimeter — the distance around a shape',
+            'area': 'Area — the space inside a shape',
+            'volume': 'Volume — how much can fit inside',
+            'decimal': 'Decimal — the digits after the point',
+            'percentage': 'Percentage — how many out of a hundred',
+            'ratio': 'Ratio — comparing two things',
+            'profit': 'Profit — sell for more than you bought',
+            'loss': 'Loss — sell for less than you bought',
+            'interest': 'Interest — money earns more money',
+            'equation': 'Equation — both sides are equal',
+            'polynomial': 'Polynomial — terms with powers of x',
+            'linear': 'Linear — like a straight line',
+            'quadratic': 'Quadratic — has x squared',
         }
 
         # Intro — randomize greeting so every video sounds different
         intro_variants = [
-            f'नमस्ते बच्चों! आज हम "{topic_text}" सीखेंगे। यह कक्षा {class_num} का महत्वपूर्ण टॉपिक है। बहुत आसान है, बस ध्यान से देखो!',
-            f'हेलो बच्चों! तैयार हो? आज का टॉपिक है "{topic_text}"। बहुत मज़ेदार है, चलो शुरू करते हैं!',
-            f'बच्चों, आज हम एक नया टॉपिक सीखेंगे — "{topic_text}"। कक्षा {class_num} के लिए बहुत ज़रूरी है। ध्यान दो!',
-            f'आज का lesson है "{topic_text}"! बहुत आसान है, बस मेरे साथ चलो। शुरू करते हैं!',
-            f'तैयार हो जाओ बच्चों! आज "{topic_text}" सीखेंगे। यह बहुत interesting है!',
+            f'Hello kids! Today we will learn "{topic_text}". This is an important topic for Class {class_num}. It is very easy, just pay attention!',
+            f'Hey kids! Are you ready? Today\'s topic is "{topic_text}". It is very fun, let us get started!',
+            f'Kids, today we will learn a new topic — "{topic_text}". It is very important for Class {class_num}. Pay attention!',
+            f'Today\'s lesson is "{topic_text}"! It is very easy, just follow along. Let us begin!',
+            f'Get ready kids! Today we will learn "{topic_text}". It is very interesting!',
         ]
         # Randomize color palettes for visual variety
         palette_sets = [
@@ -1362,7 +1362,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
             'elements': [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': topic_text[:50], 'size': 42, 'color': colors[0], 'bold': True},
                 {'type': 'text', 'x': 540, 'y': 300, 'text': f'Class {class_num}', 'size': 32, 'color': colors[2], 'bold': True},
-                {'type': 'text', 'x': 540, 'y': 500, 'text': random.choice(["Let's Learn!", 'चलो सीखो!', 'शुरू करो!', 'देखो और सीखो!', 'तैयार?']), 'size': 48, 'color': colors[3], 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 500, 'text': random.choice(["Let's Learn!", 'Get Started!', 'Ready?', 'Watch and Learn!', 'Let\'s Go!']), 'size': 48, 'color': colors[3], 'bold': True},
                 {'type': 'star', 'cx': 540, 'cy': 750, 'size': 80, 'fill': colors[3], 'outline': colors[0]},
             ]
         })
@@ -1381,7 +1381,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
                         explanation = expl
                         best_len = len(keyword)
 
-                narration = explanation if explanation else f'अब हम "{sub}" समझते हैं। ध्यान से देखो और सीखो!'
+                narration = explanation if explanation else f'Now let us understand "{sub}". Watch carefully and learn!'
                 vis_type = visual_types[i % len(visual_types)]
 
                 # Randomize text color per step
@@ -1433,12 +1433,12 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
 
         # Practice step — random outro
         outro_variants = [
-            f'बहुत अच्छे बच्चों! "{topic_text}" समझ आ गया होगा। अभ्यास ज़रूर करो!',
-            f'वाह बच्चों! "{topic_text}" बहुत अच्छे से सीखा। अब खुद practice करो!',
-            f'शाबाश! "{topic_text}" हो गया। रोज़ अभ्यास करोगे तो master बन जाओगे!',
-            f'great job! "{topic_text}" आ गया। homework मत भूलना!',
+            f'Very good kids! You must have understood "{topic_text}". Make sure to practice!',
+            f'Wow kids! You learned "{topic_text}" very well. Now practice on your own!',
+            f'Well done! "{topic_text}" is complete. If you practice daily, you will become a master!',
+            f'Great job! "{topic_text}" is done. Do not forget your homework!',
         ]
-        practice_labels = ['Practice Time!', 'अभ्यास करो!', 'शाबाश!', 'बहुत बढ़िया!', 'Well Done!']
+        practice_labels = ['Practice Time!', 'Keep Going!', 'Well Done!', 'Excellent!', 'Great Job!']
         steps.append({
             'label': 'Practice',
             'narration': random.choice(outro_variants),

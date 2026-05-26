@@ -230,7 +230,7 @@ def generate_thumbnail(topic_name, class_num, chapter="", output_path=None):
 if __name__ == "__main__":
     # Test
     path = generate_thumbnail(
-        topic_name="Skip Counting सीखो",
+        topic_name="Learn Skip Counting",
         class_num=2,
         chapter="Counting in Groups"
     )

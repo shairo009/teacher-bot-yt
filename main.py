@@ -200,10 +200,10 @@ class TeacherBot:
                 print(f"    Tags: {len(metadata['tags'])} tags")
 
                 # Get or create class playlist
-                playlist_title = f"Class {topic['class']} NCERT Math Hindi"
+                playlist_title = f"Class {topic['class']} NCERT Math English"
                 playlist_id = self.uploader.get_or_create_playlist(
                     playlist_title,
-                    f"NCERT Class {topic['class']} Mathematics lessons in Hindi medium"
+                    f"NCERT Class {topic['class']} Mathematics lessons in English medium"
                 )
 
                 # Detect CI — schedule locally, upload immediately in CI

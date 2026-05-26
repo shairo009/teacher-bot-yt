@@ -9,66 +9,12 @@ class AudioEngine:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        # ElevenLabs config — human-like Hindi voice
-        self.elevenlabs_key = os.environ.get('ELEVENLABS_API_KEY', '')
-        self.elevenlabs_voice_id = '21m00Tcm4TlvDq8ikWAM'  # Rachel (natural female)
-        self.elevenlabs_url = 'https://api.elevenlabs.io/v1/text-to-speech'
+        # edge-tts voices (English)
+        self.edge_voice = 'en-US-JennyNeural'       # female
+        self.edge_voice_male = 'en-US-GuyNeural'     # male
 
-        # edge-tts fallback
-        self.edge_voice = 'hi-IN-SwaraNeural'
-        self.edge_voice_male = 'hi-IN-MadhurNeural'
-
-        # Track which engine we're using
-        self._engine = None
-
-    def _detect_engine(self):
-        """Detect available TTS engine at runtime."""
-        if self._engine is not None:
-            return self._engine
-
-        if self.elevenlabs_key:
-            self._engine = 'elevenlabs'
-            print("  TTS Engine: ElevenLabs (human-like voice)")
-        else:
-            self._engine = 'edge-tts'
-            print("  TTS Engine: edge-tts (fallback)")
-        return self._engine
-
-    async def _tts_elevenlabs(self, text, output_path):
-        """Generate TTS using ElevenLabs API (human-like voice)."""
-        import requests
-
-        headers = {
-            'Accept': 'audio/mpeg',
-            'xi-api-key': self.elevenlabs_key,
-            'Content-Type': 'application/json',
-        }
-        data = {
-            'text': text,
-            'model_id': 'eleven_multilingual_v2',
-            'voice_settings': {
-                'stability': 0.5,
-                'similarity_boost': 0.75,
-                'style': 0.4,
-                'use_speaker_boost': True
-            }
-        }
-        try:
-            url = f"{self.elevenlabs_url}/{self.elevenlabs_voice_id}"
-            response = requests.post(url, json=data, headers=headers, timeout=30)
-            if response.status_code == 200:
-                with open(output_path, 'wb') as f:
-                    f.write(response.content)
-                return os.path.exists(output_path) and os.path.getsize(output_path) > 100
-            else:
-                print(f"  ElevenLabs error {response.status_code}: {response.text[:200]}")
-                return False
-        except Exception as e:
-            print(f"  ElevenLabs error: {e}")
-            return False
-
-    async def _tts_edge(self, text, output_path):
-        """Generate TTS using edge-tts (free fallback)."""
+    async def _tts(self, text, output_path):
+        """Generate TTS using edge-tts."""
         import edge_tts
 
         try:
@@ -79,22 +25,9 @@ class AudioEngine:
             print(f"  edge-tts error: {e}")
             return False
 
-    async def _tts(self, text, output_path):
-        """Generate TTS with ElevenLabs first, edge-tts fallback."""
-        engine = self._detect_engine()
-
-        if engine == 'elevenlabs':
-            success = await self._tts_elevenlabs(text, output_path)
-            if success:
-                return True
-            print("  ElevenLabs failed, falling back to edge-tts...")
-            return await self._tts_edge(text, output_path)
-        else:
-            return await self._tts_edge(text, output_path)
-
     async def generate_step_audio(self, narrations):
         """Generate one TTS clip per narration line (synced with visual steps).
-        narrations: list of Hindi strings, one per step.
+        narrations: list of English strings, one per step.
         Returns: list of audio file paths (mp3), one per step.
         """
         os.makedirs(self.output_dir, exist_ok=True)
@@ -110,8 +43,8 @@ class AudioEngine:
         return audio_parts
 
     async def generate_lesson_audio(self, topic, lesson_text):
-        """Fallback: generate audio from topic data when narrations are unavailable.
-        Builds a proper Hindi teaching script from topic + subtopics.
+        """Generate audio from topic data when narrations are unavailable.
+        Builds a teaching script from topic + subtopics.
         """
         os.makedirs(self.output_dir, exist_ok=True)
 
@@ -124,11 +57,11 @@ class AudioEngine:
 
         # Random intro — so every video sounds different
         intro_variants = [
-            f"नमस्ते बच्चों! आज हम \"{topic_name}\" सीखेंगे। यह कक्षा {class_num} का {chapter} है। ध्यान से देखो!",
-            f"हेलो बच्चों! तैयार हो? आज का टॉपिक है \"{topic_name}\"। बहुत मज़ेदार है, चलो शुरू करते हैं!",
-            f"बच्चों, आज हम \"{topic_name}\" सीखेंगे। कक्षा {class_num} के लिए बहुत ज़रूरी है। ध्यान दो!",
-            f"आज का lesson है \"{topic_name}\"! बहुत आसान है, बस मेरे साथ चलो!",
-            f"तैयार हो जाओ! \"{topic_name}\" शुरू करते हैं। बहुत interesting है!",
+            f"Hello kids! Today we'll learn about {topic_name}. This is from class {class_num}, {chapter}. Pay attention!",
+            f"Hey kids! Ready? Today's topic is {topic_name}. It's really fun, let's get started!",
+            f"Kids, today we're going to learn {topic_name}. This is very important for class {class_num}. Listen carefully!",
+            f"Today's lesson is {topic_name}! It's very easy, just follow along with me!",
+            f"Get ready! Let's start {topic_name}. It's going to be really interesting!",
         ]
         intro = random.choice(intro_variants)
         intro_path = str(self.output_dir / "intro.mp3")
@@ -137,15 +70,15 @@ class AudioEngine:
 
         # Random connectors for subtopic steps
         connectors = [
-            "अब समझते हैं:", "चलो अब देखते हैं:", "अगला topic है:",
-            "अब बात करते हैं:", "इसके बाद देखो:", "अब आता है:",
+            "Now let's understand:", "Let's look at:", "Next topic:",
+            "Now let's talk about:", "After this, look:", "Now comes:",
         ]
 
         # Generate teaching narrations from subtopics
         if subtopics:
             for i, sub in enumerate(subtopics[:5]):
                 connector = random.choice(connectors)
-                step_text = f"{connector} {sub}। {self._subtopic_hint(sub)}"
+                step_text = f"{connector} {sub}. {self._subtopic_hint(sub)}"
                 step_path = str(self.output_dir / f"step_{i:03d}.mp3")
                 if await self._tts(step_text, step_path):
                     audio_parts.append(step_path)
@@ -158,10 +91,10 @@ class AudioEngine:
 
         # Random outro
         outro_variants = [
-            f"बहुत अच्छे! \"{topic_name}\" समझ आ गया होगा। अभ्यास ज़रूर करो। धन्यवाद!",
-            f"वाह बच्चों! \"{topic_name}\" बहुत अच्छे से सीखा। अब खुद practice करो!",
-            f"शाबाश! \"{topic_name}\" हो गया। रोज़ अभ्यास करोगे तो master बन जाओगे!",
-            f"great job! \"{topic_name}\" आ गया। homework मत भूलना! अगले lesson में मिलते हैं!",
+            f"Great job! You must have understood {topic_name}. Make sure to practice. Thank you!",
+            f"Wow kids! You learned {topic_name} really well. Now practice it yourself!",
+            f"Well done! {topic_name} is done. If you practice every day, you'll master it!",
+            f"Great work! You got {topic_name}. Don't forget your homework! See you in the next lesson!",
         ]
         outro = random.choice(outro_variants)
         outro_path = str(self.output_dir / "outro.mp3")
@@ -172,17 +105,17 @@ class AudioEngine:
 
     @staticmethod
     def _subtopic_hint(sub):
-        """Generate a short Hindi teaching hint for a subtopic."""
+        """Generate a short English teaching hint for a subtopic."""
         sub_lower = sub.lower()
         if any(k in sub_lower for k in ['example', 'problem', 'practice']):
-            return "उदाहरण देखो और खुद कोशिश करो।"
+            return "Look at the example and try it yourself."
         if any(k in sub_lower for k in ['definition', 'what is', 'basics', 'introduction']):
-            return "पहले बेसिक समझो, फिर आगे बढ़ेंगे।"
+            return "First understand the basics, then we'll move forward."
         if any(k in sub_lower for k in ['property', 'properties', 'rule']):
-            return "इसके नियम याद रखो, बहुत ज़रूरी हैं।"
+            return "Remember these rules, they're very important."
         if any(k in sub_lower for k in ['formula', 'equation']):
-            return "यह फ़ॉर्मूला याद रखो।"
-        return "ध्यान से देखो, बहुत आसान है।"
+            return "Remember this formula."
+        return "Watch carefully, it's very easy."
 
     def _prepare_text(self, text):
         """Clean text for TTS."""
@@ -196,8 +129,8 @@ class AudioEngine:
 async def _test():
     engine = AudioEngine()
     narrations = [
-        "चलो तीन और दो को जोड़ते हैं। तीन गेंदें लो, फिर दो और गेंदें मिलाओ।",
-        "कुल पाँच गेंदें हो गईं। तीन प्लस दो बराबर पाँच।",
+        "Let's add three and two together. Take three balls, then add two more balls.",
+        "That makes five balls in total. Three plus two equals five.",
     ]
     audios = await engine.generate_step_audio(narrations)
     print(f"Generated {len(audios)} audio files: {audios}")

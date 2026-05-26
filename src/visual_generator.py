@@ -165,6 +165,7 @@ Rules:
 """
 
     try:
+        print(f"    [debug] model={model}, base_url={os.environ.get('OPENAI_BASE_URL', 'default')}", flush=True)
         content = _call_api(
             messages=[
                 {"role": "system", "content": "You are a friendly Hindi math teacher making a YouTube video for kids. Narration MUST be in Hindi (Devanagari) — warm, encouraging, simple words. Like: 'बहुत अच्छे बच्चों!', 'चलो देखते हैं', 'समझ गए?' Return only valid JSON, no markdown."},
@@ -172,6 +173,7 @@ Rules:
             ],
             model=model, temperature=0.7, max_tokens=3000
         )
+        print(f"    [debug] content={repr(content[:200]) if content else 'None'}", flush=True)
         if not content:
             return None
 
@@ -186,17 +188,18 @@ Rules:
 
         scene = json.loads(content)
         if 'steps' in scene and len(scene['steps']) > 0:
-            print(f"  LLM generated {len(scene['steps'])} visual steps")
+            print(f"  LLM generated {len(scene['steps'])} visual steps", flush=True)
             return scene
         else:
-            print("  LLM response missing 'steps', falling back")
+            print("  LLM response missing 'steps', falling back", flush=True)
             return None
 
-    except json.JSONDecodeError:
-        print(f"  LLM returned invalid JSON, retrying with simpler prompt...")
+    except json.JSONDecodeError as e:
+        print(f"  LLM returned invalid JSON: {e}", flush=True)
+        print(f"  Content was: {repr(content[:300])}", flush=True)
         return _retry_llm_simple(model, topic, class_num)
     except Exception as e:
-        print(f"  LLM API error: {e}")
+        print(f"  LLM API error: {type(e).__name__}: {e}", flush=True)
         return None
 
 
@@ -230,11 +233,11 @@ IMPORTANT: Each step MUST have a "narration" field in Hindi (Devanagari) that ex
 
         scene = json.loads(content)
         if 'steps' in scene and len(scene['steps']) > 0:
-            print(f"  Retry generated {len(scene['steps'])} steps")
+            print(f"  Retry generated {len(scene['steps'])} steps", flush=True)
             return scene
         return None
     except Exception as e2:
-        print(f"  Retry also failed: {e2}")
+        print(f"  Retry also failed: {e2}", flush=True)
         return None
 
 
@@ -711,7 +714,7 @@ def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
                 try:
                     renderer(draw, el)
                 except Exception as e:
-                    print(f"  Warning: failed to render {el_type}: {e}")
+                    print(f"  Warning: failed to render {el_type}: {e}", flush=True)
 
         # ── Progress bar ──
         progress = (step_idx + 1) / len(steps)
@@ -740,13 +743,13 @@ def generate_visual(topic, frames_dir="temp_frames"):
     class_num = topic.get('class', 6)
     subtopics = topic.get('subtopics', [])
 
-    print(f"  Generating LLM visual for: {topic_text}")
+    print(f"  Generating LLM visual for: {topic_text}", flush=True)
 
     # Call LLM to get scene description
     scene = call_llm(topic_text, subtopics, class_num)
 
     if not scene:
-        print("  LLM failed, using smart fallback...")
+        print("  LLM failed, using smart fallback...", flush=True)
         scene = _generate_fallback_scene(topic_text, subtopics, class_num)
 
     if scene:
@@ -763,7 +766,7 @@ def generate_visual(topic, frames_dir="temp_frames"):
 
         # Render scene
         frames = render_scene(scene, frames_dir, frames_per_step=5)
-        print(f"  Generated {len(frames)} visual frames, {len(narrations)} narration lines")
+        print(f"  Generated {len(frames)} visual frames, {len(narrations)} narration lines", flush=True)
         return frames, narrations
 
     return None, None

@@ -116,7 +116,8 @@ Return ONLY valid JSON (no markdown, no explanation) with this exact format:
 }}
 
 Rules:
-- Canvas is 1080x1920 (portrait). Keep all elements within bounds (x: 50-1030, y: 50-1870).
+- Canvas is 1080x1920 (portrait). VISUAL AREA is y=280 to y=1700. Keep ALL elements within this visual area.
+- Center elements horizontally around x=540. For groups (dots, grids), calculate the group width and center it.
 - Create 4-6 steps that TEACH the topic progressively (easy → concept → example → practice).
 - Each step should build on the previous one.
 - Use subtopics to guide step generation — each subtopic can become a step.
@@ -723,6 +724,10 @@ def generate_visual(topic, frames_dir="temp_frames"):
         scene = _generate_fallback_scene(topic_text, subtopics, class_num)
 
     if scene:
+        # Center all elements within visual area (y=280 to y=1700)
+        for step in scene.get('steps', []):
+            step['elements'] = _center_step_elements(step.get('elements', []))
+
         # Extract narration from each step
         narrations = []
         for step in scene.get('steps', []):
@@ -736,6 +741,127 @@ def generate_visual(topic, frames_dir="temp_frames"):
         return frames, narrations
 
     return None, None
+
+
+# Visual area bounds for YouTube Shorts
+VISUAL_TOP = 280
+VISUAL_BOTTOM = 1700
+VISUAL_CENTER_Y = (VISUAL_TOP + VISUAL_BOTTOM) // 2  # 990
+
+
+def _center_step_elements(elements):
+    """Adjust element positions so they're centered in the visual area (y=280 to y=1700).
+
+    - Vertically: shift all elements so the group is centered between 280-1700
+    - Horizontally: center groups (dots, grids) that are left-aligned
+    """
+    if not elements:
+        return elements
+
+    # Calculate bounding box of all elements
+    min_y, max_y = 9999, 0
+    for el in elements:
+        etype = el.get('type', 'text')
+        y = el.get('y', el.get('cy', 500))
+
+        if etype == 'dots_group':
+            count = el.get('count', 5)
+            cols = min(5, count)
+            rows = (count + cols - 1) // cols
+            spacing = el.get('spacing', 70)
+            top = y
+            bottom = y + (rows - 1) * spacing + 50  # +50 for labels
+        elif etype == 'fraction_bar':
+            top = y
+            bottom = y + el.get('h', 60) + 30  # +30 for label below
+        elif etype == 'bar_chart':
+            top = y
+            bottom = y + el.get('h', 500) + 40
+        elif etype == 'clock_face':
+            r = el.get('r', 150)
+            top = y - r
+            bottom = y + r + 40  # +40 for digital time below
+        elif etype == 'grid':
+            top = y
+            bottom = y + el.get('h', 600)
+        elif etype == 'number_line':
+            top = y - 30
+            bottom = y + 50
+        elif etype == 'ruler':
+            top = y
+            bottom = y + 60
+        elif etype in ('circle', 'star', 'hexagon'):
+            r = el.get('r', el.get('size', 50))
+            top = y - r
+            bottom = y + r
+        else:  # text, rect, line, arrow, triangle, arc
+            top = y
+            # Estimate text height
+            size = el.get('size', 32)
+            bottom = y + size + 10
+
+        if top < min_y:
+            min_y = top
+        if bottom > max_y:
+            max_y = bottom
+
+    # Calculate vertical shift to center in visual area
+    content_height = max_y - min_y
+    ideal_top = VISUAL_TOP + (VISUAL_BOTTOM - VISUAL_TOP - content_height) // 2
+    y_shift = ideal_top - min_y
+
+    # Don't shift if already well-centered (within 50px)
+    if abs(y_shift) < 50:
+        y_shift = 0
+
+    # Apply adjustments
+    for el in elements:
+        etype = el.get('type', 'text')
+
+        # Vertical shift
+        if 'y' in el:
+            el['y'] += y_shift
+        if 'cy' in el:
+            el['cy'] += y_shift
+        if 'y1' in el:
+            el['y1'] += y_shift
+        if 'y2' in el:
+            el['y2'] += y_shift
+
+        # Horizontal centering for groups that are left-aligned
+        if etype == 'dots_group':
+            count = el.get('count', 5)
+            cols = min(5, count)
+            spacing = el.get('spacing', 70)
+            group_w = (cols - 1) * spacing + 50  # 50 = dot diameter
+            el['x'] = (WIDTH - group_w) // 2
+
+        elif etype == 'grid':
+            w = el.get('w', 800)
+            el['x'] = (WIDTH - w) // 2
+
+        elif etype == 'fraction_bar':
+            w = el.get('w', 800)
+            el['x'] = (WIDTH - w) // 2
+
+        elif etype == 'bar_chart':
+            w = el.get('w', 800)
+            el['x'] = (WIDTH - w) // 2
+
+        elif etype == 'number_line':
+            line_w = 880  # default x1 - x
+            el['x'] = (WIDTH - line_w) // 2
+            el['x1'] = el['x'] + line_w
+
+        elif etype == 'ruler':
+            w = el.get('w', 800)
+            el['x'] = (WIDTH - w) // 2
+
+        elif etype == 'rect':
+            w = el.get('w', 200)
+            el['x'] = (WIDTH - w) // 2
+
+    return elements
 
 
 def _generate_fallback_scene(topic_text, subtopics, class_num):
@@ -1048,5 +1174,9 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
 
     if not steps:
         return None
+
+    # Center all elements within visual area (y=280 to y=1700)
+    for step in steps:
+        step['elements'] = _center_step_elements(step.get('elements', []))
 
     return {'title': title, 'steps': steps}

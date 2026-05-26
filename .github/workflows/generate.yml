@@ -41,10 +41,17 @@ jobs:
           pip install -r requirements.txt
 
       - name: Write YouTube credentials
-        if: ${{ secrets.TOKEN_JSON != '' }}
+        env:
+          TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
+          CLIENT_SECRETS_JSON: ${{ secrets.CLIENT_SECRETS_JSON }}
         run: |
-          echo '${{ secrets.TOKEN_JSON }}' > token.json
-          echo '${{ secrets.CLIENT_SECRETS_JSON }}' > client_secrets.json
+          if [ -n "$TOKEN_JSON" ]; then
+            echo "$TOKEN_JSON" > token.json
+            echo "$CLIENT_SECRETS_JSON" > client_secrets.json
+            echo "YouTube credentials written"
+          else
+            echo "No YouTube credentials found, skipping"
+          fi
 
       - name: Generate video
         env:

@@ -71,7 +71,7 @@ def _call_api(messages, model, temperature=0.7, max_tokens=3000):
             "Accept-Encoding": "identity",  # avoid gzip decode bug
         },
         json={"model": model, "messages": messages, "temperature": temperature, "max_tokens": max_tokens},
-        timeout=60
+        timeout=180
     )
     resp.raise_for_status()
     msg = resp.json()["choices"][0]["message"]

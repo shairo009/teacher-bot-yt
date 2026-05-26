@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import asyncio
 import json
 from pathlib import Path
@@ -179,10 +180,69 @@ class TeacherBot:
         elif self.dry_run:
             print("\n  ✅ Dry run complete!")
 
+        # Log to video history
+        self._log_video_history(topic, video_created, video_path if video_created else None)
+
         # Mark topic as completed
         self.topic_manager.mark_completed(topic.get('id', 0))
 
+        # Cleanup temp files after everything is done
+        self._cleanup_temp()
+
         return True
+
+    def _log_video_history(self, topic, video_created, video_path=None):
+        """Append video generation record to history log."""
+        history_file = Path("data/video_history.json")
+        history = []
+        if history_file.exists():
+            try:
+                with open(history_file, 'r') as f:
+                    history = json.load(f)
+            except Exception:
+                history = []
+
+        entry = {
+            "timestamp": datetime.now().isoformat(),
+            "class": topic.get('class'),
+            "chapter": topic.get('chapter'),
+            "topic": topic.get('topic'),
+            "topic_id": topic.get('id'),
+            "video_created": video_created,
+            "video_file": Path(video_path).name if video_path else None
+        }
+        history.append(entry)
+
+        with open(history_file, 'w') as f:
+            json.dump(history, f, indent=2, ensure_ascii=False)
+        print(f"  📝 History logged ({len(history)} total videos)")
+
+    def _cleanup_temp(self):
+        """Remove temp files after video generation."""
+        cleaned = 0
+        for d in ["temp_frames", "temp_audio"]:
+            if os.path.exists(d):
+                shutil.rmtree(d)
+                cleaned += 1
+
+        # Remove stale outputs but keep the latest video
+        if os.path.exists("outputs"):
+            videos = sorted(Path("outputs").glob("*.mp4"), key=lambda p: p.stat().st_mtime)
+            for v in videos[:-1]:  # keep only the latest
+                v.unlink()
+                cleaned += 1
+            # Remove non-video files
+            for f in Path("outputs").iterdir():
+                if f.suffix != ".mp4":
+                    f.unlink()
+                    cleaned += 1
+
+        # Remove rebuilt index from disk (regenerated each run, don't need to persist)
+        if os.path.exists("data/topics_index.json"):
+            os.remove("data/topics_index.json")
+            cleaned += 1
+
+        print(f"  🧹 Cleanup done ({cleaned} items removed)")
 
     def show_progress(self):
         """Show current progress."""

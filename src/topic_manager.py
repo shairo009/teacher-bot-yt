@@ -69,14 +69,24 @@ class TopicManager:
         return index
 
     def get_current_topic(self):
-        """Get the next topic to be taught."""
+        """Get the next topic to be taught (skips already completed)."""
         if not self.index:
             return None
 
+        completed = set(self.progress.get('completed_ids', []))
         idx = self.progress.get('current_idx', 0)
+
+        # Skip forward past any already-completed topics (prevents repeats)
+        while idx < len(self.index) and self.index[idx].get('id') in completed:
+            idx += 1
+
         if idx >= len(self.index):
-            # All topics completed
             return None
+
+        # Update idx if we skipped ahead
+        if idx != self.progress.get('current_idx', 0):
+            self.progress['current_idx'] = idx
+            self._save_progress()
 
         return self.index[idx]
 

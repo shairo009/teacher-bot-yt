@@ -1,43 +1,39 @@
 # Teacher Bot YT - Git ignore
 
-# Environment
+# Environment & credentials
 .env
-
-# Credentials
-# We want to track tokens so they don't disappear on push
-!token.json
-!client_secrets.json
-
-# Ignore generic json files but explicitly keep curriculum and progress
-*.json
-!curriculum.json
-!topics_index.json
-!data/topics_index.json
-!data/topics_progress.json
-!data/curriculum.json
+*.pem
+client_secrets.json
+token.json
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+venv/
+.venv/
 
-# Temp files
+# Generated during each run (rebuilt from curriculum.json)
+data/topics_index.json
+data/extracted_images/
+
+# Temp files (created during video generation, cleaned up after)
 temp_frames/
 temp_audio/
 temp_*.html
-data/extracted_images/
 
-# Output
+# Output videos (uploaded to YouTube, not needed in git)
 outputs/
 *.mp4
 *.mp3
+*.wav
 
-# Progress (optional - uncomment if you don't want to track progress in git)
-# data/
-# topics_progress.json
-# topics_index.json
-
-# OS
+# OS junk
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/

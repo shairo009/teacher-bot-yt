@@ -135,7 +135,7 @@ class YouTubeUploader:
             "Bell 🔔 icon दबाना मत भूलना!",
             "",
             "📌 More Class-wise Videos:",
-            "https://www.youtube.com/@YourChannel/playlists",
+            "https://www.youtube.com/@shairo009/playlists",
             "",
             "📖 NCERT Books: https://ncert.nic.in/textbook.php",
             "",

@@ -9,22 +9,88 @@ class AudioEngine:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        # edge-tts config — FREE, no API key needed
-        self.voice = 'hi-IN-SwaraNeural'  # Female Hindi voice
-        self.voice_male = 'hi-IN-MadhurNeural'  # Male Hindi voice
-        self.available = True  # Always available (no API key needed)
+        # ElevenLabs config — human-like Hindi voice
+        self.elevenlabs_key = os.environ.get('ELEVENLABS_API_KEY', '')
+        self.elevenlabs_voice_id = '21m00Tcm4TlvDq8ikWAM'  # Rachel (natural female)
+        self.elevenlabs_url = 'https://api.elevenlabs.io/v1/text-to-speech'
 
-    async def _tts(self, text, output_path):
-        """Generate TTS audio using edge-tts (free, no API key)."""
+        # edge-tts fallback
+        self.edge_voice = 'hi-IN-SwaraNeural'
+        self.edge_voice_male = 'hi-IN-MadhurNeural'
+
+        # Track which engine we're using
+        self._engine = None
+
+    def _detect_engine(self):
+        """Detect available TTS engine at runtime."""
+        if self._engine is not None:
+            return self._engine
+
+        if self.elevenlabs_key:
+            self._engine = 'elevenlabs'
+            print("  TTS Engine: ElevenLabs (human-like voice)")
+        else:
+            self._engine = 'edge-tts'
+            print("  TTS Engine: edge-tts (fallback)")
+        return self._engine
+
+    async def _tts_elevenlabs(self, text, output_path):
+        """Generate TTS using ElevenLabs API (human-like voice)."""
+        import requests
+
+        headers = {
+            'Accept': 'audio/mpeg',
+            'xi-api-key': self.elevenlabs_key,
+            'Content-Type': 'application/json',
+        }
+        data = {
+            'text': text,
+            'model_id': 'eleven_multilingual_v2',
+            'voice_settings': {
+                'stability': 0.5,
+                'similarity_boost': 0.75,
+                'style': 0.4,
+                'use_speaker_boost': True
+            }
+        }
+        try:
+            url = f"{self.elevenlabs_url}/{self.elevenlabs_voice_id}"
+            response = requests.post(url, json=data, headers=headers, timeout=30)
+            if response.status_code == 200:
+                with open(output_path, 'wb') as f:
+                    f.write(response.content)
+                return os.path.exists(output_path) and os.path.getsize(output_path) > 100
+            else:
+                print(f"  ElevenLabs error {response.status_code}: {response.text[:200]}")
+                return False
+        except Exception as e:
+            print(f"  ElevenLabs error: {e}")
+            return False
+
+    async def _tts_edge(self, text, output_path):
+        """Generate TTS using edge-tts (free fallback)."""
         import edge_tts
 
         try:
-            communicate = edge_tts.Communicate(text, self.voice)
+            communicate = edge_tts.Communicate(text, self.edge_voice)
             await communicate.save(output_path)
             return os.path.exists(output_path) and os.path.getsize(output_path) > 100
         except Exception as e:
             print(f"  edge-tts error: {e}")
             return False
+
+    async def _tts(self, text, output_path):
+        """Generate TTS with ElevenLabs first, edge-tts fallback."""
+        engine = self._detect_engine()
+
+        if engine == 'elevenlabs':
+            success = await self._tts_elevenlabs(text, output_path)
+            if success:
+                return True
+            print("  ElevenLabs failed, falling back to edge-tts...")
+            return await self._tts_edge(text, output_path)
+        else:
+            return await self._tts_edge(text, output_path)
 
     async def generate_step_audio(self, narrations):
         """Generate one TTS clip per narration line (synced with visual steps).
@@ -34,8 +100,6 @@ class AudioEngine:
         os.makedirs(self.output_dir, exist_ok=True)
         audio_parts = []
 
-        # Intro — already handled by narrations, skip generic intro
-        # Per-step narration
         for i, text in enumerate(narrations):
             if not text.strip():
                 continue

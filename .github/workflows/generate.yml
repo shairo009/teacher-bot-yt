@@ -2,8 +2,8 @@ name: Teacher Bot - Generate Video
 
 on:
   schedule:
-    # Din me 5 baar: 7am, 11am, 3pm, 7pm, 11pm IST (UTC: 1:30, 5:30, 9:30, 13:30, 17:30)
-    - cron: '30 1,5,9,13,17 * * *'
+    # Once daily at 7:30 PM IST (2:00 PM UTC) — evening peak hour
+    - cron: '0 14 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -25,7 +25,7 @@ jobs:
       - name: Rate limit check
         id: rate_check
         run: |
-          # Check if a video was generated in the last 3 hours
+          # Check if a video was generated in the last 20 hours
           if [ -f data/video_history.json ]; then
             LAST_RUN=$(python3 -c "
           import json
@@ -46,10 +46,10 @@ jobs:
               print('999')
           ")
             echo "Hours since last video: $LAST_RUN"
-            SKIP=$(python3 -c "print('true' if float('$LAST_RUN') < 3.0 else 'false')")
+            SKIP=$(python3 -c "print('true' if float('$LAST_RUN') < 20.0 else 'false')")
             echo "skip=$SKIP" >> $GITHUB_OUTPUT
             if [ "$SKIP" = "true" ]; then
-              echo "Last video was less than 3 hours ago. Skipping."
+              echo "Last video was less than 20 hours ago. Skipping."
             fi
           else
             echo "No history file. Running."
@@ -60,7 +60,7 @@ jobs:
         if: steps.rate_check.outputs.skip != 'true'
         id: daily_check
         run: |
-          # Max 5 videos per day
+          # Max 1 video per day — human-like pace
           if [ -f data/video_history.json ]; then
             TODAY_COUNT=$(python3 -c "
           import json
@@ -75,8 +75,8 @@ jobs:
               print(0)
           ")
             echo "Videos today: $TODAY_COUNT"
-            if [ "$TODAY_COUNT" -ge 5 ]; then
-              echo "Daily limit (5 videos) reached. Skipping."
+            if [ "$TODAY_COUNT" -ge 1 ]; then
+              echo "Daily limit (1 video) reached. Skipping."
               echo "skip=true" >> $GITHUB_OUTPUT
             else
               echo "skip=false" >> $GITHUB_OUTPUT

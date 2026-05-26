@@ -25,5 +25,14 @@
     "topic_id": 6005,
     "video_created": true,
     "video_file": "lesson_class2_20260526_044831.mp4"
+  },
+  {
+    "timestamp": "2026-05-26T04:53:38.047468",
+    "class": 2,
+    "chapter": "Chapter 2: Counting in Groups",
+    "topic": "Group counting",
+    "topic_id": 7000,
+    "video_created": true,
+    "video_file": "lesson_class2_20260526_045333.mp4"
   }
 ]

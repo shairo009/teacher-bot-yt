@@ -2,8 +2,8 @@ name: Teacher Bot - Generate Video
 
 on:
   schedule:
-    # Har 4 ghante: 7:00, 11:00, 15:00, 19:00, 23:00, 3:00 IST
-    - cron: '30 1,5,9,13,17,21 * * *'
+    # Din me 5 baar: 7am, 11am, 3pm, 7pm, 11pm IST (UTC: 1:30, 5:30, 9:30, 13:30, 17:30)
+    - cron: '30 1,5,9,13,17 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -22,13 +22,78 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Rate limit check
+        id: rate_check
+        run: |
+          # Check if a video was generated in the last 3 hours
+          if [ -f data/video_history.json ]; then
+            LAST_RUN=$(python3 -c "
+          import json
+          from datetime import datetime, timezone, timedelta
+          try:
+              with open('data/video_history.json') as f:
+                  history = json.load(f)
+              if history:
+                  last = datetime.fromisoformat(history[-1]['timestamp'])
+                  if last.tzinfo is None:
+                      last = last.replace(tzinfo=timezone.utc)
+                  now = datetime.now(timezone.utc)
+                  hours_since = (now - last).total_seconds() / 3600
+                  print(f'{hours_since:.1f}')
+              else:
+                  print('999')
+          except:
+              print('999')
+          ")
+            echo "Hours since last video: $LAST_RUN"
+            SKIP=$(python3 -c "print('true' if float('$LAST_RUN') < 3.0 else 'false')")
+            echo "skip=$SKIP" >> $GITHUB_OUTPUT
+            if [ "$SKIP" = "true" ]; then
+              echo "Last video was less than 3 hours ago. Skipping."
+            fi
+          else
+            echo "No history file. Running."
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check daily limit
+        if: steps.rate_check.outputs.skip != 'true'
+        id: daily_check
+        run: |
+          # Max 5 videos per day
+          if [ -f data/video_history.json ]; then
+            TODAY_COUNT=$(python3 -c "
+          import json
+          from datetime import datetime, timezone
+          try:
+              with open('data/video_history.json') as f:
+                  history = json.load(f)
+              today = datetime.now(timezone.utc).date()
+              count = sum(1 for h in history if datetime.fromisoformat(h['timestamp']).date() == today)
+              print(count)
+          except:
+              print(0)
+          ")
+            echo "Videos today: $TODAY_COUNT"
+            if [ "$TODAY_COUNT" -ge 5 ]; then
+              echo "Daily limit (5 videos) reached. Skipping."
+              echo "skip=true" >> $GITHUB_OUTPUT
+            else
+              echo "skip=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup Python 3.11
+        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
 
       - name: Install system dependencies
+        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
@@ -36,11 +101,13 @@ jobs:
             libgdk-pixbuf2.0-dev fonts-noto cm-super
 
       - name: Install Python dependencies
+        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         run: |
           pip install --upgrade pip wheel
           pip install -r requirements.txt
 
       - name: Write YouTube credentials
+        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         env:
           TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
           CLIENT_SECRETS_JSON: ${{ secrets.CLIENT_SECRETS_JSON }}
@@ -54,6 +121,7 @@ jobs:
           fi
 
       - name: Generate video
+        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
@@ -68,7 +136,7 @@ jobs:
           fi
 
       - name: Upload video artifact
-        if: always()
+        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: video-${{ github.run_number }}
@@ -77,7 +145,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Save progress
-        if: always()
+        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'

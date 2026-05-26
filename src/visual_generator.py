@@ -94,9 +94,14 @@ def _call_api(messages, model, temperature=0.7, max_tokens=3000):
         json={"model": model, "messages": messages, "temperature": temperature, "max_tokens": max_tokens},
         timeout=180
     )
+    print(f"    [debug] resp_status={resp.status_code}, resp_keys={list(resp.json().keys()) if resp.headers.get('content-type','').startswith('application/json') else 'not json'}", flush=True)
     resp.raise_for_status()
-    msg = resp.json()["choices"][0]["message"]
-    content = msg.get("content") or msg.get("reasoning_content") or ""
+    data = resp.json()
+    msg = data["choices"][0]["message"]
+    c = msg.get("content")
+    rc = msg.get("reasoning_content")
+    print(f"    [debug] msg_keys={list(msg.keys())}, content={repr(c[:100]) if c else 'None'}, reasoning_content={repr(rc[:100]) if rc else 'None'}", flush=True)
+    content = c or rc or ""
     if not content:
         return None
     # reasoning_content may contain reasoning text + JSON mixed — extract clean JSON

@@ -116,19 +116,24 @@ class TeacherBot:
 
         video_created = False
 
-        # Try to render frames
+        # Try to render frames (now returns frames + narrations)
         if self.render_engine:
             print("  Rendering frames...")
             try:
-                frames = await self.render_engine.render_lesson(topic)
-                print(f"    Created {len(frames)} frames")
+                frames, narrations = await self.render_engine.render_lesson(topic)
+                print(f"    Created {len(frames)} frames, {len(narrations)} narration lines")
 
-                # Try to generate audio
+                # Generate audio from LLM narrations (visual-synced)
                 audios = []
                 if self.audio_engine:
                     print("  Generating audio...")
                     try:
-                        audios = await self.audio_engine.generate_lesson_audio(topic, topic['topic'])
+                        if narrations:
+                            # Per-step audio: each visual gets its own TTS clip
+                            audios = self.audio_engine.generate_step_audio(narrations)
+                        else:
+                            # Fallback: raw topic text (boring, but works)
+                            audios = self.audio_engine.generate_lesson_audio(topic, topic['topic'])
                         print(f"    Created {len(audios)} audio files")
                     except Exception as e:
                         print(f"    Audio generation failed: {e}")
@@ -138,7 +143,7 @@ class TeacherBot:
                     print("  Composing video...")
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     output_name = f"lesson_class{topic['class']}_{timestamp}.mp4"
-                    video_path = self.video_engine.compose_video(frames, audios, output_name)
+                    video_path = self.video_engine.compose_video(frames, audios, output_name, frames_per_step=5)
 
                     if video_path:
                         print(f"    ✅ Video: {video_path}")

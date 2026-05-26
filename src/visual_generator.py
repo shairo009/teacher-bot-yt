@@ -53,30 +53,40 @@ def get_font(size, bold=False):
         return ImageFont.load_default()
 
 
-def call_llm(topic, subtopics, class_num):
-    """Call OpenGateway API to generate visual scene description."""
-    try:
-        from openai import OpenAI
-    except ImportError:
-        print("  openai library not installed, skipping LLM visual generation")
-        return None
+def _call_api(messages, model, temperature=0.7, max_tokens=3000):
+    """Call OpenGateway API using requests (avoids openai library httpx issue)."""
+    import requests
 
     api_key = os.environ.get('OPENAI_API_KEY', '')
     base_url = os.environ.get('OPENAI_BASE_URL', 'https://opengateway.gitlawb.com/v1')
-    model = os.environ.get('OPENAI_MODEL', 'mimo-v2.5-pro')
 
     if not api_key:
-        print("  No OPENAI_API_KEY found, skipping LLM visual generation")
         return None
 
-    client = OpenAI(api_key=api_key, base_url=base_url)
+    resp = requests.post(
+        f"{base_url}/chat/completions",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "Accept-Encoding": "identity",  # avoid gzip decode bug
+        },
+        json={"model": model, "messages": messages, "temperature": temperature, "max_tokens": max_tokens},
+        timeout=60
+    )
+    resp.raise_for_status()
+    return resp.json()["choices"][0]["message"]["content"].strip()
 
-    prompt = f"""You are a math teacher creating visual frames for a Class {class_num} NCERT math video.
+
+def call_llm(topic, subtopics, class_num):
+    """Call OpenGateway API to generate visual scene description."""
+    model = os.environ.get('OPENAI_MODEL', 'mimo-v2.5-pro')
+
+    prompt = f"""You are a math teacher creating visual frames AND Hindi narration for a Class {class_num} NCERT math video.
 
 Topic: {topic}
 Subtopics: {', '.join(subtopics)}
 
-Generate a JSON scene description for PIL to render. The video should TEACH this topic step by step.
+Generate a JSON with BOTH visual scene AND narration. Each narration line must EXPLAIN what is shown in that step's visuals.
 
 Return ONLY valid JSON (no markdown, no explanation) with this exact format:
 {{
@@ -84,6 +94,7 @@ Return ONLY valid JSON (no markdown, no explanation) with this exact format:
   "steps": [
     {{
       "label": "Step 1 title",
+      "narration": "Hindi text that teacher speaks while this visual is shown - explain what the student sees",
       "elements": [
         {{"type": "text", "x": 540, "y": 200, "text": "Hello", "size": 48, "color": "#2563EB", "bold": true}},
         {{"type": "circle", "cx": 300, "cy": 500, "r": 50, "fill": "#DBEAFE", "outline": "#2563EB"}},
@@ -127,17 +138,16 @@ Rules:
 """
 
     try:
-        response = client.chat.completions.create(
-            model=model,
+        content = _call_api(
             messages=[
-                {"role": "system", "content": "You are a math visualization expert. Return only valid JSON, no markdown code blocks."},
+                {"role": "system", "content": "You are a friendly Hindi math teacher making a YouTube video for kids. Narration MUST be in Hindi (Devanagari) — warm, encouraging, simple words. Like: 'बहुत अच्छे बच्चों!', 'चलो देखते हैं', 'समझ गए?' Return only valid JSON, no markdown."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.7,
-            max_tokens=3000
+            model=model, temperature=0.7, max_tokens=3000
         )
+        if not content:
+            return None
 
-        content = response.choices[0].message.content.strip()
         # Clean up markdown code blocks if present
         if content.startswith('```'):
             content = content.split('\n', 1)[1] if '\n' in content else content[3:]
@@ -155,33 +165,34 @@ Rules:
             print("  LLM response missing 'steps', falling back")
             return None
 
-    except json.JSONDecodeError as e:
+    except json.JSONDecodeError:
         print(f"  LLM returned invalid JSON, retrying with simpler prompt...")
-        return _retry_llm_simple(client, model, topic, class_num)
+        return _retry_llm_simple(model, topic, class_num)
     except Exception as e:
         print(f"  LLM API error: {e}")
         return None
 
 
-def _retry_llm_simple(client, model, topic, class_num):
+def _retry_llm_simple(model, topic, class_num):
     """Retry LLM with a simpler prompt after JSON parse failure."""
     simple_prompt = f"""Generate a JSON scene for teaching "{topic}" to Class {class_num} students.
 Return ONLY valid JSON, no markdown, no explanation.
-Format: {{"title":"...","steps":[{{"label":"...","elements":[{{"type":"text","x":540,"y":200,"text":"...","size":48,"color":"#2563EB"}}]}}]}}
+Format: {{"title":"...","steps":[{{"label":"...","narration":"Hindi narration here","elements":[{{"type":"text","x":540,"y":200,"text":"...","size":48,"color":"#2563EB"}}]}}]}}
 Use 4 steps with elements: text, circle, rect, dots_group, fraction_bar, number_line.
-Canvas: 1080x1920. Bounds: x 50-1030, y 50-1870."""
+Canvas: 1080x1920. Bounds: x 50-1030, y 50-1870.
+IMPORTANT: Each step MUST have a "narration" field in Hindi (Devanagari) that explains the visual to a child."""
 
     try:
-        response = client.chat.completions.create(
-            model=model,
+        content = _call_api(
             messages=[
-                {"role": "system", "content": "Return only valid JSON."},
+                {"role": "system", "content": "Return only valid JSON. Narration MUST be in Hindi (Devanagari)."},
                 {"role": "user", "content": simple_prompt}
             ],
-            temperature=0.5,
-            max_tokens=2000
+            model=model, temperature=0.5, max_tokens=2000
         )
-        content = response.choices[0].message.content.strip()
+        if not content:
+            return None
+
         if content.startswith('```'):
             content = content.split('\n', 1)[1] if '\n' in content else content[3:]
         if content.endswith('```'):
@@ -203,19 +214,18 @@ Canvas: 1080x1920. Bounds: x 50-1030, y 50-1870."""
 # ============ ELEMENT RENDERERS ============
 
 def draw_element_text(draw, el):
-    """Draw text element."""
+    """Draw text element — always centered for YouTube Shorts (1080x1920)."""
     size = el.get('size', 32)
     bold = el.get('bold', False)
     font = get_font(size, bold)
     color = hex_to_rgb(el.get('color', COLORS['text']))
-    x, y = el.get('x', 100), el.get('y', 100)
     text = el.get('text', '')
+    y = el.get('y', 100)
 
-    # Center text if x is near middle
-    if 400 < x < 700:
-        bbox = draw.textbbox((0, 0), text, font=font)
-        tw = bbox[2] - bbox[0]
-        x = x - tw // 2
+    # Always center horizontally on 1080-wide canvas
+    bbox = draw.textbbox((0, 0), text, font=font)
+    tw = bbox[2] - bbox[0]
+    x = (WIDTH - tw) // 2
 
     draw.text((x, y), text, fill=color, font=font)
 
@@ -594,7 +604,21 @@ ELEMENT_RENDERERS = {
 
 
 def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
-    """Render a scene (from LLM) into frame images."""
+    """Render a scene into YouTube Shorts frames (1080x1920).
+
+    Layout:
+    ┌─────────────────────────┐
+    │  Header (title)    30-110│
+    │  Step label       130-190│
+    │  Progress dots       220 │
+    │                         │
+    │  VISUAL AREA      280-1700│
+    │  (all elements here,    │
+    │   properly centered)    │
+    │                         │
+    │  Progress bar   1750-1790│
+    └─────────────────────────┘
+    """
     frames_dir = Path(frames_dir)
     frames_dir.mkdir(parents=True, exist_ok=True)
 
@@ -607,11 +631,11 @@ def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
         step_idx = min(frame_idx // frames_per_step, len(steps) - 1)
         step = steps[step_idx]
 
-        # Create canvas
+        # Create canvas with gradient background
         img = Image.new('RGB', (WIDTH, HEIGHT), color=hex_to_rgb(COLORS['bg']))
         draw = ImageDraw.Draw(img)
 
-        # Draw gradient background
+        # Gradient background (subtle blue-white)
         top = hex_to_rgb('#F0F4FF')
         bot = hex_to_rgb('#FFFFFF')
         for y in range(HEIGHT):
@@ -621,19 +645,25 @@ def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
             b = int(top[2] + (bot[2] - top[2]) * ratio)
             draw.line([(0, y), (WIDTH, y)], fill=(r, g, b))
 
-        # Draw header bar
-        draw.rounded_rectangle([(30, 30), (WIDTH - 30, 130)], radius=20, fill=hex_to_rgb('#1E293B'))
+        # ── Header bar ──
+        draw.rounded_rectangle([(30, 30), (WIDTH - 30, 110)], radius=20, fill=hex_to_rgb('#1E293B'))
         header_font = get_font(28, bold=True)
-        draw.text((60, 60), title, fill=hex_to_rgb('#FFFFFF'), font=header_font)
+        # Center title in header
+        bbox = draw.textbbox((0, 0), title, font=header_font)
+        tw = bbox[2] - bbox[0]
+        draw.text(((WIDTH - tw) // 2, 52), title, fill=hex_to_rgb('#FFFFFF'), font=header_font)
 
-        # Draw step label
+        # ── Step label ──
         step_label = step.get('label', f'Step {step_idx + 1}')
-        label_font = get_font(32, bold=True)
-        draw.rounded_rectangle([(30, 150), (WIDTH - 30, 210)], radius=15, fill=hex_to_rgb('#EFF6FF'))
-        draw.text((60, 160), f"Step {step_idx + 1}: {step_label}", fill=hex_to_rgb(COLORS['primary']), font=label_font)
+        label_text = f"Step {step_idx + 1}: {step_label}"
+        label_font = get_font(30, bold=True)
+        draw.rounded_rectangle([(30, 130), (WIDTH - 30, 190)], radius=15, fill=hex_to_rgb('#EFF6FF'))
+        bbox2 = draw.textbbox((0, 0), label_text, font=label_font)
+        tw2 = bbox2[2] - bbox2[0]
+        draw.text(((WIDTH - tw2) // 2, 142), label_text, fill=hex_to_rgb(COLORS['primary']), font=label_font)
 
-        # Draw step indicator dots
-        dot_y = 240
+        # ── Step indicator dots ──
+        dot_y = 220
         dot_spacing = 60
         start_x = (WIDTH - (len(steps) - 1) * dot_spacing) // 2
         for i in range(len(steps)):
@@ -645,7 +675,7 @@ def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
             else:
                 draw.ellipse([(dx-10, dot_y-10), (dx+10, dot_y+10)], fill=hex_to_rgb(COLORS['grid']))
 
-        # Draw elements for current step
+        # ── Draw elements (visual area: y=280 to y=1700) ──
         elements = step.get('elements', [])
         for el in elements:
             el_type = el.get('type', 'text')
@@ -656,7 +686,7 @@ def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
                 except Exception as e:
                     print(f"  Warning: failed to render {el_type}: {e}")
 
-        # Progress bar at bottom
+        # ── Progress bar ──
         progress = (step_idx + 1) / len(steps)
         bar_w = int((WIDTH - 100) * progress)
         draw.rounded_rectangle([(50, HEIGHT - 80), (50 + bar_w, HEIGHT - 50)], radius=10, fill=hex_to_rgb(COLORS['primary']))
@@ -671,7 +701,13 @@ def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
 
 
 def generate_visual(topic, frames_dir="temp_frames"):
-    """Main entry: generate visual frames for a topic using LLM + PIL."""
+    """Main entry: generate visual frames for a topic using LLM + PIL.
+
+    Returns (frames, narrations) tuple:
+      - frames: list of frame file paths
+      - narrations: list of Hindi narration strings (one per step, synced with frames)
+    Returns (None, None) on failure.
+    """
     topic_text = topic.get('topic', '')
     chapter = topic.get('chapter', '')
     class_num = topic.get('class', 6)
@@ -687,12 +723,19 @@ def generate_visual(topic, frames_dir="temp_frames"):
         scene = _generate_fallback_scene(topic_text, subtopics, class_num)
 
     if scene:
+        # Extract narration from each step
+        narrations = []
+        for step in scene.get('steps', []):
+            narr = step.get('narration', '')
+            if narr:
+                narrations.append(narr)
+
         # Render scene
         frames = render_scene(scene, frames_dir, frames_per_step=5)
-        print(f"  Generated {len(frames)} visual frames")
-        return frames
+        print(f"  Generated {len(frames)} visual frames, {len(narrations)} narration lines")
+        return frames, narrations
 
-    return None
+    return None, None
 
 
 def _generate_fallback_scene(topic_text, subtopics, class_num):
@@ -702,56 +745,201 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
     steps = []
 
     # Detect topic type and generate appropriate steps
-    if any(kw in topic_lower for kw in ['add', 'plus', 'sum', 'addition', 'jod']):
-        # Addition visual
-        for i in range(4):
-            a, b = 3 + i, 2 + i
-            steps.append({
-                'label': f'Addition: {a} + {b}',
-                'elements': [
-                    {'type': 'text', 'x': 540, 'y': 150, 'text': f'Addition: {a} + {b}', 'size': 42, 'color': '#2563EB', 'bold': True},
-                    {'type': 'dots_group', 'x': 200, 'y': 400, 'count': a, 'color': '#2563EB', 'spacing': 70},
-                    {'type': 'text', 'x': 200 + a * 70 + 30, 'y': 420, 'text': '+', 'size': 48, 'color': '#F59E0B', 'bold': True},
-                    {'type': 'dots_group', 'x': 200 + a * 70 + 80, 'y': 400, 'count': b, 'color': '#7C3AED', 'spacing': 70},
-                    {'type': 'text', 'x': 540, 'y': 700, 'text': f'{a} + {b} = {a+b}', 'size': 56, 'color': '#10B981', 'bold': True},
-                ]
-            })
+    if any(kw in topic_lower for kw in ['add', 'addition', 'plus', 'sum', 'jod']):
+        # Addition — 4 steps: intro → concept → example → practice
+        a, b = 3, 2
+        steps.append({
+            'label': 'What is Addition?',
+            'narration': f'नमस्ते बच्चों! आज हम जोड़ यानी Addition सीखेंगे। जोड़ का मतलब है दो या दो से ज़्यादा चीज़ों को मिलाना। बहुत आसान है!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 200, 'text': 'Addition (+)', 'size': 56, 'color': '#2563EB', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 400, 'text': 'Adding things together', 'size': 36, 'color': '#64748B'},
+                {'type': 'star', 'cx': 300, 'cy': 650, 'size': 50, 'fill': '#F59E0B', 'outline': '#D97706'},
+                {'type': 'text', 'x': 420, 'y': 630, 'text': '+', 'size': 56, 'color': '#EF4444', 'bold': True},
+                {'type': 'star', 'cx': 540, 'cy': 650, 'size': 50, 'fill': '#10B981', 'outline': '#059669'},
+                {'type': 'text', 'x': 640, 'y': 630, 'text': '=', 'size': 56, 'color': '#7C3AED', 'bold': True},
+                {'type': 'text', 'x': 720, 'y': 630, 'text': 'More!', 'size': 42, 'color': '#10B981', 'bold': True},
+            ]
+        })
+        steps.append({
+            'label': f'Let\'s Add: {a} + {b}',
+            'narration': f'चलो {a} और {b} को जोड़ते हैं। पहले {a} गेंदें देखो, फिर {b} और गेंदें मिलाओ। एक-एक करके गिनो!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': f'{a} + {b}', 'size': 56, 'color': '#2563EB', 'bold': True},
+                {'type': 'dots_group', 'x': 250, 'y': 400, 'count': a, 'color': '#2563EB', 'spacing': 80},
+                {'type': 'text', 'x': 250 + a * 80 + 20, 'y': 420, 'text': '+', 'size': 56, 'color': '#F59E0B', 'bold': True},
+                {'type': 'dots_group', 'x': 250 + a * 80 + 90, 'y': 400, 'count': b, 'color': '#7C3AED', 'spacing': 80},
+                {'type': 'text', 'x': 540, 'y': 700, 'text': f'{a} + {b} = ?', 'size': 48, 'color': '#EF4444', 'bold': True},
+            ]
+        })
+        steps.append({
+            'label': f'Answer: {a} + {b} = {a+b}',
+            'narration': f'बहुत अच्छे! सारी गेंदें मिलाकर गिनो — {a} प्लस {b} बराबर {a+b}! बिल्कुल सही!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': f'{a} + {b} = {a+b}', 'size': 56, 'color': '#10B981', 'bold': True},
+                {'type': 'dots_group', 'x': 150, 'y': 400, 'count': a + b, 'color': '#10B981', 'spacing': 70},
+                {'type': 'text', 'x': 540, 'y': 700, 'text': f'{a} + {b} = {a+b}', 'size': 64, 'color': '#10B981', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 850, 'text': 'Very Good!', 'size': 36, 'color': '#F59E0B', 'bold': True},
+            ]
+        })
+        steps.append({
+            'label': 'Try Another: 4 + 3',
+            'narration': f'अब तुम्हारी बारी! चार और तीन को जोड़ो। गेंदें गिनो और बताओ — कितनी हुईं?',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': 'Your Turn!', 'size': 48, 'color': '#7C3AED', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 300, 'text': '4 + 3 = ?', 'size': 56, 'color': '#2563EB', 'bold': True},
+                {'type': 'dots_group', 'x': 250, 'y': 500, 'count': 4, 'color': '#2563EB', 'spacing': 80},
+                {'type': 'text', 'x': 600, 'y': 520, 'text': '+', 'size': 56, 'color': '#F59E0B', 'bold': True},
+                {'type': 'dots_group', 'x': 680, 'y': 500, 'count': 3, 'color': '#7C3AED', 'spacing': 80},
+                {'type': 'text', 'x': 540, 'y': 800, 'text': 'Count all dots!', 'size': 32, 'color': '#64748B'},
+                {'type': 'star', 'cx': 540, 'cy': 1000, 'size': 60, 'fill': '#F59E0B', 'outline': '#D97706'},
+            ]
+        })
 
-    elif any(kw in topic_lower for kw in ['subtract', 'minus', 'difference', 'ghata']):
-        # Subtraction visual
-        for i in range(4):
-            a, b = 8 - i, 3 + i
-            steps.append({
-                'label': f'Subtraction: {a} - {b}',
-                'elements': [
-                    {'type': 'text', 'x': 540, 'y': 150, 'text': f'Subtraction: {a} - {b}', 'size': 42, 'color': '#EF4444', 'bold': True},
-                    {'type': 'dots_group', 'x': 200, 'y': 400, 'count': a, 'color': '#2563EB', 'spacing': 70},
-                    {'type': 'text', 'x': 540, 'y': 650, 'text': f'Remove {b}', 'size': 36, 'color': '#EF4444'},
-                    {'type': 'dots_group', 'x': 200, 'y': 800, 'count': max(0, a - b), 'color': '#10B981', 'spacing': 70},
-                    {'type': 'text', 'x': 540, 'y': 1050, 'text': f'{a} - {b} = {a-b}', 'size': 56, 'color': '#10B981', 'bold': True},
-                ]
-            })
+    elif any(kw in topic_lower for kw in ['subtract', 'subtraction', 'minus', 'difference', 'ghata']):
+        # Subtraction — 4 steps: intro → concept → example → practice
+        steps.append({
+            'label': 'What is Subtraction?',
+            'narration': 'नमस्ते बच्चों! आज हम घटाना यानी Subtraction सीखेंगे। घटाने का मतलब है कुछ हटाना या कम करना। चलो देखते हैं!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 200, 'text': 'Subtraction (-)', 'size': 56, 'color': '#EF4444', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 400, 'text': 'Taking away things', 'size': 36, 'color': '#64748B'},
+                {'type': 'dots_group', 'x': 300, 'y': 600, 'count': 5, 'color': '#2563EB', 'spacing': 70},
+                {'type': 'text', 'x': 680, 'y': 620, 'text': '-', 'size': 56, 'color': '#EF4444', 'bold': True},
+                {'type': 'text', 'x': 770, 'y': 620, 'text': '2', 'size': 48, 'color': '#EF4444', 'bold': True},
+            ]
+        })
+        steps.append({
+            'label': 'Remove 2 from 5',
+            'narration': 'देखो यहाँ पाँच गेंदें हैं। अब दो गेंदें हटा दो। एक-एक करके हटाओ!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': '5 - 2', 'size': 56, 'color': '#EF4444', 'bold': True},
+                {'type': 'dots_group', 'x': 200, 'y': 400, 'count': 5, 'color': '#2563EB', 'spacing': 80},
+                {'type': 'text', 'x': 540, 'y': 650, 'text': 'Remove 2', 'size': 42, 'color': '#EF4444', 'bold': True},
+                {'type': 'dots_group', 'x': 200, 'y': 850, 'count': 3, 'color': '#10B981', 'spacing': 80},
+                {'type': 'text', 'x': 540, 'y': 1100, 'text': '5 - 2 = ?', 'size': 48, 'color': '#F59E0B', 'bold': True},
+            ]
+        })
+        steps.append({
+            'label': 'Answer: 5 - 2 = 3',
+            'narration': 'बहुत अच्छे! पाँच में से दो हटाओ तो तीन बचते हैं। पाँच माइनस दो बराबर तीन!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': '5 - 2 = 3', 'size': 64, 'color': '#10B981', 'bold': True},
+                {'type': 'dots_group', 'x': 250, 'y': 400, 'count': 3, 'color': '#10B981', 'spacing': 80},
+                {'type': 'text', 'x': 540, 'y': 700, 'text': '3 dots left!', 'size': 36, 'color': '#10B981'},
+                {'type': 'star', 'cx': 540, 'cy': 900, 'size': 60, 'fill': '#F59E0B', 'outline': '#D97706'},
+            ]
+        })
+        steps.append({
+            'label': 'Try: 7 - 3',
+            'narration': 'अब तुम बताओ! सात गेंदों में से तीन हटाओ। कितनी बचीं? गिनकर बताओ!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': 'Your Turn!', 'size': 48, 'color': '#7C3AED', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 300, 'text': '7 - 3 = ?', 'size': 56, 'color': '#EF4444', 'bold': True},
+                {'type': 'dots_group', 'x': 250, 'y': 500, 'count': 7, 'color': '#2563EB', 'spacing': 70},
+                {'type': 'text', 'x': 540, 'y': 800, 'text': 'Remove 3 and count!', 'size': 32, 'color': '#64748B'},
+            ]
+        })
 
-    elif any(kw in topic_lower for kw in ['multiply', 'times', 'product', 'guna']):
-        # Multiplication visual
-        for i in range(4):
-            rows, cols = 2 + i, 3 + i
-            steps.append({
-                'label': f'Multiplication: {rows} x {cols}',
-                'elements': [
-                    {'type': 'text', 'x': 540, 'y': 150, 'text': f'{rows} x {cols} = {rows*cols}', 'size': 42, 'color': '#7C3AED', 'bold': True},
-                    {'type': 'grid', 'x': 200, 'y': 350, 'w': 600, 'h': 400, 'rows': rows, 'cols': cols},
-                    {'type': 'text', 'x': 540, 'y': 850, 'text': f'{rows} groups of {cols}', 'size': 32, 'color': '#64748B'},
-                    {'type': 'text', 'x': 540, 'y': 1000, 'text': f'= {rows*cols}', 'size': 56, 'color': '#10B981', 'bold': True},
-                ]
-            })
+    elif any(kw in topic_lower for kw in ['multiply', 'multiplication', 'times', 'product', 'guna']):
+        # Multiplication — 4 steps: intro → concept → example → practice
+        steps.append({
+            'label': 'What is Multiplication?',
+            'narration': 'नमस्ते बच्चों! आज हम गुणा यानी Multiplication सीखेंगे। गुणा का मतलब है बार-बार जोड़ना। बहुत आसान है!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 200, 'text': 'Multiplication (x)', 'size': 52, 'color': '#7C3AED', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 400, 'text': 'Repeated Addition', 'size': 36, 'color': '#64748B'},
+                {'type': 'text', 'x': 540, 'y': 600, 'text': '2 x 3 = 2+2+2 = 6', 'size': 40, 'color': '#10B981', 'bold': True},
+            ]
+        })
+        steps.append({
+            'label': '2 x 3 with Grid',
+            'narration': 'देखो! दो पंक्तियाँ बनाओ, हर पंक्ति में तीन गेंदें रखो। कुल गिनो — छह गेंदें! दो गुणा तीन बराबर छह।',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': '2 x 3 = 6', 'size': 56, 'color': '#7C3AED', 'bold': True},
+                {'type': 'grid', 'x': 250, 'y': 350, 'w': 500, 'h': 350, 'rows': 2, 'cols': 3},
+                {'type': 'text', 'x': 540, 'y': 800, 'text': '2 rows, 3 in each', 'size': 32, 'color': '#64748B'},
+                {'type': 'text', 'x': 540, 'y': 950, 'text': '= 6', 'size': 56, 'color': '#10B981', 'bold': True},
+            ]
+        })
+        steps.append({
+            'label': '3 x 4 = 12',
+            'narration': 'अब तीन पंक्तियाँ, हर पंक्ति में चार। तीन गुणा चार बराबर बारह! गिनकर देखो!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': '3 x 4 = 12', 'size': 56, 'color': '#7C3AED', 'bold': True},
+                {'type': 'grid', 'x': 250, 'y': 350, 'w': 500, 'h': 350, 'rows': 3, 'cols': 4},
+                {'type': 'text', 'x': 540, 'y': 800, 'text': '3 rows, 4 in each', 'size': 32, 'color': '#64748B'},
+                {'type': 'text', 'x': 540, 'y': 950, 'text': '= 12', 'size': 56, 'color': '#10B981', 'bold': True},
+            ]
+        })
+        steps.append({
+            'label': 'Your Turn: 4 x 5',
+            'narration': 'अब तुम्हारी बारी! चार पंक्तियाँ, हर पंक्ति में पाँच। कुल कितने हुए? गिनकर बताओ!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': '4 x 5 = ?', 'size': 56, 'color': '#7C3AED', 'bold': True},
+                {'type': 'grid', 'x': 250, 'y': 350, 'w': 500, 'h': 400, 'rows': 4, 'cols': 5},
+                {'type': 'text', 'x': 540, 'y': 850, 'text': 'Count all boxes!', 'size': 32, 'color': '#64748B'},
+                {'type': 'star', 'cx': 540, 'cy': 1050, 'size': 60, 'fill': '#F59E0B', 'outline': '#D97706'},
+            ]
+        })
 
-    elif any(kw in topic_lower for kw in ['fraction', 'half', 'quarter', 'part']):
+    elif any(kw in topic_lower for kw in ['divide', 'division', 'bhag', 'bato', 'split', 'share']):
+        # Division — 4 steps: intro → concept → example → practice
+        steps.append({
+            'label': 'What is Division?',
+            'narration': 'नमस्ते बच्चों! आज हम भाग यानी Division सीखेंगे। भाग का मतलब है बराबर बाँटना। जैसे चॉकलेट बाँटना!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 200, 'text': 'Division (÷)', 'size': 56, 'color': '#2563EB', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 400, 'text': 'Equal Sharing', 'size': 36, 'color': '#64748B'},
+                {'type': 'dots_group', 'x': 300, 'y': 600, 'count': 6, 'color': '#2563EB', 'spacing': 60},
+                {'type': 'text', 'x': 700, 'y': 620, 'text': '÷ 2', 'size': 48, 'color': '#EF4444', 'bold': True},
+            ]
+        })
+        steps.append({
+            'label': '6 ÷ 2 = 3',
+            'narration': 'छह गेंदें हैं। दो बराबर भागों में बाँटो। हर भाग में तीन गेंदें आईं। छह बटे दो बराबर तीन!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': '6 ÷ 2 = 3', 'size': 56, 'color': '#2563EB', 'bold': True},
+                {'type': 'dots_group', 'x': 150, 'y': 400, 'count': 3, 'color': '#2563EB', 'spacing': 70},
+                {'type': 'text', 'x': 430, 'y': 420, 'text': '|', 'size': 48, 'color': '#EF4444', 'bold': True},
+                {'type': 'dots_group', 'x': 500, 'y': 400, 'count': 3, 'color': '#10B981', 'spacing': 70},
+                {'type': 'text', 'x': 540, 'y': 700, 'text': '2 groups of 3', 'size': 32, 'color': '#64748B'},
+                {'type': 'text', 'x': 540, 'y': 850, 'text': '= 3', 'size': 56, 'color': '#10B981', 'bold': True},
+            ]
+        })
+        steps.append({
+            'label': '8 ÷ 4 = 2',
+            'narration': 'आठ गेंदें, चार बराबर भागों में बाँटो। हर भाग में दो-दो गेंदें। आठ बटे चार बराबर दो!',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': '8 ÷ 4 = 2', 'size': 56, 'color': '#2563EB', 'bold': True},
+                {'type': 'dots_group', 'x': 150, 'y': 400, 'count': 2, 'color': '#2563EB', 'spacing': 70},
+                {'type': 'dots_group', 'x': 350, 'y': 400, 'count': 2, 'color': '#10B981', 'spacing': 70},
+                {'type': 'dots_group', 'x': 550, 'y': 400, 'count': 2, 'color': '#F59E0B', 'spacing': 70},
+                {'type': 'dots_group', 'x': 750, 'y': 400, 'count': 2, 'color': '#7C3AED', 'spacing': 70},
+                {'type': 'text', 'x': 540, 'y': 700, 'text': '4 groups of 2', 'size': 32, 'color': '#64748B'},
+                {'type': 'text', 'x': 540, 'y': 850, 'text': '= 2', 'size': 56, 'color': '#10B981', 'bold': True},
+            ]
+        })
+        steps.append({
+            'label': 'Try: 9 ÷ 3',
+            'narration': 'अब तुम बताओ! नौ गेंदें तीन बराबर भागों में बाँटो। हर भाग में कितनी?',
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': 'Your Turn!', 'size': 48, 'color': '#7C3AED', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 300, 'text': '9 ÷ 3 = ?', 'size': 56, 'color': '#2563EB', 'bold': True},
+                {'type': 'dots_group', 'x': 250, 'y': 500, 'count': 9, 'color': '#2563EB', 'spacing': 60},
+                {'type': 'text', 'x': 540, 'y': 800, 'text': 'Make 3 equal groups!', 'size': 32, 'color': '#64748B'},
+                {'type': 'star', 'cx': 540, 'cy': 1000, 'size': 60, 'fill': '#F59E0B', 'outline': '#D97706'},
+            ]
+        })
+
+    elif any(kw in topic_lower for kw in ['fraction', 'fractions', 'half', 'quarter', 'part', 'hissa', 'ansh']):
         # Fraction visual
         fractions = [(1, 2), (1, 4), (3, 4), (2, 3)]
+        fraction_hindi = {(1,2): 'आधा', (1,4): 'चौथाई', (3,4): 'तीन चौथाई', (2,3): 'दो तिहाई'}
         for num, den in fractions:
             steps.append({
                 'label': f'Fraction {num}/{den}',
+                'narration': f'{num} बटे {den} यानी {fraction_hindi.get((num, den), "")}। पूरे को {den} बराबर भागों में बाँटो, इनमें से {num} भाग लो। यही है {num}/{den}।',
                 'elements': [
                     {'type': 'text', 'x': 540, 'y': 150, 'text': f'Fraction: {num}/{den}', 'size': 42, 'color': '#7C3AED', 'bold': True},
                     {'type': 'fraction_bar', 'x': 140, 'y': 400, 'w': 800, 'h': 80, 'num': num, 'den': den, 'color': '#7C3AED'},
@@ -766,6 +954,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
             ('rect', 500, 350, 80, '#D1FAE5', '#10B981'),
             ('triangle', 800, 400, 80, '#EDE9FE', '#7C3AED'),
         ]
+        shape_hindi = {'circle': 'वृत्त', 'rect': 'आयत', 'triangle': 'त्रिकोण'}
         for i, (shape, cx, cy, size, fill, outline) in enumerate(shapes):
             elements = [
                 {'type': 'text', 'x': 540, 'y': 150, 'text': f'Geometry: {shape.title()}', 'size': 42, 'color': '#2563EB', 'bold': True},
@@ -777,7 +966,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
             else:
                 elements.append({'type': 'triangle', 'points': [[cx, cy-size], [cx+size, cy+size], [cx-size, cy+size]], 'fill': fill, 'outline': outline})
             elements.append({'type': 'text', 'x': cx, 'y': cy + size + 40, 'text': shape.title(), 'size': 32, 'color': outline, 'bold': True})
-            steps.append({'label': f'Shape: {shape.title()}', 'elements': elements})
+            steps.append({'label': f'Shape: {shape.title()}', 'narration': f'यह है {shape_hindi.get(shape, shape)}। इसे ध्यान से देखो, इसकी अपनी विशेषताएँ हैं। {shape.title()} को पहचानो।', 'elements': elements})
 
     elif any(kw in topic_lower for kw in ['time', 'clock', 'hour', 'minute', 'ghanta']):
         # Time/clock visual
@@ -785,6 +974,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         for h, m in times:
             steps.append({
                 'label': f'Time: {h:02d}:{m:02d}',
+                'narration': f'घड़ी देखो। बड़ी सुई {m} पर है और छोटी सुई {h} पर। यह {h} बजकर {m} मिनट है।',
                 'elements': [
                     {'type': 'text', 'x': 540, 'y': 150, 'text': f'Time: {h:02d}:{m:02d}', 'size': 42, 'color': '#2563EB', 'bold': True},
                     {'type': 'clock_face', 'cx': 540, 'cy': 600, 'r': 200, 'hour': h, 'minute': m},
@@ -798,8 +988,10 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
             [{'label': 'Apple', 'value': 5, 'color': '#EF4444'}, {'label': 'Banana', 'value': 8, 'color': '#F59E0B'}, {'label': 'Orange', 'value': 3, 'color': '#10B981'}],
         ]
         for data in data_sets:
+            names = ', '.join(d['label'] for d in data)
             steps.append({
                 'label': 'Bar Chart',
+                'narration': f'यह एक बार चार्ट है। {names} के डेटा को देखो। सबसे लंबी पट्टी देखकर बताओ कौन सा फल सबसे ज़्यादा पसंद है?',
                 'elements': [
                     {'type': 'text', 'x': 540, 'y': 150, 'text': 'Data Handling - Bar Chart', 'size': 38, 'color': '#2563EB', 'bold': True},
                     {'type': 'bar_chart', 'x': 140, 'y': 350, 'w': 800, 'h': 500, 'data': data},
@@ -813,6 +1005,7 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
         for val, unit in measurements:
             steps.append({
                 'label': f'Measurement: {val} {unit}',
+                'narration': f'माप लो। यह {val} {unit} लंबा है। रूलर पर देखो, शून्य से {val} तक कितने {unit} हैं?',
                 'elements': [
                     {'type': 'text', 'x': 540, 'y': 150, 'text': f'Measurement: {val} {unit}', 'size': 42, 'color': '#2563EB', 'bold': True},
                     {'type': 'ruler', 'x': 140, 'y': 500, 'w': 800, 'min': 0, 'max': val + 5, 'unit': unit},
@@ -822,11 +1015,13 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
             })
 
     else:
-        # Default: number line with topic text
+        # Default: topic with visual elements (teacher-style)
         steps.append({
-            'label': topic_text[:30],
+            'label': f'Introduction: {topic_text[:25]}',
+            'narration': f'नमस्ते बच्चों! आज हम "{topic_text}" के बारे में सीखेंगे। बहुत आसान है, ध्यान से देखो!',
             'elements': [
-                {'type': 'text', 'x': 540, 'y': 150, 'text': topic_text[:50], 'size': 36, 'color': '#2563EB', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 150, 'text': topic_text[:50], 'size': 42, 'color': '#2563EB', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 300, 'text': f'Class {class_num}', 'size': 32, 'color': '#10B981', 'bold': True},
                 {'type': 'number_line', 'x': 100, 'y': 500, 'min': 0, 'max': 20, 'highlight': list(range(1, 11))},
             ]
         })
@@ -834,11 +1029,22 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
             for i, sub in enumerate(subtopics[:3]):
                 steps.append({
                     'label': sub[:30],
+                    'narration': f'अब हम "{sub}" समझते हैं। बहुत आसान है, देखो!',
                     'elements': [
-                        {'type': 'text', 'x': 540, 'y': 150, 'text': sub[:50], 'size': 36, 'color': '#7C3AED', 'bold': True},
+                        {'type': 'text', 'x': 540, 'y': 150, 'text': sub[:50], 'size': 42, 'color': '#7C3AED', 'bold': True},
                         {'type': 'text', 'x': 540, 'y': 400, 'text': f'Part {i+1}', 'size': 32, 'color': '#64748B'},
                     ]
                 })
+        else:
+            steps.append({
+                'label': 'Practice',
+                'narration': f'बहुत अच्छे बच्चों! अब "{topic_text}" का अभ्यास करो। याद रखो, अभ्यास से ही सीखते हैं!',
+                'elements': [
+                    {'type': 'text', 'x': 540, 'y': 150, 'text': 'Practice Time!', 'size': 42, 'color': '#10B981', 'bold': True},
+                    {'type': 'text', 'x': 540, 'y': 400, 'text': topic_text[:50], 'size': 32, 'color': '#64748B'},
+                    {'type': 'star', 'cx': 540, 'cy': 700, 'size': 80, 'fill': '#F59E0B', 'outline': '#D97706'},
+                ]
+            })
 
     if not steps:
         return None

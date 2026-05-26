@@ -1,6 +1,6 @@
 import os
 import subprocess
-import shutil
+import json
 from pathlib import Path
 
 
@@ -10,260 +10,181 @@ class VideoEngine:
         self.audio_dir = Path(audio_dir)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.has_ffmpeg = shutil.which('ffmpeg') is not None
-        self.has_moviepy = False
+
+    def _get_audio_duration(self, audio_path):
+        """Get duration of an audio file in seconds using ffprobe."""
         try:
-            from moviepy.editor import ImageClip
-            self.has_moviepy = True
-        except ImportError:
+            result = subprocess.run(
+                ['ffprobe', '-v', 'error', '-show_entries', 'format=duration',
+                 '-of', 'default=noprint_wrappers=1:nokey=1', str(audio_path)],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                return float(result.stdout.strip())
+        except:
             pass
+        return 3.0  # fallback 3 seconds
 
     def compose_video(self, frame_paths, audio_paths, output_name="lesson.mp4",
-                       frame_duration=None):
-        """Compose video from frames and audio. Uses MoviePy if available, else ffmpeg."""
-        if not frame_paths:
+                       frames_per_step=5):
+        """Compose video with proper frame-audio sync.
+
+        Strategy:
+        - frames are grouped: [step0_frame0..step0_frameN, step1_frame0..step1_frameN, ...]
+        - audio is: [intro, step0_narration, step1_narration, ..., outro]
+        - intro plays during step0's frames
+        - step_i narration plays during step_i's frames
+        - outro plays during last step's frames
+        - each frame within a step shows for (step_audio_duration / frames_per_step)
+        """
+        existing_frames = [f for f in (frame_paths or []) if os.path.exists(f)]
+        existing_audio = [f for f in (audio_paths or []) if os.path.exists(f)]
+
+        if not existing_frames:
             print("No frames to compose")
             return None
 
-        # Filter to existing frames only
-        existing_frames = [f for f in frame_paths if os.path.exists(f)]
-        if not existing_frames:
-            print("No frame files found")
-            return None
-
-        # Filter to existing audio only
-        existing_audio = [f for f in (audio_paths or []) if os.path.exists(f)]
-
-        if self.has_moviepy:
-            return self._compose_moviepy(existing_frames, existing_audio, output_name, frame_duration)
-        elif self.has_ffmpeg:
-            return self._compose_ffmpeg(existing_frames, existing_audio, output_name)
-        else:
-            print("Neither MoviePy nor ffmpeg available")
-            return None
-
-    def _compose_moviepy(self, frame_paths, audio_paths, output_name, frame_duration):
-        """Compose using MoviePy."""
-        try:
-            from moviepy.editor import (ImageClip, AudioFileClip,
-                                        concatenate_videoclips, concatenate_audioclips)
-        except ImportError:
-            print("MoviePy import failed, falling back to ffmpeg")
-            return self._compose_ffmpeg(frame_paths, audio_paths, output_name)
-
-        output_path = self.output_dir / output_name
-
-        try:
-            # Calculate total audio duration
-            total_audio_duration = 0
-            for audio_path in audio_paths:
-                try:
-                    ac = AudioFileClip(audio_path)
-                    total_audio_duration += ac.duration
-                    ac.close()
-                except:
-                    pass
-
-            # Determine frame duration
-            if frame_duration is None:
-                if total_audio_duration > 0 and len(frame_paths) > 0:
-                    frame_duration = total_audio_duration / len(frame_paths)
-                else:
-                    frame_duration = 0.5
-            frame_duration = max(0.3, min(frame_duration, 3.0))
-
-            # Create clips
-            clips = []
-            for frame_path in frame_paths:
-                clip = ImageClip(frame_path).set_duration(frame_duration)
-                clips.append(clip)
-
-            if not clips:
-                return None
-
-            video = concatenate_videoclips(clips, method="compose")
-
-            # Add audio
-            if audio_paths:
-                audio_clips = [AudioFileClip(a) for a in audio_paths]
-                if audio_clips:
-                    combined_audio = concatenate_audioclips(audio_clips)
-                    video = video.set_audio(combined_audio)
-                    if video.duration < combined_audio.duration:
-                        video = video.set_duration(combined_audio.duration)
-
-            video.write_videofile(
-                str(output_path), fps=30, codec='libx264',
-                audio_codec='aac', preset='fast',
-                verbose=False, logger=None
-            )
-            video.close()
-
-            if os.path.exists(output_path):
-                print(f"Video created (MoviePy): {output_path}")
-                return str(output_path)
-
-        except Exception as e:
-            print(f"MoviePy error: {e}, falling back to ffmpeg")
-            return self._compose_ffmpeg(frame_paths, audio_paths, output_name)
-
-        return None
-
-    def _compose_ffmpeg(self, frame_paths, audio_paths, output_name):
-        """Compose using ffmpeg (no MoviePy needed)."""
         output_path = str(self.output_dir / output_name)
 
-        # Get absolute paths
-        abs_frames = [os.path.abspath(f) for f in frame_paths]
-        abs_audio = [os.path.abspath(a) for a in audio_paths] if audio_paths else []
+        # Calculate per-step audio durations
+        # audio layout: [intro, step_0, step_1, ..., step_N, outro]
+        # frame layout: [step0_f0...step0_fN, step1_f0...step1_fN, ...]
+        num_frames = len(existing_frames)
+        num_audio = len(existing_audio)
 
-        # Create concat file for frames
-        list_file = os.path.abspath(os.path.join(str(self.output_dir), "frames.txt"))
-        with open(list_file, 'w') as f:
-            for frame in abs_frames:
-                f.write(f"file '{frame}'\n")
-                f.write("duration 0.5\n")
-            f.write(f"file '{abs_frames[-1]}'\n")
+        if num_audio == 0:
+            return self._compose_frames_only(existing_frames, output_path)
 
-        # Get total audio duration for video length
-        audio_duration = 10  # default
-        if abs_audio:
-            try:
-                probe = subprocess.run(
-                    ['ffprobe', '-v', 'error', '-show_entries', 'format=duration',
-                     '-of', 'default=noprint_wrappers=1:nokey=1', abs_audio[0]],
-                    capture_output=True, text=True
-                )
-                if probe.returncode == 0:
-                    audio_duration = float(probe.stdout.strip())
-            except:
-                pass
+        # Get duration for each audio clip
+        audio_durations = [self._get_audio_duration(a) for a in existing_audio]
 
-        # Step 1: Create video from frames
-        temp_video = os.path.abspath(os.path.join(str(self.output_dir), "temp_video.mp4"))
+        # Map audio to frame groups
+        # If we have N steps with frames_per_step each = N*frames_per_step frames
+        # Audio: intro + N step clips + outro = N+2 clips
+        num_steps = num_frames // frames_per_step if frames_per_step > 0 else 1
+
+        # Build per-frame durations
+        frame_durations = []
+        audio_idx = 0
+
+        for step_i in range(num_steps):
+            # Which audio clip plays during this step's frames?
+            # intro(step0), step0(step0), step1(step1), ..., outro(last_step)
+            if step_i == 0:
+                # First step: use intro audio (idx 0) if available
+                clip_duration = audio_durations[0] if num_audio > 0 else 3.0
+            elif step_i < num_audio - 1:
+                # Middle steps: use step_i audio
+                clip_duration = audio_durations[step_i] if step_i < num_audio else 3.0
+            else:
+                # Last step: use outro audio if available
+                clip_duration = audio_durations[-1] if num_audio > 1 else 3.0
+
+            per_frame = max(0.5, clip_duration / frames_per_step)
+            for _ in range(frames_per_step):
+                frame_durations.append(per_frame)
+
+        # Handle leftover frames (if num_frames not divisible by frames_per_step)
+        leftover = num_frames - len(frame_durations)
+        for _ in range(leftover):
+            frame_durations.append(1.0)
+
+        # Step 1: Create ffmpeg concat file with per-frame durations
+        concat_file = str(self.output_dir / "concat.txt")
+        with open(concat_file, 'w') as f:
+            for i, frame in enumerate(existing_frames):
+                dur = frame_durations[i] if i < len(frame_durations) else 1.0
+                f.write(f"file '{os.path.abspath(frame)}'\n")
+                f.write(f"duration {dur:.2f}\n")
+            # Last frame (ffmpeg requirement)
+            f.write(f"file '{os.path.abspath(existing_frames[-1])}'\n")
+
+        # Step 2: Concat audio files
+        audio_concat = str(self.output_dir / "audio_concat.txt")
+        with open(audio_concat, 'w') as f:
+            for a in existing_audio:
+                f.write(f"file '{os.path.abspath(a)}'\n")
+
+        temp_audio = str(self.output_dir / "temp_audio.mp3")
+        result = subprocess.run([
+            'ffmpeg', '-y', '-f', 'concat', '-safe', '0',
+            '-i', audio_concat, '-c', 'copy', temp_audio
+        ], capture_output=True, text=True, timeout=60)
+
+        has_audio = result.returncode == 0 and os.path.exists(temp_audio)
+
+        # Step 3: Create video from frames
+        temp_video = str(self.output_dir / "temp_video.mp4")
         result = subprocess.run([
             'ffmpeg', '-y',
             '-f', 'concat', '-safe', '0',
-            '-i', list_file,
+            '-i', concat_file,
             '-vf', 'scale=1080:1920,fps=30',
             '-c:v', 'libx264', '-preset', 'fast',
             '-pix_fmt', 'yuv420p',
-            '-t', str(audio_duration),
             temp_video
-        ], capture_output=True, text=True)
+        ], capture_output=True, text=True, timeout=120)
 
-        if os.path.exists(list_file):
-            os.remove(list_file)
+        # Cleanup concat file
+        if os.path.exists(concat_file):
+            os.remove(concat_file)
+        if os.path.exists(audio_concat):
+            os.remove(audio_concat)
 
         if result.returncode != 0:
             print(f"ffmpeg video failed: {result.stderr[-200:]}")
             return None
 
-        # Step 2: Merge audio if available
-        if abs_audio:
-            # Concat audio files first
-            audio_list = os.path.abspath(os.path.join(str(self.output_dir), "audio.txt"))
-            with open(audio_list, 'w') as f:
-                for a in abs_audio:
-                    f.write(f"file '{a}'\n")
-
-            temp_audio = os.path.abspath(os.path.join(str(self.output_dir), "temp_audio_concat.mp3"))
-            subprocess.run([
-                'ffmpeg', '-y', '-f', 'concat', '-safe', '0',
-                '-i', audio_list, '-c', 'copy', temp_audio
-            ], capture_output=True, text=True)
-
-            if os.path.exists(audio_list):
-                os.remove(audio_list)
-
-            # Merge video + audio
-            if os.path.exists(temp_audio):
-                result = subprocess.run([
-                    'ffmpeg', '-y',
-                    '-i', temp_video,
-                    '-i', temp_audio,
-                    '-c:v', 'copy', '-c:a', 'aac',
-                    '-shortest',
-                    output_path
-                ], capture_output=True, text=True)
-
-                os.remove(temp_audio)
-                if os.path.exists(temp_video):
-                    os.remove(temp_video)
-
-                if result.returncode == 0 and os.path.exists(output_path):
-                    print(f"Video created (ffmpeg): {output_path}")
-                    return output_path
-
-        # No audio - just rename temp
-        if os.path.exists(temp_video):
-            os.rename(temp_video, output_path)
-            print(f"Video created (ffmpeg, no audio): {output_path}")
-            return output_path
-
-        return None
-
-        return None
-
-    def create_simple_video(self, frame_paths, output_name="lesson.mp4"):
-        """Simple video from frames only (no audio)."""
-        output_path = self.output_dir / output_name
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-
-        if not frame_paths:
-            return None
-
-        try:
-            import subprocess
-            import glob as globmod
-
-            # Use absolute paths for ffmpeg
-            abs_frames = [os.path.abspath(f) for f in sorted(frame_paths)]
-
-            # Check which frames actually exist
-            existing = [f for f in abs_frames if os.path.exists(f)]
-            if not existing:
-                print("No frame files found")
-                return None
-
-            # Create file list with absolute paths
-            list_file = os.path.abspath(os.path.join(str(self.output_dir), "frames.txt"))
-            with open(list_file, 'w') as f:
-                for frame in existing:
-                    f.write(f"file '{frame}'\n")
-                    f.write(f"duration 0.5\n")
-                # Last frame needs no duration (ffmpeg convention)
-                f.write(f"file '{existing[-1]}'\n")
-
+        # Step 4: Merge video + audio
+        if has_audio:
             result = subprocess.run([
                 'ffmpeg', '-y',
-                '-f', 'concat', '-safe', '0',
-                '-i', list_file,
-                '-vf', 'scale=1080:1920,fps=30',
-                '-c:v', 'libx264',
-                '-preset', 'fast',
-                '-pix_fmt', 'yuv420p',
-                str(output_path)
-            ], capture_output=True, text=True)
+                '-i', temp_video,
+                '-i', temp_audio,
+                '-c:v', 'copy', '-c:a', 'aac',
+                '-shortest',
+                output_path
+            ], capture_output=True, text=True, timeout=60)
 
-            # Clean up
-            if os.path.exists(list_file):
-                os.remove(list_file)
+            os.remove(temp_audio)
+            if os.path.exists(temp_video):
+                os.remove(temp_video)
 
             if result.returncode == 0 and os.path.exists(output_path):
-                print(f"Simple video created: {output_path}")
-                return str(output_path)
-            else:
-                print(f"ffmpeg failed (code {result.returncode}): {result.stderr[-200:]}")
-
-        except Exception as e:
-            print(f"Simple video error: {e}")
+                print(f"Video created (synced): {output_path}")
+                return output_path
+        else:
+            # No audio, just rename
+            if os.path.exists(temp_video):
+                os.rename(temp_video, output_path)
+                print(f"Video created (no audio): {output_path}")
+                return output_path
 
         return None
 
+    def _compose_frames_only(self, frame_paths, output_path):
+        """Create video from frames only (no audio)."""
+        concat_file = str(self.output_dir / "concat.txt")
+        with open(concat_file, 'w') as f:
+            for frame in frame_paths:
+                f.write(f"file '{os.path.abspath(frame)}'\n")
+                f.write("duration 1.0\n")
+            f.write(f"file '{os.path.abspath(frame_paths[-1])}'\n")
 
-if __name__ == "__main__":
-    engine = VideoEngine()
-    test_frames = list(Path("temp_frames").glob("*.png"))[:18]
-    video = engine.create_simple_video([str(f) for f in test_frames])
-    print(f"Test video: {video}")
+        result = subprocess.run([
+            'ffmpeg', '-y',
+            '-f', 'concat', '-safe', '0',
+            '-i', concat_file,
+            '-vf', 'scale=1080:1920,fps=30',
+            '-c:v', 'libx264', '-preset', 'fast',
+            '-pix_fmt', 'yuv420p',
+            output_path
+        ], capture_output=True, text=True, timeout=120)
+
+        if os.path.exists(concat_file):
+            os.remove(concat_file)
+
+        if result.returncode == 0 and os.path.exists(output_path):
+            print(f"Video created (frames only): {output_path}")
+            return output_path
+        return None

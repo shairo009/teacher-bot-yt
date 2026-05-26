@@ -139,32 +139,39 @@ class RenderEngine:
         return self.render_simple(topic, num_frames=18)
 
     def render_with_llm(self, topic):
-        """Generate visuals using LLM + PIL (best quality)."""
+        """Generate visuals using LLM + PIL (best quality).
+        Returns (frames, narrations) tuple or (None, None).
+        """
         try:
             from src.visual_generator import generate_visual
-            frames = generate_visual(topic, str(self.frames_dir))
+            frames, narrations = generate_visual(topic, str(self.frames_dir))
             if frames:
                 print(f"Generated {len(frames)} LLM visual frames")
-                return frames
+                return frames, narrations
         except ImportError:
             print("visual_generator not available, falling back to math_effects")
         except Exception as e:
             print(f"LLM visual error: {e}, falling back to math_effects")
-        return None
+        return None, None
 
     async def render_lesson(self, topic):
-        """Async wrapper - tries LLM first, then math effects, then simple."""
-        # Priority 1: LLM-powered visuals (topic-specific)
-        frames = self.render_with_llm(topic)
+        """Async wrapper - tries LLM first, then math effects, then simple.
+        Returns (frames, narrations) tuple.
+        narrations is a list of Hindi strings synced with frames (empty list for non-LLM fallbacks).
+        """
+        # Priority 1: LLM-powered visuals (topic-specific, with narration)
+        frames, narrations = self.render_with_llm(topic)
         if frames:
-            return frames
+            return frames, narrations
 
-        # Priority 2: Math effects (keyword-based)
+        # Priority 2: Math effects (keyword-based, no narration)
         if self.use_math_effects:
-            return self.render_with_math_effects(topic)
+            frames = self.render_with_math_effects(topic)
+            if frames:
+                return frames, []
 
-        # Priority 3: Simple text frames
-        return self.render_simple(topic)
+        # Priority 3: Simple text frames (no narration)
+        return self.render_simple(topic), []
 
 
 if __name__ == "__main__":

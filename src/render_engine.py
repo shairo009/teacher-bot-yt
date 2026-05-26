@@ -1,6 +1,7 @@
 import os
 import asyncio
 import json
+import random
 from pathlib import Path
 
 
@@ -168,10 +169,87 @@ class RenderEngine:
         if self.use_math_effects:
             frames = self.render_with_math_effects(topic)
             if frames:
-                return frames, []
+                return frames, self._generate_fallback_narrations(topic)
 
         # Priority 3: Simple text frames (no narration)
-        return self.render_simple(topic), []
+        return self.render_simple(topic), self._generate_fallback_narrations(topic)
+
+    def _generate_fallback_narrations(self, topic):
+        """Generate Hindi teaching narrations from topic data when LLM is unavailable.
+        Uses random intro/outro phrasing so every video sounds different.
+        """
+        topic_text = topic.get('topic', '')
+        subtopics = topic.get('subtopics', [])
+        class_num = topic.get('class', 6)
+        chapter = topic.get('chapter', 'Chapter')
+
+        narrations = []
+
+        # Random intro variations — so every video sounds different
+        intro_variants = [
+            f"नमस्ते बच्चों! आज हम \"{topic_text}\" के बारे में सीखेंगे। यह कक्षा {class_num} का महत्वपूर्ण टॉपिक है। ध्यान से देखो!",
+            f"हेलो बच्चों! तैयार हो? आज का टॉपिक है \"{topic_text}\"। बहुत मज़ेदार है, चलो शुरू करते हैं!",
+            f"बच्चों, आज हम एक नया टॉपिक सीखेंगे — \"{topic_text}\"। कक्षा {class_num} के लिए बहुत ज़रूरी है। ध्यान दो!",
+            f"आज का lesson है \"{topic_text}\"! बहुत आसान है, बस मेरे साथ चलो। शुरू करते हैं!",
+            f"तैयार हो जाओ बच्चों! आज \"{topic_text}\" सीखेंगे। यह बहुत interesting है!",
+        ]
+        narrations.append(random.choice(intro_variants))
+
+        # Build teaching narrations from subtopics with random connectors
+        subtopic_connectors = [
+            "अब हम", "चलो अब समझते हैं", "अगला topic है", "अब बात करते हैं",
+            "इसके बाद देखो", "अब आता है", "चलो अब देखते हैं",
+        ]
+        if subtopics:
+            for i, sub in enumerate(subtopics[:5]):
+                connector = random.choice(subtopic_connectors)
+                narrations.append(
+                    f"{connector} \"{sub}\"। "
+                    f"{self._subtopic_explanation(sub, topic_text, class_num)}"
+                )
+        else:
+            words = topic_text.split()
+            if len(words) > 3:
+                narrations.append(
+                    f"सबसे पहले समझते हैं कि \"{topic_text}\" क्या होता है। "
+                    f"यह बहुत आसान है, बस ध्यान से देखो!"
+                )
+            narrations.append(
+                f"अब देखो कैसे \"{topic_text}\" में यह काम करता है। "
+                f"हर चीज़ कदम-दर-कदम सीखेंगे!"
+            )
+
+        # Random outro variations
+        outro_variants = [
+            f"बहुत अच्छे बच्चों! \"{topic_text}\" समझ आ गया होगा। अभ्यास ज़रूर करो। धन्यवाद!",
+            f"वाह बच्चों! आज \"{topic_text}\" बहुत अच्छे से सीखा। अब खुद practice करो!",
+            f"शाबाश! \"{topic_text}\" हो गया। याद रखो, रोज़ अभ्यास करोगे तो master बन जाओगे!",
+            f"बच्चों, \"{topic_text}\" खत्म हुआ। अब अपने दोस्तों को भी सिखाओ! धन्यवाद!",
+            f"great job! \"{topic_text}\" आ गया। homework मत भूलना! अगले lesson में मिलते हैं!",
+        ]
+        narrations.append(random.choice(outro_variants))
+
+        return narrations
+
+    @staticmethod
+    def _subtopic_explanation(sub, topic_text, class_num):
+        """Generate a Hindi explanation sentence for a subtopic."""
+        sub_lower = sub.lower()
+
+        if any(k in sub_lower for k in ['example', 'problem', 'word problem', 'practice']):
+            return f"उदाहरण देखो: {sub}। इसे ध्यान से हल करो।"
+        if any(k in sub_lower for k in ['definition', 'introduction', 'what is', 'basics']):
+            return f"पहले यह समझो कि {sub} क्या होता है।"
+        if any(k in sub_lower for k in ['property', 'properties', 'rule']):
+            return f"इसके नियम याद रखो: {sub}।"
+        if any(k in sub_lower for k in ['formula', 'equation']):
+            return f"यह फ़ॉर्मूला याद रखो: {sub}।"
+        if any(k in sub_lower for k in ['application', 'real life', 'real world']):
+            return f"रोज़मर्रा की ज़िंदगी में {sub} कैसे काम आता है, देखो।"
+        if class_num is not None and class_num <= 3:
+            return f"बहुत आसान है! {sub} देखो और समझो।"
+
+        return f"{sub} को अच्छे से समझो।"
 
 
 if __name__ == "__main__":

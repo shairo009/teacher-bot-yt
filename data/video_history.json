@@ -7,5 +7,23 @@
     "topic_id": 7002,
     "video_created": true,
     "video_file": "lesson_class2_20260526_050848.mp4"
+  },
+  {
+    "timestamp": "2026-05-26T11:38:22.811473",
+    "class": 2,
+    "chapter": "Chapter 2: Counting in Groups",
+    "topic": "Arrays",
+    "topic_id": 7003,
+    "video_created": true,
+    "video_file": "lesson_class2_20260526_113748.mp4"
+  },
+  {
+    "timestamp": "2026-05-26T18:25:14.916016",
+    "class": 2,
+    "chapter": "Chapter 2: Counting in Groups",
+    "topic": "Rows and columns",
+    "topic_id": 7004,
+    "video_created": false,
+    "video_file": null
   }
 ]

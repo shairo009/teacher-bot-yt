@@ -39,6 +39,8 @@ def hex_to_rgb(hex_color):
 
 def get_font(size, bold=False):
     font_paths = [
+        'assets/fonts/hindi_font.ttf',  # Hindi Devanagari font (project-local)
+        'assets/fonts/hindi_font.ttf',  # Same for bold (we only have one Hindi font)
         '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
         '/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf',
     ]
@@ -51,6 +53,96 @@ def get_font(size, bold=False):
         return ImageFont.load_default(size)
     except:
         return ImageFont.load_default()
+
+
+def draw_gradient_bg(draw, img, top_color='#667EEA', bot_color='#764BA2'):
+    """Draw a smooth vertical gradient background."""
+    w, h = img.size
+    top = hex_to_rgb(top_color)
+    bot = hex_to_rgb(bot_color)
+    for y in range(h):
+        ratio = y / h
+        r = int(top[0] + (bot[0] - top[0]) * ratio)
+        g = int(top[1] + (bot[1] - top[1]) * ratio)
+        b = int(top[2] + (bot[2] - top[2]) * ratio)
+        draw.line([(0, y), (w, y)], fill=(r, g, b))
+
+
+def draw_rounded_rect(draw, xy, radius, fill, outline=None, width=1):
+    """Draw a rounded rectangle with optional shadow."""
+    x0, y0, x1, y1 = xy
+    draw.rounded_rectangle(xy, radius=radius, fill=fill, outline=outline, width=width)
+
+
+def draw_shadow_card(draw, xy, radius=20, shadow_offset=8, card_color='#FFFFFF', shadow_color='#E2E8F0'):
+    """Draw a card with drop shadow effect. xy = [(x0,y0),(x1,y1)] or (x0,y0,x1,y1)."""
+    if isinstance(xy[0], (list, tuple)):
+        x0, y0 = xy[0]
+        x1, y1 = xy[1]
+    else:
+        x0, y0, x1, y1 = xy
+    # Shadow (darker, offset)
+    draw.rounded_rectangle(
+        [(x0 + shadow_offset, y0 + shadow_offset), (x1 + shadow_offset, y1 + shadow_offset)],
+        radius=radius, fill=hex_to_rgb(shadow_color)
+    )
+    # Card
+    draw.rounded_rectangle([(x0, y0), (x1, y1)], radius=radius, fill=hex_to_rgb(card_color))
+
+
+def draw_progress_bar(draw, x, y, w, h, progress, color='#2563EB', bg='#E2E8F0'):
+    """Draw an animated progress bar."""
+    draw.rounded_rectangle([(x, y), (x + w, y + h)], radius=h // 2, fill=hex_to_rgb(bg))
+    bar_w = max(h, int(w * min(progress, 1.0)))
+    draw.rounded_rectangle([(x, y), (x + bar_w, y + h)], radius=h // 2, fill=hex_to_rgb(color))
+
+
+def draw_step_dots(draw, x, y, total, current, active_color='#2563EB', inactive_color='#CBD5E1', done_color='#10B981'):
+    """Draw step progress dots."""
+    spacing = 45
+    for i in range(total):
+        dx = x + i * spacing
+        r = 10
+        if i < current:
+            color = hex_to_rgb(done_color)
+        elif i == current:
+            color = hex_to_rgb(active_color)
+            r = 14
+        else:
+            color = hex_to_rgb(inactive_color)
+        draw.ellipse([(dx - r, y - r), (dx + r, y + r)], fill=color)
+
+
+def draw_teacher_avatar(draw, cx, cy, size=80):
+    """Draw a simple teacher avatar silhouette with PIL."""
+    # Head
+    head_r = size // 3
+    draw.ellipse(
+        [(cx - head_r, cy - size + head_r), (cx + head_r, cy - size + head_r + head_r * 2)],
+        fill=hex_to_rgb('#1E293B')
+    )
+    # Body (triangle for dress)
+    draw.polygon(
+        [(cx - size, cy + head_r), (cx + size, cy + head_r), (cx, cy + size)],
+        fill=hex_to_rgb('#1E293B')
+    )
+    # Pointer stick
+    draw.line([(cx + size // 2, cy), (cx + size + 20, cy - size // 2)],
+              fill=hex_to_rgb('#F59E0B'), width=3)
+
+
+def draw_chapter_badge(draw, x, y, text, color='#1E293B'):
+    """Draw a chapter/topic badge pill."""
+    font = get_font(20, bold=True)
+    bbox = draw.textbbox((0, 0), text, font=font)
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
+    pad = 15
+    draw.rounded_rectangle(
+        [(x, y), (x + tw + pad * 2, y + th + pad)],
+        radius=15, fill=hex_to_rgb(color)
+    )
+    draw.text((x + pad, y + pad // 2), text, fill=hex_to_rgb('#FFFFFF'), font=font)
 
 
 def _extract_json(text):
@@ -99,8 +191,12 @@ def _call_api(messages, model, temperature=0.7, max_tokens=3000):
     data = resp.json()
     msg = data["choices"][0]["message"]
     c = msg.get("content")
-    rc = msg.get("reasoning_content")
-    print(f"    [debug] msg_keys={list(msg.keys())}, content={repr(c[:100]) if c else 'None'}, reasoning_content={repr(rc[:100]) if rc else 'None'}", flush=True)
+    rc = msg.get("reasoning_content") or msg.get("reasoning")
+    if isinstance(rc, dict):
+        rc = rc.get("content") or str(rc)
+    elif isinstance(rc, list):
+        rc = "".join(item.get("text", "") for item in rc if isinstance(item, dict))
+    print(f"    [debug] msg_keys={list(msg.keys())}, content={repr(c[:100]) if c else 'None'}, reasoning={repr(rc[:100]) if rc else 'None'}", flush=True)
     content = c or rc or ""
     if not content:
         return None
@@ -639,19 +735,23 @@ ELEMENT_RENDERERS = {
 
 
 def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
-    """Render a scene into YouTube Shorts frames (1080x1920).
+    """Render a scene into YouTube Shorts frames (1080x1920) with PRO visuals.
 
     Layout:
     ┌─────────────────────────┐
+    │  Gradient Background     │
     │  Header (title)    30-110│
-    │  Step label       130-190│
-    │  Progress dots       220 │
+    │  Chapter badge    120-160│
+    │  Progress dots       190 │
+    │  Step label card  220-290│
     │                         │
-    │  VISUAL AREA      280-1700│
+    │  VISUAL AREA      310-1650│
     │  (all elements here,    │
-    │   properly centered)    │
+    │   inside shadow cards)  │
     │                         │
-    │  Progress bar   1750-1790│
+    │  Teacher avatar  1700    │
+    │  Progress bar   1800-1840│
+    │  Watermark       1870    │
     └─────────────────────────┘
     """
     frames_dir = Path(frames_dir)
@@ -659,73 +759,102 @@ def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
 
     steps = scene.get('steps', [])
     title = scene.get('title', 'Math Lesson')
+    chapter = scene.get('chapter', '')
+    class_num = scene.get('class', '')
     total_frames = len(steps) * frames_per_step
     frame_paths = []
+
+    # Color palettes for variety
+    gradient_pairs = [
+        ('#667EEA', '#764BA2'),  # Purple-blue
+        ('#F093FB', '#F5576C'),  # Pink-coral
+        ('#4FACFE', '#00F2FE'),  # Cyan-blue
+        ('#43E97B', '#38F9D7'),  # Green-teal
+        ('#FA709A', '#FEE140'),  # Pink-yellow
+        ('#A18CD1', '#FBC2EB'),  # Lavender-pink
+    ]
+    grad = random.choice(gradient_pairs)
+
+    # Step colors for text variety
+    step_colors = ['#2563EB', '#7C3AED', '#059669', '#D97706', '#DC2626', '#0891B2']
+
+    # Pre-render gradient background once (reuse for all frames)
+    gradient_bg = Image.new('RGB', (WIDTH, HEIGHT), color=hex_to_rgb('#FFFFFF'))
+    grad_draw = ImageDraw.Draw(gradient_bg)
+    draw_gradient_bg(grad_draw, gradient_bg, grad[0], grad[1])
+    # Add frosted glass overlay
+    overlay = Image.new('RGBA', (WIDTH, HEIGHT), (0, 0, 0, 0))
+    overlay_draw = ImageDraw.Draw(overlay)
+    overlay_draw.rounded_rectangle(
+        [(25, 225), (WIDTH - 25, HEIGHT - 100)],
+        radius=30, fill=(255, 255, 255, 180)
+    )
+    gradient_bg = Image.alpha_composite(gradient_bg.convert('RGBA'), overlay).convert('RGB')
 
     for frame_idx in range(total_frames):
         step_idx = min(frame_idx // frames_per_step, len(steps) - 1)
         step = steps[step_idx]
+        step_progress = (frame_idx % frames_per_step) / frames_per_step
 
-        # Create canvas with gradient background
-        img = Image.new('RGB', (WIDTH, HEIGHT), color=hex_to_rgb(COLORS['bg']))
+        # Copy pre-rendered gradient
+        img = gradient_bg.copy()
         draw = ImageDraw.Draw(img)
 
-        # Gradient background (subtle blue-white)
-        top = hex_to_rgb('#F0F4FF')
-        bot = hex_to_rgb('#FFFFFF')
-        for y in range(HEIGHT):
-            ratio = y / HEIGHT
-            r = int(top[0] + (bot[0] - top[0]) * ratio)
-            g = int(top[1] + (bot[1] - top[1]) * ratio)
-            b = int(top[2] + (bot[2] - top[2]) * ratio)
-            draw.line([(0, y), (WIDTH, y)], fill=(r, g, b))
-
-        # ── Header bar ──
-        draw.rounded_rectangle([(30, 30), (WIDTH - 30, 110)], radius=20, fill=hex_to_rgb('#1E293B'))
-        header_font = get_font(28, bold=True)
-        # Center title in header
-        bbox = draw.textbbox((0, 0), title, font=header_font)
+        # ── Header bar with shadow ──
+        draw_shadow_card(draw, [(30, 30), (WIDTH - 30, 115)], radius=22, card_color='#1E293B', shadow_color='#CBD5E1')
+        header_font = get_font(30, bold=True)
+        bbox = draw.textbbox((0, 0), title[:40], font=header_font)
         tw = bbox[2] - bbox[0]
-        draw.text(((WIDTH - tw) // 2, 52), title, fill=hex_to_rgb('#FFFFFF'), font=header_font)
+        draw.text(((WIDTH - tw) // 2, 55), title[:40], fill=hex_to_rgb('#FFFFFF'), font=header_font)
 
-        # ── Step label ──
+        # ── Class/Chapter badge below header ──
+        badge_text = f"Class {class_num}" if class_num else ""
+        if chapter:
+            badge_text += f"  |  {chapter}"[:30]
+        if badge_text:
+            draw_chapter_badge(draw, (WIDTH - 300) // 2, 125, badge_text, '#1E293B')
+
+        # ── Progress dots ──
+        draw_step_dots(draw, (WIDTH - (len(steps) - 1) * 45) // 2, 200,
+                       len(steps), step_idx)
+
+        # ── Step label card with shadow ──
         step_label = step.get('label', f'Step {step_idx + 1}')
         label_text = f"Step {step_idx + 1}: {step_label}"
-        label_font = get_font(30, bold=True)
-        draw.rounded_rectangle([(30, 130), (WIDTH - 30, 190)], radius=15, fill=hex_to_rgb('#EFF6FF'))
+        label_font = get_font(28, bold=True)
+        step_color = step_colors[step_idx % len(step_colors)]
+        draw_shadow_card(draw, [(40, 230), (WIDTH - 40, 295)], radius=18, card_color='#FFFFFF', shadow_color='#E2E8F0')
+        # Colored accent bar on left
+        draw.rounded_rectangle([(40, 230), (52, 295)], radius=6, fill=hex_to_rgb(step_color))
         bbox2 = draw.textbbox((0, 0), label_text, font=label_font)
         tw2 = bbox2[2] - bbox2[0]
-        draw.text(((WIDTH - tw2) // 2, 142), label_text, fill=hex_to_rgb(COLORS['primary']), font=label_font)
+        draw.text(((WIDTH - tw2) // 2, 245), label_text, fill=hex_to_rgb(step_color), font=label_font)
 
-        # ── Step indicator dots ──
-        dot_y = 220
-        dot_spacing = 60
-        start_x = (WIDTH - (len(steps) - 1) * dot_spacing) // 2
-        for i in range(len(steps)):
-            dx = start_x + i * dot_spacing
-            if i < step_idx:
-                draw.ellipse([(dx-10, dot_y-10), (dx+10, dot_y+10)], fill=hex_to_rgb(COLORS['success']))
-            elif i == step_idx:
-                draw.ellipse([(dx-13, dot_y-13), (dx+13, dot_y+13)], fill=hex_to_rgb(COLORS['primary']))
-            else:
-                draw.ellipse([(dx-10, dot_y-10), (dx+10, dot_y+10)], fill=hex_to_rgb(COLORS['grid']))
+        # ── Draw elements (visual area: y=310 to y=1650) in shadow card ──
+        draw_shadow_card(draw, [(40, 310), (WIDTH - 40, 1650)], radius=24, card_color='#FFFFFF', shadow_color='#E2E8F0')
 
-        # ── Draw elements (visual area: y=280 to y=1700) ──
         elements = step.get('elements', [])
         for el in elements:
             el_type = el.get('type', 'text')
             renderer = ELEMENT_RENDERERS.get(el_type)
             if renderer:
                 try:
+                    # Offset elements into the card area
                     renderer(draw, el)
                 except Exception as e:
                     print(f"  Warning: failed to render {el_type}: {e}", flush=True)
 
+        # ── Teacher avatar (small, bottom-left) ──
+        draw_teacher_avatar(draw, 90, 1750, size=50)
+
         # ── Progress bar ──
         progress = (step_idx + 1) / len(steps)
-        bar_w = int((WIDTH - 100) * progress)
-        draw.rounded_rectangle([(50, HEIGHT - 80), (50 + bar_w, HEIGHT - 50)], radius=10, fill=hex_to_rgb(COLORS['primary']))
-        draw.rounded_rectangle([(50, HEIGHT - 80), (WIDTH - 50, HEIGHT - 50)], radius=10, outline=hex_to_rgb(COLORS['grid']), width=2)
+        draw_progress_bar(draw, 150, 1780, WIDTH - 300, 16, progress, step_color)
+
+        # ── Watermark / Channel name ──
+        wm_font = get_font(18)
+        draw.text((WIDTH // 2, HEIGHT - 40), "Learn with Fun!",
+                  fill=hex_to_rgb('#94A3B8'), font=wm_font, anchor='mm')
 
         # Save frame
         frame_path = frames_dir / f"frame_{str(frame_idx).zfill(3)}.png"
@@ -1175,36 +1304,150 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
             })
 
     else:
-        # Default: topic with visual elements (teacher-style)
+        # Default: topic with visual elements (teacher-style) — RICH narration
+        sub_explanations = {
+            'skip counting': 'दो-दो, तीन-तीन, पाँच-पाँच करके गिनो — यही Skip Counting है!',
+            'counting': 'एक-एक करके गिनती सीखो',
+            'group counting': 'गिनती को समूहों में बाँटो, जैसे दो-दो, तीन-तीन',
+            'dozen': 'एक दर्जन यानी बारह — ऐसे ही गिनते हैं समूहों में',
+            'pair': 'जोड़ी — दो-दो करके गिनो',
+            'array': 'एरे — पंक्तियों और स्तंभों में सजाकर गिनो',
+            'row': 'पंक्ति — एक लाइन में गिनो',
+            'column': 'स्तंभ — ऊपर से नीचे गिनो',
+            'pattern': 'पैटर्न देखो — कौन सा अंक आता है? पैटर्न पहचानो!',
+            'place value': 'हर अंक की एक जगह होती है — इकाई, दहाई, सैकड़ा',
+            'even': 'जो अंक दो से पूरा बँटे — वह सम (Even) है',
+            'odd': 'जो दो से न बँटे — वह विषम (Odd) है',
+            'prime': 'जो सिर्फ़ 1 और खुद से भाग हो — वह अभाज्य (Prime) है',
+            'composite': 'जिसके और भी गुणनखंड हों — वह भाज्य (Composite) है',
+            'factor': 'गुणनखंड वे अंक हैं जिनसे कोई संख्या पूरी बँट जाए',
+            'multiple': 'गुणित वे अंक हैं जो किसी संख्या के पहाड़े में आते हैं',
+            'symmetry': 'सममिति — दोनों तरफ़ एक जैसा दिखे',
+            'angle': 'कोण — दो सीधों के बीच का कोना',
+            'perimeter': 'परिमाप — आकार के चारों तरफ़ की दूरी',
+            'area': 'क्षेत्रफल — आकार के अंदर की जगह',
+            'volume': 'आयतन — कितना सामान आ सकता है',
+            'decimal': 'दशमलव — बिंदु के बाद के अंक',
+            'percentage': 'प्रतिशत — सौ में से कितने',
+            'ratio': 'अनुपात — दो चीज़ों की तुलना',
+            'profit': 'लाभ — खरीद से ज़्यादा में बेचो',
+            'loss': 'हानि — खरीद से कम में बेचो',
+            'interest': 'ब्याज — पैसे पर पैसा मिलता है',
+            'equation': 'समीकरण — दोनों तरफ़ बराबर',
+            'polynomial': 'बहुपद — x की घात वाले पद',
+            'linear': 'रेखीय — सीधी रेखा जैसा',
+            'quadratic': 'द्विघात — x वर्ग वाला',
+        }
+
+        # Intro — randomize greeting so every video sounds different
+        intro_variants = [
+            f'नमस्ते बच्चों! आज हम "{topic_text}" सीखेंगे। यह कक्षा {class_num} का महत्वपूर्ण टॉपिक है। बहुत आसान है, बस ध्यान से देखो!',
+            f'हेलो बच्चों! तैयार हो? आज का टॉपिक है "{topic_text}"। बहुत मज़ेदार है, चलो शुरू करते हैं!',
+            f'बच्चों, आज हम एक नया टॉपिक सीखेंगे — "{topic_text}"। कक्षा {class_num} के लिए बहुत ज़रूरी है। ध्यान दो!',
+            f'आज का lesson है "{topic_text}"! बहुत आसान है, बस मेरे साथ चलो। शुरू करते हैं!',
+            f'तैयार हो जाओ बच्चों! आज "{topic_text}" सीखेंगे। यह बहुत interesting है!',
+        ]
+        # Randomize color palettes for visual variety
+        palette_sets = [
+            ['#2563EB', '#7C3AED', '#10B981', '#F59E0B', '#EF4444'],  # Default
+            ['#E11D48', '#7C3AED', '#0891B2', '#CA8A04', '#059669'],  # Warm
+            ['#0369A1', '#4338CA', '#047857', '#D97706', '#BE123C'],  # Cool
+            ['#6D28D9', '#B91C1C', '#0E7490', '#A16207', '#15803D'],  # Bold
+        ]
+        colors = random.choice(palette_sets)
+
         steps.append({
             'label': f'Introduction: {topic_text[:25]}',
-            'narration': f'नमस्ते बच्चों! आज हम "{topic_text}" के बारे में सीखेंगे। बहुत आसान है, ध्यान से देखो!',
+            'narration': random.choice(intro_variants),
             'elements': [
-                {'type': 'text', 'x': 540, 'y': 150, 'text': topic_text[:50], 'size': 42, 'color': '#2563EB', 'bold': True},
-                {'type': 'text', 'x': 540, 'y': 300, 'text': f'Class {class_num}', 'size': 32, 'color': '#10B981', 'bold': True},
-                {'type': 'number_line', 'x': 100, 'y': 500, 'min': 0, 'max': 20, 'highlight': list(range(1, 11))},
+                {'type': 'text', 'x': 540, 'y': 150, 'text': topic_text[:50], 'size': 42, 'color': colors[0], 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 300, 'text': f'Class {class_num}', 'size': 32, 'color': colors[2], 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 500, 'text': random.choice(["Let's Learn!", 'चलो सीखो!', 'शुरू करो!', 'देखो और सीखो!', 'तैयार?']), 'size': 48, 'color': colors[3], 'bold': True},
+                {'type': 'star', 'cx': 540, 'cy': 750, 'size': 80, 'fill': colors[3], 'outline': colors[0]},
             ]
         })
+
+        # Subtopic steps with rich visual elements — randomize visual order
         if subtopics:
-            for i, sub in enumerate(subtopics[:3]):
+            visual_types = ['dots_group', 'number_line', 'fraction_bar', 'grid', 'circle', 'rect', 'bar_chart', 'ruler']
+            random.shuffle(visual_types)
+            for i, sub in enumerate(subtopics[:4]):
+                sub_lower = sub.lower()
+                # Find matching explanation (longest keyword match wins)
+                explanation = None
+                best_len = 0
+                for keyword, expl in sub_explanations.items():
+                    if keyword in sub_lower and len(keyword) > best_len:
+                        explanation = expl
+                        best_len = len(keyword)
+
+                narration = explanation if explanation else f'अब हम "{sub}" समझते हैं। ध्यान से देखो और सीखो!'
+                vis_type = visual_types[i % len(visual_types)]
+
+                # Randomize text color per step
+                step_color = colors[i % len(colors)]
+                elements = [
+                    {'type': 'text', 'x': 540, 'y': 150, 'text': sub[:50], 'size': 42, 'color': step_color, 'bold': True},
+                ]
+
+                # Add matching visual with randomized colors
+                fill_colors = ['#DBEAFE', '#D1FAE5', '#FEF3C7', '#EDE9FE', '#FCE7F3', '#CCFBF1']
+                fill = random.choice(fill_colors)
+
+                if vis_type == 'dots_group':
+                    count = random.randint(4, 10)
+                    elements.append({'type': 'dots_group', 'x': 300, 'y': 450, 'count': count, 'color': step_color, 'spacing': 80})
+                    elements.append({'type': 'text', 'x': 540, 'y': 750, 'text': f'{count} items', 'size': 36, 'color': '#64748B'})
+                elif vis_type == 'number_line':
+                    start = random.randint(0, 5)
+                    elements.append({'type': 'number_line', 'x': 100, 'y': 500, 'min': 0, 'max': 20, 'highlight': list(range(start, start + random.randint(5, 10)))})
+                elif vis_type == 'fraction_bar':
+                    den = random.choice([2, 3, 4, 5, 6])
+                    num = random.randint(1, den - 1)
+                    elements.append({'type': 'fraction_bar', 'x': 140, 'y': 500, 'w': 800, 'h': 80, 'num': num, 'den': den, 'color': step_color})
+                elif vis_type == 'grid':
+                    rows = random.randint(2, 5)
+                    cols = random.randint(2, 5)
+                    elements.append({'type': 'grid', 'x': 200, 'y': 400, 'w': 600, 'h': 400, 'rows': rows, 'cols': cols})
+                elif vis_type == 'circle':
+                    elements.append({'type': 'circle', 'cx': 540, 'cy': 650, 'r': random.randint(80, 150), 'fill': fill, 'outline': step_color})
+                elif vis_type == 'rect':
+                    w = random.randint(300, 500)
+                    h = random.randint(200, 350)
+                    elements.append({'type': 'rect', 'x': 540 - w//2, 'y': 450, 'w': w, 'h': h, 'fill': fill, 'outline': step_color})
+                elif vis_type == 'bar_chart':
+                    data = [
+                        {'label': 'A', 'value': random.randint(2, 8), 'color': colors[0]},
+                        {'label': 'B', 'value': random.randint(2, 8), 'color': colors[1]},
+                        {'label': 'C', 'value': random.randint(2, 8), 'color': colors[2]},
+                    ]
+                    elements.append({'type': 'bar_chart', 'x': 140, 'y': 400, 'w': 800, 'h': 500, 'data': data})
+                elif vis_type == 'ruler':
+                    elements.append({'type': 'ruler', 'x': 140, 'y': 500, 'w': 800, 'min': 0, 'max': 30, 'unit': 'cm'})
+
                 steps.append({
                     'label': sub[:30],
-                    'narration': f'अब हम "{sub}" समझते हैं। बहुत आसान है, देखो!',
-                    'elements': [
-                        {'type': 'text', 'x': 540, 'y': 150, 'text': sub[:50], 'size': 42, 'color': '#7C3AED', 'bold': True},
-                        {'type': 'text', 'x': 540, 'y': 400, 'text': f'Part {i+1}', 'size': 32, 'color': '#64748B'},
-                    ]
+                    'narration': narration,
+                    'elements': elements,
                 })
-        else:
-            steps.append({
-                'label': 'Practice',
-                'narration': f'बहुत अच्छे बच्चों! अब "{topic_text}" का अभ्यास करो। याद रखो, अभ्यास से ही सीखते हैं!',
-                'elements': [
-                    {'type': 'text', 'x': 540, 'y': 150, 'text': 'Practice Time!', 'size': 42, 'color': '#10B981', 'bold': True},
-                    {'type': 'text', 'x': 540, 'y': 400, 'text': topic_text[:50], 'size': 32, 'color': '#64748B'},
-                    {'type': 'star', 'cx': 540, 'cy': 700, 'size': 80, 'fill': '#F59E0B', 'outline': '#D97706'},
-                ]
-            })
+
+        # Practice step — random outro
+        outro_variants = [
+            f'बहुत अच्छे बच्चों! "{topic_text}" समझ आ गया होगा। अभ्यास ज़रूर करो!',
+            f'वाह बच्चों! "{topic_text}" बहुत अच्छे से सीखा। अब खुद practice करो!',
+            f'शाबाश! "{topic_text}" हो गया। रोज़ अभ्यास करोगे तो master बन जाओगे!',
+            f'great job! "{topic_text}" आ गया। homework मत भूलना!',
+        ]
+        practice_labels = ['Practice Time!', 'अभ्यास करो!', 'शाबाश!', 'बहुत बढ़िया!', 'Well Done!']
+        steps.append({
+            'label': 'Practice',
+            'narration': random.choice(outro_variants),
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 150, 'text': random.choice(practice_labels), 'size': 48, 'color': colors[2], 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 400, 'text': topic_text[:50], 'size': 36, 'color': '#64748B'},
+                {'type': 'star', 'cx': 540, 'cy': 700, 'size': 80, 'fill': colors[3], 'outline': colors[0]},
+            ]
+        })
 
     if not steps:
         return None

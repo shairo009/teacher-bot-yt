@@ -115,6 +115,7 @@ class TeacherBot:
         os.makedirs("outputs", exist_ok=True)
 
         video_created = False
+        thumbnail_path = None
 
         # Try to render frames (now returns frames + narrations)
         if self.render_engine:
@@ -130,10 +131,10 @@ class TeacherBot:
                     try:
                         if narrations:
                             # Per-step audio: each visual gets its own TTS clip
-                            audios = self.audio_engine.generate_step_audio(narrations)
+                            audios = await self.audio_engine.generate_step_audio(narrations)
                         else:
                             # Fallback: raw topic text (boring, but works)
-                            audios = self.audio_engine.generate_lesson_audio(topic, topic['topic'])
+                            audios = await self.audio_engine.generate_lesson_audio(topic, topic['topic'])
                         print(f"    Created {len(audios)} audio files")
                     except Exception as e:
                         print(f"    Audio generation failed: {e}")
@@ -142,12 +143,29 @@ class TeacherBot:
                 if self.video_engine and frames:
                     print("  Composing video...")
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    output_name = f"lesson_class{topic['class']}_{timestamp}.mp4"
-                    video_path = self.video_engine.compose_video(frames, audios, output_name, frames_per_step=5)
+                    output_name = f"lesson_class{topic['class']}_{timestamp}"
+                    video_path = self.video_engine.compose_video(
+                        frames, audios, output_name
+                    )
 
                     if video_path:
                         print(f"    ✅ Video: {video_path}")
                         video_created = True
+
+                        # Generate custom thumbnail
+                        try:
+                            from src.thumbnail_generator import generate_thumbnail
+                            thumb_dir = Path("outputs")
+                            thumb_dir.mkdir(exist_ok=True)
+                            thumbnail_path = generate_thumbnail(
+                                topic['topic'], topic['class'],
+                                topic['chapter'],
+                                str(thumb_dir / f"thumb_class{topic['class']}_{timestamp}.png")
+                            )
+                            print(f"    🖼️ Thumbnail: {thumbnail_path}")
+                        except Exception as e:
+                            print(f"    Thumbnail generation failed: {e}")
+
                     else:
                         print("    ⚠️ Could not compose video")
                         # Save frame info as fallback
@@ -175,15 +193,40 @@ class TeacherBot:
             self.setup_uploader()
             if self.uploader:
                 print("\n  Uploading to YouTube...")
+
+                # Generate smart metadata
+                metadata = self.uploader.generate_metadata(topic)
+                print(f"    Title: {metadata['title']}")
+                print(f"    Tags: {len(metadata['tags'])} tags")
+
+                # Get or create class playlist
+                playlist_title = f"Class {topic['class']} NCERT Math Hindi"
+                playlist_id = self.uploader.get_or_create_playlist(
+                    playlist_title,
+                    f"NCERT Class {topic['class']} Mathematics lessons in Hindi medium"
+                )
+
+                # Detect CI — schedule locally, upload immediately in CI
+                is_ci = os.environ.get('CI') == 'true' or os.environ.get('GITHUB_ACTIONS') == 'true'
+                schedule = not is_ci
+
                 video_id = self.uploader.upload_video(
                     video_path,
-                    title=f"Class {topic['class']} - {topic['chapter']} | NCERT Hindi",
-                    description=f"NCERT Math Lesson\nClass {topic['class']}\nChapter: {topic['chapter']}\n\n#ncert #math #class{topic['class']} #education #hindi"
+                    metadata=metadata,
+                    thumbnail_path=thumbnail_path,
+                    playlist_id=playlist_id,
+                    schedule=schedule,
                 )
                 if video_id:
-                    print(f"  ✅ Uploaded! Video ID: {video_id}")
+                    print(f"  Uploaded! Video ID: {video_id}")
         elif self.dry_run:
-            print("\n  ✅ Dry run complete!")
+            print("\n  Dry run — showing generated metadata:")
+            from src.uploader import YouTubeUploader
+            meta_gen = YouTubeUploader()
+            meta = meta_gen.generate_metadata(topic)
+            print(f"    Title: {meta['title']}")
+            print(f"    Tags: {meta['tags']}")
+            print(f"    Description preview:\n{meta['description'][:300]}...")
 
         # Log to video history
         self._log_video_history(topic, video_created, video_path if video_created else None)

@@ -49,8 +49,9 @@ def hex_to_rgb(hex_color):
 
 
 def get_font(size, bold=False):
-    """Get a font, trying common paths."""
+    """Get a font, trying common paths. Hindi font first for Devanagari support."""
     font_paths = [
+        'assets/fonts/hindi_font.ttf',  # Hindi Devanagari font (project-local)
         '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
         '/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf',
         '/usr/share/fonts/TTF/DejaVuSans-Bold.ttf' if bold else '/usr/share/fonts/TTF/DejaVuSans.ttf',

@@ -26,6 +26,7 @@ __pycache__/
 temp_frames/
 temp_audio/
 temp_*.html
+data/extracted_images/
 
 # Output
 outputs/

@@ -1,0 +1,79 @@
+name: Teacher Bot - Generate Video
+
+on:
+  schedule:
+    # Har 4 ghante: 7:00, 11:00, 15:00, 19:00, 23:00, 3:00 IST
+    - cron: '30 1,5,9,13,17,21 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (skip YouTube upload)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  generate-video:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            ffmpeg libcairo2-dev libpango1.0-dev \
+            libgdk-pixbuf2.0-dev fonts-noto cm-super
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip wheel
+          pip install -r requirements.txt
+
+      - name: Write YouTube credentials
+        if: ${{ secrets.TOKEN_JSON != '' }}
+        run: |
+          echo '${{ secrets.TOKEN_JSON }}' > token.json
+          echo '${{ secrets.CLIENT_SECRETS_JSON }}' > client_secrets.json
+
+      - name: Generate video
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: |
+          DRY="${{ github.event.inputs.dry_run || 'false' }}"
+          if [ "$DRY" = "true" ] || [ ! -f token.json ]; then
+            python main.py --dry-run
+          else
+            python main.py
+          fi
+
+      - name: Upload video artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ github.run_number }}
+          path: outputs/*.mp4
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Save progress
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          # Only commit tracked progress files (not junk)
+          git add data/topics_progress.json data/video_history.json
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Video #$(jq .total_completed data/topics_progress.json) complete [skip ci]"
+          git push

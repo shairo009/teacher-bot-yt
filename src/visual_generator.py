@@ -53,6 +53,27 @@ def get_font(size, bold=False):
         return ImageFont.load_default()
 
 
+def _extract_json(text):
+    """Extract first valid JSON object from text that may contain reasoning + JSON mixed."""
+    text = text.strip()
+    # Try parsing as-is first
+    try:
+        json.loads(text)
+        return text
+    except (json.JSONDecodeError, ValueError):
+        pass
+    # Find first { and try raw_decode
+    start = text.find('{')
+    if start != -1:
+        try:
+            decoder = json.JSONDecoder()
+            obj, _ = decoder.raw_decode(text[start:])
+            return json.dumps(obj)
+        except (json.JSONDecodeError, ValueError):
+            pass
+    return text
+
+
 def _call_api(messages, model, temperature=0.7, max_tokens=3000):
     """Call OpenGateway API using requests (avoids openai library httpx issue)."""
     import requests
@@ -76,7 +97,10 @@ def _call_api(messages, model, temperature=0.7, max_tokens=3000):
     resp.raise_for_status()
     msg = resp.json()["choices"][0]["message"]
     content = msg.get("content") or msg.get("reasoning_content") or ""
-    return content.strip() if content else None
+    if not content:
+        return None
+    # reasoning_content may contain reasoning text + JSON mixed — extract clean JSON
+    return _extract_json(content.strip())
 
 
 def call_llm(topic, subtopics, class_num):

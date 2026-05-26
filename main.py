@@ -9,10 +9,6 @@ from datetime import datetime
 from src.pdf_downloader import PDFDownloader
 from src.pdf_extractor import PDFExtractor
 from src.topic_manager import TopicManager
-from src.render_engine import RenderEngine
-from src.audio_engine import AudioEngine
-from src.video_engine import VideoEngine
-from src.llm_engine import LLMEngine
 
 
 class TeacherBot:
@@ -24,246 +20,209 @@ class TeacherBot:
         self.pdf_downloader = PDFDownloader()
         self.pdf_extractor = PDFExtractor()
         self.topic_manager = TopicManager()
-        self.render_engine = RenderEngine()
-        self.audio_engine = AudioEngine()
-        self.video_engine = VideoEngine()
-        self.llm_engine = LLMEngine()
 
-        self.uploader = None  # Lazy load
+        # Optional components (loaded later)
+        self.render_engine = None
+        self.audio_engine = None
+        self.video_engine = None
+        self.uploader = None
+
+    def _init_optional_components(self):
+        """Initialize optional components that may not be installed."""
+        try:
+            from src.render_engine import RenderEngine
+            self.render_engine = RenderEngine()
+            print("  ✓ RenderEngine loaded")
+        except Exception as e:
+            print(f"  ✗ RenderEngine not available: {e}")
+
+        try:
+            from src.audio_engine import AudioEngine
+            self.audio_engine = AudioEngine()
+            print("  ✓ AudioEngine loaded")
+        except Exception as e:
+            print(f"  ✗ AudioEngine not available: {e}")
+
+        try:
+            from src.video_engine import VideoEngine
+            self.video_engine = VideoEngine()
+            print("  ✓ VideoEngine loaded")
+        except Exception as e:
+            print(f"  ✗ VideoEngine not available: {e}")
 
     def setup_uploader(self):
         if self.uploader is None:
             try:
                 from src.uploader import YouTubeUploader
                 self.uploader = YouTubeUploader()
+                print("  ✓ YouTube uploader loaded")
             except Exception as e:
-                print(f"Warning: YouTube uploader not available: {e}")
+                print(f"  ✗ YouTube uploader not available: {e}")
 
     async def initialize(self):
-        """Download PDFs and build topic index if needed."""
+        """Load curriculum and build topic index."""
         print("=" * 60)
-        print("  Teacher Bot YT - Premium Formula Book Presenter")
+        print("  Teacher Bot YT - NCERT Video Creator")
         print("=" * 60)
 
-        # 0. Check if we have curriculum_master.json to build/load the master index directly
-        curriculum_path = Path("curriculum_master.json")
-        index_path = Path("data/topics_index.json")
-        
-        if curriculum_path.exists():
-            print("\n[Direct Load] Found curriculum_master.json! Building master index...")
-            index = self.topic_manager.build_from_curriculum()
-            if index:
-                # Save index for reference
-                os.makedirs("data", exist_ok=True)
-                with open(index_path, 'w', encoding='utf-8') as f:
-                    json.dump({'total_topics': len(index), 'topics': index}, f, ensure_ascii=False, indent=2)
-                print(f"✅ Loaded and saved master index with {len(index)} progressive topics (Class 1 to PhD Level)!")
-                return True
+        # Load curriculum as "books"
+        print("\n[1/4] Loading curriculum...")
+        books = self.pdf_downloader.get_available_books()
+        print(f"  Found {len(books)} curriculum items (chapters)")
 
-        # Fallback to loading existing topic index
-        if index_path.exists() and not self.force_redownload:
-            try:
-                with open(index_path, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    index = data.get('topics', [])
-                    if index:
-                        self.topic_manager.index = index
-                        print(f"Loaded existing topic index with {len(index)} topics from data/topics_index.json")
-                        return True
-            except Exception as e:
-                print(f"Warning: Could not load existing index: {e}")
+        # Extract content
+        print("\n[2/4] Extracting content...")
+        all_content = self.pdf_extractor.extract_all()
+        print(f"  Extracted {len(all_content)} classes")
 
-        # Check if we need to download PDFs
-        pdf_files = self.pdf_downloader.get_available_pdfs()
+        # Build index
+        print("\n[3/4] Building topic index...")
+        index = self.topic_manager.load_index(all_content)
+        print(f"  Indexed {len(index)} topics")
 
-        if not pdf_files or self.force_redownload:
-            print("\n[1/4] Downloading NCERT books...")
-            downloaded, failed = self.pdf_downloader.download_all_books()
-            pdf_files = self.pdf_downloader.get_available_pdfs()
-            print(f"Downloaded {len(downloaded)} books")
-            if failed:
-                print(f"Failed: {len(failed)}")
-        else:
-            print(f"\n[1/4] Found {len(pdf_files)} existing PDFs")
-
-        # Extract topics from PDFs
-        print("\n[2/4] Extracting topics from books...")
-        all_content = self.pdf_extractor.extract_all(pdf_files)
-
-        if not all_content:
-            print("ERROR: No content extracted from PDFs!")
-            return False
-
-        # Build and save topic index
-        print("\n[3/4] Building topic index from curriculum...")
-        index = self.topic_manager.build_from_curriculum()
-
-        if not index:
-            print("Falling back to PDF extraction...")
-            index = self.topic_manager.load_index(all_content)
-
-        if not index:
-            print("ERROR: No topics found!")
-            return False
-
-        # Save index for reference
+        # Save index
+        os.makedirs("data", exist_ok=True)
         with open("data/topics_index.json", 'w', encoding='utf-8') as f:
             json.dump({'total_topics': len(index), 'topics': index}, f, ensure_ascii=False, indent=2)
 
-        print(f"Indexed {len(index)} topics")
+        # Init optional components
+        print("\n[4/4] Loading components...")
+        self._init_optional_components()
 
         return True
 
     async def create_video(self):
         """Create a video for the current topic."""
-        print("\n[4/4] Creating video...")
+        print("\n" + "=" * 60)
+        print("  Creating Video...")
+        print("=" * 60)
 
-        # Load current topic from master curriculum index
+        # Get current topic
         topic = self.topic_manager.get_current_topic()
 
         if not topic:
             print("All topics completed! 🎉")
             return True
 
-        # Process script and parameters via LLM
-        print("   🤖 AI is studying the topic...")
-        explanation = self.llm_engine.explain_topic(topic['topic'], class_num=topic['class'])
-        topic['lines'] = explanation['screen_bullet_points']
-        topic['script'] = explanation['narration_script']
-        # Copy split scripts
-        for k, v in explanation.items():
-            topic[k] = v
+        print(f"\n📚 Current: Class {topic['class']} | {topic['chapter']}")
+        print(f"   Topic: {topic['topic']}")
+        print()
 
         # Create temp directories
         os.makedirs("temp_frames", exist_ok=True)
         os.makedirs("temp_audio", exist_ok=True)
+        os.makedirs("outputs", exist_ok=True)
 
-        # Generate audio parts
-        print("   🎙️ Generating split step-based audio...")
-        audios = await self.audio_engine.generate_lesson_audio(topic)
+        video_created = False
 
-        if not audios:
-            print("WARNING: No audio generated, video will be silent")
-            audios = []
-
-        print(f"   Created {len(audios)} audio parts")
-
-        # Extract audio durations dynamically
-        audio_durations = {}
-        if audios:
+        # Try to render frames
+        if self.render_engine:
+            print("  Rendering frames...")
             try:
-                from moviepy.editor import AudioFileClip
-                for audio_path in audios:
-                    name = Path(audio_path).stem  # 'intro', 'step1', 'step2', 'step3', 'outro'
-                    clip = AudioFileClip(audio_path)
-                    audio_durations[name] = clip.duration
-                    clip.close()
-                print(f"   Dynamic Audio durations: {audio_durations}")
+                frames = await self.render_engine.render_lesson(topic)
+                print(f"    Created {len(frames)} frames")
+
+                # Try to generate audio
+                audios = []
+                if self.audio_engine:
+                    print("  Generating audio...")
+                    try:
+                        audios = await self.audio_engine.generate_lesson_audio(topic, topic['topic'])
+                        print(f"    Created {len(audios)} audio files")
+                    except Exception as e:
+                        print(f"    Audio generation failed: {e}")
+
+                # Try to compose video
+                if self.video_engine and frames:
+                    print("  Composing video...")
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    output_name = f"lesson_class{topic['class']}_{timestamp}.mp4"
+                    video_path = self.video_engine.compose_video(frames, audios, output_name)
+
+                    if video_path:
+                        print(f"    ✅ Video: {video_path}")
+                        video_created = True
+                    else:
+                        print("    ⚠️ Could not compose video")
+                        # Save frame info as fallback
+                        with open(f"outputs/lesson_info.json", 'w') as f:
+                            json.dump({
+                                'topic': topic,
+                                'frames_count': len(frames),
+                                'audios_count': len(audios)
+                            }, f, indent=2)
             except Exception as e:
-                print(f"   Error reading audio durations: {e}")
+                print(f"  Rendering failed: {e}")
+        else:
+            print("  ⚠️ RenderEngine not available")
+            print("  Topic data saved for manual processing")
 
-        # Render frames with exact audio timing
-        print("   Rendering frames with dynamic sync...")
-        frames = await self.render_engine.render_lesson(topic, audio_durations)
+        # Show what we have
+        print("\n  📊 Status:")
+        print(f"     - Topic: {topic['topic']}")
+        print(f"     - Class: {topic['class']}")
+        print(f"     - Chapter: {topic['chapter']}")
+        print(f"     - Video created: {'Yes' if video_created else 'No (needs dependencies)'}")
 
-        if not frames:
-            # Fallback to simple render
-            print("   Using simple render...")
-            frames = self.render_engine.render_simple(topic)
-
-        if not frames:
-            print("ERROR: Could not render frames!")
-            return False
-
-        print(f"   Created {len(frames)} frames")
-
-        # Compose video
-        print("   Composing video...")
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_name = f"lesson_class{topic['class']}_{timestamp}.mp4"
-
-        video_path = self.video_engine.compose_video(frames, audios, output_name)
-
-        if not video_path:
-            # Try simple video
-            video_path = self.video_engine.create_simple_video(frames, output_name)
-
-        if not video_path:
-            print("ERROR: Could not create video!")
-            return False
-
-        print(f"   Video: {video_path}")
-
-        # Upload if not dry run
-        if not self.dry_run:
+        # Upload if not dry run and video was created
+        if not self.dry_run and video_created:
             self.setup_uploader()
             if self.uploader:
-                print("\n   Uploading to YouTube...")
+                print("\n  Uploading to YouTube...")
                 video_id = self.uploader.upload_video(
                     video_path,
-                    title=f"{topic['level']} - {topic['chapter']}",
-                    description=f"Math Lesson\nLevel: {topic['level']}\nChapter: {topic['chapter']}\nTopic: {topic['topic']}\n\n#math #education #{topic['level'].lower().replace(' ', '')}"
+                    title=f"Class {topic['class']} - {topic['chapter']} | NCERT Hindi",
+                    description=f"NCERT Math Lesson\nClass {topic['class']}\nChapter: {topic['chapter']}\n\n#ncert #math #class{topic['class']} #education #hindi"
                 )
-                print(f"   Uploaded! Video ID: {video_id}")
-                
-                # Only delete the video after successful upload
-                self.cleanup(video_path)
-            else:
-                print("   ⚠️ YouTube upload not configured")
-        else:
-            print(f"\n   ✅ Dry run complete! Video saved: {video_path}")
+                if video_id:
+                    print(f"  ✅ Uploaded! Video ID: {video_id}")
+        elif self.dry_run:
+            print("\n  ✅ Dry run complete!")
 
         # Mark topic as completed
-        self.topic_manager.mark_completed(topic['id'])
+        self.topic_manager.mark_completed(topic.get('id', 0))
 
         return True
 
-    def cleanup(self, video_path=None):
-        """Clean up video file after upload, keep other files."""
-        if video_path and os.path.exists(video_path):
-            try:
-                os.remove(video_path)
-                print(f"\n🧹 Deleted uploaded video: {video_path}")
-            except Exception as e:
-                print(f"Could not delete video: {e}")
+    def show_progress(self):
+        """Show current progress."""
+        stats = self.topic_manager.get_progress_stats()
+        print("\n" + "=" * 60)
+        print("  Progress Report")
+        print("=" * 60)
+        print(f"  Total topics: {stats['total_topics']}")
+        print(f"  Completed: {stats['completed']}")
+        print(f"  Remaining: {stats['remaining']}")
+        print(f"  Progress: {stats['percentage']}%")
+
+        topic = self.topic_manager.get_current_topic()
+        if topic:
+            print(f"\n  Next topic: Class {topic['class']} | {topic['chapter']}")
+            print(f"  Subtopic: {topic['topic']}")
 
 
 async def main():
     dry_run = "--dry-run" in sys.argv or "-d" in sys.argv
     force_redownload = "--force" in sys.argv or "-f" in sys.argv
-    
-    # Parse batch size: e.g. --batch 5
-    batch_size = 5
-    for idx, arg in enumerate(sys.argv):
-        if arg == "--batch" and idx + 1 < len(sys.argv):
-            try:
-                batch_size = int(sys.argv[idx + 1])
-            except ValueError:
-                pass
+    show_progress = "--progress" in sys.argv or "-p" in sys.argv
 
     bot = TeacherBot(dry_run=dry_run, force_redownload=force_redownload)
 
-    # Initialize (download/load curriculum and index)
+    # Initialize
     if not await bot.initialize():
         print("\n❌ Initialization failed!")
         sys.exit(1)
 
-    print(f"\n🚀 Running video generation batch: {batch_size} videos to create sequentially...\n")
+    if show_progress:
+        bot.show_progress()
+        return
 
-    successful_videos = 0
-    for i in range(batch_size):
-        print(f"\n🎬 === Video {i+1}/{batch_size} ===")
-        try:
-            if await bot.create_video():
-                successful_videos += 1
-            else:
-                print(f"❌ Failed to create video {i+1}!")
-                break
-        except Exception as e:
-            print(f"❌ Exception in video {i+1}: {e}")
-            break
+    # Create video
+    if not await bot.create_video():
+        print("\n❌ Video creation failed!")
+        sys.exit(1)
 
-    print(f"\n✅ Batch run complete! {successful_videos}/{batch_size} videos created successfully.")
+    print("\n✅ Teacher Bot completed!")
 
 
 if __name__ == "__main__":

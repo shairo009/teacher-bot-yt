@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Visual Lesson - Teacher Bot</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: linear-gradient(180deg, #F0F4FF 0%, #FFFFFF 100%);
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Noto Sans Devanagari', 'Mangal', 'Segoe UI', sans-serif;
+    position: relative;
+}
+
+/* Header */
+.header {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    right: 30px;
+    height: 100px;
+    background: #1E293B;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+}
+
+.class-badge {
+    background: #2563EB;
+    color: white;
+    padding: 10px 24px;
+    border-radius: 15px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.chapter-label {
+    color: #CBD5E1;
+    font-size: 20px;
+    margin-left: 20px;
+}
+
+.topic-label {
+    color: #94A3B8;
+    font-size: 18px;
+    margin-left: auto;
+}
+
+/* Grid background */
+.grid-bg {
+    position: absolute;
+    top: 160px;
+    left: 50px;
+    right: 50px;
+    bottom: 150px;
+    opacity: 0.3;
+}
+
+/* Equation container */
+.equation-area {
+    position: absolute;
+    top: 200px;
+    left: 60px;
+    right: 60px;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.step.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.step.active {
+    opacity: 1;
+    transform: translateX(0) scale(1.05);
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.step-content {
+    margin-left: 20px;
+}
+
+.equation {
+    font-size: 52px;
+    font-weight: 700;
+    color: #1E293B;
+    position: relative;
+}
+
+.equation .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.equation .char.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.equation .highlight {
+    background: #FEF3C7;
+    border-radius: 8px;
+    padding: 2px 6px;
+    border-bottom: 3px solid #F59E0B;
+}
+
+.explanation {
+    font-size: 26px;
+    color: #64748B;
+    margin-top: 8px;
+    opacity: 0;
+    transition: opacity 0.5s ease 0.3s;
+}
+
+.step.visible .explanation,
+.step.active .explanation {
+    opacity: 1;
+}
+
+/* Shape area */
+.shape-area {
+    position: absolute;
+    top: 200px;
+    left: 60px;
+    right: 60px;
+    bottom: 200px;
+}
+
+.math-shape {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.math-shape.visible {
+    opacity: 1;
+}
+
+/* SVG shapes with draw animation */
+.shape-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.shape-svg .draw-path {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    transition: stroke-dashoffset 1.5s ease-in-out;
+}
+
+.shape-svg .draw-path.animated {
+    stroke-dashoffset: 0;
+}
+
+.shape-svg .fill-area {
+    opacity: 0;
+    transition: opacity 0.5s ease 1s;
+}
+
+.shape-svg .fill-area.animated {
+    opacity: 1;
+}
+
+/* Number line */
+.number-line-area {
+    position: absolute;
+    top: 500px;
+    left: 60px;
+    right: 60px;
+}
+
+.number-line {
+    position: relative;
+    height: 4px;
+    background: #1E293B;
+    margin: 0 30px;
+}
+
+.number-line .tick {
+    position: absolute;
+    top: -15px;
+    width: 2px;
+    height: 34px;
+    background: #1E293B;
+    transition: all 0.3s ease;
+}
+
+.number-line .tick.highlighted {
+    background: #2563EB;
+    height: 44px;
+    top: -20px;
+    width: 4px;
+}
+
+.number-line .tick .label {
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    color: #64748B;
+    font-weight: 600;
+}
+
+.number-line .tick.highlighted .label {
+    color: #2563EB;
+    font-size: 24px;
+}
+
+.number-line .marker {
+    position: absolute;
+    top: -12px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #2563EB;
+    transform: translateX(-50%) scale(0);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.number-line .marker.visible {
+    transform: translateX(-50%) scale(1);
+}
+
+/* Big number display */
+.big-number {
+    position: absolute;
+    bottom: 300px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 200px;
+    font-weight: 800;
+    color: #2563EB;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.big-number.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Fraction bars */
+.fraction-area {
+    position: absolute;
+    top: 300px;
+    left: 80px;
+    right: 80px;
+}
+
+.fraction-row {
+    margin-bottom: 60px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+}
+
+.fraction-row.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fraction-label {
+    font-size: 30px;
+    font-weight: 700;
+    color: #1E293B;
+    margin-bottom: 15px;
+}
+
+.fraction-bar {
+    display: flex;
+    height: 80px;
+    border: 2px solid #1E293B;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.fraction-part {
+    flex: 1;
+    border-right: 2px solid #1E293B;
+    transition: background 0.3s ease;
+}
+
+.fraction-part:last-child {
+    border-right: none;
+}
+
+.fraction-part.filled {
+    /* Color set via JS */
+}
+
+/* Step progress dots */
+.progress-dots {
+    position: absolute;
+    bottom: 120px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #CBD5E1;
+    transition: all 0.3s ease;
+}
+
+.dot.completed {
+    background: #10B981;
+}
+
+.dot.current {
+    background: #2563EB;
+    transform: scale(1.3);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.3);
+}
+
+/* Progress bar */
+.progress-bar {
+    position: absolute;
+    bottom: 60px;
+    left: 50px;
+    right: 50px;
+    height: 30px;
+    background: #E2E8F0;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2563EB, #7C3AED);
+    border-radius: 15px;
+    transition: width 0.5s ease;
+    width: 0%;
+}
+
+/* Pencil cursor */
+.pencil {
+    position: fixed;
+    bottom: 40px;
+    right: 60px;
+    width: 60px;
+    height: 200px;
+    transform: rotate(-30deg);
+    transform-origin: bottom center;
+    animation: pencilBob 0.8s ease-in-out infinite;
+}
+
+@keyframes pencilBob {
+    0%, 100% { transform: rotate(-30deg) translateY(0); }
+    50% { transform: rotate(-25deg) translateY(-5px); }
+}
+
+/* Shape labels */
+.shape-label {
+    position: absolute;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1E293B;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s ease 1.2s;
+}
+
+.shape-label.visible {
+    opacity: 1;
+}
+
+/* Counting objects */
+.count-area {
+    position: absolute;
+    top: 250px;
+    left: 60px;
+    right: 60px;
+}
+
+.count-object {
+    position: absolute;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.count-object.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.count-number {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1E293B;
+    margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <div class="class-badge" id="classBadge">Class 6</div>
+    <div class="chapter-label" id="chapterLabel">Chapter 1</div>
+    <div class="topic-label" id="topicLabel"></div>
+</div>
+
+<!-- Dynamic content area -->
+<div id="contentArea"></div>
+
+<!-- Step progress -->
+<div class="progress-dots" id="progressDots"></div>
+
+<!-- Progress bar -->
+<div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+</div>
+
+<!-- Animated Pencil -->
+<svg class="pencil" viewBox="0 0 60 200">
+    <rect fill="#FF6B6B" x="15" y="0" width="30" height="30" rx="5"/>
+    <rect fill="#C0C0C0" x="15" y="30" width="30" height="15"/>
+    <rect fill="#FFD700" x="15" y="45" width="30" height="130"/>
+    <polygon fill="#374151" points="15,175 45,175 30,200"/>
+</svg>
+
+<script>
+// Configuration injected by Python
+const LESSON_TYPE = '{{LESSON_TYPE}}';  // 'equation', 'geometry', 'numberline', 'fraction', 'counting'
+const LESSON_DATA = {{LESSON_DATA_JSON | safe}};
+const CLASS_LABEL = '{{CLASS_LABEL}}';
+const CHAPTER_LABEL = '{{CHAPTER_LABEL}}';
+const TOPIC_LABEL = '{{TOPIC_LABEL}}';
+const TOTAL_FRAMES = {{TOTAL_FRAMES}};
+
+// Set header
+document.getElementById('classBadge').textContent = CLASS_LABEL;
+document.getElementById('chapterLabel').textContent = CHAPTER_LABEL;
+document.getElementById('topicLabel').textContent = TOPIC_LABEL;
+
+const contentArea = document.getElementById('contentArea');
+const progressDots = document.getElementById('progressDots');
+const progressFill = document.getElementById('progressFill');
+
+// State
+let currentStep = 0;
+let animationTimer = null;
+
+function updateProgress(step, total) {
+    // Update dots
+    progressDots.innerHTML = '';
+    for (let i = 0; i < total; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i < step ? ' completed' : '') + (i === step ? ' current' : '');
+        progressDots.appendChild(dot);
+    }
+    // Update bar
+    progressFill.style.width = ((step + 1) / total * 100) + '%';
+}
+
+// ========== EQUATION MODE ==========
+function initEquation() {
+    const steps = LESSON_DATA.steps || [];
+    let html = '<div class="equation-area">';
+
+    steps.forEach((step, i) => {
+        const color = step.highlight_color || '#2563EB';
+        html += `
+            <div class="step" id="step-${i}" data-step="${i}">
+                <div class="step-number" style="background: ${color}">${i + 1}</div>
+                <div class="step-content">
+                    <div class="equation" id="eq-${i}">${step.equation}</div>
+                    ${step.explanation ? `<div class="explanation">${step.explanation}</div>` : ''}
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    contentArea.innerHTML = html;
+
+    // Create dots
+    updateProgress(0, steps.length);
+
+    // Animate steps
+    steps.forEach((_, i) => {
+        setTimeout(() => {
+            const el = document.getElementById(`step-${i}`);
+            if (el) {
+                // Mark previous as visible, current as active
+                for (let j = 0; j <= i; j++) {
+                    const prev = document.getElementById(`step-${j}`);
+                    if (prev) {
+                        prev.classList.remove('active');
+                        prev.classList.add('visible');
+                    }
+                }
+                el.classList.add('active');
+                currentStep = i;
+                updateProgress(i, steps.length);
+            }
+        }, i * 2500);
+    });
+}
+
+// ========== GEOMETRY MODE ==========
+function initGeometry() {
+    const shapes = LESSON_DATA.shapes || [];
+    let html = '<div class="shape-area" style="position: relative; width: 960px; height: 1500px;">';
+
+    shapes.forEach((shape, i) => {
+        const size = shape.size || 120;
+        const cx = shape.cx || 300;
+        const cy = shape.cy || 400;
+        const fill = shape.fill || '#DBEAFE';
+        const outline = shape.outline || '#2563EB';
+
+        let svgContent = '';
+        if (shape.type === 'circle') {
+            svgContent = `
+                <circle class="draw-path" cx="${size}" cy="${size}" r="${size - 5}"
+                    fill="none" stroke="${outline}" stroke-width="4"/>
+                <circle class="fill-area" cx="${size}" cy="${size}" r="${size - 5}"
+                    fill="${fill}" stroke="none"/>
+            `;
+        } else if (shape.type === 'rectangle' || shape.type === 'square') {
+            const h = shape.type === 'square' ? size * 2 : size * 1.4;
+            const w = size * 2;
+            svgContent = `
+                <rect class="draw-path" x="5" y="5" width="${w - 10}" height="${h - 10}" rx="4"
+                    fill="none" stroke="${outline}" stroke-width="4"/>
+                <rect class="fill-area" x="5" y="5" width="${w - 10}" height="${h - 10}" rx="4"
+                    fill="${fill}" stroke="none"/>
+            `;
+        } else if (shape.type === 'triangle') {
+            const pts = `${size},5 ${size * 2 - 5},${size * 2 - 5} 5,${size * 2 - 5}`;
+            svgContent = `
+                <polygon class="draw-path" points="${pts}"
+                    fill="none" stroke="${outline}" stroke-width="4"/>
+                <polygon class="fill-area" points="${pts}"
+                    fill="${fill}" stroke="none"/>
+            `;
+        }
+
+        const svgW = shape.type === 'triangle' ? size * 2 : size * 2;
+        const svgH = shape.type === 'rectangle' ? size * 1.4 : (shape.type === 'square' ? size * 2 : size * 2);
+
+        html += `
+            <div class="math-shape" id="shape-${i}"
+                 style="left: ${cx - size}px; top: ${cy - size}px; width: ${svgW}px; height: ${svgH}px;">
+                <svg class="shape-svg" viewBox="0 0 ${svgW} ${svgH}">
+                    ${svgContent}
+                </svg>
+                <div class="shape-label" id="label-${i}" style="width: ${svgW}px; top: ${svgH + 10}px;">
+                    ${shape.label || ''}
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    contentArea.innerHTML = html;
+
+    updateProgress(0, shapes.length);
+
+    // Animate shapes
+    shapes.forEach((_, i) => {
+        setTimeout(() => {
+            const el = document.getElementById(`shape-${i}`);
+            const label = document.getElementById(`label-${i}`);
+            if (el) {
+                el.classList.add('visible');
+                // Trigger SVG animation
+                setTimeout(() => {
+                    el.querySelectorAll('.draw-path').forEach(p => p.classList.add('animated'));
+                    el.querySelectorAll('.fill-area').forEach(p => p.classList.add('animated'));
+                    if (label) label.classList.add('visible');
+                }, 100);
+                currentStep = i;
+                updateProgress(i, shapes.length);
+            }
+        }, i * 2000);
+    });
+}
+
+// ========== NUMBER LINE MODE ==========
+function initNumberLine() {
+    const { min_val, max_val, step, highlights } = LESSON_DATA;
+    const range = max_val - min_val;
+    let html = '<div class="number-line-area"><div class="number-line">';
+
+    // Ticks
+    for (let v = min_val; v <= max_val; v += step) {
+        const pct = ((v - min_val) / range * 100);
+        html += `
+            <div class="tick" id="tick-${v}" style="left: ${pct}%;">
+                <div class="label">${v}</div>
+            </div>
+            <div class="marker" id="marker-${v}" style="left: ${pct}%;"></div>
+        `;
+    }
+
+    html += '</div></div>';
+
+    // Big number
+    html += '<div class="big-number" id="bigNumber"></div>';
+
+    contentArea.innerHTML = html;
+
+    const nums = highlights || [];
+    updateProgress(0, nums.length);
+
+    nums.forEach((num, i) => {
+        setTimeout(() => {
+            // Highlight tick
+            const tick = document.getElementById(`tick-${num}`);
+            const marker = document.getElementById(`marker-${num}`);
+            if (tick) tick.classList.add('highlighted');
+            if (marker) marker.classList.add('visible');
+
+            // Big number
+            const bigNum = document.getElementById('bigNumber');
+            bigNum.textContent = num;
+            bigNum.classList.remove('visible');
+            setTimeout(() => bigNum.classList.add('visible'), 50);
+
+            currentStep = i;
+            updateProgress(i, nums.length);
+        }, i * 1200);
+    });
+}
+
+// ========== FRACTION MODE ==========
+function initFraction() {
+    const fractions = LESSON_DATA.fractions || [];
+    let html = '<div class="fraction-area">';
+
+    fractions.forEach((frac, i) => {
+        const parts = frac.denominator;
+        const filled = frac.numerator;
+        const color = frac.color || '#2563EB';
+
+        let barHtml = '';
+        for (let p = 0; p < parts; p++) {
+            barHtml += `<div class="fraction-part ${p < filled ? 'filled' : ''}" id="fp-${i}-${p}"></div>`;
+        }
+
+        html += `
+            <div class="fraction-row" id="frac-${i}">
+                <div class="fraction-label">${frac.label || `${filled}/${parts}`}</div>
+                <div class="fraction-bar">${barHtml}</div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    contentArea.innerHTML = html;
+
+    updateProgress(0, fractions.length);
+
+    fractions.forEach((frac, i) => {
+        setTimeout(() => {
+            const row = document.getElementById(`frac-${i}`);
+            if (row) row.classList.add('visible');
+
+            // Animate fill
+            for (let p = 0; p < frac.numerator; p++) {
+                setTimeout(() => {
+                    const part = document.getElementById(`fp-${i}-${p}`);
+                    if (part) part.style.background = frac.color || '#2563EB';
+                }, p * 200);
+            }
+
+            currentStep = i;
+            updateProgress(i, fractions.length);
+        }, i * 2500);
+    });
+}
+
+// ========== COUNTING MODE ==========
+function initCounting() {
+    const { count_to, objects } = LESSON_DATA;
+    const cols = Math.min(5, count_to);
+    const spacing = 160;
+    const startX = (960 - cols * spacing) / 2 + spacing / 2;
+    const startY = 300;
+
+    let html = '<div class="count-area" style="position: relative; width: 960px; height: 1200px;">';
+
+    for (let i = 0; i < count_to; i++) {
+        const row = Math.floor(i / cols);
+        const col = i % cols;
+        const x = startX + col * spacing - 40;
+        const y = startY + row * spacing - 40;
+
+        let objSvg = '';
+        if (objects === 'stars') {
+            objSvg = `<svg width="80" height="80" viewBox="0 0 80 80">
+                <polygon points="40,5 50,30 75,30 55,48 62,75 40,58 18,75 25,48 5,30 30,30"
+                    fill="#F59E0B" stroke="#D97706" stroke-width="2"/>
+            </svg>`;
+        } else if (objects === 'hearts') {
+            objSvg = `<svg width="80" height="80" viewBox="0 0 80 80">
+                <path d="M40 70 C20 50 0 35 0 20 C0 10 10 0 20 0 C30 0 38 8 40 15 C42 8 50 0 60 0 C70 0 80 10 80 20 C80 35 60 50 40 70Z"
+                    fill="#EF4444" stroke="#DC2626" stroke-width="2"/>
+            </svg>`;
+        } else {
+            objSvg = `<svg width="80" height="80" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="35" fill="#2563EB" stroke="#1D4ED8" stroke-width="2"/>
+            </svg>`;
+        }
+
+        html += `
+            <div class="count-object" id="obj-${i}" style="left: ${x}px; top: ${y}px;">
+                ${objSvg}
+                <div class="count-number">${i + 1}</div>
+            </div>
+        `;
+    }
+
+    html += '</div>';
+    html += '<div class="big-number" id="bigCountNum" style="bottom: 200px;"></div>';
+
+    contentArea.innerHTML = html;
+
+    updateProgress(0, count_to);
+
+    for (let i = 0; i < count_to; i++) {
+        setTimeout(() => {
+            const obj = document.getElementById(`obj-${i}`);
+            if (obj) obj.classList.add('visible');
+
+            const bigNum = document.getElementById('bigCountNum');
+            bigNum.textContent = i + 1;
+            bigNum.classList.remove('visible');
+            setTimeout(() => bigNum.classList.add('visible'), 50);
+
+            currentStep = i;
+            updateProgress(i, count_to);
+        }, i * 1000);
+    }
+}
+
+// ========== INIT ==========
+function init() {
+    switch (LESSON_TYPE) {
+        case 'equation': initEquation(); break;
+        case 'geometry': initGeometry(); break;
+        case 'numberline': initNumberLine(); break;
+        case 'fraction': initFraction(); break;
+        case 'counting': initCounting(); break;
+        default: initEquation();
+    }
+}
+
+window.onload = init;
+</script>
+</body>
+</html>

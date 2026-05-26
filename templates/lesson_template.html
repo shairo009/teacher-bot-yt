@@ -8,161 +8,142 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: #FFFFFF;
     width: 1080px;
     height: 1920px;
     overflow: hidden;
-    font-family: 'Outfit', 'Noto Sans Devanagari', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 100px;
-}
-
-.card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    width: 940px;
-    border-radius: 40px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-    padding: 60px;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-    animation: slideUp 1s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(100px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.badge-container {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-}
-
-.badge {
-    background: #4A90E2;
-    color: white;
-    padding: 12px 30px;
-    border-radius: 50px;
-    font-size: 24px;
-    font-weight: 700;
-}
-
-.chapter {
-    color: #7f8c8d;
-    font-size: 22px;
-    font-weight: 500;
-}
-
-.book-image-container {
-    width: 100%;
-    height: 600px;
-    background: #fff;
-    border-radius: 20px;
+    font-family: 'Noto Sans Devanagari', 'Mangal', sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    border: 4px solid #eee;
-    animation: fadeIn 1.5s ease;
 }
 
-.book-image {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+.container {
+    width: 900px;
+    padding: 60px;
+    position: relative;
 }
 
-.content {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
+.class-badge {
+    position: absolute;
+    top: 30px;
+    left: 60px;
+    background: #1a1a1a;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.chapter-label {
+    position: absolute;
+    top: 30px;
+    right: 60px;
+    color: #888;
+    font-size: 16px;
+}
+
+.topic-text {
+    font-size: 42px;
+    line-height: 2;
+    color: #1a1a1a;
+    font-weight: 500;
 }
 
 .line {
-    font-size: 48px;
-    line-height: 1.4;
-    color: #2c3e50;
-    font-weight: 600;
+    display: block;
     opacity: 0;
-    transform: translateX(-30px);
-    transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
 }
 
 .line.visible {
     opacity: 1;
-    transform: translateX(0);
 }
 
-.teacher-bot {
+/* Pencil SVG */
+.pencil {
     position: fixed;
-    bottom: 50px;
-    right: 80px;
-    width: 350px;
-    animation: float 3s ease-in-out infinite;
+    bottom: 40px;
+    right: 60px;
+    width: 80px;
+    height: 300px;
+    transform: rotate(-30deg);
+    transform-origin: bottom center;
+    transition: transform 0.5s ease;
 }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
+.pencil-writing {
+    animation: pencilMove 0.8s ease-in-out infinite;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+@keyframes pencilMove {
+    0%, 100% { transform: rotate(-30deg) translateY(0); }
+    50% { transform: rotate(-25deg) translateY(-5px); }
+}
+
+.pencil-body {
+    fill: #FFD700;
+}
+
+.pencil-tip {
+    fill: #333;
+}
+
+.pencil-eraser {
+    fill: #FF6B6B;
 }
 
 </style>
 </head>
 <body>
-    <div class="card">
-        <div class="badge-container">
-            <div class="badge" id="classBadge">Class 1</div>
-            <div class="chapter" id="chapterLabel">Maths</div>
-        </div>
-        
-        <!-- Book Image -->
-        <div class="book-image-container" id="imageContainer" style="display: none;">
-            <img src="" id="bookImage" class="book-image">
-        </div>
+<div class="container">
+    <div class="class-badge" id="classBadge">Class 6</div>
+    <div class="chapter-label" id="chapterLabel">Chapter 1</div>
+    <div class="topic-text" id="topicText"></div>
+</div>
 
-        <div class="content" id="topicText">
-            <!-- Lines will be injected here -->
-        </div>
-    </div>
-
-    <!-- Teacher Bot Mascot (Placeholder/Emoji for now, could be image) -->
-    <div class="teacher-bot">
-        <span style="font-size: 200px;">👩‍🏫</span>
-    </div>
+<!-- Animated Pencil SVG -->
+<svg class="pencil" id="pencil" viewBox="0 0 80 300">
+    <!-- Eraser -->
+    <rect class="pencil-eraser" x="25" y="0" width="30" height="40" rx="5"/>
+    <!-- Metal band -->
+    <rect fill="#C0C0C0" x="25" y="40" width="30" height="20"/>
+    <!-- Body -->
+    <rect class="pencil-body" x="25" y="60" width="30" height="200"/>
+    <!-- Tip -->
+    <polygon class="pencil-tip" points="25,260 55,260 40,300"/>
+</svg>
 
 <script>
 const lines = {{LINES_JSON | safe}};
-const imageUrl = "{{IMAGE_URL}}";
 const container = document.getElementById('topicText');
+let currentLine = 0;
+
+function typeLine(text) {
+    const lineEl = document.createElement('span');
+    lineEl.className = 'line';
+    lineEl.textContent = text;
+    container.appendChild(lineEl);
+
+    // Trigger animation
+    setTimeout(() => {
+        lineEl.classList.add('visible');
+    }, 50);
+
+    currentLine++;
+}
 
 function animateLesson() {
-    // Show image if available
-    if (imageUrl && imageUrl !== "None") {
-        document.getElementById('imageContainer').style.display = 'flex';
-        document.getElementById('bookImage').src = imageUrl;
-    }
-
-    let delay = 500;
+    let delay = 0;
     lines.forEach((line, idx) => {
         setTimeout(() => {
-            const lineEl = document.createElement('div');
-            lineEl.className = 'line';
-            lineEl.textContent = "• " + line;
-            container.appendChild(lineEl);
-            
-            setTimeout(() => lineEl.classList.add('visible'), 50);
+            typeLine(line);
+            // Move pencil
+            const pencil = document.getElementById('pencil');
+            pencil.classList.add('pencil-writing');
         }, delay);
-        delay += 2500; // Line every 2.5 seconds
+        delay += 2000; // Each line appears every 2 seconds
     });
 }
 

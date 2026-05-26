@@ -17,6 +17,7 @@ venv/
 # Generated during each run (rebuilt from curriculum.json)
 data/topics_index.json
 data/extracted_images/
+data/books/
 
 # Temp files (created during video generation, cleaned up after)
 temp_frames/

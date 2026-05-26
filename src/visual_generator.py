@@ -74,7 +74,9 @@ def _call_api(messages, model, temperature=0.7, max_tokens=3000):
         timeout=60
     )
     resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"].strip()
+    msg = resp.json()["choices"][0]["message"]
+    content = msg.get("content") or msg.get("reasoning_content") or ""
+    return content.strip() if content else None
 
 
 def call_llm(topic, subtopics, class_num):

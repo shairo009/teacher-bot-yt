@@ -27,5 +27,8 @@ python-dotenv>=1.0.0
 requests>=2.31.0
 aiofiles>=23.0.0
 
+# LLM for visual generation
+openai>=1.6.0
+
 # Development
 python-dotenv

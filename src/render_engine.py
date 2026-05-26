@@ -138,10 +138,32 @@ class RenderEngine:
 
         return self.render_simple(topic, num_frames=18)
 
+    def render_with_llm(self, topic):
+        """Generate visuals using LLM + PIL (best quality)."""
+        try:
+            from src.visual_generator import generate_visual
+            frames = generate_visual(topic, str(self.frames_dir))
+            if frames:
+                print(f"Generated {len(frames)} LLM visual frames")
+                return frames
+        except ImportError:
+            print("visual_generator not available, falling back to math_effects")
+        except Exception as e:
+            print(f"LLM visual error: {e}, falling back to math_effects")
+        return None
+
     async def render_lesson(self, topic):
-        """Async wrapper - uses math effects if enabled."""
+        """Async wrapper - tries LLM first, then math effects, then simple."""
+        # Priority 1: LLM-powered visuals (topic-specific)
+        frames = self.render_with_llm(topic)
+        if frames:
+            return frames
+
+        # Priority 2: Math effects (keyword-based)
         if self.use_math_effects:
             return self.render_with_math_effects(topic)
+
+        # Priority 3: Simple text frames
         return self.render_simple(topic)
 
 

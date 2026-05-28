@@ -34,5 +34,14 @@
     "topic_id": 7005,
     "video_created": false,
     "video_file": null
+  },
+  {
+    "timestamp": "2026-05-28T17:37:15.170730",
+    "class": 2,
+    "chapter": "Chapter 3: How Much Can You Carry?",
+    "topic": "Weight comparison",
+    "topic_id": 8000,
+    "video_created": false,
+    "video_file": null
   }
 ]

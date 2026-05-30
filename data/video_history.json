@@ -52,5 +52,14 @@
     "topic_id": 8001,
     "video_created": false,
     "video_file": null
+  },
+  {
+    "timestamp": "2026-05-30T15:09:22.153126",
+    "class": 2,
+    "chapter": "Chapter 3: How Much Can You Carry?",
+    "topic": "Balance scale",
+    "topic_id": 8002,
+    "video_created": false,
+    "video_file": null
   }
 ]

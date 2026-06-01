@@ -70,5 +70,14 @@
     "topic_id": 8003,
     "video_created": false,
     "video_file": null
+  },
+  {
+    "timestamp": "2026-06-01T19:22:52.497416",
+    "class": 2,
+    "chapter": "Chapter 3: How Much Can You Carry?",
+    "topic": "Estimation",
+    "topic_id": 8004,
+    "video_created": false,
+    "video_file": null
   }
 ]

@@ -79,5 +79,14 @@
     "topic_id": 8004,
     "video_created": false,
     "video_file": null
+  },
+  {
+    "timestamp": "2026-06-02T18:06:22.107297",
+    "class": 2,
+    "chapter": "Chapter 3: How Much Can You Carry?",
+    "topic": "Real life weight",
+    "topic_id": 8005,
+    "video_created": false,
+    "video_file": null
   }
 ]

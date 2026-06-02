@@ -1,5 +1,5 @@
 {
-  "current_idx": 47,
+  "current_idx": 48,
   "completed_ids": [
     6003,
     6004,
@@ -14,10 +14,11 @@
     8001,
     8002,
     8003,
-    8004
+    8004,
+    8005
   ],
-  "total_completed": 14,
-  "last_updated": "1780341625.749583",
+  "total_completed": 15,
+  "last_updated": "1780423488.6000783",
   "current_class": 1,
   "formula_idx": 0
 }

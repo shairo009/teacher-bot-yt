@@ -88,5 +88,14 @@
     "topic_id": 8005,
     "video_created": false,
     "video_file": null
+  },
+  {
+    "timestamp": "2026-06-03T18:24:50.610686",
+    "class": 2,
+    "chapter": "Chapter 4: Counting in Tens",
+    "topic": "Tens and ones",
+    "topic_id": 9000,
+    "video_created": false,
+    "video_file": null
   }
 ]

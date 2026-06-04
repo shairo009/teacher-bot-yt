@@ -97,5 +97,14 @@
     "topic_id": 9000,
     "video_created": false,
     "video_file": null
+  },
+  {
+    "timestamp": "2026-06-04T16:55:49.158663",
+    "class": 2,
+    "chapter": "Chapter 4: Counting in Tens",
+    "topic": "Place value",
+    "topic_id": 9001,
+    "video_created": false,
+    "video_file": null
   }
 ]

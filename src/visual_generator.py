@@ -16,6 +16,7 @@ from PIL import Image, ImageDraw, ImageFont
 # Canvas size (YouTube Shorts portrait)
 WIDTH = 1080
 HEIGHT = 1920
+TARGET_FPS = 30
 
 # Colors
 COLORS = {
@@ -39,10 +40,11 @@ def hex_to_rgb(hex_color):
 
 def get_font(size, bold=False):
     font_paths = [
-        'assets/fonts/hindi_font.ttf',  # Devanagari font (project-local, fallback)
-        'assets/fonts/hindi_font.ttf',  # Same for bold (only one font available)
+        'C:/Windows/Fonts/arialbd.ttf' if bold else 'C:/Windows/Fonts/arial.ttf',
+        'C:/Windows/Fonts/seguisb.ttf' if bold else 'C:/Windows/Fonts/segoeui.ttf',
         '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
         '/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf',
+        'assets/fonts/hindi_font.ttf',  # Devanagari/project-local fallback
     ]
     for path in font_paths:
         try:
@@ -352,13 +354,32 @@ def draw_element_text(draw, el):
     color = hex_to_rgb(el.get('color', COLORS['text']))
     text = el.get('text', '')
     y = el.get('y', 100)
+    center_x = el.get('x', WIDTH // 2)
+    max_width = el.get('max_width', 900)
+    line_spacing = el.get('line_spacing', int(size * 0.35))
 
-    # Always center horizontally on 1080-wide canvas
-    bbox = draw.textbbox((0, 0), text, font=font)
-    tw = bbox[2] - bbox[0]
-    x = (WIDTH - tw) // 2
+    words = str(text).split()
+    lines = []
+    current = []
+    for word in words:
+        candidate = ' '.join(current + [word])
+        bbox = draw.textbbox((0, 0), candidate, font=font)
+        if current and bbox[2] - bbox[0] > max_width:
+            lines.append(' '.join(current))
+            current = [word]
+        else:
+            current.append(word)
+    if current:
+        lines.append(' '.join(current))
+    if not lines:
+        lines = ['']
 
-    draw.text((x, y), text, fill=color, font=font)
+    for line_idx, line in enumerate(lines):
+        bbox = draw.textbbox((0, 0), line, font=font)
+        tw = bbox[2] - bbox[0]
+        th = bbox[3] - bbox[1]
+        x = max(40, min(WIDTH - tw - 40, int(center_x - tw // 2)))
+        draw.text((x, y + line_idx * (th + line_spacing)), line, fill=color, font=font)
 
 
 def draw_element_circle(draw, el):
@@ -469,22 +490,37 @@ def draw_element_dots_group(draw, el):
     color = hex_to_rgb(el.get('color', COLORS['primary']))
     outline = hex_to_rgb(el.get('outline', '#1D4ED8'))
     spacing = el.get('spacing', 70)
-    r = el.get('r', 25)
+    r = el.get('r', 30)
     label_below = el.get('label', True)
+    label_size = el.get('label_size', 30)
+    label_gap = el.get('label_gap', 14)
+    row_spacing = el.get('row_spacing', max(spacing, r * 2 + label_size + label_gap + 18))
 
     cols = min(5, count)
+    font = get_font(label_size, bold=True)
     for i in range(count):
         row = i // cols
         col = i % cols
         cx = x + col * spacing
-        cy = y + row * spacing
-        draw.ellipse([(cx-r, cy-r), (cx+r, cy+r)], fill=color, outline=outline, width=2)
+        cy = y + row * row_spacing
+        draw.ellipse([(cx-r, cy-r), (cx+r, cy+r)], fill=color, outline=outline, width=3)
         if label_below:
-            font = get_font(20, bold=True)
             label = str(i + 1)
             bbox = draw.textbbox((0, 0), label, font=font)
             tw = bbox[2] - bbox[0]
-            draw.text((cx - tw // 2, cy + r + 8), label, fill=hex_to_rgb(COLORS['text']), font=font)
+            th = bbox[3] - bbox[1]
+            lx = cx - tw // 2
+            ly = cy + r + label_gap
+            pad_x = 10
+            pad_y = 5
+            draw.rounded_rectangle(
+                [(lx - pad_x, ly - pad_y), (lx + tw + pad_x, ly + th + pad_y)],
+                radius=8,
+                fill=hex_to_rgb('#FFFFFF'),
+                outline=hex_to_rgb('#CBD5E1'),
+                width=1,
+            )
+            draw.text((lx, ly), label, fill=hex_to_rgb('#0F172A'), font=font)
 
 
 def draw_element_grid(draw, el):
@@ -734,6 +770,55 @@ ELEMENT_RENDERERS = {
 }
 
 
+def _ease_out(t):
+    t = max(0.0, min(1.0, t))
+    return 1 - (1 - t) * (1 - t)
+
+
+def _shift_element(el, dx=0, dy=0):
+    shifted = dict(el)
+    for key in ('x', 'cx', 'x1', 'x2'):
+        if key in shifted:
+            shifted[key] += dx
+    for key in ('y', 'cy', 'y1', 'y2'):
+        if key in shifted:
+            shifted[key] += dy
+    if 'points' in shifted:
+        shifted['points'] = [[x + dx, y + dy] for x, y in shifted['points']]
+    return shifted
+
+
+def _animated_element(el, progress):
+    eased = _ease_out(progress)
+    dy = int((1 - eased) * 38)
+    animated = _shift_element(el, dy=dy)
+
+    if animated.get('type') == 'dots_group':
+        count = animated.get('count', 1)
+        animated['count'] = max(1, min(count, int(math.ceil(count * eased))))
+
+    return animated
+
+
+def _draw_element_animated(base_img, el, progress):
+    """Draw one element with simple fade, slide, and count reveal animation."""
+    el_type = el.get('type', 'text')
+    renderer = ELEMENT_RENDERERS.get(el_type)
+    if not renderer:
+        return
+
+    layer = Image.new('RGBA', (WIDTH, HEIGHT), (0, 0, 0, 0))
+    layer_draw = ImageDraw.Draw(layer)
+    renderer(layer_draw, _animated_element(el, progress))
+
+    alpha = int(255 * _ease_out(progress))
+    if alpha < 255:
+        alpha_layer = layer.getchannel('A').point(lambda value: value * alpha // 255)
+        layer.putalpha(alpha_layer)
+
+    base_img.alpha_composite(layer)
+
+
 def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
     """Render a scene into YouTube Shorts frames (1080x1920) with PRO visuals.
 
@@ -797,7 +882,7 @@ def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
         step_progress = (frame_idx % frames_per_step) / frames_per_step
 
         # Copy pre-rendered gradient
-        img = gradient_bg.copy()
+        img = gradient_bg.copy().convert('RGBA')
         draw = ImageDraw.Draw(img)
 
         # ── Header bar with shadow ──
@@ -834,15 +919,19 @@ def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
         draw_shadow_card(draw, [(40, 310), (WIDTH - 40, 1650)], radius=24, card_color='#FFFFFF', shadow_color='#E2E8F0')
 
         elements = step.get('elements', [])
-        for el in elements:
-            el_type = el.get('type', 'text')
-            renderer = ELEMENT_RENDERERS.get(el_type)
-            if renderer:
-                try:
-                    # Offset elements into the card area
-                    renderer(draw, el)
-                except Exception as e:
-                    print(f"  Warning: failed to render {el_type}: {e}", flush=True)
+        total_elements = max(1, len(elements))
+        immediately_visible = min(3, total_elements)
+        for element_idx, el in enumerate(elements):
+            start = element_idx / total_elements * 0.42
+            element_progress = (step_progress - start) / 0.14
+            if element_idx < immediately_visible:
+                element_progress = max(0.35, element_progress)
+            if element_progress <= 0:
+                continue
+            try:
+                _draw_element_animated(img, el, element_progress)
+            except Exception as e:
+                print(f"  Warning: failed to render {el.get('type', 'element')}: {e}", flush=True)
 
         # ── Teacher avatar (small, bottom-left) ──
         draw_teacher_avatar(draw, 90, 1750, size=50)
@@ -858,10 +947,25 @@ def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
 
         # Save frame
         frame_path = frames_dir / f"frame_{str(frame_idx).zfill(3)}.png"
-        img.save(frame_path)
+        img.convert('RGB').save(frame_path)
         frame_paths.append(str(frame_path))
 
     return frame_paths
+
+
+def _estimate_frames_per_step(narrations, fps=TARGET_FPS):
+    """Choose enough animation frames for teacher narration to stay fluid."""
+    if not narrations:
+        return fps * 4
+
+    estimated_durations = []
+    for narration in narrations:
+        word_count = len(str(narration).split())
+        # Edge TTS teaching voice is usually around 2.2 words/sec. Add a small
+        # pause so each visual breathes instead of racing the narration.
+        estimated_durations.append(max(3.5, (word_count / 2.2) + 0.8))
+
+    return max(fps * 3, min(fps * 6, int(math.ceil(max(estimated_durations) * fps))))
 
 
 def generate_visual(topic, frames_dir="temp_frames"):
@@ -898,8 +1002,10 @@ def generate_visual(topic, frames_dir="temp_frames"):
             if narr:
                 narrations.append(narr)
 
-        # Render scene
-        frames = render_scene(scene, frames_dir, frames_per_step=5)
+        # Render enough frames per step so the 30fps video stays smooth while
+        # the matching TTS clip plays.
+        frames_per_step = _estimate_frames_per_step(narrations)
+        frames = render_scene(scene, frames_dir, frames_per_step=frames_per_step)
         print(f"  Generated {len(frames)} visual frames, {len(narrations)} narration lines", flush=True)
         return frames, narrations
 
@@ -910,6 +1016,115 @@ def generate_visual(topic, frames_dir="temp_frames"):
 VISUAL_TOP = 280
 VISUAL_BOTTOM = 1700
 VISUAL_CENTER_Y = (VISUAL_TOP + VISUAL_BOTTOM) // 2  # 990
+
+
+def _place_value_rows(y, tens_text, ones_text, number_text, color='#2563EB'):
+    """Build reusable place-value table elements."""
+    return [
+        {'type': 'text', 'x': 540, 'y': y - 135, 'text': number_text, 'size': 58, 'color': color, 'bold': True},
+        {'type': 'rect', 'x': 160, 'y': y, 'w': 360, 'h': 120, 'fill': '#DBEAFE', 'outline': '#2563EB', 'radius': 18, 'lock_position': True},
+        {'type': 'rect', 'x': 520, 'y': y, 'w': 360, 'h': 120, 'fill': '#FEF3C7', 'outline': '#F59E0B', 'radius': 18, 'lock_position': True},
+        {'type': 'text', 'x': 340, 'y': y + 18, 'text': 'TENS', 'size': 34, 'color': '#2563EB', 'bold': True},
+        {'type': 'text', 'x': 700, 'y': y + 18, 'text': 'ONES', 'size': 34, 'color': '#D97706', 'bold': True},
+        {'type': 'text', 'x': 340, 'y': y + 68, 'text': tens_text, 'size': 42, 'color': '#1E293B', 'bold': True},
+        {'type': 'text', 'x': 700, 'y': y + 68, 'text': ones_text, 'size': 42, 'color': '#1E293B', 'bold': True},
+    ]
+
+
+def _generate_tens_ones_scene(topic_text, class_num):
+    """Detailed deterministic fallback for place value: tens and ones."""
+    return [
+        {
+            'label': 'What are tens and ones?',
+            'narration': (
+                'Today we will learn tens and ones in detail. A one is a single object. '
+                'A ten is one bundle made from ten single objects. This idea helps us read numbers quickly.'
+            ),
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 190, 'text': 'Tens and Ones', 'size': 58, 'color': '#2563EB', 'bold': True, 'max_width': 900},
+                {'type': 'text', 'x': 540, 'y': 320, 'text': '1 one = single item', 'size': 38, 'color': '#1E293B', 'bold': True},
+                {'type': 'dots_group', 'x': 260, 'y': 520, 'count': 1, 'color': '#F59E0B', 'spacing': 70, 'label_size': 32, 'lock_position': True},
+                {'type': 'text', 'x': 540, 'y': 700, 'text': '10 ones grouped together = 1 ten', 'size': 38, 'color': '#1E293B', 'bold': True, 'max_width': 850},
+                {'type': 'rect', 'x': 190, 'y': 805, 'w': 470, 'h': 310, 'fill': '#FFFFFF', 'outline': '#2563EB', 'radius': 22, 'lock_position': True},
+                {'type': 'dots_group', 'x': 255, 'y': 875, 'count': 10, 'color': '#2563EB', 'spacing': 82, 'row_spacing': 116, 'r': 31, 'label_size': 31, 'lock_position': True},
+                {'type': 'text', 'x': 825, 'y': 960, 'text': '= 1 ten', 'size': 44, 'color': '#10B981', 'bold': True},
+            ],
+        },
+        {
+            'label': 'Place-value chart',
+            'narration': (
+                'Every digit has a place. The right side is ones. The next place on the left is tens. '
+                'For example, in the number twenty four, two is in the tens place and four is in the ones place.'
+            ),
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 190, 'text': 'Place Value Chart', 'size': 54, 'color': '#7C3AED', 'bold': True},
+                *_place_value_rows(520, '2', '4', '24 = 2 tens and 4 ones', '#7C3AED'),
+                {'type': 'text', 'x': 540, 'y': 820, 'text': '2 tens = 20', 'size': 42, 'color': '#2563EB', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 920, 'text': '4 ones = 4', 'size': 42, 'color': '#F59E0B', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 1050, 'text': '20 + 4 = 24', 'size': 58, 'color': '#10B981', 'bold': True},
+            ],
+        },
+        {
+            'label': 'Build number 37',
+            'narration': (
+                'Let us build the number thirty seven. Thirty seven has three tens and seven ones. '
+                'Three tens means thirty, and seven ones means seven. Thirty plus seven makes thirty seven.'
+            ),
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 170, 'text': '37 = 3 tens + 7 ones', 'size': 50, 'color': '#2563EB', 'bold': True, 'max_width': 920},
+                {'type': 'rect', 'x': 160, 'y': 390, 'w': 120, 'h': 350, 'fill': '#DBEAFE', 'outline': '#2563EB', 'radius': 18, 'lock_position': True},
+                {'type': 'rect', 'x': 310, 'y': 390, 'w': 120, 'h': 350, 'fill': '#DBEAFE', 'outline': '#2563EB', 'radius': 18, 'lock_position': True},
+                {'type': 'rect', 'x': 460, 'y': 390, 'w': 120, 'h': 350, 'fill': '#DBEAFE', 'outline': '#2563EB', 'radius': 18, 'lock_position': True},
+                {'type': 'text', 'x': 340, 'y': 770, 'text': '3 tens = 30', 'size': 38, 'color': '#2563EB', 'bold': True},
+                {'type': 'dots_group', 'x': 650, 'y': 455, 'count': 7, 'color': '#F59E0B', 'spacing': 82, 'row_spacing': 116, 'r': 31, 'label_size': 31, 'lock_position': True},
+                {'type': 'text', 'x': 760, 'y': 770, 'text': '7 ones = 7', 'size': 38, 'color': '#D97706', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 940, 'text': '30 + 7 = 37', 'size': 62, 'color': '#10B981', 'bold': True},
+            ],
+        },
+        {
+            'label': 'Read any two-digit number',
+            'narration': (
+                'Use this rule for every two digit number. First read the tens digit, then read the ones digit. '
+                'In fifty six, five tens make fifty, and six ones make six.'
+            ),
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 170, 'text': 'Rule: tens first, ones second', 'size': 46, 'color': '#7C3AED', 'bold': True, 'max_width': 900},
+                *_place_value_rows(500, '5', '6', '56', '#7C3AED'),
+                {'type': 'arrow', 'x1': 335, 'y1': 720, 'x2': 335, 'y2': 860, 'color': '#2563EB', 'width': 6},
+                {'type': 'arrow', 'x1': 700, 'y1': 720, 'x2': 700, 'y2': 860, 'color': '#F59E0B', 'width': 6},
+                {'type': 'text', 'x': 335, 'y': 900, 'text': '5 tens = 50', 'size': 36, 'color': '#2563EB', 'bold': True},
+                {'type': 'text', 'x': 700, 'y': 900, 'text': '6 ones = 6', 'size': 36, 'color': '#D97706', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 1060, 'text': '50 + 6 = 56', 'size': 56, 'color': '#10B981', 'bold': True},
+            ],
+        },
+        {
+            'label': 'Do not confuse the places',
+            'narration': (
+                'Be careful. In forty two, four is tens and two is ones. '
+                'If we swap the digits, twenty four is a different number. Place value changes the value.'
+            ),
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 160, 'text': '42 is not the same as 24', 'size': 50, 'color': '#EF4444', 'bold': True, 'max_width': 900},
+                *_place_value_rows(430, '4', '2', '42 = 40 + 2', '#EF4444'),
+                *_place_value_rows(830, '2', '4', '24 = 20 + 4', '#2563EB'),
+                {'type': 'text', 'x': 540, 'y': 1160, 'text': 'Same digits, different places, different value!', 'size': 38, 'color': '#1E293B', 'bold': True, 'max_width': 880},
+            ],
+        },
+        {
+            'label': 'Practice question',
+            'narration': (
+                'Now try one yourself. What are the tens and ones in seventy three? '
+                'The answer is seven tens and three ones. That means seventy plus three equals seventy three.'
+            ),
+            'elements': [
+                {'type': 'text', 'x': 540, 'y': 170, 'text': 'Practice: 73', 'size': 58, 'color': '#7C3AED', 'bold': True},
+                *_place_value_rows(500, '7', '3', '73 = ? tens and ? ones', '#7C3AED'),
+                {'type': 'text', 'x': 540, 'y': 850, 'text': 'Answer:', 'size': 42, 'color': '#1E293B', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 960, 'text': '7 tens and 3 ones', 'size': 54, 'color': '#10B981', 'bold': True},
+                {'type': 'text', 'x': 540, 'y': 1110, 'text': '70 + 3 = 73', 'size': 56, 'color': '#2563EB', 'bold': True},
+            ],
+        },
+    ]
 
 
 def _center_step_elements(elements):
@@ -992,7 +1207,7 @@ def _center_step_elements(elements):
             el['y2'] += y_shift
 
         # Horizontal centering for groups that are left-aligned
-        if etype == 'dots_group':
+        if etype == 'dots_group' and not el.get('lock_position'):
             count = el.get('count', 5)
             cols = min(5, count)
             spacing = el.get('spacing', 70)
@@ -1020,7 +1235,7 @@ def _center_step_elements(elements):
             w = el.get('w', 800)
             el['x'] = (WIDTH - w) // 2
 
-        elif etype == 'rect':
+        elif etype == 'rect' and not el.get('lock_position'):
             w = el.get('w', 200)
             el['x'] = (WIDTH - w) // 2
 
@@ -1034,7 +1249,10 @@ def _generate_fallback_scene(topic_text, subtopics, class_num):
     steps = []
 
     # Detect topic type and generate appropriate steps
-    if any(kw in topic_lower for kw in ['add', 'addition', 'plus', 'sum', 'jod']):
+    if any(kw in topic_lower for kw in ['tens', 'ones', 'place value']):
+        steps = _generate_tens_ones_scene(topic_text, class_num)
+
+    elif any(kw in topic_lower for kw in ['add', 'addition', 'plus', 'sum', 'jod']):
         # Addition — 4 steps: intro → concept → example → practice
         a, b = 3, 2
         steps.append({

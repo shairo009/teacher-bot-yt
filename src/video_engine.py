@@ -6,6 +6,7 @@ from pathlib import Path
 
 # Project root for assets
 _PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
+TARGET_FPS = 30
 
 
 class VideoEngine:
@@ -36,7 +37,7 @@ class VideoEngine:
         return 3.0
 
     def compose_video(self, frame_paths, audio_paths, output_name="lesson.mp4",
-                       frames_per_step=5):
+                       frames_per_step=None):
         """Compose video with pro post-processing: crossfade, bg music, normalization.
 
         Strategy:
@@ -50,41 +51,49 @@ class VideoEngine:
             print("No frames to compose")
             return None
 
-        output_path = str(self.output_dir / output_name)
+        output_path = self.output_dir / output_name
+        if output_path.suffix.lower() != ".mp4":
+            output_path = output_path.with_suffix(".mp4")
+        output_path = str(output_path)
 
         # Get duration for each audio clip
         num_audio = len(existing_audio)
         audio_durations = [self._get_audio_duration(a) for a in existing_audio] if num_audio else []
-        num_steps = max(1, len(existing_frames) // frames_per_step)
-
-        # Build per-frame durations synced to audio
         frame_durations = []
-        for step_i in range(num_steps):
-            if num_audio == 0:
-                clip_duration = 3.0
-            elif step_i == 0:
-                clip_duration = audio_durations[0]
-            elif step_i < num_audio - 1:
-                clip_duration = audio_durations[min(step_i, num_audio - 1)]
-            else:
-                clip_duration = audio_durations[-1]
 
-            per_frame = max(0.5, clip_duration / frames_per_step)
-            for _ in range(frames_per_step):
-                frame_durations.append(per_frame)
+        if num_audio == 0:
+            # No narration available: play the rendered animation at real 30fps.
+            # Stretching tiny frame groups made fallback videos look frozen.
+            frame_durations = [1.0 / TARGET_FPS] * len(existing_frames)
+        else:
+            if frames_per_step is None:
+                frames_per_step = max(1, round(len(existing_frames) / num_audio))
+
+            # Build per-frame durations synced to audio
+            for step_i in range(max(1, num_audio)):
+                if step_i == 0:
+                    clip_duration = audio_durations[0]
+                elif step_i < num_audio - 1:
+                    clip_duration = audio_durations[min(step_i, num_audio - 1)]
+                else:
+                    clip_duration = audio_durations[-1]
+
+                per_frame = max(1.0 / TARGET_FPS, clip_duration / frames_per_step)
+                for _ in range(frames_per_step):
+                    frame_durations.append(per_frame)
 
         # Handle leftover frames
         leftover = len(existing_frames) - len(frame_durations)
         for _ in range(leftover):
-            frame_durations.append(1.0)
+            frame_durations.append(1.0 / TARGET_FPS)
 
         # Step 1: Create concat file with per-frame durations
         concat_file = str(self.output_dir / "concat.txt")
         with open(concat_file, 'w') as f:
             for i, frame in enumerate(existing_frames):
-                dur = frame_durations[i] if i < len(frame_durations) else 1.0
+                dur = frame_durations[i] if i < len(frame_durations) else (1.0 / TARGET_FPS)
                 f.write(f"file '{os.path.abspath(frame)}'\n")
-                f.write(f"duration {dur:.2f}\n")
+                f.write(f"duration {dur:.6f}\n")
             f.write(f"file '{os.path.abspath(existing_frames[-1])}'\n")
 
         # Step 2: Concat audio files
@@ -110,7 +119,7 @@ class VideoEngine:
             'ffmpeg', '-y',
             '-f', 'concat', '-safe', '0',
             '-i', concat_file,
-            '-vf', 'scale=1080:1920,fps=30',
+            '-vf', f'scale=1080:1920,fps={TARGET_FPS}',
             '-c:v', 'libx264', '-preset', 'fast',
             '-pix_fmt', 'yuv420p',
             temp_video

@@ -228,11 +228,13 @@ class TeacherBot:
             print(f"    Tags: {meta['tags']}")
             print(f"    Description preview:\n{meta['description'][:300]}...")
 
-        # Log to video history
-        self._log_video_history(topic, video_created, video_path if video_created else None)
-
-        # Mark topic as completed
-        self.topic_manager.mark_completed(topic.get('id', 0))
+        if video_created:
+            # Log to video history only for successful videos so failed runs do not
+            # trigger rate limits or advance the curriculum.
+            self._log_video_history(topic, True, video_path)
+            self.topic_manager.mark_completed(topic.get('id', 0))
+        else:
+            print("  ⚠️ Progress not updated because no video was created")
 
         # Cleanup temp files after everything is done
         self._cleanup_temp()

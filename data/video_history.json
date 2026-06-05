@@ -106,5 +106,14 @@
     "topic_id": 9001,
     "video_created": false,
     "video_file": null
+  },
+  {
+    "timestamp": "2026-06-05T11:11:08.958074",
+    "class": 2,
+    "chapter": "Chapter 4: Counting in Tens",
+    "topic": "Number names",
+    "topic_id": 9002,
+    "video_created": true,
+    "video_file": "lesson_class2_20260605_111058.mp4"
   }
 ]

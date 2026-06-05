@@ -2,8 +2,11 @@ name: Teacher Bot - Generate Video
 
 on:
   schedule:
-    # Once daily at 7:30 PM IST (2:00 PM UTC) — evening peak hour
-    - cron: '0 14 * * *'
+    # Four times daily in IST: 8:00 AM, 1:00 PM, 6:00 PM, 11:00 PM
+    - cron: '30 2 * * *'
+    - cron: '30 7 * * *'
+    - cron: '30 12 * * *'
+    - cron: '30 17 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -25,7 +28,7 @@ jobs:
       - name: Rate limit check
         id: rate_check
         run: |
-          # Check if a video was generated in the last 20 hours
+          # Check if a video was generated in the last 5 hours
           if [ -f data/video_history.json ]; then
             LAST_RUN=$(python3 -c "
           import json
@@ -46,10 +49,10 @@ jobs:
               print('999')
           ")
             echo "Hours since last video: $LAST_RUN"
-            SKIP=$(python3 -c "print('true' if float('$LAST_RUN') < 20.0 else 'false')")
+            SKIP=$(python3 -c "print('true' if float('$LAST_RUN') < 5.0 else 'false')")
             echo "skip=$SKIP" >> $GITHUB_OUTPUT
             if [ "$SKIP" = "true" ]; then
-              echo "Last video was less than 20 hours ago. Skipping."
+              echo "Last video was less than 5 hours ago. Skipping."
             fi
           else
             echo "No history file. Running."
@@ -60,7 +63,7 @@ jobs:
         if: steps.rate_check.outputs.skip != 'true'
         id: daily_check
         run: |
-          # Max 1 video per day — human-like pace
+          # Max 4 videos per day — steady YouTube upload pace
           if [ -f data/video_history.json ]; then
             TODAY_COUNT=$(python3 -c "
           import json
@@ -75,8 +78,8 @@ jobs:
               print(0)
           ")
             echo "Videos today: $TODAY_COUNT"
-            if [ "$TODAY_COUNT" -ge 1 ]; then
-              echo "Daily limit (1 video) reached. Skipping."
+            if [ "$TODAY_COUNT" -ge 4 ]; then
+              echo "Daily limit (4 videos) reached. Skipping."
               echo "skip=true" >> $GITHUB_OUTPUT
             else
               echo "skip=false" >> $GITHUB_OUTPUT

@@ -5,10 +5,10 @@ Automated YouTube channel that teaches **Class 1 to 10 NCERT Mathematics** with 
 ## Features
 
 - 📖 **Downloads actual NCERT books** (Class 1-10, English + Hindi medium)
-- 📝 **Sequential topic coverage** — one topic daily, never repeats
+- 📝 **Sequential topic coverage** — up to four topics daily, never repeats
 - ✏️ **Pencil animation style** — white page with animated pencil drawing content
 - 🔊 **Female Hindi voice** — using free Edge-TTS (no costs!)
-- 🎬 **Auto-upload to YouTube** — daily automation via GitHub Actions
+- 🎬 **Auto-upload to YouTube** — 4 daily automation slots via GitHub Actions
 
 ## Video Style
 
@@ -23,7 +23,7 @@ Each video features:
 ```
 1. Download NCERT PDF books (Class 1-10)
 2. Extract topics from PDFs
-3. Track progress (daily sequential coverage)
+3. Track progress (up to 4 lessons per day)
 4. Render animated frames (pencil drawing)
 5. Generate Hindi audio narration
 6. Compose video

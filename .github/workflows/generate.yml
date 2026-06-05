@@ -14,6 +14,11 @@ on:
         required: false
         default: 'false'
         type: boolean
+      force:
+        description: 'Force run (skip rate limits)'
+        required: false
+        default: 'false'
+        type: boolean
 
 jobs:
   generate-video:
@@ -49,10 +54,16 @@ jobs:
               print('999')
           ")
             echo "Hours since last video: $LAST_RUN"
-            SKIP=$(python3 -c "print('true' if float('$LAST_RUN') < 5.0 else 'false')")
-            echo "skip=$SKIP" >> $GITHUB_OUTPUT
-            if [ "$SKIP" = "true" ]; then
-              echo "Last video was less than 5 hours ago. Skipping."
+            FORCE="${{ github.event.inputs.force || 'false' }}"
+            if [ "$FORCE" = "true" ]; then
+              echo "Force run enabled. Overriding rate limit check."
+              echo "skip=false" >> $GITHUB_OUTPUT
+            else
+              SKIP=$(python3 -c "print('true' if float('$LAST_RUN') < 5.0 else 'false')")
+              echo "skip=$SKIP" >> $GITHUB_OUTPUT
+              if [ "$SKIP" = "true" ]; then
+                echo "Last video was less than 5 hours ago. Skipping."
+              fi
             fi
           else
             echo "No history file. Running."
@@ -78,11 +89,17 @@ jobs:
               print(0)
           ")
             echo "Videos today: $TODAY_COUNT"
-            if [ "$TODAY_COUNT" -ge 4 ]; then
-              echo "Daily limit (4 videos) reached. Skipping."
-              echo "skip=true" >> $GITHUB_OUTPUT
-            else
+            FORCE="${{ github.event.inputs.force || 'false' }}"
+            if [ "$FORCE" = "true" ]; then
+              echo "Force run enabled. Overriding daily limit check."
               echo "skip=false" >> $GITHUB_OUTPUT
+            else
+              if [ "$TODAY_COUNT" -ge 4 ]; then
+                echo "Daily limit (4 videos) reached. Skipping."
+                echo "skip=true" >> $GITHUB_OUTPUT
+              else
+                echo "skip=false" >> $GITHUB_OUTPUT
+              fi
             fi
           else
             echo "skip=false" >> $GITHUB_OUTPUT

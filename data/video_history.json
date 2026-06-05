@@ -115,5 +115,14 @@
     "topic_id": 9002,
     "video_created": true,
     "video_file": "lesson_class2_20260605_111058.mp4"
+  },
+  {
+    "timestamp": "2026-06-05T12:11:13.483359",
+    "class": 2,
+    "chapter": "Chapter 4: Counting in Tens",
+    "topic": "Expanded form",
+    "topic_id": 9003,
+    "video_created": true,
+    "video_file": "lesson_class2_20260605_121102.mp4"
   }
 ]

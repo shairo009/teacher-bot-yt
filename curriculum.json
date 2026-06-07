@@ -1080,6 +1080,19 @@
       ]
     },
     {
+      "class": 6,
+      "chapter": 14,
+      "topic": "Practical Geometry",
+      "subtopics": [
+        "Drawing a circle",
+        "Line segment construction",
+        "Copying a line segment",
+        "Perpendicular lines",
+        "Perpendicular bisector",
+        "Angles construction"
+      ]
+    },
+    {
       "class": 7,
       "chapter": 1,
       "topic": "Integers",
@@ -1220,6 +1233,58 @@
         "Circle area",
         "Composite figures",
         "Unit conversion"
+      ]
+    },
+    {
+      "class": 7,
+      "chapter": 12,
+      "topic": "Algebraic Expressions",
+      "subtopics": [
+        "Terms and factors",
+        "Monomial, binomial, trinomial",
+        "Like and unlike terms",
+        "Addition of expressions",
+        "Subtraction of expressions",
+        "Finding value of expression"
+      ]
+    },
+    {
+      "class": 7,
+      "chapter": 13,
+      "topic": "Exponents and Powers",
+      "subtopics": [
+        "Exponent notation",
+        "Laws of exponents",
+        "Multiplying powers",
+        "Dividing powers",
+        "Power of a power",
+        "Decimal number system powers"
+      ]
+    },
+    {
+      "class": 7,
+      "chapter": 14,
+      "topic": "Symmetry",
+      "subtopics": [
+        "Line symmetry",
+        "Rotational symmetry",
+        "Angle of rotation",
+        "Order of rotation",
+        "Line and rotational symmetry",
+        "Symmetrical designs"
+      ]
+    },
+    {
+      "class": 7,
+      "chapter": 15,
+      "topic": "Visualising Solid Shapes",
+      "subtopics": [
+        "2D and 3D shapes",
+        "Faces, edges and vertices",
+        "Nets for building 3D shapes",
+        "Drawing solids on flat surface",
+        "Oblique and isometric sketches",
+        "Viewing sections of solids"
       ]
     },
     {
@@ -1405,6 +1470,32 @@
       ]
     },
     {
+      "class": 8,
+      "chapter": 15,
+      "topic": "Introduction to Graphs",
+      "subtopics": [
+        "Bar graphs and pie charts",
+        "Linear graphs",
+        "Plotting coordinates",
+        "Reading coordinates",
+        "Graph applications",
+        "Independent and dependent variables"
+      ]
+    },
+    {
+      "class": 8,
+      "chapter": 16,
+      "topic": "Playing with Numbers",
+      "subtopics": [
+        "Numbers in General Form",
+        "Reversing Digits Game",
+        "Letters for Digits",
+        "Divisibility by 10 and 5",
+        "Divisibility by 2 and 3",
+        "Divisibility by 9"
+      ]
+    },
+    {
       "class": 9,
       "chapter": 1,
       "topic": "Number Systems",
@@ -1571,6 +1662,32 @@
         "Cone surface area",
         "Sphere surface area",
         "Volume conversion"
+      ]
+    },
+    {
+      "class": 9,
+      "chapter": 14,
+      "topic": "Statistics",
+      "subtopics": [
+        "Collection of data",
+        "Presentation of data",
+        "Bar graphs",
+        "Histograms",
+        "Frequency polygons",
+        "Measures of central tendency"
+      ]
+    },
+    {
+      "class": 9,
+      "chapter": 15,
+      "topic": "Probability",
+      "subtopics": [
+        "Experimental probability",
+        "Events and trials",
+        "Probability formula",
+        "Sure and impossible events",
+        "Complementary events",
+        "Word problems"
       ]
     },
     {
@@ -1753,6 +1870,19 @@
         "Conditional probability",
         "Deck of cards problems",
         "Dice and coin problems"
+      ]
+    },
+    {
+      "class": 10,
+      "chapter": 15,
+      "topic": "Constructions",
+      "subtopics": [
+        "Division of line segment",
+        "Scale factor ratios",
+        "Constructing similar triangles",
+        "Tangent to a circle",
+        "Constructing tangents from external point",
+        "Step by step proofs"
       ]
     }
   ]

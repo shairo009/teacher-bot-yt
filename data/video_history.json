@@ -160,5 +160,14 @@
     "topic_id": 10001,
     "video_created": true,
     "video_file": "lesson_class2_20260607_170919.mp4"
+  },
+  {
+    "timestamp": "2026-06-07T18:31:54.143963",
+    "class": 1,
+    "chapter": "Chapter 6: Time",
+    "topic": "Morning/Night",
+    "topic_id": 6000,
+    "video_created": true,
+    "video_file": "lesson_class1_20260607_183118.mp4"
   }
 ]

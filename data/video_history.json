@@ -151,5 +151,14 @@
     "topic_id": 10000,
     "video_created": true,
     "video_file": "lesson_class2_20260607_170101.mp4"
+  },
+  {
+    "timestamp": "2026-06-07T17:09:49.683664",
+    "class": 2,
+    "chapter": "Chapter 5: Patterns",
+    "topic": "Shape patterns",
+    "topic_id": 10001,
+    "video_created": true,
+    "video_file": "lesson_class2_20260607_170919.mp4"
   }
 ]

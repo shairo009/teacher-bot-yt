@@ -168,7 +168,7 @@ def _extract_json(text):
     return text
 
 
-def _call_api(messages, model, temperature=0.7, max_tokens=3000):
+def _call_api(messages, model, temperature=0.7, max_tokens=12000):
     """Call OpenGateway API using requests (avoids openai library httpx issue)."""
     import requests
 
@@ -274,7 +274,7 @@ Rules:
                 {"role": "system", "content": "You are a friendly English math teacher making a YouTube video for kids. Narration must be in English — warm, encouraging, simple words. Like: 'Very good kids!', 'Let us see', 'Understood?' Return only valid JSON, no markdown."},
                 {"role": "user", "content": prompt}
             ],
-            model=model, temperature=0.7, max_tokens=3000
+            model=model, temperature=0.3, max_tokens=12000
         )
         print(f"    [debug] content={repr(content[:200]) if content else 'None'}", flush=True)
         if not content:
@@ -321,7 +321,7 @@ IMPORTANT: Each step MUST have a "narration" field in English that explains the 
                 {"role": "system", "content": "Return only valid JSON. Narration must be in English."},
                 {"role": "user", "content": simple_prompt}
             ],
-            model=model, temperature=0.5, max_tokens=2000
+            model=model, temperature=0.2, max_tokens=8000
         )
         if not content:
             return None

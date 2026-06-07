@@ -124,5 +124,14 @@
     "topic_id": 9003,
     "video_created": true,
     "video_file": "lesson_class2_20260605_121102.mp4"
+  },
+  {
+    "timestamp": "2026-06-07T16:40:25.911461",
+    "class": 2,
+    "chapter": "Chapter 4: Counting in Tens",
+    "topic": "Comparing numbers",
+    "topic_id": 9004,
+    "video_created": true,
+    "video_file": "lesson_class2_20260607_163947.mp4"
   }
 ]

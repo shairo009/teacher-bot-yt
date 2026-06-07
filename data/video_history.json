@@ -133,5 +133,14 @@
     "topic_id": 9004,
     "video_created": true,
     "video_file": "lesson_class2_20260607_163947.mp4"
+  },
+  {
+    "timestamp": "2026-06-07T16:53:23.366542",
+    "class": 2,
+    "chapter": "Chapter 4: Counting in Tens",
+    "topic": "Mental math",
+    "topic_id": 9005,
+    "video_created": true,
+    "video_file": "lesson_class2_20260607_165305.mp4"
   }
 ]

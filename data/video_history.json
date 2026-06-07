@@ -142,5 +142,14 @@
     "topic_id": 9005,
     "video_created": true,
     "video_file": "lesson_class2_20260607_165305.mp4"
+  },
+  {
+    "timestamp": "2026-06-07T17:01:21.878675",
+    "class": 2,
+    "chapter": "Chapter 5: Patterns",
+    "topic": "Number patterns",
+    "topic_id": 10000,
+    "video_created": true,
+    "video_file": "lesson_class2_20260607_170101.mp4"
   }
 ]

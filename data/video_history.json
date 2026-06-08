@@ -178,5 +178,14 @@
     "topic_id": 6001,
     "video_created": true,
     "video_file": "lesson_class1_20260607_184511.mp4"
+  },
+  {
+    "timestamp": "2026-06-08T07:16:15.672616",
+    "class": 1,
+    "chapter": "Chapter 6: Time",
+    "topic": "Sequence of events",
+    "topic_id": 6002,
+    "video_created": true,
+    "video_file": "lesson_class1_20260608_071532.mp4"
   }
 ]

@@ -196,5 +196,14 @@
     "topic_id": 6003,
     "video_created": true,
     "video_file": "lesson_class1_20260608_121652.mp4"
+  },
+  {
+    "timestamp": "2026-06-08T19:43:29.582894",
+    "class": 1,
+    "chapter": "Chapter 6: Time",
+    "topic": "Reading simple clock",
+    "topic_id": 6004,
+    "video_created": true,
+    "video_file": "lesson_class1_20260608_194250.mp4"
   }
 ]

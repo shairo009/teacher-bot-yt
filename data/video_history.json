@@ -187,5 +187,14 @@
     "topic_id": 6002,
     "video_created": true,
     "video_file": "lesson_class1_20260608_071532.mp4"
+  },
+  {
+    "timestamp": "2026-06-08T12:17:24.758614",
+    "class": 1,
+    "chapter": "Chapter 6: Time",
+    "topic": "Daily routine",
+    "topic_id": 6003,
+    "video_created": true,
+    "video_file": "lesson_class1_20260608_121652.mp4"
   }
 ]

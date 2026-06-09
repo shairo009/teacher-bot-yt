@@ -205,5 +205,14 @@
     "topic_id": 6004,
     "video_created": true,
     "video_file": "lesson_class1_20260608_194250.mp4"
+  },
+  {
+    "timestamp": "2026-06-09T06:33:53.785677",
+    "class": 1,
+    "chapter": "Chapter 6: Time",
+    "topic": "Concept of time",
+    "topic_id": 6005,
+    "video_created": true,
+    "video_file": "lesson_class1_20260609_063320.mp4"
   }
 ]

@@ -223,5 +223,14 @@
     "topic_id": 7000,
     "video_created": true,
     "video_file": "lesson_class1_20260609_154443.mp4"
+  },
+  {
+    "timestamp": "2026-06-10T06:51:17.139195",
+    "class": 1,
+    "chapter": "Chapter 7: Measurement",
+    "topic": "Longest/Shortest",
+    "topic_id": 7001,
+    "video_created": true,
+    "video_file": "lesson_class1_20260610_065045.mp4"
   }
 ]

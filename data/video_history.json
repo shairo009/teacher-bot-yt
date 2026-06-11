@@ -241,5 +241,14 @@
     "topic_id": 7002,
     "video_created": true,
     "video_file": "lesson_class1_20260610_162651.mp4"
+  },
+  {
+    "timestamp": "2026-06-11T07:16:19.587119",
+    "class": 1,
+    "chapter": "Chapter 7: Measurement",
+    "topic": "Thicker/Thinner",
+    "topic_id": 7003,
+    "video_created": true,
+    "video_file": "lesson_class1_20260611_071545.mp4"
   }
 ]

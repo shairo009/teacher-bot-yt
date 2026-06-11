@@ -259,5 +259,14 @@
     "topic_id": 7004,
     "video_created": true,
     "video_file": "lesson_class1_20260611_104037.mp4"
+  },
+  {
+    "timestamp": "2026-06-11T11:06:58.744260",
+    "class": 1,
+    "chapter": "Chapter 7: Measurement",
+    "topic": "Measuring with handspan",
+    "topic_id": 7005,
+    "video_created": true,
+    "video_file": "lesson_class1_20260611_110622.mp4"
   }
 ]

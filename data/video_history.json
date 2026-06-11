@@ -178,5 +178,77 @@
     "topic_id": 6001,
     "video_created": true,
     "video_file": "lesson_class1_20260607_184511.mp4"
+  },
+  {
+    "timestamp": "2026-06-08T07:16:15.672616",
+    "class": 1,
+    "chapter": "Chapter 6: Time",
+    "topic": "Sequence of events",
+    "topic_id": 6002,
+    "video_created": true,
+    "video_file": "lesson_class1_20260608_071532.mp4"
+  },
+  {
+    "timestamp": "2026-06-08T12:17:24.758614",
+    "class": 1,
+    "chapter": "Chapter 6: Time",
+    "topic": "Daily routine",
+    "topic_id": 6003,
+    "video_created": true,
+    "video_file": "lesson_class1_20260608_121652.mp4"
+  },
+  {
+    "timestamp": "2026-06-08T19:43:29.582894",
+    "class": 1,
+    "chapter": "Chapter 6: Time",
+    "topic": "Reading simple clock",
+    "topic_id": 6004,
+    "video_created": true,
+    "video_file": "lesson_class1_20260608_194250.mp4"
+  },
+  {
+    "timestamp": "2026-06-09T06:33:53.785677",
+    "class": 1,
+    "chapter": "Chapter 6: Time",
+    "topic": "Concept of time",
+    "topic_id": 6005,
+    "video_created": true,
+    "video_file": "lesson_class1_20260609_063320.mp4"
+  },
+  {
+    "timestamp": "2026-06-09T15:45:19.445377",
+    "class": 1,
+    "chapter": "Chapter 7: Measurement",
+    "topic": "Longer/Shorter",
+    "topic_id": 7000,
+    "video_created": true,
+    "video_file": "lesson_class1_20260609_154443.mp4"
+  },
+  {
+    "timestamp": "2026-06-10T06:51:17.139195",
+    "class": 1,
+    "chapter": "Chapter 7: Measurement",
+    "topic": "Longest/Shortest",
+    "topic_id": 7001,
+    "video_created": true,
+    "video_file": "lesson_class1_20260610_065045.mp4"
+  },
+  {
+    "timestamp": "2026-06-10T16:27:18.899306",
+    "class": 1,
+    "chapter": "Chapter 7: Measurement",
+    "topic": "Taller/Shorter",
+    "topic_id": 7002,
+    "video_created": true,
+    "video_file": "lesson_class1_20260610_162651.mp4"
+  },
+  {
+    "timestamp": "2026-06-11T07:16:19.587119",
+    "class": 1,
+    "chapter": "Chapter 7: Measurement",
+    "topic": "Thicker/Thinner",
+    "topic_id": 7003,
+    "video_created": true,
+    "video_file": "lesson_class1_20260611_071545.mp4"
   }
 ]

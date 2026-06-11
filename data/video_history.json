@@ -250,5 +250,14 @@
     "topic_id": 7003,
     "video_created": true,
     "video_file": "lesson_class1_20260611_071545.mp4"
+  },
+  {
+    "timestamp": "2026-06-11T10:41:12.464230",
+    "class": 1,
+    "chapter": "Chapter 7: Measurement",
+    "topic": "Heavier/Lighter",
+    "topic_id": 7004,
+    "video_created": true,
+    "video_file": "lesson_class1_20260611_104037.mp4"
   }
 ]

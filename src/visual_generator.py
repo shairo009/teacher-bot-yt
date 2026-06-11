@@ -20,17 +20,63 @@ TARGET_FPS = 30
 
 # Colors
 COLORS = {
-    'bg': '#FFFFFF',
-    'bg_light': '#F8FAFC',
-    'primary': '#2563EB',
-    'secondary': '#7C3AED',
-    'accent': '#F59E0B',
-    'success': '#10B981',
-    'danger': '#EF4444',
-    'text': '#1E293B',
-    'text_light': '#64748B',
-    'grid': '#E2E8F0',
+    'bg': '#0B0F19',          # Dark Slate/Space
+    'bg_light': '#1E1B4B',    # Deep Indigo/Card background
+    'primary': '#38BDF8',     # Neon Sky Blue
+    'secondary': '#C084FC',   # Neon Purple
+    'accent': '#FBBF24',      # Neon Gold
+    'success': '#34D399',     # Neon Emerald Green
+    'danger': '#F87171',      # Neon Coral Red
+    'text': '#F8FAFC',        # Near White Text
+    'text_light': '#CBD5E1',  # Light Slate Text
+    'grid': '#334155',        # Muted grid line color
 }
+
+NEON_COLOR_MAP = {
+    '#1E293B': '#F8FAFC',
+    '#1e293b': '#F8FAFC',
+    '#111827': '#F8FAFC',
+    '#111827'.lower(): '#F8FAFC',
+    '#0F172A': '#F8FAFC',
+    '#0f172a': '#F8FAFC',
+    '#64748B': '#CBD5E1',
+    '#64748b': '#CBD5E1',
+    '#475569': '#CBD5E1',
+    '#475569'.lower(): '#CBD5E1',
+    '#94A3B8': '#94A3B8',
+    '#94a3b8': '#94A3B8',
+    
+    '#2563EB': '#38BDF8',
+    '#2563eb': '#38BDF8',
+    '#7C3AED': '#C084FC',
+    '#7c3aed': '#C084FC',
+    '#10B981': '#34D399',
+    '#10b981': '#34D399',
+    '#F59E0B': '#FBBF24',
+    '#f59e0b': '#FBBF24',
+    '#EF4444': '#F87171',
+    '#ef4444': '#F87171',
+    '#D97706': '#FBBF24',
+    '#d97706': '#FBBF24',
+    '#DC2626': '#F87171',
+    '#dc2626': '#F87171',
+    '#059669': '#34D399',
+    '#059669'.lower(): '#34D399',
+    '#0891B2': '#22D3EE',
+    '#0891b2': '#22D3EE',
+    
+    '#FFFFFF': '#1E1B4B',
+    '#ffffff': '#1E1B4B',
+    '#F8FAFC': '#0B0F19',
+    '#f8fafc': '#0B0F19',
+}
+
+def map_to_neon(color_str):
+    if not color_str:
+        return color_str
+    if not isinstance(color_str, str):
+        return color_str
+    return NEON_COLOR_MAP.get(color_str, NEON_COLOR_MAP.get(color_str.lower(), color_str))
 
 
 def hex_to_rgb(hex_color):
@@ -40,6 +86,7 @@ def hex_to_rgb(hex_color):
 
 def get_font(size, bold=False):
     font_paths = [
+        'assets/fonts/Montserrat-Bold.ttf' if bold else 'assets/fonts/Montserrat-Regular.ttf',
         'C:/Windows/Fonts/arialbd.ttf' if bold else 'C:/Windows/Fonts/arial.ttf',
         'C:/Windows/Fonts/seguisb.ttf' if bold else 'C:/Windows/Fonts/segoeui.ttf',
         '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
@@ -121,16 +168,16 @@ def draw_teacher_avatar(draw, cx, cy, size=80):
     head_r = size // 3
     draw.ellipse(
         [(cx - head_r, cy - size + head_r), (cx + head_r, cy - size + head_r + head_r * 2)],
-        fill=hex_to_rgb('#1E293B')
+        fill=hex_to_rgb('#E2E8F0')  # Light color for dark mode
     )
     # Body (triangle for dress)
     draw.polygon(
         [(cx - size, cy + head_r), (cx + size, cy + head_r), (cx, cy + size)],
-        fill=hex_to_rgb('#1E293B')
+        fill=hex_to_rgb('#E2E8F0')  # Light color for dark mode
     )
     # Pointer stick
     draw.line([(cx + size // 2, cy), (cx + size + 20, cy - size // 2)],
-              fill=hex_to_rgb('#F59E0B'), width=3)
+              fill=hex_to_rgb('#FBBF24'), width=3)
 
 
 def draw_chapter_badge(draw, x, y, text, color='#1E293B'):
@@ -184,6 +231,7 @@ def _call_api(messages, model, temperature=0.7, max_tokens=12000):
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
             "Accept-Encoding": "identity",  # avoid gzip decode bug
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         },
         json={"model": model, "messages": messages, "temperature": temperature, "max_tokens": max_tokens},
         timeout=180
@@ -374,12 +422,14 @@ def draw_element_text(draw, el):
     if not lines:
         lines = ['']
 
-    for line_idx, line in enumerate(lines):
+    current_y = y
+    for line in lines:
         bbox = draw.textbbox((0, 0), line, font=font)
         tw = bbox[2] - bbox[0]
-        th = bbox[3] - bbox[1]
+        line_h = size
         x = max(40, min(WIDTH - tw - 40, int(center_x - tw // 2)))
-        draw.text((x, y + line_idx * (th + line_spacing)), line, fill=color, font=font)
+        draw.text((x, current_y), line, fill=color, font=font)
+        current_y += line_h + line_spacing
 
 
 def draw_element_circle(draw, el):
@@ -807,9 +857,25 @@ def _draw_element_animated(base_img, el, progress):
     if not renderer:
         return
 
+    # Deep-copy or shallow-copy element and map its colors to neon!
+    el_copy = dict(el)
+    for color_key in ('color', 'fill', 'outline'):
+        if color_key in el_copy:
+            el_copy[color_key] = map_to_neon(el_copy[color_key])
+            
+    # Also handle specific sub-structures like data in bar_chart
+    if el_type == 'bar_chart' and 'data' in el_copy:
+        new_data = []
+        for d in el_copy['data']:
+            d_copy = dict(d)
+            if 'color' in d_copy:
+                d_copy['color'] = map_to_neon(d_copy['color'])
+            new_data.append(d_copy)
+        el_copy['data'] = new_data
+
     layer = Image.new('RGBA', (WIDTH, HEIGHT), (0, 0, 0, 0))
     layer_draw = ImageDraw.Draw(layer)
-    renderer(layer_draw, _animated_element(el, progress))
+    renderer(layer_draw, _animated_element(el_copy, progress))
 
     alpha = int(255 * _ease_out(progress))
     if alpha < 255:
@@ -849,30 +915,28 @@ def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
     total_frames = len(steps) * frames_per_step
     frame_paths = []
 
-    # Color palettes for variety
+    # Color palettes for variety (Dark premium futuristic/neon gradients)
     gradient_pairs = [
-        ('#667EEA', '#764BA2'),  # Purple-blue
-        ('#F093FB', '#F5576C'),  # Pink-coral
-        ('#4FACFE', '#00F2FE'),  # Cyan-blue
-        ('#43E97B', '#38F9D7'),  # Green-teal
-        ('#FA709A', '#FEE140'),  # Pink-yellow
-        ('#A18CD1', '#FBC2EB'),  # Lavender-pink
+        ('#0B0F19', '#1E1B4B'),  # Deep slate to indigo
+        ('#0A0F1D', '#2E1065'),  # Midnight to deep purple
+        ('#020617', '#172554'),  # Black to royal navy
+        ('#0F172A', '#0F172A'),  # Solid dark slate
     ]
     grad = random.choice(gradient_pairs)
 
-    # Step colors for text variety
-    step_colors = ['#2563EB', '#7C3AED', '#059669', '#D97706', '#DC2626', '#0891B2']
+    # Step colors for text variety (Vibrant neon colors)
+    step_colors = ['#38BDF8', '#C084FC', '#34D399', '#FBBF24', '#F87171', '#22D3EE']
 
     # Pre-render gradient background once (reuse for all frames)
-    gradient_bg = Image.new('RGB', (WIDTH, HEIGHT), color=hex_to_rgb('#FFFFFF'))
+    gradient_bg = Image.new('RGB', (WIDTH, HEIGHT), color=hex_to_rgb('#020617'))
     grad_draw = ImageDraw.Draw(gradient_bg)
     draw_gradient_bg(grad_draw, gradient_bg, grad[0], grad[1])
     # Add frosted glass overlay
     overlay = Image.new('RGBA', (WIDTH, HEIGHT), (0, 0, 0, 0))
     overlay_draw = ImageDraw.Draw(overlay)
     overlay_draw.rounded_rectangle(
-        [(25, 225), (WIDTH - 25, HEIGHT - 100)],
-        radius=30, fill=(255, 255, 255, 180)
+        [(25, 25), (WIDTH - 25, HEIGHT - 25)],
+        radius=35, fill=(11, 15, 25, 210)  # Premium dark space glass overlay (82% opacity)
     )
     gradient_bg = Image.alpha_composite(gradient_bg.convert('RGBA'), overlay).convert('RGB')
 
@@ -886,37 +950,43 @@ def render_scene(scene, frames_dir="temp_frames", frames_per_step=5):
         draw = ImageDraw.Draw(img)
 
         # ── Header bar with shadow ──
-        draw_shadow_card(draw, [(30, 30), (WIDTH - 30, 115)], radius=22, card_color='#1E293B', shadow_color='#CBD5E1')
+        draw_shadow_card(draw, [(40, 40), (WIDTH - 40, 125)], radius=22, card_color='#1E1B4B', shadow_color='#020617')
+        # Glowing border around header
+        draw.rounded_rectangle([(40, 40), (WIDTH - 40, 125)], radius=22, outline=hex_to_rgb('#C084FC'), width=2)
         header_font = get_font(30, bold=True)
         bbox = draw.textbbox((0, 0), title[:40], font=header_font)
         tw = bbox[2] - bbox[0]
-        draw.text(((WIDTH - tw) // 2, 55), title[:40], fill=hex_to_rgb('#FFFFFF'), font=header_font)
+        draw.text(((WIDTH - tw) // 2, 60), title[:40], fill=hex_to_rgb('#F8FAFC'), font=header_font)
 
         # ── Class/Chapter badge below header ──
         badge_text = f"Class {class_num}" if class_num else ""
         if chapter:
             badge_text += f"  |  {chapter}"[:30]
         if badge_text:
-            draw_chapter_badge(draw, (WIDTH - 300) // 2, 125, badge_text, '#1E293B')
+            draw_chapter_badge(draw, (WIDTH - 300) // 2, 135, badge_text, '#1E1B4B')
 
         # ── Progress dots ──
-        draw_step_dots(draw, (WIDTH - (len(steps) - 1) * 45) // 2, 200,
-                       len(steps), step_idx)
+        step_color = step_colors[step_idx % len(step_colors)]
+        draw_step_dots(draw, (WIDTH - (len(steps) - 1) * 45) // 2, 205,
+                       len(steps), step_idx, active_color=step_color, inactive_color='#475569', done_color='#34D399')
 
         # ── Step label card with shadow ──
         step_label = step.get('label', f'Step {step_idx + 1}')
         label_text = f"Step {step_idx + 1}: {step_label}"
         label_font = get_font(28, bold=True)
-        step_color = step_colors[step_idx % len(step_colors)]
-        draw_shadow_card(draw, [(40, 230), (WIDTH - 40, 295)], radius=18, card_color='#FFFFFF', shadow_color='#E2E8F0')
+        draw_shadow_card(draw, [(40, 235), (WIDTH - 40, 300)], radius=18, card_color='#0B0F19', shadow_color='#020617')
         # Colored accent bar on left
-        draw.rounded_rectangle([(40, 230), (52, 295)], radius=6, fill=hex_to_rgb(step_color))
+        draw.rounded_rectangle([(40, 235), (52, 300)], radius=6, fill=hex_to_rgb(step_color))
+        # Thin neon border matching step color
+        draw.rounded_rectangle([(40, 235), (WIDTH - 40, 300)], radius=18, outline=hex_to_rgb(step_color), width=2)
         bbox2 = draw.textbbox((0, 0), label_text, font=label_font)
         tw2 = bbox2[2] - bbox2[0]
-        draw.text(((WIDTH - tw2) // 2, 245), label_text, fill=hex_to_rgb(step_color), font=label_font)
+        draw.text(((WIDTH - tw2) // 2, 250), label_text, fill=hex_to_rgb(step_color), font=label_font)
 
         # ── Draw elements (visual area: y=310 to y=1650) in shadow card ──
-        draw_shadow_card(draw, [(40, 310), (WIDTH - 40, 1650)], radius=24, card_color='#FFFFFF', shadow_color='#E2E8F0')
+        draw_shadow_card(draw, [(40, 315), (WIDTH - 40, 1645)], radius=24, card_color='#090D16', shadow_color='#020617')
+        # Glowing border around the main visual viewport
+        draw.rounded_rectangle([(40, 315), (WIDTH - 40, 1645)], radius=24, outline=hex_to_rgb(step_color), width=3)
 
         elements = step.get('elements', [])
         total_elements = max(1, len(elements))
@@ -1013,9 +1083,9 @@ def generate_visual(topic, frames_dir="temp_frames"):
 
 
 # Visual area bounds for YouTube Shorts
-VISUAL_TOP = 280
-VISUAL_BOTTOM = 1700
-VISUAL_CENTER_Y = (VISUAL_TOP + VISUAL_BOTTOM) // 2  # 990
+VISUAL_TOP = 340
+VISUAL_BOTTOM = 1620
+VISUAL_CENTER_Y = (VISUAL_TOP + VISUAL_BOTTOM) // 2  # 980
 
 
 def _place_value_rows(y, tens_text, ones_text, number_text, color='#2563EB'):

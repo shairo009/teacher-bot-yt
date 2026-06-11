@@ -5,6 +5,10 @@ import asyncio
 import json
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(override=True)
 
 # Import our modules
 from src.pdf_downloader import PDFDownloader

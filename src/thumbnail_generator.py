@@ -23,8 +23,8 @@ PALETTES = [
     {'bg_top': '#9333EA', 'bg_bot': '#3B82F6', 'text': '#FFFFFF', 'accent': '#FDE68A', 'badge': '#10B981'},
 ]
 
-# Math symbols for decoration
-MATH_SYMBOLS = ['+', '-', '×', '÷', '=', 'π', '∑', '√', '∞', 'Δ', 'θ', 'α', 'β', '%']
+# Math symbols for decoration (using only standard characters supported by Montserrat)
+MATH_SYMBOLS = ['+', '-', '=', '%', 'x', '/', '>', '<', '?', '1', '2', '3', '5', '8', '9', 'y', 'z', 'A', 'B']
 
 
 def hex_to_rgb(hex_color):
@@ -37,11 +37,21 @@ def lerp_color(c1, c2, t):
 
 
 def get_font(size, bold=False):
-    """Get Hindi font at given size."""
-    font_path = Path(_PROJECT_ROOT) / 'assets' / 'fonts' / 'hindi_font.ttf'
+    """Get font at given size."""
+    font_path = Path(_PROJECT_ROOT) / 'assets' / 'fonts' / ('Montserrat-Bold.ttf' if bold else 'Montserrat-Regular.ttf')
     if font_path.exists():
         return ImageFont.truetype(str(font_path), size)
-    # Fallback
+    
+    # Fallback to hindi font
+    hindi_path = Path(_PROJECT_ROOT) / 'assets' / 'fonts' / 'hindi_font.ttf'
+    if hindi_path.exists():
+        return ImageFont.truetype(str(hindi_path), size)
+        
+    # System fallback
+    try:
+        return ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf" if bold else "C:/Windows/Fonts/arial.ttf", size)
+    except:
+        pass
     try:
         return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold
                                   else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", size)

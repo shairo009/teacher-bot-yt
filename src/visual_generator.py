@@ -1232,6 +1232,7 @@ def _set_element_center_x(el, new_cx):
     elif etype == 'rect':
         w = el.get('w', 200)
         el['x'] = new_cx - w // 2
+        el['lock_position'] = True
     elif etype in ('line', 'arrow'):
         x1 = el.get('x1', 100)
         x2 = el.get('x2', 500)
@@ -1322,6 +1323,15 @@ def _center_step_elements(elements):
     """
     if not elements:
         return elements
+
+    # Pre-check: If the LLM has explicitly positioned a rect or dots_group at a non-center X coordinate,
+    # lock its position so that the centering sweep does not override it.
+    for el in elements:
+        etype = el.get('type')
+        if etype in ('rect', 'dots_group'):
+            cx = _get_element_center_x(el)
+            if abs(cx - WIDTH // 2) > 20:
+                el['lock_position'] = True
 
     # Resolve horizontal collisions for side-by-side elements
     COLLIDABLE_TYPES = {'circle', 'rect', 'star', 'hexagon', 'triangle', 'dots_group', 'text', 'clock_face', 'line', 'arrow'}

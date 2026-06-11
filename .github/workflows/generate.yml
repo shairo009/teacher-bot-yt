@@ -126,6 +126,11 @@ jobs:
           pip install --upgrade pip wheel
           pip install -r requirements.txt
 
+      - name: Install Playwright browser
+        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
+        run: |
+          python -m playwright install chromium --with-deps
+
       - name: Write YouTube credentials
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         env:
@@ -149,9 +154,9 @@ jobs:
         run: |
           DRY="${{ github.event.inputs.dry_run || 'false' }}"
           if [ "$DRY" = "true" ] || [ ! -f token.json ]; then
-            python main.py --dry-run
+            python lucent_main.py --dry-run
           else
-            python main.py
+            python lucent_main.py
           fi
 
       - name: Upload video artifact
@@ -169,7 +174,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           # Only commit tracked progress files (not junk)
-          git add data/topics_progress.json data/video_history.json
+          git add data/lucent_progress.json data/video_history.json
           git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "Video #$(jq .total_completed data/topics_progress.json) complete [skip ci]"
+          git commit -m "Video #$(jq .current_id data/lucent_progress.json) complete [skip ci]"
           git push

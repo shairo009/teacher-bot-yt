@@ -23,6 +23,7 @@ data/books/
 temp_frames/
 temp_audio/
 temp_*.html
+templates/quiz_shorts.html
 
 # Output videos (uploaded to YouTube, not needed in git)
 outputs/

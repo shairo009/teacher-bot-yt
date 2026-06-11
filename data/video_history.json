@@ -268,5 +268,14 @@
     "topic_id": 7005,
     "video_created": true,
     "video_file": "lesson_class1_20260611_110622.mp4"
+  },
+  {
+    "timestamp": "2026-06-11T11:17:33.946426",
+    "class": 1,
+    "chapter": "Chapter 8: Numbers from Twenty-one to Fifty",
+    "topic": "Counting 21-50",
+    "topic_id": 8000,
+    "video_created": true,
+    "video_file": "lesson_class1_20260611_111658.mp4"
   }
 ]

@@ -295,6 +295,7 @@ Return ONLY valid JSON (no markdown, no explanation) with this exact format:
 Rules:
 - Canvas is 1080x1920 (portrait). VISUAL AREA is y=280 to y=1700. Keep ALL elements within this visual area.
 - Center elements horizontally around x=540. For groups (dots, grids), calculate the group width and center it.
+- For side-by-side comparisons or contrasts (e.g., left vs right objects, heavier vs lighter, 2D vs 3D shapes), place the left-side text/object at x=280 and the right-side text/object at x=800 at the same y level. NEVER place both at x=540 or overlapping.
 - Create 4-6 steps that TEACH the topic progressively (easy → concept → example → practice).
 - Each step should build on the previous one.
 - Use subtopics to guide step generation — each subtopic can become a step.
@@ -1205,6 +1206,44 @@ def _center_step_elements(elements):
     """
     if not elements:
         return elements
+
+    # Resolve horizontal text element collisions for side-by-side comparisons
+    text_elements = [el for el in elements if el.get('type') == 'text']
+    if len(text_elements) >= 2:
+        # Group text elements that have very similar y coordinates (within 40px)
+        text_elements.sort(key=lambda el: el.get('y', 100))
+        groups = []
+        current_group = [text_elements[0]]
+        for el in text_elements[1:]:
+            last_y = current_group[-1].get('y', 100)
+            curr_y = el.get('y', 100)
+            if abs(curr_y - last_y) <= 40:
+                current_group.append(el)
+            else:
+                groups.append(current_group)
+                current_group = [el]
+        groups.append(current_group)
+
+        for group in groups:
+            if len(group) == 2:
+                el1, el2 = group[0], group[1]
+                x1 = el1.get('x', WIDTH // 2)
+                x2 = el2.get('x', WIDTH // 2)
+                
+                # If they are horizontally very close (e.g. within 150px) or both centered
+                if abs(x1 - x2) < 150:
+                    # Push them to left (280) and right (800) sides respectively
+                    if x1 <= x2:
+                        el1['x'] = 280
+                        el2['x'] = 800
+                    else:
+                        el1['x'] = 800
+                        el2['x'] = 280
+                    # Align them vertically to the average y coordinate
+                    avg_y = (el1.get('y', 100) + el2.get('y', 100)) // 2
+                    el1['y'] = avg_y
+                    el2['y'] = avg_y
+                    print(f"  [collision] Resolved horizontal text overlap: pushed to x=280 and x=800")
 
     # Calculate bounding box of all elements
     min_y, max_y = 9999, 0

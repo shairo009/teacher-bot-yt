@@ -1198,26 +1198,144 @@ def _generate_tens_ones_scene(topic_text, class_num):
     ]
 
 
+def _get_element_center_x(el):
+    etype = el.get('type', 'text')
+    if etype in ('circle', 'star', 'hexagon', 'clock_face'):
+        return el.get('cx', WIDTH // 2)
+    elif etype == 'rect':
+        x = el.get('x', 100)
+        w = el.get('w', 200)
+        return x + w // 2
+    elif etype in ('line', 'arrow'):
+        x1 = el.get('x1', 100)
+        x2 = el.get('x2', 500)
+        return (x1 + x2) // 2
+    elif etype == 'triangle':
+        points = el.get('points', [])
+        if points:
+            return sum(p[0] for p in points) // len(points)
+    elif etype == 'dots_group':
+        x = el.get('x', 200)
+        count = el.get('count', 5)
+        cols = min(5, count)
+        spacing = el.get('spacing', 70)
+        group_w = (cols - 1) * spacing + 50
+        return x + group_w // 2
+    else: # text, fraction_bar, grid, ruler, bar_chart, etc.
+        return el.get('x', WIDTH // 2)
+
+
+def _set_element_center_x(el, new_cx):
+    etype = el.get('type', 'text')
+    if etype in ('circle', 'star', 'hexagon', 'clock_face'):
+        el['cx'] = new_cx
+    elif etype == 'rect':
+        w = el.get('w', 200)
+        el['x'] = new_cx - w // 2
+    elif etype in ('line', 'arrow'):
+        x1 = el.get('x1', 100)
+        x2 = el.get('x2', 500)
+        dx = new_cx - (x1 + x2) // 2
+        el['x1'] = x1 + dx
+        el['x2'] = x2 + dx
+    elif etype == 'triangle':
+        points = el.get('points', [])
+        if points:
+            curr_cx = sum(p[0] for p in points) // len(points)
+            dx = new_cx - curr_cx
+            el['points'] = [[p[0] + dx, p[1]] for p in points]
+    elif etype == 'dots_group':
+        count = el.get('count', 5)
+        cols = min(5, count)
+        spacing = el.get('spacing', 70)
+        group_w = (cols - 1) * spacing + 50
+        el['x'] = new_cx - group_w // 2
+        el['lock_position'] = True
+    else: # text, fraction_bar, grid, ruler, etc.
+        el['x'] = new_cx
+
+
+def _get_element_center_y(el):
+    etype = el.get('type', 'text')
+    if etype in ('circle', 'star', 'hexagon', 'clock_face'):
+        return el.get('cy', VISUAL_CENTER_Y)
+    elif etype == 'rect':
+        y = el.get('y', 100)
+        h = el.get('h', 100)
+        return y + h // 2
+    elif etype in ('line', 'arrow'):
+        y1 = el.get('y1', 100)
+        y2 = el.get('y2', 500)
+        return (y1 + y2) // 2
+    elif etype == 'triangle':
+        points = el.get('points', [])
+        if points:
+            return sum(p[1] for p in points) // len(points)
+    elif etype == 'dots_group':
+        y = el.get('y', 500)
+        count = el.get('count', 5)
+        cols = min(5, count)
+        rows = (count + cols - 1) // cols
+        spacing = el.get('spacing', 70)
+        group_h = (rows - 1) * spacing + 50
+        return y + group_h // 2
+    else: # text, fraction_bar, grid, ruler, etc.
+        return el.get('y', VISUAL_CENTER_Y)
+
+
+def _set_element_center_y(el, new_cy):
+    etype = el.get('type', 'text')
+    if etype in ('circle', 'star', 'hexagon', 'clock_face'):
+        el['cy'] = new_cy
+    elif etype == 'rect':
+        h = el.get('h', 100)
+        el['y'] = new_cy - h // 2
+    elif etype in ('line', 'arrow'):
+        y1 = el.get('y1', 100)
+        y2 = el.get('y2', 500)
+        dy = new_cy - (y1 + y2) // 2
+        el['y1'] = y1 + dy
+        el['y2'] = y2 + dy
+    elif etype == 'triangle':
+        points = el.get('points', [])
+        if points:
+            curr_cy = sum(p[1] for p in points) // len(points)
+            dy = new_cy - curr_cy
+            el['points'] = [[p[0], p[1] + dy] for p in points]
+    elif etype == 'dots_group':
+        count = el.get('count', 5)
+        cols = min(5, count)
+        rows = (count + cols - 1) // cols
+        spacing = el.get('spacing', 70)
+        group_h = (rows - 1) * spacing + 50
+        el['y'] = new_cy - group_h // 2
+        el['lock_position'] = True
+    else: # text, fraction_bar, grid, ruler, etc.
+        el['y'] = new_cy
+
+
 def _center_step_elements(elements):
     """Adjust element positions so they're centered in the visual area (y=280 to y=1700).
 
     - Vertically: shift all elements so the group is centered between 280-1700
-    - Horizontally: center groups (dots, grids) that are left-aligned
+    - Horizontally: resolve overlaps and center groups (dots, grids) that are left-aligned
     """
     if not elements:
         return elements
 
-    # Resolve horizontal text element collisions for side-by-side comparisons
-    text_elements = [el for el in elements if el.get('type') == 'text']
-    if len(text_elements) >= 2:
-        # Group text elements that have very similar y coordinates (within 40px)
-        text_elements.sort(key=lambda el: el.get('y', 100))
+    # Resolve horizontal collisions for side-by-side elements
+    COLLIDABLE_TYPES = {'circle', 'rect', 'star', 'hexagon', 'triangle', 'dots_group', 'text', 'clock_face', 'line', 'arrow'}
+    collidables = [el for el in elements if el.get('type', 'text') in COLLIDABLE_TYPES]
+    
+    if len(collidables) >= 2:
+        # Group elements that have very similar center y-coordinates (within 60px)
+        collidables.sort(key=lambda el: _get_element_center_y(el))
         groups = []
-        current_group = [text_elements[0]]
-        for el in text_elements[1:]:
-            last_y = current_group[-1].get('y', 100)
-            curr_y = el.get('y', 100)
-            if abs(curr_y - last_y) <= 40:
+        current_group = [collidables[0]]
+        for el in collidables[1:]:
+            last_cy = _get_element_center_y(current_group[-1])
+            curr_cy = _get_element_center_y(el)
+            if abs(curr_cy - last_cy) <= 60:
                 current_group.append(el)
             else:
                 groups.append(current_group)
@@ -1225,25 +1343,48 @@ def _center_step_elements(elements):
         groups.append(current_group)
 
         for group in groups:
+            # 2-way comparison layout
             if len(group) == 2:
                 el1, el2 = group[0], group[1]
-                x1 = el1.get('x', WIDTH // 2)
-                x2 = el2.get('x', WIDTH // 2)
+                cx1 = _get_element_center_x(el1)
+                cx2 = _get_element_center_x(el2)
                 
-                # If they are horizontally very close (e.g. within 150px) or both centered
-                if abs(x1 - x2) < 150:
+                # If they are horizontally very close (within 180px)
+                if abs(cx1 - cx2) < 180:
                     # Push them to left (280) and right (800) sides respectively
-                    if x1 <= x2:
-                        el1['x'] = 280
-                        el2['x'] = 800
+                    if cx1 <= cx2:
+                        _set_element_center_x(el1, 280)
+                        _set_element_center_x(el2, 800)
                     else:
-                        el1['x'] = 800
-                        el2['x'] = 280
-                    # Align them vertically to the average y coordinate
-                    avg_y = (el1.get('y', 100) + el2.get('y', 100)) // 2
-                    el1['y'] = avg_y
-                    el2['y'] = avg_y
-                    print(f"  [collision] Resolved horizontal text overlap: pushed to x=280 and x=800")
+                        _set_element_center_x(el1, 800)
+                        _set_element_center_x(el2, 280)
+                    
+                    # Align them vertically to the average y coordinate of the group
+                    avg_cy = (_get_element_center_y(el1) + _get_element_center_y(el2)) // 2
+                    _set_element_center_y(el1, avg_cy)
+                    _set_element_center_y(el2, avg_cy)
+                    print(f"  [collision] Resolved 2-way horizontal overlap for {el1.get('type')} and {el2.get('type')}: pushed to x=280 and x=800")
+            
+            # 3-way comparison layout
+            elif len(group) == 3:
+                el1, el2, el3 = group[0], group[1], group[2]
+                cx1 = _get_element_center_x(el1)
+                cx2 = _get_element_center_x(el2)
+                cx3 = _get_element_center_x(el3)
+                
+                # If any of them are horizontally very close (within 150px)
+                if abs(cx1 - cx2) < 150 or abs(cx2 - cx3) < 150 or abs(cx1 - cx3) < 150:
+                    # Sort them left-to-right by their current x-coordinate
+                    sorted_group = sorted(group, key=lambda el: _get_element_center_x(el))
+                    _set_element_center_x(sorted_group[0], 200)
+                    _set_element_center_x(sorted_group[1], 540)
+                    _set_element_center_x(sorted_group[2], 880)
+                    
+                    # Align them vertically to the average y coordinate of the group
+                    avg_cy = sum(_get_element_center_y(el) for el in group) // 3
+                    for el in group:
+                        _set_element_center_y(el, avg_cy)
+                    print(f"  [collision] Resolved 3-way horizontal overlap: pushed to x=200, x=540, and x=880")
 
     # Calculate bounding box of all elements
     min_y, max_y = 9999, 0

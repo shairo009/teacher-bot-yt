@@ -33,16 +33,18 @@ jobs:
       - name: Rate limit check
         id: rate_check
         run: |
-          # Check if a video was generated in the last 5 hours
+          # Check if a LUCENT quiz video was generated in the last 5 hours
           if [ -f data/video_history.json ]; then
             LAST_RUN=$(python3 -c "
           import json
-          from datetime import datetime, timezone, timedelta
+          from datetime import datetime, timezone
           try:
               with open('data/video_history.json') as f:
                   history = json.load(f)
-              if history:
-                  last = datetime.fromisoformat(history[-1]['timestamp'])
+              # Only look at lucent quiz entries (they have 'id' field)
+              lucent_history = [h for h in history if 'id' in h]
+              if lucent_history:
+                  last = datetime.fromisoformat(lucent_history[-1]['timestamp'])
                   if last.tzinfo is None:
                       last = last.replace(tzinfo=timezone.utc)
                   now = datetime.now(timezone.utc)
@@ -50,10 +52,10 @@ jobs:
                   print(f'{hours_since:.1f}')
               else:
                   print('999')
-          except:
+          except Exception as e:
               print('999')
           ")
-            echo "Hours since last video: $LAST_RUN"
+            echo "Hours since last lucent video: $LAST_RUN"
             FORCE="${{ github.event.inputs.force || 'false' }}"
             if [ "$FORCE" = "true" ]; then
               echo "Force run enabled. Overriding rate limit check."
@@ -62,7 +64,7 @@ jobs:
               SKIP=$(python3 -c "print('true' if float('$LAST_RUN') < 5.0 else 'false')")
               echo "skip=$SKIP" >> $GITHUB_OUTPUT
               if [ "$SKIP" = "true" ]; then
-                echo "Last video was less than 5 hours ago. Skipping."
+                echo "Last lucent video was less than 5 hours ago. Skipping."
               fi
             fi
           else
@@ -74,7 +76,7 @@ jobs:
         if: steps.rate_check.outputs.skip != 'true'
         id: daily_check
         run: |
-          # Max 4 videos per day — steady YouTube upload pace
+          # Max 4 lucent videos per day — steady YouTube upload pace
           if [ -f data/video_history.json ]; then
             TODAY_COUNT=$(python3 -c "
           import json
@@ -82,8 +84,18 @@ jobs:
           try:
               with open('data/video_history.json') as f:
                   history = json.load(f)
+              # Only count lucent quiz entries (they have 'id' field)
+              lucent_history = [h for h in history if 'id' in h]
               today = datetime.now(timezone.utc).date()
-              count = sum(1 for h in history if datetime.fromisoformat(h['timestamp']).date() == today)
+              def safe_date(h):
+                  try:
+                      ts = datetime.fromisoformat(h['timestamp'])
+                      if ts.tzinfo is None:
+                          ts = ts.replace(tzinfo=timezone.utc)
+                      return ts.date()
+                  except:
+                      return None
+              count = sum(1 for h in lucent_history if safe_date(h) == today)
               print(count)
           except:
               print(0)

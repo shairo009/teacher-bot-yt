@@ -11,9 +11,9 @@ from datetime import datetime, timezone
 PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.append(str(PROJECT_ROOT))
 
-# Canvas size for Shorts (Portrait)
-WIDTH = 1080
-HEIGHT = 1920
+# Canvas size for 4K Shorts (Portrait)
+WIDTH = 2160
+HEIGHT = 3840
 FPS = 30
 
 def get_audio_duration(file_path):
@@ -130,9 +130,10 @@ def compose_quiz_video(frame_paths, audio_path, question_id):
         '-f', 'concat', '-safe', '0',
         '-i', str(concat_file),
         '-i', str(audio_path),
-        '-vf', 'scale=1080:1920,fps=30',
+        '-vf', 'scale=2160:3840,fps=30',
         '-c:v', 'libx264',
-        '-preset', 'fast',
+        '-preset', 'slow',
+        '-crf', '18',
         '-pix_fmt', 'yuv420p',
         '-shortest',
         str(output_video_path)

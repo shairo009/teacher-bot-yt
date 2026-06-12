@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>React GK Quiz Shorts Template</title>
+  <title>Lucent GK Quiz Shorts - 4K</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Poppins -->
@@ -14,43 +14,43 @@
     }
   </style>
 </head>
-<body class="w-[1080px] h-[1920px] bg-[#E5DDF5] p-0 m-0 flex items-center justify-center select-none relative overflow-hidden">
+<body class="w-[2160px] h-[3840px] bg-[#E5DDF5] p-0 m-0 flex items-center justify-center select-none relative overflow-hidden">
 
   <!-- Soft Pastel Background Blur Elements -->
-  <div class="absolute -top-40 -left-40 w-[600px] h-[600px] bg-purple-300 rounded-full blur-[180px] opacity-60 pointer-events-none"></div>
-  <div class="absolute -bottom-40 -right-40 w-[800px] h-[800px] bg-pink-300 rounded-full blur-[200px] opacity-50 pointer-events-none"></div>
+  <div class="absolute -top-80 -left-80 w-[1200px] h-[1200px] bg-purple-300 rounded-full blur-[360px] opacity-60 pointer-events-none"></div>
+  <div class="absolute -bottom-80 -right-80 w-[1600px] h-[1600px] bg-pink-300 rounded-full blur-[400px] opacity-50 pointer-events-none"></div>
 
   <!-- PAGE 1: QUIZ PAGE -->
-  <div id="page-quiz" class="w-full h-full bg-white/60 backdrop-blur-3xl p-12 pt-16 pb-10 flex flex-col justify-between relative overflow-hidden">
+  <div id="page-quiz" class="w-full h-full bg-white/60 backdrop-blur-3xl p-24 pt-32 pb-20 flex flex-col justify-between relative overflow-hidden">
     
     <!-- TOP STATUS ROW -->
-    <div class="flex items-center justify-between mb-8 border-b-2 border-slate-100/60 pb-5 flex-shrink-0">
-      <div class="flex flex-col items-start text-left gap-1 w-full">
+    <div class="flex items-center justify-between mb-16 border-b-4 border-slate-100/60 pb-10 flex-shrink-0">
+      <div class="flex flex-col items-start text-left gap-2 w-full">
         <!-- Lucent GK Logo -->
-        <div class="flex items-center gap-3.5">
-          <span class="w-6 h-6 rounded-full bg-[#BA68C8] opacity-80 inline-block"></span>
-          <span class="text-3xl font-black text-[#8E24AA] uppercase tracking-wider">
+        <div class="flex items-center gap-7">
+          <span class="w-12 h-12 rounded-full bg-[#BA68C8] opacity-80 inline-block"></span>
+          <span class="text-6xl font-black text-[#8E24AA] uppercase tracking-wider">
             LUCENT GK
           </span>
         </div>
-        <!-- Book headings in Poppins -->
-        <span class="text-xl font-black uppercase tracking-widest text-[#8E24AA]/70 mt-2">
+        <!-- Book headings -->
+        <span class="text-4xl font-black uppercase tracking-widest text-[#8E24AA]/70 mt-4">
           SUBJECT: {{subject}}
         </span>
-        <span class="text-2xl font-black uppercase tracking-widest text-[#8E24AA]">
+        <span class="text-5xl font-black uppercase tracking-widest text-[#8E24AA]">
           {{chapter}}
         </span>
-        <span class="text-xl font-bold uppercase tracking-wider text-slate-500">
+        <span class="text-4xl font-bold uppercase tracking-wider text-slate-500 mt-2">
           TOPIC: {{topic}}
         </span>
       </div>
 
       <!-- Right Side Circular Timer -->
-      <div id="timer-orb" class="relative w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-md border-2 border-slate-100 flex-shrink-0">
+      <div id="timer-orb" class="relative w-48 h-48 rounded-full bg-white flex items-center justify-center shadow-md border-4 border-slate-100 flex-shrink-0">
         <!-- SVG Circular Ring -->
         <svg class="absolute top-0 left-0 w-full h-full transform -rotate-90">
-          <circle cx="48" cy="48" r="40" stroke="#E2E8F0" stroke-width="6" fill="transparent"></circle>
-          <circle id="timer-ring" cx="48" cy="48" r="40" stroke="url(#timer-grad)" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="0" stroke-linecap="round" fill="transparent" class="transition-all duration-100"></circle>
+          <circle cx="96" cy="96" r="80" stroke="#E2E8F0" stroke-width="12" fill="transparent"></circle>
+          <circle id="timer-ring" cx="96" cy="96" r="80" stroke="url(#timer-grad)" stroke-width="16" stroke-dasharray="502.4" stroke-dashoffset="0" stroke-linecap="round" fill="transparent" class="transition-all duration-100"></circle>
           <defs>
             <linearGradient id="timer-grad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="#4CD3A2"></stop>
@@ -58,88 +58,88 @@
             </linearGradient>
           </defs>
         </svg>
-        <span id="timer-num" class="text-2xl font-black text-slate-800 relative z-10">05</span>
+        <span id="timer-num" class="text-5xl font-black text-slate-800 relative z-10">05</span>
       </div>
     </div>
 
     <!-- MAIN INTERACTIVE QUIZ AREA -->
-    <div class="flex-grow flex flex-col justify-start mt-6">
+    <div class="flex-grow flex flex-col justify-start mt-12">
       
       <!-- UPPER QUESTION CARD -->
-      <div id="question-card" class="bg-gradient-to-br from-[#4A154B] via-[#611F69] to-[#3F0E40] border-4 border-[#521c54] rounded-[48px] pt-16 pb-16 px-12 text-white shadow-2xl relative overflow-hidden flex-shrink-0 min-h-[800px] flex flex-col justify-start items-start">
+      <div id="question-card" class="bg-gradient-to-br from-[#4A154B] via-[#611F69] to-[#3F0E40] border-8 border-[#521c54] rounded-[96px] pt-32 pb-32 px-24 text-white shadow-2xl relative overflow-hidden flex-shrink-0 min-h-[1600px] flex flex-col justify-start items-start">
         <!-- Inner glow blur -->
-        <div class="absolute -top-20 -right-20 w-80 h-80 bg-pink-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -top-40 -right-40 w-[640px] h-[640px] bg-pink-500/20 rounded-full blur-3xl pointer-events-none"></div>
         
-        <div class="relative z-10 flex flex-col items-start gap-5 w-full">
-          <h3 class="font-black text-slate-100 leading-snug break-words tracking-wide text-3xl w-full text-left">
+        <div class="relative z-10 flex flex-col items-start gap-10 w-full">
+          <h3 class="font-black text-slate-100 leading-snug break-words tracking-wide text-[64px] w-full text-left">
             {{question_hi}}
           </h3>
           <!-- Thin line divider -->
-          <div class="w-full h-0.5 bg-white/10 my-1"></div>
-          <h3 class="font-black text-purple-200 leading-snug break-words tracking-wide text-3xl w-full text-left">
+          <div class="w-full h-1 bg-white/10 my-2"></div>
+          <h3 class="font-black text-purple-200 leading-snug break-words tracking-wide text-[60px] w-full text-left">
             {{question_en}}
           </h3>
         </div>
       </div>
 
       <!-- LOWER OPTIONS LIST -->
-      <div class="flex flex-col mt-32">
-        <div class="px-2 pb-6 flex-shrink-0 text-left">
-          <h4 class="text-xl font-black uppercase tracking-wide text-slate-400">
+      <div class="flex flex-col mt-64">
+        <div class="px-4 pb-12 flex-shrink-0 text-left">
+          <h4 class="text-4xl font-black uppercase tracking-wide text-slate-400">
             OPTIONS
           </h4>
         </div>
 
         <!-- Options Container -->
-        <div class="space-y-5" id="options-container">
+        <div class="space-y-10" id="options-container">
           <!-- Option A -->
-          <div id="opt-0" class="bg-white/75 border border-transparent rounded-[36px] py-6 px-8 flex flex-col gap-4 shadow-[0_8px_20px_rgba(0,0,0,0.02)] w-full">
-            <div class="flex items-center gap-8 text-left justify-start w-full">
-              <div id="circle-0" class="w-20 h-20 rounded-full flex items-center justify-center font-black text-[30px] shrink-0 shadow-sm bg-[#F1EEF8] text-black">
+          <div id="opt-0" class="bg-white/75 border border-transparent rounded-[72px] py-12 px-16 flex flex-col gap-8 shadow-[0_8px_20px_rgba(0,0,0,0.02)] w-full">
+            <div class="flex items-center gap-16 text-left justify-start w-full">
+              <div id="circle-0" class="w-40 h-40 rounded-full flex items-center justify-center font-black text-[60px] shrink-0 shadow-sm bg-[#F1EEF8] text-black">
                 A
               </div>
-              <div class="flex flex-col gap-1 flex-1 text-left">
-                <span class="text-[30px] font-black text-slate-800">{{opt0_en}}</span>
-                <span class="text-[23px] font-bold text-[#8E24AA]/80">{{opt0_hi}}</span>
+              <div class="flex flex-col gap-2 flex-1 text-left">
+                <span class="text-[58px] font-black text-slate-800">{{opt0_en}}</span>
+                <span class="text-[46px] font-bold text-[#8E24AA]/80">{{opt0_hi}}</span>
               </div>
             </div>
           </div>
 
           <!-- Option B -->
-          <div id="opt-1" class="bg-white/75 border border-transparent rounded-[36px] py-6 px-8 flex flex-col gap-4 shadow-[0_8px_20px_rgba(0,0,0,0.02)] w-full">
-            <div class="flex items-center gap-8 text-left justify-start w-full">
-              <div id="circle-1" class="w-20 h-20 rounded-full flex items-center justify-center font-black text-[30px] shrink-0 shadow-sm bg-[#F1EEF8] text-black">
+          <div id="opt-1" class="bg-white/75 border border-transparent rounded-[72px] py-12 px-16 flex flex-col gap-8 shadow-[0_8px_20px_rgba(0,0,0,0.02)] w-full">
+            <div class="flex items-center gap-16 text-left justify-start w-full">
+              <div id="circle-1" class="w-40 h-40 rounded-full flex items-center justify-center font-black text-[60px] shrink-0 shadow-sm bg-[#F1EEF8] text-black">
                 B
               </div>
-              <div class="flex flex-col gap-1 flex-1 text-left">
-                <span class="text-[30px] font-black text-slate-800">{{opt1_en}}</span>
-                <span class="text-[23px] font-bold text-[#8E24AA]/80">{{opt1_hi}}</span>
+              <div class="flex flex-col gap-2 flex-1 text-left">
+                <span class="text-[58px] font-black text-slate-800">{{opt1_en}}</span>
+                <span class="text-[46px] font-bold text-[#8E24AA]/80">{{opt1_hi}}</span>
               </div>
             </div>
           </div>
 
           <!-- Option C -->
-          <div id="opt-2" class="bg-white/75 border border-transparent rounded-[36px] py-6 px-8 flex flex-col gap-4 shadow-[0_8px_20px_rgba(0,0,0,0.02)] w-full">
-            <div class="flex items-center gap-8 text-left justify-start w-full">
-              <div id="circle-2" class="w-20 h-20 rounded-full flex items-center justify-center font-black text-[30px] shrink-0 shadow-sm bg-[#F1EEF8] text-black">
+          <div id="opt-2" class="bg-white/75 border border-transparent rounded-[72px] py-12 px-16 flex flex-col gap-8 shadow-[0_8px_20px_rgba(0,0,0,0.02)] w-full">
+            <div class="flex items-center gap-16 text-left justify-start w-full">
+              <div id="circle-2" class="w-40 h-40 rounded-full flex items-center justify-center font-black text-[60px] shrink-0 shadow-sm bg-[#F1EEF8] text-black">
                 C
               </div>
-              <div class="flex flex-col gap-1 flex-1 text-left">
-                <span class="text-[30px] font-black text-slate-800">{{opt2_en}}</span>
-                <span class="text-[23px] font-bold text-[#8E24AA]/80">{{opt2_hi}}</span>
+              <div class="flex flex-col gap-2 flex-1 text-left">
+                <span class="text-[58px] font-black text-slate-800">{{opt2_en}}</span>
+                <span class="text-[46px] font-bold text-[#8E24AA]/80">{{opt2_hi}}</span>
               </div>
             </div>
           </div>
 
           <!-- Option D -->
-          <div id="opt-3" class="bg-white/75 border border-transparent rounded-[36px] py-6 px-8 flex flex-col gap-4 shadow-[0_8px_20px_rgba(0,0,0,0.02)] w-full">
-            <div class="flex items-center gap-8 text-left justify-start w-full">
-              <div id="circle-3" class="w-20 h-20 rounded-full flex items-center justify-center font-black text-[30px] shrink-0 shadow-sm bg-[#F1EEF8] text-black">
+          <div id="opt-3" class="bg-white/75 border border-transparent rounded-[72px] py-12 px-16 flex flex-col gap-8 shadow-[0_8px_20px_rgba(0,0,0,0.02)] w-full">
+            <div class="flex items-center gap-16 text-left justify-start w-full">
+              <div id="circle-3" class="w-40 h-40 rounded-full flex items-center justify-center font-black text-[60px] shrink-0 shadow-sm bg-[#F1EEF8] text-black">
                 D
               </div>
-              <div class="flex flex-col gap-1 flex-1 text-left">
-                <span class="text-[30px] font-black text-slate-800">{{opt3_en}}</span>
-                <span class="text-[23px] font-bold text-[#8E24AA]/80">{{opt3_hi}}</span>
+              <div class="flex flex-col gap-2 flex-1 text-left">
+                <span class="text-[58px] font-black text-slate-800">{{opt3_en}}</span>
+                <span class="text-[46px] font-bold text-[#8E24AA]/80">{{opt3_hi}}</span>
               </div>
             </div>
           </div>
@@ -150,83 +150,83 @@
   </div>
 
   <!-- PAGE 2: EXPLANATION PAGE -->
-  <div id="page-explain" class="w-full h-full bg-white backdrop-blur-3xl p-12 pt-16 pb-10 flex flex-col justify-start relative overflow-hidden" style="display: none;">
-    <!-- Soft Background Blur Elements for Page 2 to match theme -->
-    <div class="absolute -top-40 -left-40 w-[600px] h-[600px] bg-purple-300 rounded-full blur-[180px] opacity-40 pointer-events-none"></div>
-    <div class="absolute -bottom-40 -right-40 w-[800px] h-[800px] bg-pink-300 rounded-full blur-[200px] opacity-35 pointer-events-none"></div>
+  <div id="page-explain" class="w-full h-full bg-white backdrop-blur-3xl p-24 pt-32 pb-20 flex flex-col justify-start relative overflow-hidden" style="display: none;">
+    <!-- Soft Background Blur Elements for Page 2 -->
+    <div class="absolute -top-80 -left-80 w-[1200px] h-[1200px] bg-purple-300 rounded-full blur-[360px] opacity-40 pointer-events-none"></div>
+    <div class="absolute -bottom-80 -right-80 w-[1600px] h-[1600px] bg-pink-300 rounded-full blur-[400px] opacity-35 pointer-events-none"></div>
 
     <!-- TOP STATUS ROW -->
-    <div class="flex items-center justify-between mb-10 border-b-2 border-slate-100 pb-5 flex-shrink-0 relative z-10">
-      <div class="flex flex-col items-start text-left gap-1 w-full">
+    <div class="flex items-center justify-between mb-20 border-b-4 border-slate-100 pb-10 flex-shrink-0 relative z-10">
+      <div class="flex flex-col items-start text-left gap-2 w-full">
         <!-- Lucent GK Logo -->
-        <div class="flex items-center gap-3.5">
-          <span class="w-6 h-6 rounded-full bg-[#BA68C8] opacity-80 inline-block"></span>
-          <span class="text-3xl font-black text-[#8E24AA] uppercase tracking-wider">
+        <div class="flex items-center gap-7">
+          <span class="w-12 h-12 rounded-full bg-[#BA68C8] opacity-80 inline-block"></span>
+          <span class="text-6xl font-black text-[#8E24AA] uppercase tracking-wider">
             LUCENT GK
           </span>
         </div>
-        <!-- Book headings in Poppins -->
-        <span class="text-xl font-black uppercase tracking-widest text-[#8E24AA]/70 mt-2">
+        <!-- Book headings -->
+        <span class="text-4xl font-black uppercase tracking-widest text-[#8E24AA]/70 mt-4">
           SUBJECT: INDIAN POLITY (भारतीय राजव्यवस्था)
         </span>
-        <span class="text-2xl font-black uppercase tracking-widest text-[#8E24AA]">
+        <span class="text-5xl font-black uppercase tracking-widest text-[#8E24AA]">
           CHAPTER 1: MAKING OF THE CONSTITUTION
         </span>
-        <span class="text-2xl font-black uppercase tracking-widest text-[#8E24AA]/60 mt-1">
+        <span class="text-4xl font-black uppercase tracking-widest text-[#8E24AA]/60 mt-2">
           IMPORTANT FACTS (महत्वपूर्ण जानकारी)
         </span>
       </div>
     </div>
 
     <!-- EXPLANATIONS LIST -->
-    <div class="flex-grow flex flex-col justify-start space-y-9 mt-4 relative z-10">
+    <div class="flex-grow flex flex-col justify-start space-y-16 mt-8 relative z-10">
       <!-- Card A -->
-      <div id="exp-card-0" class="bg-white border border-[#E2E8F0] rounded-[36px] py-9 px-9 flex items-start gap-8 shadow-sm transition-all duration-300 w-full opacity-0">
-        <div id="exp-circle-0" class="w-24 h-24 rounded-full flex items-center justify-center font-black text-[30px] shrink-0 bg-[#F1EEF8] text-black">
+      <div id="exp-card-0" class="bg-white border-2 border-[#E2E8F0] rounded-[72px] py-16 px-18 flex items-start gap-16 shadow-sm transition-all duration-300 w-full opacity-0">
+        <div id="exp-circle-0" class="w-48 h-48 rounded-full flex items-center justify-center font-black text-[60px] shrink-0 bg-[#F1EEF8] text-black">
           A
         </div>
-        <div class="flex flex-col gap-2 flex-1 text-left">
-          <span class="text-[28px] font-black text-slate-800 leading-tight">{{opt0_en}} ({{opt0_hi}})</span>
-          <p class="text-[23px] font-medium leading-relaxed text-slate-500">
+        <div class="flex flex-col gap-4 flex-1 text-left">
+          <span class="text-[54px] font-black text-slate-800 leading-tight">{{opt0_en}} ({{opt0_hi}})</span>
+          <p class="text-[44px] font-medium leading-relaxed text-slate-500">
             {{exp0}}
           </p>
         </div>
       </div>
 
       <!-- Card B -->
-      <div id="exp-card-1" class="bg-white border border-[#E2E8F0] rounded-[36px] py-9 px-9 flex items-start gap-8 shadow-sm transition-all duration-300 w-full opacity-0">
-        <div id="exp-circle-1" class="w-24 h-24 rounded-full flex items-center justify-center font-black text-[30px] shrink-0 bg-[#F1EEF8] text-black">
+      <div id="exp-card-1" class="bg-white border-2 border-[#E2E8F0] rounded-[72px] py-16 px-18 flex items-start gap-16 shadow-sm transition-all duration-300 w-full opacity-0">
+        <div id="exp-circle-1" class="w-48 h-48 rounded-full flex items-center justify-center font-black text-[60px] shrink-0 bg-[#F1EEF8] text-black">
           B
         </div>
-        <div class="flex flex-col gap-2 flex-1 text-left">
-          <span class="text-[28px] font-black text-slate-800 leading-tight">{{opt1_en}} ({{opt1_hi}})</span>
-          <p class="text-[23px] font-medium leading-relaxed text-slate-500">
+        <div class="flex flex-col gap-4 flex-1 text-left">
+          <span class="text-[54px] font-black text-slate-800 leading-tight">{{opt1_en}} ({{opt1_hi}})</span>
+          <p class="text-[44px] font-medium leading-relaxed text-slate-500">
             {{exp1}}
           </p>
         </div>
       </div>
 
       <!-- Card C -->
-      <div id="exp-card-2" class="bg-white border border-[#E2E8F0] rounded-[36px] py-9 px-9 flex items-start gap-8 shadow-sm transition-all duration-300 w-full opacity-0">
-        <div id="exp-circle-2" class="w-24 h-24 rounded-full flex items-center justify-center font-black text-[30px] shrink-0 bg-[#F1EEF8] text-black">
+      <div id="exp-card-2" class="bg-white border-2 border-[#E2E8F0] rounded-[72px] py-16 px-18 flex items-start gap-16 shadow-sm transition-all duration-300 w-full opacity-0">
+        <div id="exp-circle-2" class="w-48 h-48 rounded-full flex items-center justify-center font-black text-[60px] shrink-0 bg-[#F1EEF8] text-black">
           C
         </div>
-        <div class="flex flex-col gap-2 flex-1 text-left">
-          <span class="text-[28px] font-black text-slate-800 leading-tight">{{opt2_en}} ({{opt2_hi}})</span>
-          <p class="text-[23px] font-medium leading-relaxed text-slate-500">
+        <div class="flex flex-col gap-4 flex-1 text-left">
+          <span class="text-[54px] font-black text-slate-800 leading-tight">{{opt2_en}} ({{opt2_hi}})</span>
+          <p class="text-[44px] font-medium leading-relaxed text-slate-500">
             {{exp2}}
           </p>
         </div>
       </div>
 
       <!-- Card D -->
-      <div id="exp-card-3" class="bg-white border border-[#E2E8F0] rounded-[36px] py-9 px-9 flex items-start gap-8 shadow-sm transition-all duration-300 w-full opacity-0">
-        <div id="exp-circle-3" class="w-24 h-24 rounded-full flex items-center justify-center font-black text-[30px] shrink-0 bg-[#F1EEF8] text-black">
+      <div id="exp-card-3" class="bg-white border-2 border-[#E2E8F0] rounded-[72px] py-16 px-18 flex items-start gap-16 shadow-sm transition-all duration-300 w-full opacity-0">
+        <div id="exp-circle-3" class="w-48 h-48 rounded-full flex items-center justify-center font-black text-[60px] shrink-0 bg-[#F1EEF8] text-black">
           D
         </div>
-        <div class="flex flex-col gap-2 flex-1 text-left">
-          <span class="text-[28px] font-black text-slate-800 leading-tight">{{opt3_en}} ({{opt3_hi}})</span>
-          <p class="text-[23px] font-medium leading-relaxed text-slate-500">
+        <div class="flex flex-col gap-4 flex-1 text-left">
+          <span class="text-[54px] font-black text-slate-800 leading-tight">{{opt3_en}} ({{opt3_hi}})</span>
+          <p class="text-[44px] font-medium leading-relaxed text-slate-500">
             {{exp3}}
           </p>
         </div>
@@ -237,6 +237,7 @@
   <!-- Javascript State Controller -->
   <script>
     const correctIdx = {{correct_idx}};
+    const TIMER_CIRCUMFERENCE = 502.4; // 2 * pi * 80
 
     window.setQuizState = function(phase, progress, timings) {
       const timerNum = document.getElementById("timer-num");
@@ -256,12 +257,12 @@
           timerRing.style.strokeDashoffset = "0";
           timerRing.style.stroke = "url(#timer-grad)";
           
-          questionCard.style.minHeight = "800px";
-          questionCard.style.paddingTop = "4.5rem"; // pt-18
-          questionCard.style.paddingBottom = "4.5rem"; // pb-18
+          questionCard.style.minHeight = "1600px";
+          questionCard.style.paddingTop = "8rem";
+          questionCard.style.paddingBottom = "8rem";
 
           if (timings) {
-            // Question Box Zoom: zoom during start_question and end_question (150ms pre-zoom)
+            // Question Box Zoom
             let qScale = 1.0;
             const startQ = timings.start_question - 0.15;
             const endQ = timings.end_question - 0.15;
@@ -274,7 +275,7 @@
               } else if (progress > endQ - trans) {
                 factor = (endQ - progress) / trans;
               }
-              qScale = 1.0 + (factor * 0.08);
+              qScale = 1.0 + (factor * 0.05);
             }
             questionCard.style.transform = "scale(" + qScale + ")";
 
@@ -299,9 +300,9 @@
                   factor = (optEnd - progress) / optTrans;
                 }
 
-                const scale = 1.0 + (factor * 0.08);
-                const translateY = factor * -8;
-                const borderWidth = 1 + (factor * 3);
+                const scale = 1.0 + (factor * 0.05);
+                const translateY = factor * -12;
+                const borderWidth = 2 + (factor * 4);
                 const borderColor = `rgba(0, 0, 0, ${factor})`;
                 const bgAlpha = 0.75 + (factor * 0.25);
                 const shadowAlpha = factor * 0.15;
@@ -309,7 +310,7 @@
                 optCard.style.transform = `scale(${scale}) translateY(${translateY}px)`;
                 optCard.style.borderColor = borderColor;
                 optCard.style.borderWidth = `${borderWidth}px`;
-                optCard.style.boxShadow = `0 ${factor * 20}px ${factor * 40}px rgba(0, 0, 0, ${shadowAlpha})`;
+                optCard.style.boxShadow = `0 ${factor * 30}px ${factor * 60}px rgba(0, 0, 0, ${shadowAlpha})`;
                 optCard.style.backgroundColor = `rgba(255, 255, 255, ${bgAlpha})`;
               } else {
                 optCard.style.transform = "scale(1.0) translateY(0px)";
@@ -327,15 +328,15 @@
           timerOrb.style.display = "flex";
           questionCard.style.transform = "scale(1.0)";
           
-          questionCard.style.minHeight = "800px";
-          questionCard.style.paddingTop = "4.5rem";
-          questionCard.style.paddingBottom = "4.5rem";
+          questionCard.style.minHeight = "1600px";
+          questionCard.style.paddingTop = "8rem";
+          questionCard.style.paddingBottom = "8rem";
 
           for (let i = 0; i < 4; i++) {
             resetOptionToNormal(i);
           }
 
-          const offset = progress * 251.2;
+          const offset = progress * TIMER_CIRCUMFERENCE;
           timerRing.style.strokeDashoffset = offset;
 
           if (progress > 0.7) {
@@ -353,9 +354,9 @@
           timerOrb.style.display = "none";
           questionCard.style.transform = "scale(1.0)";
           
-          questionCard.style.minHeight = "800px";
-          questionCard.style.paddingTop = "4.5rem";
-          questionCard.style.paddingBottom = "4.5rem";
+          questionCard.style.minHeight = "1600px";
+          questionCard.style.paddingTop = "8rem";
+          questionCard.style.paddingBottom = "8rem";
 
           for (let i = 0; i < 4; i++) {
             const optCard = document.getElementById(`opt-${i}`);
@@ -367,17 +368,16 @@
               if (progress < trans) {
                 factor = progress / trans;
               }
-              const scale = 1.0 + (factor * 0.08);
-              const shadowAlpha = factor * 0.15;
-              const borderWidth = 1 + (factor * 3);
+              const scale = 1.0 + (factor * 0.06);
+              const shadowAlpha = factor * 0.2;
+              const borderWidth = 2 + (factor * 6);
 
               optCard.style.transform = `scale(${scale}) translateY(0px)`;
               optCard.style.borderColor = "#22C55E";
               optCard.style.borderWidth = `${borderWidth}px`;
-              optCard.style.boxShadow = `0 ${factor * 15}px ${factor * 30}px rgba(34, 197, 94, ${shadowAlpha})`;
+              optCard.style.boxShadow = `0 ${factor * 20}px ${factor * 40}px rgba(34, 197, 94, ${shadowAlpha})`;
               optCard.style.backgroundColor = `rgba(240, 253, 244, ${0.75 + factor * 0.25})`;
               
-              // Light green solid background (#4ADE80) with white text, no border
               circle.style.backgroundColor = "#4ADE80";
               circle.style.border = "none";
               circle.style.color = "white";
@@ -388,7 +388,7 @@
         }
       }
 
-      // 4. Explanation Page Phase (explain0, explain1, explain2, explain3)
+      // 4. Explanation Page Phase
       else if (phase.startsWith('explain')) {
         document.getElementById("page-quiz").style.display = "none";
         document.getElementById("page-explain").style.display = "flex";
@@ -400,11 +400,9 @@
           const expCircle = document.getElementById(`exp-circle-${i}`);
 
           if (i <= activeIdx) {
-            // Show the card
             expCard.style.opacity = "1";
             
             if (i === activeIdx) {
-              // Current active explanation card is zoomed
               const trans = 0.15;
               let factor = 1.0;
               if (progress < trans) {
@@ -413,18 +411,17 @@
                 factor = (1.0 - progress) / trans;
               }
               
-              const scale = 1.0 + (factor * 0.08);
-              const translateY = factor * -8;
-              const borderWidth = 1 + (factor * 3);
+              const scale = 1.0 + (factor * 0.05);
+              const translateY = factor * -12;
+              const borderWidth = 2 + (factor * 6);
               
               expCard.style.transform = `scale(${scale}) translateY(${translateY}px)`;
-              expCard.style.borderColor = `rgba(0, 0, 0, ${factor})`;
+              expCard.style.borderColor = `rgba(0, 0, 0, ${factor * 0.5})`;
               expCard.style.borderWidth = `${borderWidth}px`;
-              expCard.style.boxShadow = `0 ${factor * 15}px ${factor * 30}px rgba(0, 0, 0, ${factor * 0.12})`;
+              expCard.style.boxShadow = `0 ${factor * 20}px ${factor * 40}px rgba(0, 0, 0, ${factor * 0.12})`;
               expCard.style.backgroundColor = `rgba(255, 255, 255, ${0.75 + factor * 0.25})`;
               
               if (i === correctIdx) {
-                // Correct circle has solid light green background, white letter
                 expCircle.style.backgroundColor = "#4ADE80";
                 expCircle.style.border = "none";
                 expCircle.style.color = "white";
@@ -434,34 +431,29 @@
                 expCircle.style.color = "black";
               }
             } else {
-              // Previous cards are flat and stay visible
               expCard.style.transform = "scale(1.0) translateY(0px)";
-              expCard.style.borderWidth = "1px";
+              expCard.style.borderWidth = "2px";
               expCard.style.boxShadow = "none";
               
               if (i === correctIdx) {
                 expCard.style.borderColor = "#22C55E";
                 expCard.style.backgroundColor = "#F0FDF4";
-                
                 expCircle.style.backgroundColor = "#4ADE80";
                 expCircle.style.border = "none";
                 expCircle.style.color = "white";
               } else {
                 expCard.style.borderColor = "#E2E8F0";
                 expCard.style.backgroundColor = "#F8FAFC";
-                
                 expCircle.style.backgroundColor = "#F1EEF8";
                 expCircle.style.border = "none";
                 expCircle.style.color = "black";
               }
             }
           } else {
-            // Future cards are completely hidden
             expCard.style.opacity = "0";
             expCard.style.transform = "scale(1.0) translateY(0px)";
             expCard.style.borderColor = "#E2E8F0";
             expCard.style.backgroundColor = "#FFFFFF";
-            
             expCircle.style.backgroundColor = "#F1EEF8";
             expCircle.style.border = "none";
             expCircle.style.color = "black";

@@ -277,5 +277,13 @@
     "topic_id": 8000,
     "video_created": true,
     "video_file": "lesson_class1_20260611_111658.mp4"
+  },
+  {
+    "id": 1,
+    "topic": "CONSTITUENT ASSEMBLY (संविधान सभा)",
+    "question": "संविधान सभा की प्रथम बैठक कब हुई थी?",
+    "video_file": "quiz_polity_q1.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-12T07:10:35.467814+00:00"
   }
 ]

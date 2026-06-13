@@ -301,5 +301,13 @@
     "video_file": "quiz_polity_q3.mp4",
     "uploaded": true,
     "timestamp": "2026-06-12T16:15:41.185964+00:00"
+  },
+  {
+    "id": 4,
+    "topic": "BORROWED FEATURES (उधार ली गई विशेषताएं)",
+    "question": "भारत ने मौलिक अधिकारों की अवधारणा किस देश से ली?",
+    "video_file": "quiz_polity_q4.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-13T06:59:26.240277+00:00"
   }
 ]

@@ -229,7 +229,33 @@
           // 5: Minimalist Moving Dots
           `<svg width="2160" height="3840" style="position:absolute;top:0;left:0;">
             <rect x="50" y="50" width="2060" height="3740" stroke="${mainColor}" stroke-width="20" stroke-dasharray="20 40" fill="none" style="animation: borderDash 20s linear infinite;" />
-          </svg>`
+          </svg>`,
+
+          // 6: Double Lines (Classic)
+          `<div style="position:absolute;top:50px;left:50px;right:50px;bottom:50px;border:10px double ${mainColor}; box-shadow: 0 0 30px ${mainColor};"></div>`,
+
+          // 7: Corner Angles (Sci-Fi)
+          `<svg width="2160" height="3840" style="position:absolute;top:0;left:0;">
+            <path d="M 60 300 L 60 60 L 300 60" stroke="${mainColor}" stroke-width="20" fill="none"/>
+            <path d="M 2100 300 L 2100 60 L 1860 60" stroke="${mainColor}" stroke-width="20" fill="none"/>
+            <path d="M 60 3540 L 60 3780 L 300 3780" stroke="${mainColor}" stroke-width="20" fill="none"/>
+            <path d="M 2100 3540 L 2100 3780 L 1860 3780" stroke="${mainColor}" stroke-width="20" fill="none"/>
+          </svg>`,
+
+          // 8: Thick Glowing Edges
+          `<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-left:40px solid ${mainColor}; border-right:40px solid ${mainColor}; box-shadow: inset 0 0 100px ${mainColor}; opacity:0.8;"></div>`,
+
+          // 9: Crosshairs Corner
+          `<svg width="2160" height="3840" style="position:absolute;top:0;left:0;">
+            <circle cx="100" cy="100" r="40" stroke="${mainColor}" stroke-width="10" fill="none"/>
+            <circle cx="2060" cy="100" r="40" stroke="${mainColor}" stroke-width="10" fill="none"/>
+            <circle cx="100" cy="3740" r="40" stroke="${mainColor}" stroke-width="10" fill="none"/>
+            <circle cx="2060" cy="3740" r="40" stroke="${mainColor}" stroke-width="10" fill="none"/>
+          </svg>`,
+
+          // 10: Cinema Bars
+          `<div style="position:absolute;top:0;left:0;right:0;height:100px;background:${mainColor}; opacity:0.6;"></div>
+           <div style="position:absolute;bottom:0;left:0;right:0;height:100px;background:${mainColor}; opacity:0.6;"></div>`
       ];
       
       const frameHTML = frameLayouts[Math.floor(Math.random() * frameLayouts.length)];

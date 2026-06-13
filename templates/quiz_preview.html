@@ -125,11 +125,11 @@
 
   <!-- Dot patterns right -->
   <div class="dots-right">
-    {% for i in range(25) %}<span></span>{% endfor %}
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
   </div>
   <!-- Dot patterns left -->
   <div class="dots-left">
-    {% for i in range(25) %}<span></span>{% endfor %}
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
   </div>
 
   <!-- QUIZ PAGE -->
@@ -140,9 +140,9 @@
       <!-- LUCENT GK -->
       <div style="display:flex;flex-direction:column;gap:10px;">
         <span style="font-size:120px;font-weight:900;color:#FF6B00;letter-spacing:6px;line-height:1;text-shadow:0 0 40px rgba(255,107,0,0.5);">LUCENT GK</span>
-        <span style="font-size:52px;font-weight:600;color:#aaa;letter-spacing:2px;">{{subject_hi}}</span>
-        <span style="font-size:52px;font-weight:800;color:#39FF14;">{{chapter_hi}}</span>
-        <span style="font-size:48px;font-weight:600;color:#777;">📌 {{topic_hi}}</span>
+        <span style="font-size:52px;font-weight:600;color:#aaa;letter-spacing:2px;">भारतीय राजव्यवस्था</span>
+        <span style="font-size:52px;font-weight:800;color:#39FF14;">अध्याय 1: संविधान का निर्माण</span>
+        <span style="font-size:48px;font-weight:600;color:#777;">📌 संविधान सभा</span>
       </div>
 
       <!-- Clock Timer -->
@@ -151,14 +151,91 @@
           <!-- Clock tick marks -->
           <div style="position:absolute;width:100%;height:100%;border-radius:50;">
             <svg style="position:absolute;top:0;left:0;width:340px;height:340px;">
-              {% for i in range(12) %}
+              
               <line
-                x1="{{ 170 + 120 * [0,0.5,0.866,1,0.866,0.5,0,-0.5,-0.866,-1,-0.866,-0.5][i] }}"
-                y1="{{ 170 - 120 * [1,0.866,0.5,0,-0.5,-0.866,-1,-0.866,-0.5,0,0.5,0.866][i] }}"
-                x2="{{ 170 + 108 * [0,0.5,0.866,1,0.866,0.5,0,-0.5,-0.866,-1,-0.866,-0.5][i] }}"
-                y2="{{ 170 - 108 * [1,0.866,0.5,0,-0.5,-0.866,-1,-0.866,-0.5,0,0.5,0.866][i] }}"
+                x1="170"
+                y1="50"
+                x2="170"
+                y2="62"
                 stroke="#555" stroke-width="5"/>
-              {% endfor %}
+              
+              <line
+                x1="230.0"
+                y1="66.08"
+                x2="224.0"
+                y2="76.472"
+                stroke="#555" stroke-width="5"/>
+              
+              <line
+                x1="273.92"
+                y1="110.0"
+                x2="263.528"
+                y2="116.0"
+                stroke="#555" stroke-width="5"/>
+              
+              <line
+                x1="290"
+                y1="170"
+                x2="278"
+                y2="170"
+                stroke="#555" stroke-width="5"/>
+              
+              <line
+                x1="273.92"
+                y1="230.0"
+                x2="263.528"
+                y2="224.0"
+                stroke="#555" stroke-width="5"/>
+              
+              <line
+                x1="230.0"
+                y1="273.92"
+                x2="224.0"
+                y2="263.528"
+                stroke="#555" stroke-width="5"/>
+              
+              <line
+                x1="170"
+                y1="290"
+                x2="170"
+                y2="278"
+                stroke="#555" stroke-width="5"/>
+              
+              <line
+                x1="110.0"
+                y1="273.92"
+                x2="116.0"
+                y2="263.528"
+                stroke="#555" stroke-width="5"/>
+              
+              <line
+                x1="66.08"
+                y1="230.0"
+                x2="76.472"
+                y2="224.0"
+                stroke="#555" stroke-width="5"/>
+              
+              <line
+                x1="50"
+                y1="170"
+                x2="62"
+                y2="170"
+                stroke="#555" stroke-width="5"/>
+              
+              <line
+                x1="66.08"
+                y1="110.0"
+                x2="76.472"
+                y2="116.0"
+                stroke="#555" stroke-width="5"/>
+              
+              <line
+                x1="110.0"
+                y1="66.08"
+                x2="116.0"
+                y2="76.472"
+                stroke="#555" stroke-width="5"/>
+              
               <!-- Progress arc -->
               <circle id="clock-ring" cx="170" cy="170" r="130" stroke="#A855F7" stroke-width="14"
                 stroke-dasharray="816.8" stroke-dashoffset="0"
@@ -176,7 +253,7 @@
     <!-- QUESTION BOX -->
     <div class="question-box" style="border-radius:60px;padding:70px 80px;margin-bottom:60px;">
       <h2 id="question-text" style="font-size:120px;font-weight:900;color:white;line-height:1.2;margin:0;">
-        {{question_hi}}
+        भारत का संविधान कब लागू हुआ?
       </h2>
     </div>
 
@@ -184,19 +261,19 @@
     <div style="display:flex;flex-direction:column;gap:36px;flex:1;">
 
       <div id="opt-0" class="option-card" style="padding:60px 80px;">
-        <span style="font-size:100px;font-weight:900;color:white;letter-spacing:2px;">A. {{opt0_hi}}</span>
+        <span style="font-size:100px;font-weight:900;color:white;letter-spacing:2px;">A. 26 जनवरी 1950</span>
       </div>
 
       <div id="opt-1" class="option-card" style="padding:60px 80px;">
-        <span style="font-size:100px;font-weight:900;color:white;letter-spacing:2px;">B. {{opt1_hi}}</span>
+        <span style="font-size:100px;font-weight:900;color:white;letter-spacing:2px;">B. 15 अगस्त 1947</span>
       </div>
 
       <div id="opt-2" class="option-card" style="padding:60px 80px;">
-        <span style="font-size:100px;font-weight:900;color:white;letter-spacing:2px;">C. {{opt2_hi}}</span>
+        <span style="font-size:100px;font-weight:900;color:white;letter-spacing:2px;">C. 26 नवंबर 1949</span>
       </div>
 
       <div id="opt-3" class="option-card" style="padding:60px 80px;">
-        <span style="font-size:100px;font-weight:900;color:white;letter-spacing:2px;">D. {{opt3_hi}}</span>
+        <span style="font-size:100px;font-weight:900;color:white;letter-spacing:2px;">D. 30 जनवरी 1948</span>
       </div>
 
     </div>
@@ -218,40 +295,40 @@
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:50px;">
       <div>
         <span style="font-size:120px;font-weight:900;color:#FF6B00;letter-spacing:6px;">LUCENT GK</span>
-        <div style="font-size:56px;font-weight:800;color:#39FF14;margin-top:10px;">{{chapter_hi}}</div>
+        <div style="font-size:56px;font-weight:800;color:#39FF14;margin-top:10px;">अध्याय 1: संविधान का निर्माण</div>
         <div style="font-size:52px;font-weight:700;color:#aaa;margin-top:6px;">✅ सही उत्तर और व्याख्या</div>
       </div>
     </div>
 
     <!-- Repeated question -->
     <div class="question-box" style="border-radius:50px;padding:50px 70px;margin-bottom:40px;">
-      <h3 style="font-size:80px;font-weight:900;color:white;line-height:1.2;margin:0;">{{question_hi}}</h3>
+      <h3 style="font-size:80px;font-weight:900;color:white;line-height:1.2;margin:0;">भारत का संविधान कब लागू हुआ?</h3>
     </div>
 
     <!-- Explanation Cards -->
     <div style="display:flex;flex-direction:column;gap:30px;flex:1;">
       <div id="exp-card-0" class="option-card" style="padding:50px 70px;flex-direction:column;align-items:flex-start;gap:16px;opacity:0;border-radius:50px;">
-        <span style="font-size:80px;font-weight:900;color:white;">A. {{opt0_hi}}</span>
-        <p style="font-size:58px;font-weight:500;color:#999;line-height:1.4;margin:0;">{{exp0}}</p>
+        <span style="font-size:80px;font-weight:900;color:white;">A. 26 जनवरी 1950</span>
+        <p style="font-size:58px;font-weight:500;color:#999;line-height:1.4;margin:0;">सही! 26 जनवरी 1950 को संविधान लागू हुआ।</p>
       </div>
       <div id="exp-card-1" class="option-card" style="padding:50px 70px;flex-direction:column;align-items:flex-start;gap:16px;opacity:0;border-radius:50px;">
-        <span style="font-size:80px;font-weight:900;color:white;">B. {{opt1_hi}}</span>
-        <p style="font-size:58px;font-weight:500;color:#999;line-height:1.4;margin:0;">{{exp1}}</p>
+        <span style="font-size:80px;font-weight:900;color:white;">B. 15 अगस्त 1947</span>
+        <p style="font-size:58px;font-weight:500;color:#999;line-height:1.4;margin:0;">15 अगस्त 1947 को स्वतंत्रता मिली।</p>
       </div>
       <div id="exp-card-2" class="option-card" style="padding:50px 70px;flex-direction:column;align-items:flex-start;gap:16px;opacity:0;border-radius:50px;">
-        <span style="font-size:80px;font-weight:900;color:white;">C. {{opt2_hi}}</span>
-        <p style="font-size:58px;font-weight:500;color:#999;line-height:1.4;margin:0;">{{exp2}}</p>
+        <span style="font-size:80px;font-weight:900;color:white;">C. 26 नवंबर 1949</span>
+        <p style="font-size:58px;font-weight:500;color:#999;line-height:1.4;margin:0;">26 नवंबर 1949 को संविधान अपनाया गया।</p>
       </div>
       <div id="exp-card-3" class="option-card" style="padding:50px 70px;flex-direction:column;align-items:flex-start;gap:16px;opacity:0;border-radius:50px;">
-        <span style="font-size:80px;font-weight:900;color:white;">D. {{opt3_hi}}</span>
-        <p style="font-size:58px;font-weight:500;color:#999;line-height:1.4;margin:0;">{{exp3}}</p>
+        <span style="font-size:80px;font-weight:900;color:white;">D. 30 जनवरी 1948</span>
+        <p style="font-size:58px;font-weight:500;color:#999;line-height:1.4;margin:0;">यह गलत तारीख है।</p>
       </div>
     </div>
 
   </div>
 
   <script>
-    const correctIdx = {{correct_idx}};
+    const correctIdx = 0;
     const CIRC = 816.8;
 
     window.setQuizState = function(phase, progress, timings) {

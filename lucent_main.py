@@ -39,6 +39,34 @@ async def generate_tts(text, filename):
     await communicate.save(str(output_path))
     return output_path
 
+def generate_tick_sound(output_path, duration=5.0):
+    """Generate TikTok-style tick-tock countdown beeps using FFmpeg.
+    5 sharp tick beeps (one per second) mixed with a low suspense drone."""
+    # Build inputs: 1 drone + 5 tick beeps
+    inputs_args = ['-f', 'lavfi', '-i', f'sine=frequency=120:duration={duration}']
+    for i in range(5):
+        t_ms = i * 1000
+        inputs_args += [
+            '-f', 'lavfi', '-i',
+            f'sine=frequency=880:duration=0.08,adelay={t_ms}|{t_ms}'
+        ]
+    mix_inputs = ''.join(f'[{j}:a]' for j in range(6))
+    filter_complex = f'{mix_inputs}amix=inputs=6:normalize=0,volume=2.5[outa]'
+    cmd = ['ffmpeg', '-y'] + inputs_args + [
+        '-filter_complex', filter_complex,
+        '-map', '[outa]',
+        '-t', str(duration),
+        '-c:a', 'libmp3lame',
+        str(output_path)
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        subprocess.run([
+            'ffmpeg', '-y', '-f', 'lavfi', '-i', 'anullsrc=r=24000:cl=mono',
+            '-t', str(duration), '-c:a', 'libmp3lame', str(output_path)
+        ], capture_output=True)
+    return output_path
+
 async def render_html_frames(data, n_q, n_c, n_r, n_e0, n_e1, n_e2, n_e3, timings):
     """Render frames by taking screenshots of the HTML file using Playwright."""
     from playwright.async_api import async_playwright
@@ -202,6 +230,9 @@ async def main():
 
     template = Template(template_str)
     rendered_html = template.render(
+        subject_hi=question_data.get("subject_hi", question_data["subject"]),
+        chapter_hi=question_data.get("chapter_hi", question_data["chapter"]),
+        topic_hi=question_data.get("topic_hi", question_data["topic"]),
         subject=question_data["subject"],
         chapter=question_data["chapter"],
         topic=question_data["topic"],
@@ -272,13 +303,10 @@ async def main():
     e2_audio = await generate_tts(quiz_data["e2_narration"], "explain2.mp3")
     e3_audio = await generate_tts(quiz_data["e3_narration"], "explain3.mp3")
     
-    # 2. Generate Silence Audios
-    print("Generating silence audio tracks...")
-    silence_audio = temp_dir / "silence.mp3"
-    subprocess.run([
-        'ffmpeg', '-y', '-f', 'lavfi', '-i', 'anullsrc=r=24000:cl=mono',
-        '-t', '5.0', '-c:a', 'libmp3lame', str(silence_audio)
-    ], capture_output=True)
+    # 2. Generate Countdown Tick Sound + Silence Audios
+    print("Generating tick-tock countdown sound...")
+    tick_audio = temp_dir / "tick_tock.mp3"
+    generate_tick_sound(tick_audio, duration=5.0)
 
     opt_silence = temp_dir / "opt_silence.mp3"
     subprocess.run([
@@ -323,7 +351,7 @@ async def main():
     t_q = timings["end_outro"]
     total_audio_time = t_q + t_c + t_r + t_e0 + t_e1 + t_e2 + t_e3
     
-    # 4. Merge Audios
+    # 4. Merge Audios (countdown uses tick_audio - TikTok style!)
     print("Concatenating all 19 audio segments...")
     merged_audio = temp_dir / "quiz_final.mp3"
     cmd_merge = [
@@ -341,7 +369,7 @@ async def main():
         '-i', str(q_opt3_audio),      # 10
         '-i', str(opt_silence),       # 11
         '-i', str(q_outro_audio),     # 12
-        '-i', str(silence_audio),     # 13
+        '-i', str(tick_audio),        # 13 ← TikTok tick-tock countdown!
         '-i', str(r_audio),           # 14
         '-i', str(e0_audio),          # 15
         '-i', str(e1_audio),          # 16
@@ -368,11 +396,13 @@ async def main():
     # 7. Compose Video
     video_path = compose_quiz_video(frame_paths, merged_audio, question_data["id"])
     
-    # Cleanup
+    # Cleanup temp files
     for frame in frame_paths:
         try: os.remove(frame)
         except: pass
-    for audio in [q_intro_audio, q_question_audio, q_opt0_audio, q_opt1_audio, q_opt2_audio, q_opt3_audio, q_outro_audio, r_audio, silence_audio, opt_silence, e0_audio, e1_audio, e2_audio, e3_audio]:
+    for audio in [q_intro_audio, q_question_audio, q_opt0_audio, q_opt1_audio,
+                  q_opt2_audio, q_opt3_audio, q_outro_audio, r_audio,
+                  tick_audio, opt_silence, e0_audio, e1_audio, e2_audio, e3_audio]:
         try: os.remove(audio)
         except: pass
 

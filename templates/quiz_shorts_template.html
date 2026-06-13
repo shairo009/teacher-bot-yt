@@ -363,7 +363,7 @@
             const card = document.getElementById(`opt-${i}`);
             if (i === correctIdx) {
               card.style.border = `8px solid ${window.themeColor}`;
-              card.style.backgroundColor = `${window.themeColor}33`; // 20% opacity background
+              card.style.backgroundColor = "transparent"; // No color fill
               card.style.borderRadius = "30px";
             } else {
               card.style.opacity = "0.35";
@@ -381,7 +381,7 @@
           card.style.opacity = "1";
           if (i === correctIdx) {
             card.style.border = `8px solid ${window.themeColor}`;
-            card.style.backgroundColor = `${window.themeColor}33`; // 20% opacity background
+            card.style.backgroundColor = "transparent"; // No color fill
             card.style.borderRadius = "30px";
             card.style.boxShadow = "none";
           }

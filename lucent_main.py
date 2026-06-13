@@ -500,9 +500,9 @@ Explanation: {question_data[f'exp{question_data["correct_idx"]}']}
         # Clean up local video file if running locally to save disk space
         if os.environ.get("GITHUB_ACTIONS") != "true":
             try:
-                if video_path.exists():
-                    os.remove(video_path)
-                    print(f"Cleaned up local video file to save disk space: {video_path}")
+                # if video_path.exists():
+#     os.remove(video_path)
+#     print(f"Cleaned up local video file to save disk space: {video_path}")
             except Exception as e:
                 print(f"Could not delete local video file: {e}")
 

@@ -7,252 +7,322 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * { font-family: 'Noto Sans Devanagari', 'Poppins', sans-serif !important; box-sizing: border-box; }
-    body { margin: 0; padding: 0; background: #000; overflow: hidden; }
+    body { margin: 0; padding: 0; background-color: #000; overflow: hidden; position: relative; }
 
-    /* Neon green corner decorations */
-    .corner-tl {
-      position: absolute; top: 0; left: 0;
-      width: 0; height: 0;
-      border-top: 360px solid #39FF14;
-      border-right: 360px solid transparent;
-      z-index: 0;
-    }
-    .corner-bl {
-      position: absolute; bottom: 0; left: 0;
-      width: 0; height: 0;
-      border-bottom: 360px solid #39FF14;
-      border-right: 360px solid transparent;
-      z-index: 0;
-    }
-    .corner-tr {
-      position: absolute; top: 0; right: 0;
-      width: 0; height: 0;
-      border-top: 360px solid #39FF14;
-      border-left: 360px solid transparent;
-      z-index: 0;
-    }
-    .corner-br {
-      position: absolute; bottom: 0; right: 0;
-      width: 0; height: 0;
-      border-bottom: 360px solid #39FF14;
-      border-left: 360px solid transparent;
-      z-index: 0;
-    }
-
-    /* Dot patterns */
-    .dots-right {
-      position: absolute; right: 60px; top: 50%;
-      transform: translateY(-50%);
-      display: grid; grid-template-columns: repeat(5, 28px); gap: 18px;
-      z-index: 1;
-    }
-    .dots-right span {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: #39FF14; display: block;
-    }
-    .dots-left {
-      position: absolute; left: 60px; top: 50%;
-      transform: translateY(-50%);
-      display: grid; grid-template-columns: repeat(5, 28px); gap: 18px;
-      z-index: 1;
-    }
-    .dots-left span {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: #39FF14; display: block;
-    }
-
-    /* Green side bars */
-    .bar-left {
-      position: absolute; left: 0; top: 20%; bottom: 20%;
-      width: 30px; background: #39FF14; z-index: 1; border-radius: 0 8px 8px 0;
-    }
-    .bar-right {
-      position: absolute; right: 0; top: 20%; bottom: 20%;
-      width: 30px; background: #39FF14; z-index: 1; border-radius: 8px 0 0 8px;
-    }
-
+    /* Decorator classes */
     .option-card {
-      background: #1C1C1C;
-      border-radius: 100px;
-      border: none;
+      background: transparent;
+      border-radius: 0;
+      border: 8px solid transparent;
       display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      width: 100%;
+      margin: 0 auto;
     }
-    .option-card.correct { background: #1C1C1C; border: 8px solid #39FF14; }
+    .option-card.correct { background: transparent; border: 8px solid #39FF14; }
     .option-card.wrong { opacity: 0.4; }
 
-    /* Clock timer */
-    .clock-outer {
-      width: 340px; height: 340px; border-radius: 50%;
-      background: #0a0a0a;
-      border: 12px solid #7C3AED;
-      box-shadow: 0 0 60px rgba(124,58,237,0.8), 0 0 120px rgba(124,58,237,0.4);
-      position: relative; display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .clock-inner {
-      width: 260px; height: 260px; border-radius: 50%;
-      border: 6px solid #4C1D95;
-      display: flex; align-items: center; justify-content: center;
-      flex-direction: column;
-    }
+    .subscribe-btn { background: #FF0000; border-radius: 80px; display: flex; align-items: center; justify-content: center; gap: 24px; padding: 40px 120px; }
+  
+    @keyframes borderDash { to { stroke-dashoffset: 1000; } }
+    @keyframes pulseGlow { 0% { opacity: 0.5; box-shadow: 0 0 20px currentColor; } 50% { opacity: 1; box-shadow: 0 0 80px currentColor; } 100% { opacity: 0.5; box-shadow: 0 0 20px currentColor; } }
+    @keyframes rotateHue { to { filter: hue-rotate(360deg); } }
 
-    /* Subscribe button */
-    .subscribe-btn {
-      background: #FF0000;
-      border-radius: 80px;
-      display: flex; align-items: center; justify-content: center; gap: 24px;
-      padding: 40px 120px;
-    }
-
-    /* Neon border on question */
-    .question-box {
-      background: #111;
-      border: 6px solid #222;
-    }
   </style>
 </head>
-<body style="width:2160px;height:3840px;position:relative;">
+<body style="width:2160px;height:3840px;position:relative;opacity:0;">
 
-  <!-- Corner triangles -->
-  <div class="corner-tl"></div>
-  <div class="corner-bl"></div>
-  <div class="corner-tr"></div>
-  <div class="corner-br"></div>
-
-  <!-- Side bars -->
-  <div class="bar-left"></div>
-  <div class="bar-right"></div>
-
-  <!-- Dot patterns right -->
-  <div class="dots-right">
-    {% for i in range(25) %}<span></span>{% endfor %}
-  </div>
-  <!-- Dot patterns left -->
-  <div class="dots-left">
-    {% for i in range(25) %}<span></span>{% endfor %}
-  </div>
+  <!-- Dynamic Decorations Container (Edge Video Borders) -->
+  <div id="decorations" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;box-sizing:border-box;"></div>
 
   <!-- QUIZ PAGE -->
-  <div id="page-quiz" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;padding:100px 200px 60px 200px;z-index:10;">
+  <div id="page-quiz" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;padding:180px 350px 1100px 350px;z-index:10;">
 
     <!-- TOP ROW: LUCENT GK + Clock Timer -->
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:60px;">
       <!-- LUCENT GK -->
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <span style="font-size:120px;font-weight:900;color:#FF6B00;letter-spacing:6px;line-height:1;text-shadow:0 0 40px rgba(255,107,0,0.5);">LUCENT GK</span>
-        <span style="font-size:52px;font-weight:600;color:#aaa;letter-spacing:2px;">{{subject_hi}}</span>
-        <span style="font-size:52px;font-weight:800;color:#39FF14;">{{chapter_hi}}</span>
-        <span style="font-size:48px;font-weight:600;color:#777;">📌 {{topic_hi}}</span>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <span style="font-size:80px;font-weight:900;color:#FF6B00;letter-spacing:6px;line-height:1;text-shadow:0 0 40px rgba(255,107,0,0.5);">LUCENT GK</span>
+        <span style="font-size:70px;font-weight:600;color:#aaa;letter-spacing:2px;">{{subject_hi}}</span>
+        <span style="font-size:70px;font-weight:800;color:#39FF14;" id="chapter-text">{{chapter_hi}}</span>
+        <span style="font-size:70px;font-weight:600;color:#777;">📌 {{topic_hi}}</span>
       </div>
 
-      <!-- Clock Timer -->
-      <div class="clock-outer">
-        <div class="clock-inner">
-          <!-- Clock tick marks -->
-          <div style="position:absolute;width:100%;height:100%;border-radius:50;">
-            <svg style="position:absolute;top:0;left:0;width:340px;height:340px;">
-              {% for i in range(12) %}
-              <line
-                x1="{{ 170 + 120 * [0,0.5,0.866,1,0.866,0.5,0,-0.5,-0.866,-1,-0.866,-0.5][i] }}"
-                y1="{{ 170 - 120 * [1,0.866,0.5,0,-0.5,-0.866,-1,-0.866,-0.5,0,0.5,0.866][i] }}"
-                x2="{{ 170 + 108 * [0,0.5,0.866,1,0.866,0.5,0,-0.5,-0.866,-1,-0.866,-0.5][i] }}"
-                y2="{{ 170 - 108 * [1,0.866,0.5,0,-0.5,-0.866,-1,-0.866,-0.5,0,0.5,0.866][i] }}"
-                stroke="#555" stroke-width="5"/>
-              {% endfor %}
-              <!-- Progress arc -->
-              <circle id="clock-ring" cx="170" cy="170" r="130" stroke="#A855F7" stroke-width="14"
-                stroke-dasharray="816.8" stroke-dashoffset="0"
-                stroke-linecap="round" fill="transparent" transform="rotate(-90 170 170)"/>
-            </svg>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:center;">
-            <span style="font-size:30px;font-weight:700;color:#888;letter-spacing:4px;">TIME</span>
-            <span id="timer-num" style="font-size:110px;font-weight:900;color:#A855F7;line-height:1;font-family:monospace!important;">00:05</span>
-          </div>
-        </div>
+      <!-- Restored Clock Timer -->
+      <div id="dynamic-timer-container" style="width:340px; height:340px; position:relative; flex-shrink:0;">
       </div>
     </div>
 
-    <!-- QUESTION BOX -->
-    <div class="question-box" style="border-radius:60px;padding:70px 80px;margin-bottom:60px;">
-      <h2 id="question-text" style="font-size:120px;font-weight:900;color:white;line-height:1.2;margin:0;">
-        {{question_hi}}
+    <!-- QUESTION BOX (fixed height for auto-shrink, text centered) -->
+    <div style="height:1000px; display:flex; align-items:center; justify-content:center; text-align:center; margin-bottom:120px;">
+      <h2 id="question-text" style="font-size:100px;font-weight:900;color:white;line-height:1.3;margin:0;max-height:100%;overflow:hidden;display:flex;align-items:center;">
+        संविधान सभा की प्रथम बैठक कब हुई थी?
       </h2>
     </div>
 
-    <!-- OPTIONS -->
-    <div style="display:flex;flex-direction:column;gap:36px;flex:1;">
-
-      <div id="opt-0" class="option-card" style="padding:60px 80px;">
-        <span style="font-size:100px;font-weight:900;color:white;letter-spacing:2px;">A. {{opt0_hi}}</span>
+    <!-- OPTIONS (fixed gap, normal flow below question box) -->
+    <div style="display:flex;flex-direction:column;gap:50px;width:100%;">
+      <div id="opt-0" class="option-card" style="height:220px; padding:20px 80px;">
+        <span id="opt-text-0" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">A. 9 दिसंबर 1946</span>
       </div>
-
-      <div id="opt-1" class="option-card" style="padding:60px 80px;">
-        <span style="font-size:100px;font-weight:900;color:white;letter-spacing:2px;">B. {{opt1_hi}}</span>
+      <div id="opt-1" class="option-card" style="height:220px; padding:20px 80px;">
+        <span id="opt-text-1" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">B. 11 दिसंबर 1946</span>
       </div>
-
-      <div id="opt-2" class="option-card" style="padding:60px 80px;">
-        <span style="font-size:100px;font-weight:900;color:white;letter-spacing:2px;">C. {{opt2_hi}}</span>
+      <div id="opt-2" class="option-card" style="height:220px; padding:20px 80px;">
+        <span id="opt-text-2" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">C. 15 अगस्त 1947</span>
       </div>
-
-      <div id="opt-3" class="option-card" style="padding:60px 80px;">
-        <span style="font-size:100px;font-weight:900;color:white;letter-spacing:2px;">D. {{opt3_hi}}</span>
-      </div>
-
-    </div>
-
-    <!-- SUBSCRIBE BUTTON -->
-    <div style="display:flex;justify-content:center;margin-top:60px;">
-      <div class="subscribe-btn">
-        <span style="font-size:72px;font-weight:900;color:white;letter-spacing:4px;">SUBSCRIBE</span>
-        <span style="font-size:80px;">🔔</span>
+      <div id="opt-3" class="option-card" style="height:220px; padding:20px 80px;">
+        <span id="opt-text-3" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">D. 26 जनवरी 1950</span>
       </div>
     </div>
 
   </div>
 
   <!-- EXPLANATION PAGE -->
-  <div id="page-explain" style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;flex-direction:column;padding:100px 200px 60px 200px;z-index:10;">
-
-    <!-- TOP ROW -->
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:50px;">
+  <div id="page-explain" style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;flex-direction:column;padding:180px 350px 1100px 350px;z-index:10;">
+    <!-- TOP ROW (HIDDEN PER USER REQUEST) -->
+    <div style="display:none;align-items:flex-start;justify-content:space-between;margin-bottom:50px;">
       <div>
-        <span style="font-size:120px;font-weight:900;color:#FF6B00;letter-spacing:6px;">LUCENT GK</span>
-        <div style="font-size:56px;font-weight:800;color:#39FF14;margin-top:10px;">{{chapter_hi}}</div>
-        <div style="font-size:52px;font-weight:700;color:#aaa;margin-top:6px;">✅ सही उत्तर और व्याख्या</div>
+        <span style="font-size:80px;font-weight:900;color:#FF6B00;letter-spacing:6px;">LUCENT GK</span>
+        <div id="chapter-text-exp" style="font-size:70px;font-weight:800;color:#39FF14;margin-top:16px;">{{chapter_hi}}</div>
+        <div style="font-size:70px;font-weight:700;color:#aaa;margin-top:10px;">✅ सही उत्तर और व्याख्या</div>
       </div>
     </div>
 
-    <!-- Repeated question -->
-    <div class="question-box" style="border-radius:50px;padding:50px 70px;margin-bottom:40px;">
-      <h3 style="font-size:80px;font-weight:900;color:white;line-height:1.2;margin:0;">{{question_hi}}</h3>
+    <!-- Repeated question (HIDDEN PER USER REQUEST) -->
+    <div style="display:none; height:650px; align-items:center; justify-content:center; text-align:center; margin-bottom:100px;">
+      <h3 id="question-text-exp" style="font-size:80px;font-weight:900;color:white;line-height:1.2;margin:0;max-height:100%;overflow:hidden;display:flex;align-items:center;">संविधान सभा की प्रथम बैठक कब हुई थी?</h3>
     </div>
 
     <!-- Explanation Cards -->
-    <div style="display:flex;flex-direction:column;gap:30px;flex:1;">
-      <div id="exp-card-0" class="option-card" style="padding:50px 70px;flex-direction:column;align-items:flex-start;gap:16px;opacity:0;border-radius:50px;">
-        <span style="font-size:80px;font-weight:900;color:white;">A. {{opt0_hi}}</span>
-        <p style="font-size:58px;font-weight:500;color:#999;line-height:1.4;margin:0;">{{exp0}}</p>
+    <div style="display:flex;flex-direction:column;gap:30px;width:100%;height:100%;justify-content:center;padding:40px 0;">
+      <div id="exp-card-0" class="option-card" style="padding:30px 50px;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;opacity:0;min-height:auto;flex-grow:1;">
+        <span id="exp-text-0" style="font-weight:900;color:white;font-size:80px;">A. {{opt0_hi}}</span>
+        <p style="font-size:70px;font-weight:600;color:#bbb;line-height:1.4;margin:0;">{{exp0}}</p>
       </div>
-      <div id="exp-card-1" class="option-card" style="padding:50px 70px;flex-direction:column;align-items:flex-start;gap:16px;opacity:0;border-radius:50px;">
-        <span style="font-size:80px;font-weight:900;color:white;">B. {{opt1_hi}}</span>
-        <p style="font-size:58px;font-weight:500;color:#999;line-height:1.4;margin:0;">{{exp1}}</p>
+      <div id="exp-card-1" class="option-card" style="padding:30px 50px;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;opacity:0;min-height:auto;flex-grow:1;">
+        <span id="exp-text-1" style="font-weight:900;color:white;font-size:80px;">B. {{opt1_hi}}</span>
+        <p style="font-size:70px;font-weight:600;color:#bbb;line-height:1.4;margin:0;">{{exp1}}</p>
       </div>
-      <div id="exp-card-2" class="option-card" style="padding:50px 70px;flex-direction:column;align-items:flex-start;gap:16px;opacity:0;border-radius:50px;">
-        <span style="font-size:80px;font-weight:900;color:white;">C. {{opt2_hi}}</span>
-        <p style="font-size:58px;font-weight:500;color:#999;line-height:1.4;margin:0;">{{exp2}}</p>
+      <div id="exp-card-2" class="option-card" style="padding:30px 50px;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;opacity:0;min-height:auto;flex-grow:1;">
+        <span id="exp-text-2" style="font-weight:900;color:white;font-size:80px;">C. {{opt2_hi}}</span>
+        <p style="font-size:70px;font-weight:600;color:#bbb;line-height:1.4;margin:0;">{{exp2}}</p>
       </div>
-      <div id="exp-card-3" class="option-card" style="padding:50px 70px;flex-direction:column;align-items:flex-start;gap:16px;opacity:0;border-radius:50px;">
-        <span style="font-size:80px;font-weight:900;color:white;">D. {{opt3_hi}}</span>
-        <p style="font-size:58px;font-weight:500;color:#999;line-height:1.4;margin:0;">{{exp3}}</p>
+      <div id="exp-card-3" class="option-card" style="padding:30px 50px;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;opacity:0;min-height:auto;flex-grow:1;">
+        <span id="exp-text-3" style="font-weight:900;color:white;font-size:80px;">D. {{opt3_hi}}</span>
+        <p style="font-size:70px;font-weight:600;color:#bbb;line-height:1.4;margin:0;">{{exp3}}</p>
       </div>
     </div>
-
   </div>
 
+  <!-- GLOBAL SUBSCRIBE BOX (ALWAYS VISIBLE AT BOTTOM) -->
+  <div id="global-sub-box" style="position:absolute; bottom:750px; left:350px; right:350px; background:rgba(20,20,20,0.95); border:6px solid #FFD700; border-radius:40px; padding:40px 40px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.9); z-index:1000; gap:30px;">
+    <span id="global-sub-text" style="font-size:46px; font-weight:800; color:#FFD700; line-height:1.4; letter-spacing:1px;">अगर आप हनुमान जी को दिल से मानते हैं तो सब्सक्राइब कीजिए, आपकी नौकरी हो जाएगी 🙏</span>
+    <div style="background:#FF0000; padding:15px 50px; border-radius:40px; color:white; font-size:40px; font-weight:900; letter-spacing:2px; display:flex; align-items:center; gap:15px; box-shadow: 0 10px 20px rgba(255,0,0,0.4);">
+      SUBSCRIBE <span style="font-size:40px;">🔔</span>
+    </div>
+  </div>
   <script>
-    const correctIdx = {{correct_idx}};
-    const CIRC = 816.8;
+    const correctIdx = 0;
+    const CIRC = 1030.5; // Calculated for r=164
+
+    function runAutoFit() {
+      // 1) Find the best size for question
+      let qEl = document.getElementById('question-text');
+      let sz = 110; // default size
+      qEl.style.fontSize = sz + "px";
+      while (qEl.scrollHeight > 800 && sz > 60) {
+        sz -= 4;
+        qEl.style.fontSize = sz + "px";
+      }
+
+      // 2) Find the best size for options
+      let optSz = sz;
+      for (let i = 0; i < 4; i++) {
+        let optEl = document.getElementById(`opt-text-${i}`);
+        if(optEl) {
+          optEl.style.fontSize = optSz + "px";
+          while (optEl.scrollHeight > 220 && optSz > 60) {
+            optSz -= 4;
+            optEl.style.fontSize = optSz + "px";
+          }
+        }
+      }
+
+      // 3) Apply the SMALLEST size to ALL (Question + Options) so they share the SAME font size
+      let finalSz = Math.min(sz, optSz);
+      qEl.style.fontSize = finalSz + "px";
+      for (let i = 0; i < 4; i++) {
+        let optEl = document.getElementById(`opt-text-${i}`);
+        if(optEl) optEl.style.fontSize = finalSz + "px";
+      }
+      
+      // Do the same for Explain page
+      const pgQuiz = document.getElementById("page-quiz");
+      const pgExp = document.getElementById("page-explain");
+      const oldQuizD = pgQuiz.style.display;
+      const oldExpD = pgExp.style.display;
+      pgQuiz.style.display = "none";
+      pgExp.style.display = "flex";
+
+      let expQEl = document.getElementById('question-text-exp');
+      let expSz = 100;
+      expQEl.style.fontSize = expSz + "px";
+      while (expQEl.scrollHeight > 600 && expSz > 60) {
+        expSz -= 4;
+        expQEl.style.fontSize = expSz + "px";
+      }
+      // Apply to explain question and options
+      expQEl.style.fontSize = expSz + "px";
+      for (let i = 0; i < 4; i++) {
+        let expOptEl = document.getElementById(`exp-text-${i}`);
+        if(expOptEl) expOptEl.style.fontSize = expSz + "px";
+      }
+      
+      pgQuiz.style.display = oldQuizD;
+      pgExp.style.display = oldExpD;
+    }
+
+    // Randomize visual theme
+    function randomizeTheme() {
+      const colors = ["#39FF14", "#FF00FF", "#00FFFF", "#FFEA00", "#FF007F", "#00FF00", "#7DF9FF", "#FF4500", "#B366FF", "#FF355E", "#FFAA00", "#00FA9A"];
+      const mainColor = colors[Math.floor(Math.random() * colors.length)];
+      let clockColor = mainColor; // Same as border color
+      
+      window.themeColor = mainColor;
+      window.clockThemeColor = mainColor; // Fix undefined error and sync
+      // Remove old backgrounds
+      document.getElementById('chapter-text').style.color = mainColor;
+      document.getElementById('chapter-text-exp').style.color = mainColor;
+      
+      const subBox = document.getElementById('global-sub-box');
+      const subText = document.getElementById('global-sub-text');
+      if (subBox && subText) {
+        subBox.style.borderColor = mainColor;
+        subText.style.color = mainColor;
+      }
+
+      // 200+ VIDEO FRAME / BORDER DECORATIONS
+      const decContainer = document.getElementById('decorations');
+      decContainer.innerHTML = ''; // clear
+
+      
+      // Pick an advanced ANIMATED frame layout
+      const frameLayouts = [
+          // 1: Animated Dashed Border (Cyberpunk)
+          `<svg width="2160" height="3840" style="position:absolute;top:0;left:0;">
+            <rect x="60" y="60" width="2040" height="3720" stroke="${mainColor}" stroke-width="30" fill="none" stroke-dasharray="80 160" style="animation: borderDash 10s linear infinite;"/>
+          </svg>`,
+          
+          // 2: Animated Moving Pillars (Neon)
+          `<svg width="2160" height="3840" style="position:absolute;top:0;left:0;">
+            <line x1="80" y1="0" x2="80" y2="3840" stroke="${mainColor}" stroke-width="40" stroke-dasharray="200 100" style="animation: borderDash 8s linear infinite;" />
+            <line x1="2080" y1="0" x2="2080" y2="3840" stroke="${mainColor}" stroke-width="40" stroke-dasharray="200 100" style="animation: borderDash 8s linear infinite reverse;" />
+          </svg>`,
+          
+          // 3: Pulsing Glowing Frame (HUD)
+          `<div style="position:absolute;top:60px;left:60px;right:60px;bottom:60px;border:12px solid ${mainColor}; color:${mainColor}; animation: pulseGlow 3s ease-in-out infinite;"></div>`,
+          
+          // 4: Color Shifting Borders
+          `<div style="position:absolute;top:40px;left:40px;right:40px;bottom:40px;border:16px solid ${mainColor}; color:${mainColor}; animation: pulseGlow 4s ease-in-out infinite; box-shadow: inset 0 0 50px ${mainColor}, 0 0 50px ${mainColor};"></div>`,
+
+          // 5: Minimalist Moving Dots
+          `<svg width="2160" height="3840" style="position:absolute;top:0;left:0;">
+            <rect x="50" y="50" width="2060" height="3740" stroke="${mainColor}" stroke-width="20" stroke-dasharray="20 40" fill="none" style="animation: borderDash 20s linear infinite;" />
+          </svg>`
+      ];
+      
+      const frameHTML = frameLayouts[Math.floor(Math.random() * frameLayouts.length)];
+      decContainer.innerHTML = frameHTML;
+
+
+      // 200+ Combinations Generator for Borders (Style x Width x BoxShadow x Side Selector)
+      const borderStyles = ["solid", "dashed", "dotted", "double", "groove", "ridge", "inset", "outset"];
+      const bStyle = borderStyles[Math.floor(Math.random() * borderStyles.length)];
+      const bWidth = Math.floor(Math.random() * 16) + 6; // 6px to 21px
+      
+      const shadows = [
+        `0 0 50px ${mainColor}, inset 0 0 50px ${mainColor}`, // Super Glow
+        `0 0 30px ${mainColor}`, // Outer Glow
+        `inset 0 0 40px ${mainColor}`, // Inner Glow
+        `10px 10px 0px ${mainColor}`, // Retro offset shadow
+        `-10px 10px 0px ${mainColor}, 10px -10px 0px ${mainColor}`, // Dual offset
+        `none` // No shadow
+      ];
+      const bShadow = shadows[Math.floor(Math.random() * shadows.length)];
+      
+      const selectors = [
+        "all", "leftRight", "topBottom", "leftThick", "bottomThick"
+      ];
+      const selector = selectors[Math.floor(Math.random() * selectors.length)];
+      
+      window.dynamicBorderStyle = {
+        style: bStyle,
+        width: bWidth,
+        shadow: bShadow,
+        selector: selector
+      };
+
+      // Dynamic Timers
+      const timerContainer = document.getElementById("dynamic-timer-container");
+      if(timerContainer) {
+          const tStyle = "classic"; // User requested exactly this style
+          let tHTML = "";
+          
+          if(tStyle === "classic") {
+              tHTML = `
+              <div style="width:340px; height:340px; border-radius:50%; background:#0a0a0a; border:12px solid #1a1a1a; box-shadow:0 0 60px ${mainColor}80; position:relative; display:flex; align-items:center; justify-content:center;">
+                <svg style="position:absolute; top:-12px; left:-12px; width:340px; height:340px; overflow:visible;">
+                  <circle id="clock-ring" cx="170" cy="170" r="164" stroke="${mainColor}" stroke-width="16" stroke-dasharray="1030.5" stroke-dashoffset="0" stroke-linecap="round" fill="transparent" transform="rotate(-90 170 170)"/>
+                </svg>
+                <div style="width:260px; height:260px; border-radius:50%; border:6px solid ${mainColor}40; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                  <span style="font-size:24px;font-weight:700;color:#888;letter-spacing:4px;margin-bottom:-10px;">TIME</span>
+                  <span id="timer-num" style="font-size:80px; font-weight:900; color:${mainColor}; font-family:monospace!important; line-height:1;">00:05</span>
+                </div>
+              </div>`;
+          } else if (tStyle === "diamond") {
+              tHTML = `
+              <div style="width:340px; height:340px; background:#0a0a0a; box-shadow:0 0 60px ${mainColor}80; position:relative; display:flex; align-items:center; justify-content:center; transform: rotate(45deg); border-radius:30px;">
+                <svg style="position:absolute; top:-12px; left:-12px; width:340px; height:340px; overflow:visible;">
+                  <circle id="clock-ring" cx="170" cy="170" r="164" stroke="${mainColor}" stroke-width="16" stroke-dasharray="1030.5" stroke-dashoffset="0" stroke-linecap="round" fill="transparent" />
+                </svg>
+                <div style="transform: rotate(-45deg); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                  <span style="font-size:24px;font-weight:700;color:#888;letter-spacing:4px;margin-bottom:-10px;">TIME</span>
+                  <span id="timer-num" style="font-size:80px; font-weight:900; color:${mainColor}; font-family:monospace!important; line-height:1;">00:05</span>
+                </div>
+              </div>`;
+          } else if (tStyle === "thick") {
+              tHTML = `
+              <div style="width:340px; height:340px; border-radius:50%; position:relative; display:flex; align-items:center; justify-content:center; background:#111; box-shadow: inset 0 0 30px ${mainColor}80;">
+                <svg style="position:absolute; top:-12px; left:-12px; width:340px; height:340px; overflow:visible;">
+                  <circle id="clock-ring" cx="170" cy="170" r="164" stroke="${mainColor}" stroke-width="40" stroke-dasharray="1030.5" stroke-dashoffset="0" fill="transparent" transform="rotate(-90 170 170)"/>
+                </svg>
+                <div style="position:relative; z-index:10; display:flex; flex-direction:column; align-items:center;">
+                  <span style="font-size:24px;font-weight:700;color:#fff;letter-spacing:4px;margin-bottom:-10px; text-shadow: 0 0 10px #000;">TIME</span>
+                  <span id="timer-num" style="font-size:80px; font-weight:900; color:#fff; font-family:monospace!important; line-height:1; text-shadow: 0 0 10px #000;">00:05</span>
+                </div>
+              </div>`;
+          } else if (tStyle === "dotted") {
+              tHTML = `
+              <div style="width:340px; height:340px; border-radius:50%; position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 40px ${mainColor}60;">
+                <svg style="position:absolute; top:-12px; left:-12px; width:340px; height:340px; overflow:visible; animation: rotateHue 20s linear infinite;">
+                  <circle id="clock-ring" cx="170" cy="170" r="164" stroke="${mainColor}" stroke-width="12" stroke-dasharray="1030.5" stroke-dashoffset="0" fill="transparent"/>
+                </svg>
+                <div style="width:280px; height:280px; border-radius:50%; background:#111; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; z-index:2; border: 4px dashed ${mainColor};">
+                  <span style="font-size:24px;font-weight:700;color:#888;letter-spacing:4px;margin-bottom:-10px;">TIME</span>
+                  <span id="timer-num" style="font-size:80px; font-weight:900; color:${mainColor}; font-family:monospace!important; line-height:1;">00:05</span>
+                </div>
+              </div>`;
+          }
+          timerContainer.innerHTML = tHTML;
+      }
+    }
+
+    // Run autofit and randomize on load
+    window.addEventListener('load', () => {
+      randomizeTheme();
+      // runAutoFit removed to prevent unexpected shrinking
+    });
 
     window.setQuizState = function(phase, progress, timings) {
       const timerNum = document.getElementById("timer-num");
@@ -266,12 +336,14 @@
           const card = document.getElementById(`opt-${i}`);
           card.classList.remove("correct", "wrong");
           card.style.opacity = "1";
-          card.style.border = "none";
+          card.style.border = "8px solid transparent";
+          card.style.background = "transparent";
+          card.style.boxShadow = "none";
         }
 
         if (phase === 'question') {
           timerNum.innerText = "00:05";
-          if (clockRing) { clockRing.style.strokeDashoffset = "0"; clockRing.style.stroke = "#A855F7"; }
+          if (clockRing) { clockRing.style.strokeDashoffset = "0"; clockRing.style.stroke = window.clockThemeColor; }
         }
         else if (phase === 'countdown') {
           const offset = progress * CIRC;
@@ -282,16 +354,17 @@
             timerNum.style.color = "#FF4444";
             if (clockRing) clockRing.style.stroke = "#FF4444";
           } else {
-            timerNum.style.color = "#A855F7";
-            if (clockRing) clockRing.style.stroke = "#A855F7";
+            timerNum.style.color = window.clockThemeColor;
+            if (clockRing) clockRing.style.stroke = window.clockThemeColor;
           }
         }
         else if (phase === 'reveal') {
           for (let i = 0; i < 4; i++) {
             const card = document.getElementById(`opt-${i}`);
             if (i === correctIdx) {
-              card.style.border = "8px solid #39FF14";
-              card.style.background = "#0a1a0a";
+              card.style.border = `8px solid ${window.themeColor}`;
+              card.style.backgroundColor = `${window.themeColor}33`; // 20% opacity background
+              card.style.borderRadius = "30px";
             } else {
               card.style.opacity = "0.35";
             }
@@ -303,25 +376,20 @@
       else if (phase.startsWith('explain')) {
         document.getElementById("page-quiz").style.display = "none";
         document.getElementById("page-explain").style.display = "flex";
-        let activeIdx = parseInt(phase.replace('explain', ''));
         for (let i = 0; i < 4; i++) {
           const card = document.getElementById(`exp-card-${i}`);
-          if (i <= activeIdx) {
-            card.style.opacity = "1";
-            if (i === correctIdx) {
-              card.style.border = "8px solid #39FF14";
-              card.style.background = "#0a1a0a";
-            } else if (i < activeIdx) {
-              card.style.opacity = "0.4";
-            }
-          } else {
-            card.style.opacity = "0";
+          card.style.opacity = "1";
+          if (i === correctIdx) {
+            card.style.border = `8px solid ${window.themeColor}`;
+            card.style.backgroundColor = `${window.themeColor}33`; // 20% opacity background
+            card.style.borderRadius = "30px";
+            card.style.boxShadow = "none";
           }
         }
       }
     };
 
-    window.setQuizState('question', 0, null);
+    // setQuizState is called by render script AFTER randomizeTheme() to ensure correct first frame
   </script>
 </body>
 </html>

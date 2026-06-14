@@ -102,26 +102,26 @@
       </div>
     </div>
 
-    <!-- QUESTION BOX (fixed height for auto-shrink, text centered) -->
-    <div style="height:1000px; display:flex; align-items:center; justify-content:center; text-align:center; margin-bottom:120px;">
-      <h2 id="question-text" style="font-size:100px;font-weight:900;color:white;line-height:1.3;margin:0;max-height:100%;overflow:hidden;display:flex;align-items:center;">
+    <!-- QUESTION BOX (fixed height for auto-shrink, text left-aligned) -->
+    <div style="height:1000px; display:flex; align-items:center; justify-content:flex-start; text-align:left; margin-bottom:120px; width:100%;">
+      <h2 id="question-text" style="font-size:100px;font-weight:900;color:white;line-height:1.3;margin:0;max-height:100%;overflow:hidden;display:flex;align-items:center;text-align:left;width:100%;">
         Q{{q_id}}. {{question_hi}}
       </h2>
     </div>
 
     <!-- OPTIONS (fixed gap, normal flow below question box) -->
     <div style="display:flex;flex-direction:column;gap:50px;width:100%;">
-      <div id="opt-0" class="option-card" style="height:220px; padding:20px 80px;">
-        <span id="opt-text-0" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">A. {{opt0_hi}}</span>
+      <div id="opt-0" class="option-card" style="height:220px; padding:20px 80px; justify-content:flex-start;">
+        <span id="opt-text-0" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:flex-start;height:100%;text-align:left;width:100%;">A. {{opt0_hi}}</span>
       </div>
-      <div id="opt-1" class="option-card" style="height:220px; padding:20px 80px;">
-        <span id="opt-text-1" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">B. {{opt1_hi}}</span>
+      <div id="opt-1" class="option-card" style="height:220px; padding:20px 80px; justify-content:flex-start;">
+        <span id="opt-text-1" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:flex-start;height:100%;text-align:left;width:100%;">B. {{opt1_hi}}</span>
       </div>
-      <div id="opt-2" class="option-card" style="height:220px; padding:20px 80px;">
-        <span id="opt-text-2" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">C. {{opt2_hi}}</span>
+      <div id="opt-2" class="option-card" style="height:220px; padding:20px 80px; justify-content:flex-start;">
+        <span id="opt-text-2" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:flex-start;height:100%;text-align:left;width:100%;">C. {{opt2_hi}}</span>
       </div>
-      <div id="opt-3" class="option-card" style="height:220px; padding:20px 80px;">
-        <span id="opt-text-3" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">D. {{opt3_hi}}</span>
+      <div id="opt-3" class="option-card" style="height:220px; padding:20px 80px; justify-content:flex-start;">
+        <span id="opt-text-3" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:flex-start;height:100%;text-align:left;width:100%;">D. {{opt3_hi}}</span>
       </div>
     </div>
 
@@ -145,19 +145,19 @@
 
     <!-- Explanation Cards -->
     <div style="display:flex;flex-direction:column;gap:30px;width:100%;height:100%;justify-content:center;padding:40px 0;">
-      <div id="exp-card-0" class="option-card" style="padding:30px 50px;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;opacity:0;min-height:auto;flex-grow:1;">
+      <div id="exp-card-0" class="option-card" style="padding:30px 80px;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;gap:20px;opacity:0;min-height:auto;flex-grow:1;">
         <span id="exp-text-0" style="font-weight:900;color:white;font-size:80px;">A. {{opt0_hi}}</span>
         <p style="font-size:70px;font-weight:600;color:#bbb;line-height:1.4;margin:0;">{{exp0}}</p>
       </div>
-      <div id="exp-card-1" class="option-card" style="padding:30px 50px;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;opacity:0;min-height:auto;flex-grow:1;">
+      <div id="exp-card-1" class="option-card" style="padding:30px 80px;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;gap:20px;opacity:0;min-height:auto;flex-grow:1;">
         <span id="exp-text-1" style="font-weight:900;color:white;font-size:80px;">B. {{opt1_hi}}</span>
         <p style="font-size:70px;font-weight:600;color:#bbb;line-height:1.4;margin:0;">{{exp1}}</p>
       </div>
-      <div id="exp-card-2" class="option-card" style="padding:30px 50px;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;opacity:0;min-height:auto;flex-grow:1;">
+      <div id="exp-card-2" class="option-card" style="padding:30px 80px;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;gap:20px;opacity:0;min-height:auto;flex-grow:1;">
         <span id="exp-text-2" style="font-weight:900;color:white;font-size:80px;">C. {{opt2_hi}}</span>
         <p style="font-size:70px;font-weight:600;color:#bbb;line-height:1.4;margin:0;">{{exp2}}</p>
       </div>
-      <div id="exp-card-3" class="option-card" style="padding:30px 50px;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;opacity:0;min-height:auto;flex-grow:1;">
+      <div id="exp-card-3" class="option-card" style="padding:30px 80px;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;gap:20px;opacity:0;min-height:auto;flex-grow:1;">
         <span id="exp-text-3" style="font-weight:900;color:white;font-size:80px;">D. {{opt3_hi}}</span>
         <p style="font-size:70px;font-weight:600;color:#bbb;line-height:1.4;margin:0;">{{exp3}}</p>
       </div>

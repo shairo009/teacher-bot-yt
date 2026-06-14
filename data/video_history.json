@@ -333,5 +333,13 @@
     "video_file": "quiz_polity_q2.mp4",
     "uploaded": true,
     "timestamp": "2026-06-14T07:09:28.325257+00:00"
+  },
+  {
+    "id": 3,
+    "topic": "PARLIAMENTARY SYSTEM (संसदीय प्रणाली)",
+    "question": "भारतीय संविधान किस प्रकार की सरकार के लिए प्रदान करता है?",
+    "video_file": "quiz_polity_q3.mp4",
+    "uploaded": false,
+    "timestamp": "2026-06-14T11:12:39.744549+00:00"
   }
 ]

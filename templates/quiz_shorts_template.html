@@ -61,9 +61,7 @@
       <!-- LUCENT GK -->
       <div style="display:flex;flex-direction:column;gap:16px;">
         <span style="font-size:80px;font-weight:900;color:#FF6B00;letter-spacing:6px;line-height:1;text-shadow:0 0 40px rgba(255,107,0,0.5);">LUCENT GK</span>
-        <span style="font-size:70px;font-weight:600;color:#aaa;letter-spacing:2px;">{{subject_hi}}</span>
-        <span style="font-size:70px;font-weight:800;color:#39FF14;" id="chapter-text">{{chapter_hi}}</span>
-        <span style="font-size:70px;font-weight:600;color:#777;">📌 {{topic_hi}}</span>
+        <span style="font-size:70px;font-weight:800;color:#39FF14;" id="chapter-text">Page: {{q_id}}</span>
       </div>
 
       <!-- Restored Clock Timer -->
@@ -74,7 +72,7 @@
     <!-- QUESTION BOX (fixed height for auto-shrink, text centered) -->
     <div style="height:1000px; display:flex; align-items:center; justify-content:center; text-align:center; margin-bottom:120px;">
       <h2 id="question-text" style="font-size:100px;font-weight:900;color:white;line-height:1.3;margin:0;max-height:100%;overflow:hidden;display:flex;align-items:center;">
-        {{question_hi}}
+        Q{{q_id}}. {{question_hi}}
       </h2>
     </div>
 
@@ -133,11 +131,15 @@
     </div>
   </div>
 
-  <!-- GLOBAL SUBSCRIBE BOX (ALWAYS VISIBLE AT BOTTOM) -->
-  <div id="global-sub-box" style="position:absolute; bottom:550px; left:350px; right:350px; background:rgba(20,20,20,0.95); border:6px solid #FFD700; border-radius:40px; padding:40px 40px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.9); z-index:1000; gap:30px;">
-    <span id="global-sub-text" style="font-size:65px; font-weight:800; color:#FFD700; line-height:1.4; letter-spacing:1px;">अगर आप हनुमान जी को दिल से मानते हैं तो सब्सक्राइब कीजिए, आपकी नौकरी हो जाएगी 🙏</span>
-    <div style="background:#FF0000; padding:20px 60px; border-radius:50px; color:white; font-size:55px; font-weight:900; letter-spacing:2px; display:flex; align-items:center; gap:20px; box-shadow: 0 10px 20px rgba(255,0,0,0.4);">
-      SUBSCRIBE <span style="font-size:55px;">🔔</span>
+  <!-- GLOBAL SUBSCRIBE & LIKE BAR (ALWAYS VISIBLE AT BOTTOM) -->
+  <div id="global-sub-box" style="position:absolute; bottom:550px; left:250px; right:250px; display:flex; justify-content:center; gap:80px; z-index:1000;">
+    <!-- Subscribe Button -->
+    <div style="background:#FF0000; padding:25px 70px; border-radius:60px; color:white; font-size:60px; font-weight:900; letter-spacing:2px; display:flex; align-items:center; gap:24px; box-shadow: 0 15px 30px rgba(255,0,0,0.4);">
+      SUBSCRIBE <span style="font-size:60px;">🔔</span>
+    </div>
+    <!-- Like Button -->
+    <div id="global-like-btn" style="background:#1E90FF; padding:25px 70px; border-radius:60px; color:white; font-size:60px; font-weight:900; letter-spacing:2px; display:flex; align-items:center; gap:24px; box-shadow: 0 15px 30px rgba(30,144,255,0.4);">
+      LIKE <span style="font-size:60px;">👍</span>
     </div>
   </div>
   <script>
@@ -213,11 +215,10 @@
       document.getElementById('chapter-text').style.color = mainColor;
       document.getElementById('chapter-text-exp').style.color = mainColor;
       
-      const subBox = document.getElementById('global-sub-box');
-      const subText = document.getElementById('global-sub-text');
-      if (subBox && subText) {
-        subBox.style.borderColor = mainColor;
-        subText.style.color = mainColor;
+      const likeBtn = document.getElementById('global-like-btn');
+      if (likeBtn) {
+        likeBtn.style.backgroundColor = mainColor;
+        likeBtn.style.boxShadow = `0 15px 30px ${mainColor}60`;
       }
 
       // 200+ VIDEO FRAME / BORDER DECORATIONS

@@ -250,6 +250,7 @@ async def main():
 
     template = Template(template_str)
     rendered_html = template.render(
+        q_id=question_data["id"],
         subject_hi=question_data.get("subject_hi", question_data["subject"]),
         chapter_hi=question_data.get("chapter_hi", question_data["chapter"]),
         topic_hi=question_data.get("topic_hi", question_data["topic"]),

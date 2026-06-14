@@ -389,5 +389,13 @@
     "video_file": "quiz_polity_q6.mp4",
     "uploaded": true,
     "timestamp": "2026-06-14T12:56:49.370203+00:00"
+  },
+  {
+    "id": 1,
+    "topic": "CONSTITUENT ASSEMBLY (संविधान सभा)",
+    "question": "संविधान सभा की प्रथम बैठक कब हुई थी?",
+    "video_file": "quiz_polity_q1.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-14T14:03:20.785669+00:00"
   }
 ]

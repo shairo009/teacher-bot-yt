@@ -349,5 +349,13 @@
     "video_file": "quiz_polity_q4.mp4",
     "uploaded": false,
     "timestamp": "2026-06-14T11:22:07.414566+00:00"
+  },
+  {
+    "id": 5,
+    "topic": "DRAFTING COMMITTEE (मसौदा समिति)",
+    "question": "भारतीय संविधान के मसौदा समिति के अध्यक्ष कौन थे?",
+    "video_file": "quiz_polity_q5.mp4",
+    "uploaded": false,
+    "timestamp": "2026-06-14T11:33:26.299905+00:00"
   }
 ]

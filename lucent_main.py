@@ -94,7 +94,11 @@ async def render_html_frames(data, n_q, n_c, n_r, n_e0, n_e1, n_e2, n_e3, timing
         page = await browser.new_page(viewport={"width": WIDTH, "height": HEIGHT})
         
         await page.goto(file_url)
-        await page.wait_for_timeout(1000)
+        await page.wait_for_timeout(1500)
+        
+        # Initialize theme FIRST to avoid black screen
+        await page.evaluate("window.randomizeTheme();")
+        await page.wait_for_timeout(500)
         
         for frame_idx in range(total_frames):
             timings_json = "null"
@@ -290,7 +294,9 @@ async def main():
     # 1. Generate Voiceovers
     print("\nGenerating Audio Voiceovers...")
     q_intro_audio = await generate_tts(q_segments["intro"], "q_intro.mp3")
-    q_question_audio = await generate_tts(q_segments["question"] + " दिए गए विकल्पों में से सही उत्तर कमेंट में बताइये।", "q_question.mp3")
+    # Use question_hi directly, remove any "aapke vikalp hain" text from narration
+    clean_question = question_data["question_hi"].rstrip("।").rstrip("?")
+    q_question_audio = await generate_tts(f"{clean_question}? दिए गए विकल्पों में से अपना जवाब कमेंट में बताइए।", "q_question.mp3")
     
     # Generate Countdown Tick Sound + Silence Audios (Need silence early for dummy assignments)
     print("Generating tick-tock countdown sound...")
@@ -423,25 +429,24 @@ async def main():
             uploader = YouTubeUploader()
             
             # Generate SEO optimized metadata
-            correct_letter = ["A", "B", "C", "D"][question_data["correct_idx"]]
-            title = f"Lucent Polity GK Quiz: {question_data['question_hi'][:40]}... | Chapter 1 | #shorts #gk"
+            chapter_num = question_data['chapter'].split(':')[0].replace('CHAPTER', '').strip()
+            title = f"Lucent GK Quiz: {question_data['question_hi'][:45]}... | #shorts #gk #lucentgk"
             
-            description = f"""📚 Lucent General Knowledge Series - Indian Polity (भारतीय राजव्यवस्था)
+            description = f"""📚 Lucent सामान्य ज्ञान Series - Indian Polity (भारतीय राजव्यवस्था)
 
-Chapter: {question_data['chapter']}
-Topic: {question_data['topic']}
+❓ प्रश्न:
+{question_data['question_hi']}
 
-Question:
-{question_data['question_hi']} ({question_data['question_en']})
+🔤 विकल्प:
+A. {question_data['opt0_hi']}
+B. {question_data['opt1_hi']}
+C. {question_data['opt2_hi']}
+D. {question_data['opt3_hi']}
 
-Options:
-A. {question_data['opt0_hi']} ({question_data['opt0_en']})
-B. {question_data['opt1_hi']} ({question_data['opt1_en']})
-C. {question_data['opt2_hi']} ({question_data['opt2_en']})
-D. {question_data['opt3_hi']} ({question_data['opt3_en']})
+💬 सही उत्तर कमेंट में बताइए!
 
-Correct Answer: Option {correct_letter}
-Explanation: {question_data[f'exp{question_data["correct_idx"]}']}
+📖 Chapter: {question_data['chapter']}
+📌 Topic: {question_data['topic']}
 
 #shorts #gk #lucentgk #gkinhindi #politygk #constitution #exam #upsc #ssc #railway
 """

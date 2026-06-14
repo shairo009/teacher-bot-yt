@@ -290,20 +290,9 @@ async def main():
     # 1. Generate Voiceovers
     print("\nGenerating Audio Voiceovers...")
     q_intro_audio = await generate_tts(q_segments["intro"], "q_intro.mp3")
-    q_question_audio = await generate_tts(q_segments["question"], "q_question.mp3")
-    q_opt0_audio = await generate_tts(q_segments["opt0"], "q_opt0.mp3")
-    q_opt1_audio = await generate_tts(q_segments["opt1"], "q_opt1.mp3")
-    q_opt2_audio = await generate_tts(q_segments["opt2"], "q_opt2.mp3")
-    q_opt3_audio = await generate_tts(q_segments["opt3"], "q_opt3.mp3")
-    q_outro_audio = await generate_tts(q_segments["outro"], "q_outro.mp3")
-
-    r_audio = await generate_tts(quiz_data["r_narration"], "reveal.mp3")
-    e0_audio = await generate_tts(quiz_data["e0_narration"], "explain0.mp3")
-    e1_audio = await generate_tts(quiz_data["e1_narration"], "explain1.mp3")
-    e2_audio = await generate_tts(quiz_data["e2_narration"], "explain2.mp3")
-    e3_audio = await generate_tts(quiz_data["e3_narration"], "explain3.mp3")
+    q_question_audio = await generate_tts(q_segments["question"] + " दिए गए विकल्पों में से सही उत्तर कमेंट में बताइये।", "q_question.mp3")
     
-    # 2. Generate Countdown Tick Sound + Silence Audios
+    # Generate Countdown Tick Sound + Silence Audios (Need silence early for dummy assignments)
     print("Generating tick-tock countdown sound...")
     tick_audio = temp_dir / "tick_tock.mp3"
     generate_tick_sound(tick_audio, duration=5.0)
@@ -311,8 +300,21 @@ async def main():
     opt_silence = temp_dir / "opt_silence.mp3"
     subprocess.run([
         'ffmpeg', '-y', '-f', 'lavfi', '-i', 'anullsrc=r=24000:cl=mono',
-        '-t', '0.25', '-c:a', 'libmp3lame', str(opt_silence)
+        '-t', '0.01', '-c:a', 'libmp3lame', str(opt_silence)
     ], capture_output=True)
+
+    # Use tiny silence for options and outro instead of generating TTS
+    q_opt0_audio = opt_silence
+    q_opt1_audio = opt_silence
+    q_opt2_audio = opt_silence
+    q_opt3_audio = opt_silence
+    q_outro_audio = opt_silence
+
+    r_audio = await generate_tts(quiz_data["r_narration"], "reveal.mp3")
+    e0_audio = await generate_tts(quiz_data["e0_narration"], "explain0.mp3")
+    e1_audio = await generate_tts(quiz_data["e1_narration"], "explain1.mp3")
+    e2_audio = await generate_tts(quiz_data["e2_narration"], "explain2.mp3")
+    e3_audio = await generate_tts(quiz_data["e3_narration"], "explain3.mp3")
     
     # 3. Measure Durations
     t_intro = get_audio_duration(q_intro_audio)

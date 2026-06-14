@@ -5,21 +5,52 @@
   <title>Lucent GK Quiz - Viral Style</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap');
+
+    /* Local Fallbacks for Offline/Playwright Rendering */
     @font-face {
       font-family: 'HindiFont';
-      src: url('../assets/fonts/hindi_font.ttf') format('truetype');
+      src: url('{{ hindi_font_url }}') format('truetype');
+      font-weight: normal;
     }
     @font-face {
+      font-family: 'HindiFont';
+      src: url('{{ hindi_font_url }}') format('truetype');
+      font-weight: bold;
+    }
+    @font-face {
+      font-family: 'HindiFont';
+      src: url('{{ hindi_font_url }}') format('truetype');
+      font-weight: 800;
+    }
+    @font-face {
+      font-family: 'HindiFont';
+      src: url('{{ hindi_font_url }}') format('truetype');
+      font-weight: 900;
+    }
+
+    @font-face {
       font-family: 'Montserrat';
-      src: url('../assets/fonts/Montserrat-Regular.ttf') format('truetype');
+      src: url('{{ montserrat_regular_url }}') format('truetype');
       font-weight: normal;
     }
     @font-face {
       font-family: 'Montserrat';
-      src: url('../assets/fonts/Montserrat-Bold.ttf') format('truetype');
+      src: url('{{ montserrat_bold_url }}') format('truetype');
       font-weight: bold;
     }
-    * { font-family: 'HindiFont', 'Montserrat', sans-serif !important; box-sizing: border-box; }
+    @font-face {
+      font-family: 'Montserrat';
+      src: url('{{ montserrat_bold_url }}') format('truetype');
+      font-weight: 800;
+    }
+    @font-face {
+      font-family: 'Montserrat';
+      src: url('{{ montserrat_bold_url }}') format('truetype');
+      font-weight: 900;
+    }
+
+    * { font-family: 'Montserrat', 'HindiFont', 'Noto Sans Devanagari', sans-serif !important; box-sizing: border-box; }
     body {
       margin: 0; padding: 0; background-color: #000; overflow: hidden; position: relative;
       -webkit-font-smoothing: antialiased;
@@ -322,7 +353,7 @@
                 </svg>
                 <div style="width:260px; height:260px; border-radius:50%; border:6px solid ${mainColor}40; display:flex; align-items:center; justify-content:center; flex-direction:column;">
                   <span style="font-size:24px;font-weight:700;color:#888;letter-spacing:4px;margin-bottom:-10px;">TIME</span>
-                  <span id="timer-num" style="font-size:80px; font-weight:900; color:${mainColor}; font-family:monospace!important; line-height:1;">00:05</span>
+                  <span id="timer-num" style="font-size:80px; font-weight:900; color:${mainColor}; font-family:'Montserrat', sans-serif!important; line-height:1;">00:05</span>
                 </div>
               </div>`;
           } else if (tStyle === "diamond") {
@@ -333,7 +364,7 @@
                 </svg>
                 <div style="transform: rotate(-45deg); display:flex; flex-direction:column; align-items:center; justify-content:center;">
                   <span style="font-size:24px;font-weight:700;color:#888;letter-spacing:4px;margin-bottom:-10px;">TIME</span>
-                  <span id="timer-num" style="font-size:80px; font-weight:900; color:${mainColor}; font-family:monospace!important; line-height:1;">00:05</span>
+                  <span id="timer-num" style="font-size:80px; font-weight:900; color:${mainColor}; font-family:'Montserrat', sans-serif!important; line-height:1;">00:05</span>
                 </div>
               </div>`;
           } else if (tStyle === "thick") {
@@ -344,7 +375,7 @@
                 </svg>
                 <div style="position:relative; z-index:10; display:flex; flex-direction:column; align-items:center;">
                   <span style="font-size:24px;font-weight:700;color:#fff;letter-spacing:4px;margin-bottom:-10px; text-shadow: 0 0 10px #000;">TIME</span>
-                  <span id="timer-num" style="font-size:80px; font-weight:900; color:#fff; font-family:monospace!important; line-height:1; text-shadow: 0 0 10px #000;">00:05</span>
+                  <span id="timer-num" style="font-size:80px; font-weight:900; color:#fff; font-family:'Montserrat', sans-serif!important; line-height:1; text-shadow: 0 0 10px #000;">00:05</span>
                 </div>
               </div>`;
           } else if (tStyle === "dotted") {
@@ -355,7 +386,7 @@
                 </svg>
                 <div style="width:280px; height:280px; border-radius:50%; background:#111; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; z-index:2; border: 4px dashed ${mainColor};">
                   <span style="font-size:24px;font-weight:700;color:#888;letter-spacing:4px;margin-bottom:-10px;">TIME</span>
-                  <span id="timer-num" style="font-size:80px; font-weight:900; color:${mainColor}; font-family:monospace!important; line-height:1;">00:05</span>
+                  <span id="timer-num" style="font-size:80px; font-weight:900; color:${mainColor}; font-family:'Montserrat', sans-serif!important; line-height:1;">00:05</span>
                 </div>
               </div>`;
           }

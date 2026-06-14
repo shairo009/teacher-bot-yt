@@ -248,6 +248,15 @@ async def main():
     with open(template_path, 'r', encoding='utf-8') as f:
         template_str = f.read()
 
+    # Resolve absolute paths for fonts to ensure perfect loading in Playwright on both Linux and Windows
+    hindi_font_path = os.path.abspath(PROJECT_ROOT / "assets/fonts/hindi_font.ttf").replace(os.sep, '/')
+    montserrat_regular_path = os.path.abspath(PROJECT_ROOT / "assets/fonts/Montserrat-Regular.ttf").replace(os.sep, '/')
+    montserrat_bold_path = os.path.abspath(PROJECT_ROOT / "assets/fonts/Montserrat-Bold.ttf").replace(os.sep, '/')
+
+    hindi_font_url = f"file:///{hindi_font_path}"
+    montserrat_regular_url = f"file:///{montserrat_regular_path}"
+    montserrat_bold_url = f"file:///{montserrat_bold_path}"
+
     template = Template(template_str)
     rendered_html = template.render(
         q_id=question_data["id"],
@@ -271,7 +280,10 @@ async def main():
         exp1=question_data["exp1"],
         exp2=question_data["exp2"],
         exp3=question_data["exp3"],
-        correct_idx=question_data["correct_idx"]
+        correct_idx=question_data["correct_idx"],
+        hindi_font_url=hindi_font_url,
+        montserrat_regular_url=montserrat_regular_url,
+        montserrat_bold_url=montserrat_bold_url
     )
 
     with open(output_html_path, 'w', encoding='utf-8') as f:

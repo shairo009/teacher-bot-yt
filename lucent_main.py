@@ -90,10 +90,25 @@ async def render_html_frames(data, n_q, n_c, n_r, n_e0, n_e1, n_e2, n_e3, timing
     frame_paths = []
     
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page(viewport={"width": WIDTH, "height": HEIGHT})
+        browser = await p.chromium.launch(
+            headless=True,
+            args=[
+                '--font-render-hinting=none',
+                '--enable-font-antialiasing',
+                '--disable-font-subpixel-positioning',
+                '--force-color-profile=srgb',
+            ]
+        )
+        page = await browser.new_page(
+            viewport={"width": WIDTH, "height": HEIGHT},
+            device_scale_factor=1.0
+        )
         
         await page.goto(file_url)
+        try:
+            await page.evaluate("document.fonts.ready")
+        except:
+            pass
         await page.wait_for_timeout(1500)
         
         # Initialize theme FIRST to avoid black screen
@@ -163,10 +178,10 @@ def compose_quiz_video(frame_paths, audio_path, question_id):
         '-f', 'concat', '-safe', '0',
         '-i', str(concat_file),
         '-i', str(audio_path),
-        '-vf', 'scale=2160:3840,fps=30',
+        '-vf', 'scale=2160:3840:flags=lanczos,fps=30',
         '-c:v', 'libx264',
         '-preset', 'slow',
-        '-crf', '18',
+        '-crf', '15',
         '-pix_fmt', 'yuv420p',
         '-shortest',
         str(output_video_path)

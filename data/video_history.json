@@ -325,5 +325,13 @@
     "video_file": "quiz_polity_q1.mp4",
     "uploaded": false,
     "timestamp": "2026-06-13T20:00:08.712823+00:00"
+  },
+  {
+    "id": 2,
+    "topic": "KEY TERMS (मुख्य शब्द)",
+    "question": "निम्नलिखित में से कौन भारतीय संविधान की प्रस्तावना का हिस्सा नहीं है?",
+    "video_file": "quiz_polity_q2.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-14T07:09:28.325257+00:00"
   }
 ]

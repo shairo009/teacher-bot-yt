@@ -56,23 +56,23 @@
     <!-- QUESTION BOX (fixed height for auto-shrink, text centered) -->
     <div style="height:1000px; display:flex; align-items:center; justify-content:center; text-align:center; margin-bottom:120px;">
       <h2 id="question-text" style="font-size:100px;font-weight:900;color:white;line-height:1.3;margin:0;max-height:100%;overflow:hidden;display:flex;align-items:center;">
-        संविधान सभा की प्रथम बैठक कब हुई थी?
+        {{question_hi}}
       </h2>
     </div>
 
     <!-- OPTIONS (fixed gap, normal flow below question box) -->
     <div style="display:flex;flex-direction:column;gap:50px;width:100%;">
       <div id="opt-0" class="option-card" style="height:220px; padding:20px 80px;">
-        <span id="opt-text-0" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">A. 9 दिसंबर 1946</span>
+        <span id="opt-text-0" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">A. {{opt0_hi}}</span>
       </div>
       <div id="opt-1" class="option-card" style="height:220px; padding:20px 80px;">
-        <span id="opt-text-1" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">B. 11 दिसंबर 1946</span>
+        <span id="opt-text-1" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">B. {{opt1_hi}}</span>
       </div>
       <div id="opt-2" class="option-card" style="height:220px; padding:20px 80px;">
-        <span id="opt-text-2" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">C. 15 अगस्त 1947</span>
+        <span id="opt-text-2" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">C. {{opt2_hi}}</span>
       </div>
       <div id="opt-3" class="option-card" style="height:220px; padding:20px 80px;">
-        <span id="opt-text-3" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">D. 26 जनवरी 1950</span>
+        <span id="opt-text-3" style="font-size:80px;font-weight:900;color:white;letter-spacing:2px;display:flex;align-items:center;justify-content:center;height:100%;">D. {{opt3_hi}}</span>
       </div>
     </div>
 
@@ -91,7 +91,7 @@
 
     <!-- Repeated question (HIDDEN PER USER REQUEST) -->
     <div style="display:none; height:650px; align-items:center; justify-content:center; text-align:center; margin-bottom:100px;">
-      <h3 id="question-text-exp" style="font-size:80px;font-weight:900;color:white;line-height:1.2;margin:0;max-height:100%;overflow:hidden;display:flex;align-items:center;">संविधान सभा की प्रथम बैठक कब हुई थी?</h3>
+      <h3 id="question-text-exp" style="font-size:80px;font-weight:900;color:white;line-height:1.2;margin:0;max-height:100%;overflow:hidden;display:flex;align-items:center;">{{question_hi}}</h3>
     </div>
 
     <!-- Explanation Cards -->
@@ -123,7 +123,7 @@
     </div>
   </div>
   <script>
-    const correctIdx = 0;
+    const correctIdx = {{correct_idx}};
     const CIRC = 1030.5; // Calculated for r=164
 
     function runAutoFit() {

@@ -98,6 +98,7 @@ async def render_html_frames(data, n_q, n_c, n_r, n_e0, n_e1, n_e2, n_e3, timing
         
         # Initialize theme FIRST to avoid black screen
         await page.evaluate("window.randomizeTheme();")
+        await page.evaluate("document.body.style.opacity = '1';")
         await page.wait_for_timeout(500)
         
         for frame_idx in range(total_frames):

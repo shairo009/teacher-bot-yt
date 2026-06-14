@@ -75,7 +75,7 @@
   
     @keyframes borderDash { to { stroke-dashoffset: 1000; } }
     @keyframes pulseGlow { 0% { opacity: 0.5; box-shadow: 0 0 20px currentColor; } 50% { opacity: 1; box-shadow: 0 0 80px currentColor; } 100% { opacity: 0.5; box-shadow: 0 0 20px currentColor; } }
-    @keyframes rotateHue { to { filter: hue-rotate(360deg); } }
+    @keyframes spinClock { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
   </style>
 </head>
@@ -83,6 +83,8 @@
 
   <!-- Dynamic Decorations Container (Edge Video Borders) -->
   <div id="decorations" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;box-sizing:border-box;"></div>
+  <!-- Dynamic Border Overlay for 200+ combinations -->
+  <div id="dynamic-border-overlay" style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:9999;box-sizing:border-box;"></div>
 
   <!-- QUIZ PAGE -->
   <div id="page-quiz" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;padding:180px 350px 1100px 350px;z-index:10;">
@@ -339,10 +341,44 @@
         selector: selector
       };
 
-      // Dynamic Timers
+      // Apply the 200+ combinations dynamic border to the overlay
+      const borderOverlay = document.getElementById('dynamic-border-overlay');
+      if (borderOverlay) {
+        borderOverlay.style.border = "none";
+        borderOverlay.style.boxShadow = "none";
+        borderOverlay.style.borderLeft = "none";
+        borderOverlay.style.borderRight = "none";
+        borderOverlay.style.borderTop = "none";
+        borderOverlay.style.borderBottom = "none";
+
+        const borderSpec = `${bWidth}px ${bStyle} ${mainColor}`;
+        
+        if (selector === "all") {
+          borderOverlay.style.border = borderSpec;
+        } else if (selector === "leftRight") {
+          borderOverlay.style.borderLeft = borderSpec;
+          borderOverlay.style.borderRight = borderSpec;
+        } else if (selector === "topBottom") {
+          borderOverlay.style.borderTop = borderSpec;
+          borderOverlay.style.borderBottom = borderSpec;
+        } else if (selector === "leftThick") {
+          borderOverlay.style.borderLeft = `${bWidth * 2}px ${bStyle} ${mainColor}`;
+          borderOverlay.style.borderRight = `${bWidth / 2}px ${bStyle} ${mainColor}40`;
+        } else if (selector === "bottomThick") {
+          borderOverlay.style.borderBottom = `${bWidth * 2}px ${bStyle} ${mainColor}`;
+          borderOverlay.style.borderTop = `${bWidth / 2}px ${bStyle} ${mainColor}40`;
+        }
+        
+        if (bShadow !== "none") {
+          borderOverlay.style.boxShadow = bShadow;
+        }
+      }
+
+      // Dynamic Timers (Randomized style for each video!)
       const timerContainer = document.getElementById("dynamic-timer-container");
       if(timerContainer) {
-          const tStyle = "classic"; // User requested exactly this style
+          const clockStyles = ["classic", "diamond", "thick", "dotted"];
+          const tStyle = clockStyles[Math.floor(Math.random() * clockStyles.length)];
           let tHTML = "";
           
           if(tStyle === "classic") {
@@ -381,7 +417,7 @@
           } else if (tStyle === "dotted") {
               tHTML = `
               <div style="width:340px; height:340px; border-radius:50%; position:relative; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 40px ${mainColor}60;">
-                <svg style="position:absolute; top:-12px; left:-12px; width:340px; height:340px; overflow:visible; animation: rotateHue 20s linear infinite;">
+                <svg style="position:absolute; top:-12px; left:-12px; width:340px; height:340px; overflow:visible; transform-origin: 170px 170px; animation: spinClock 20s linear infinite;">
                   <circle id="clock-ring" cx="170" cy="170" r="164" stroke="${mainColor}" stroke-width="12" stroke-dasharray="1030.5" stroke-dashoffset="0" fill="transparent"/>
                 </svg>
                 <div style="width:280px; height:280px; border-radius:50%; background:#111; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; z-index:2; border: 4px dashed ${mainColor};">

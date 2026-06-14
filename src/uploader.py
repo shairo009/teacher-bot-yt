@@ -355,7 +355,7 @@ class YouTubeUploader:
             },
             'status': {
                 'privacyStatus': privacy,
-                'selfDeclaredMadeForKids': True,
+                'selfDeclaredMadeForKids': False,
                 'embeddable': True,
                 'license': 'youtube',
                 'publicStatsViewable': True,

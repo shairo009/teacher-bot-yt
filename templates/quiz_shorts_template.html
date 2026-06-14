@@ -4,10 +4,28 @@
   <meta charset="UTF-8">
   <title>Lucent GK Quiz - Viral Style</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    * { font-family: 'Noto Sans Devanagari', 'Poppins', sans-serif !important; box-sizing: border-box; }
-    body { margin: 0; padding: 0; background-color: #000; overflow: hidden; position: relative; }
+    @font-face {
+      font-family: 'HindiFont';
+      src: url('../assets/fonts/hindi_font.ttf') format('truetype');
+    }
+    @font-face {
+      font-family: 'Montserrat';
+      src: url('../assets/fonts/Montserrat-Regular.ttf') format('truetype');
+      font-weight: normal;
+    }
+    @font-face {
+      font-family: 'Montserrat';
+      src: url('../assets/fonts/Montserrat-Bold.ttf') format('truetype');
+      font-weight: bold;
+    }
+    * { font-family: 'HindiFont', 'Montserrat', sans-serif !important; box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0; background-color: #000; overflow: hidden; position: relative;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
 
     /* Decorator classes */
     .option-card {

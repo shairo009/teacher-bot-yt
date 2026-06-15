@@ -101,7 +101,7 @@ async def render_html_frames(data, n_q, n_c, n_r, n_e0, n_e1, n_e2, n_e3, timing
         )
         page = await browser.new_page(
             viewport={"width": WIDTH, "height": HEIGHT},
-            device_scale_factor=1.0
+            device_scale_factor=2.0
         )
         
         await page.goto(file_url)
@@ -250,10 +250,12 @@ async def main():
 
     # Resolve absolute paths for fonts to ensure perfect loading in Playwright on both Linux and Windows
     hindi_font_path = os.path.abspath(PROJECT_ROOT / "assets/fonts/hindi_font.ttf").replace(os.sep, '/')
+    hindi_font_bold_path = os.path.abspath(PROJECT_ROOT / "assets/fonts/hindi_font_bold.ttf").replace(os.sep, '/')
     montserrat_regular_path = os.path.abspath(PROJECT_ROOT / "assets/fonts/Montserrat-Regular.ttf").replace(os.sep, '/')
     montserrat_bold_path = os.path.abspath(PROJECT_ROOT / "assets/fonts/Montserrat-Bold.ttf").replace(os.sep, '/')
 
     hindi_font_url = f"file:///{hindi_font_path}"
+    hindi_font_bold_url = f"file:///{hindi_font_bold_path}"
     montserrat_regular_url = f"file:///{montserrat_regular_path}"
     montserrat_bold_url = f"file:///{montserrat_bold_path}"
 
@@ -282,6 +284,7 @@ async def main():
         exp3=question_data["exp3"],
         correct_idx=question_data["correct_idx"],
         hindi_font_url=hindi_font_url,
+        hindi_font_bold_url=hindi_font_bold_url,
         montserrat_regular_url=montserrat_regular_url,
         montserrat_bold_url=montserrat_bold_url
     )
@@ -335,7 +338,7 @@ async def main():
     opt_silence = temp_dir / "opt_silence.mp3"
     subprocess.run([
         'ffmpeg', '-y', '-f', 'lavfi', '-i', 'anullsrc=r=24000:cl=mono',
-        '-t', '0.01', '-c:a', 'libmp3lame', str(opt_silence)
+        '-t', str(t_delay), '-c:a', 'libmp3lame', str(opt_silence)
     ], capture_output=True)
 
     # Use tiny silence for options and outro instead of generating TTS

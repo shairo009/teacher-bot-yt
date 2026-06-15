@@ -445,5 +445,13 @@
     "video_file": "quiz_polity_q7.mp4",
     "uploaded": true,
     "timestamp": "2026-06-15T14:47:38.838948+00:00"
+  },
+  {
+    "id": 8,
+    "topic": "SOURCES OF DPSP (नीति निदेशक तत्वों के स्रोत)",
+    "question": "राज्य के नीति निदेशक तत्व किस देश के संविधान से लिए गए हैं?",
+    "video_file": "quiz_polity_q8.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-15T20:10:02.234963+00:00"
   }
 ]

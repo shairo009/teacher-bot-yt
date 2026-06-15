@@ -30,18 +30,45 @@ def get_audio_duration(file_path):
     return 3.0
 
 async def generate_tts(text, filename):
-    """Generate audio using edge-tts with standard rate boost (+14%)."""
+    """Generate audio using edge-tts, then convert to uncompressed WAV to prevent compression delays/drift."""
     import edge_tts
     temp_dir = PROJECT_ROOT / "temp_audio"
     temp_dir.mkdir(exist_ok=True)
-    output_path = temp_dir / filename
+    
+    # edge-tts generates MP3 format
+    mp3_filename = filename.replace(".wav", ".mp3")
+    mp3_path = temp_dir / mp3_filename
+    
     communicate = edge_tts.Communicate(text, 'hi-IN-MadhurNeural', rate='+14%')
-    await communicate.save(str(output_path))
-    return output_path
+    await communicate.save(str(mp3_path))
+    
+    # Target WAV path
+    wav_filename = filename.replace(".mp3", ".wav")
+    wav_path = temp_dir / wav_filename
+    
+    # Convert MP3 to standard PCM 16-bit 24kHz mono WAV
+    cmd = [
+        'ffmpeg', '-y',
+        '-i', str(mp3_path),
+        '-acodec', 'pcm_s16le',
+        '-ar', '24000',
+        '-ac', '1',
+        str(wav_path)
+    ]
+    subprocess.run(cmd, capture_output=True)
+    
+    # Clean up intermediate MP3
+    if mp3_path.exists():
+        try:
+            os.remove(mp3_path)
+        except:
+            pass
+            
+    return wav_path
 
 def generate_tick_sound(output_path, duration=5.0):
     """Generate TikTok-style tick-tock countdown beeps using FFmpeg.
-    5 sharp tick beeps (one per second) mixed with a low suspense drone."""
+    5 sharp tick beeps (one per second) mixed with a low suspense drone in WAV format."""
     # Build inputs: 1 drone + 5 tick beeps
     inputs_args = ['-f', 'lavfi', '-i', f'sine=frequency=120:duration={duration}']
     for i in range(5):
@@ -56,14 +83,14 @@ def generate_tick_sound(output_path, duration=5.0):
         '-filter_complex', filter_complex,
         '-map', '[outa]',
         '-t', str(duration),
-        '-c:a', 'libmp3lame',
+        '-c:a', 'pcm_s16le',
         str(output_path)
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         subprocess.run([
             'ffmpeg', '-y', '-f', 'lavfi', '-i', 'anullsrc=r=24000:cl=mono',
-            '-t', str(duration), '-c:a', 'libmp3lame', str(output_path)
+            '-t', str(duration), '-c:a', 'pcm_s16le', str(output_path)
         ], capture_output=True)
     return output_path
 
@@ -93,16 +120,18 @@ async def render_html_frames(data, n_q, n_c, n_r, n_e0, n_e1, n_e2, n_e3, timing
         browser = await p.chromium.launch(
             headless=True,
             args=[
-                '--font-render-hinting=none',
                 '--enable-font-antialiasing',
-                '--disable-font-subpixel-positioning',
                 '--force-color-profile=srgb',
             ]
         )
         page = await browser.new_page(
             viewport={"width": WIDTH, "height": HEIGHT},
-            device_scale_factor=2.0
+            device_scale_factor=1.0
         )
+        
+        # Log browser console messages and errors to help with debugging
+        page.on("console", lambda msg: print(f"[Browser Console] {msg.text}"))
+        page.on("pageerror", lambda err: print(f"[Browser Error] {err}"))
         
         await page.goto(file_url)
         try:
@@ -182,6 +211,7 @@ def compose_quiz_video(frame_paths, audio_path, question_id):
         '-c:v', 'libx264',
         '-preset', 'slow',
         '-crf', '15',
+        '-c:a', 'aac',
         '-pix_fmt', 'yuv420p',
         '-shortest',
         str(output_video_path)
@@ -248,17 +278,6 @@ async def main():
     with open(template_path, 'r', encoding='utf-8') as f:
         template_str = f.read()
 
-    # Resolve absolute paths for fonts to ensure perfect loading in Playwright on both Linux and Windows
-    hindi_font_path = os.path.abspath(PROJECT_ROOT / "assets/fonts/hindi_font.ttf").replace(os.sep, '/')
-    hindi_font_bold_path = os.path.abspath(PROJECT_ROOT / "assets/fonts/hindi_font_bold.ttf").replace(os.sep, '/')
-    montserrat_regular_path = os.path.abspath(PROJECT_ROOT / "assets/fonts/Montserrat-Regular.ttf").replace(os.sep, '/')
-    montserrat_bold_path = os.path.abspath(PROJECT_ROOT / "assets/fonts/Montserrat-Bold.ttf").replace(os.sep, '/')
-
-    hindi_font_url = f"file:///{hindi_font_path}"
-    hindi_font_bold_url = f"file:///{hindi_font_bold_path}"
-    montserrat_regular_url = f"file:///{montserrat_regular_path}"
-    montserrat_bold_url = f"file:///{montserrat_bold_path}"
-
     template = Template(template_str)
     rendered_html = template.render(
         q_id=question_data["id"],
@@ -282,11 +301,7 @@ async def main():
         exp1=question_data["exp1"],
         exp2=question_data["exp2"],
         exp3=question_data["exp3"],
-        correct_idx=question_data["correct_idx"],
-        hindi_font_url=hindi_font_url,
-        hindi_font_bold_url=hindi_font_bold_url,
-        montserrat_regular_url=montserrat_regular_url,
-        montserrat_bold_url=montserrat_bold_url
+        correct_idx=question_data["correct_idx"]
     )
 
     with open(output_html_path, 'w', encoding='utf-8') as f:
@@ -325,22 +340,22 @@ async def main():
     
     # 1. Generate Voiceovers
     print("\nGenerating Audio Voiceovers...")
-    q_intro_audio = await generate_tts(q_segments["intro"], "q_intro.mp3")
+    q_intro_audio = await generate_tts(q_segments["intro"], "q_intro.wav")
     # Use question_hi directly, remove any "aapke vikalp hain" text from narration
     clean_question = question_data["question_hi"].rstrip("।").rstrip("?")
-    q_question_audio = await generate_tts(f"{clean_question}? दिए गए विकल्पों में से अपना जवाब कमेंट में बताइए।", "q_question.mp3")
+    q_question_audio = await generate_tts(f"{clean_question}? दिए गए विकल्पों में से अपना जवाब कमेंट में बताइए।", "q_question.wav")
     
     t_delay = 0.25
 
     # Generate Countdown Tick Sound + Silence Audios (Need silence early for dummy assignments)
     print("Generating tick-tock countdown sound...")
-    tick_audio = temp_dir / "tick_tock.mp3"
+    tick_audio = temp_dir / "tick_tock.wav"
     generate_tick_sound(tick_audio, duration=5.0)
 
-    opt_silence = temp_dir / "opt_silence.mp3"
+    opt_silence = temp_dir / "opt_silence.wav"
     subprocess.run([
         'ffmpeg', '-y', '-f', 'lavfi', '-i', 'anullsrc=r=24000:cl=mono',
-        '-t', str(t_delay), '-c:a', 'libmp3lame', str(opt_silence)
+        '-t', str(t_delay), '-c:a', 'pcm_s16le', str(opt_silence)
     ], capture_output=True)
 
     # Use tiny silence for options and outro instead of generating TTS
@@ -350,11 +365,11 @@ async def main():
     q_opt3_audio = opt_silence
     q_outro_audio = opt_silence
 
-    r_audio = await generate_tts(quiz_data["r_narration"], "reveal.mp3")
-    e0_audio = await generate_tts(quiz_data["e0_narration"], "explain0.mp3")
-    e1_audio = await generate_tts(quiz_data["e1_narration"], "explain1.mp3")
-    e2_audio = await generate_tts(quiz_data["e2_narration"], "explain2.mp3")
-    e3_audio = await generate_tts(quiz_data["e3_narration"], "explain3.mp3")
+    r_audio = await generate_tts(quiz_data["r_narration"], "reveal.wav")
+    e0_audio = await generate_tts(quiz_data["e0_narration"], "explain0.wav")
+    e1_audio = await generate_tts(quiz_data["e1_narration"], "explain1.wav")
+    e2_audio = await generate_tts(quiz_data["e2_narration"], "explain2.wav")
+    e3_audio = await generate_tts(quiz_data["e3_narration"], "explain3.wav")
     
     # 3. Measure Durations
     t_intro = get_audio_duration(q_intro_audio)
@@ -395,7 +410,7 @@ async def main():
     
     # 4. Merge Audios (countdown uses tick_audio - TikTok style!)
     print("Concatenating all 19 audio segments...")
-    merged_audio = temp_dir / "quiz_final.mp3"
+    merged_audio = temp_dir / "quiz_final.wav"
     cmd_merge = [
         'ffmpeg', '-y',
         '-i', str(q_intro_audio),     # 0

@@ -66,17 +66,42 @@ async def generate_tts(text, filename):
             
     return wav_path
 
+def pad_trim_audio(input_path, target_duration, output_path):
+    """Pad or trim an audio file to the exact target duration in seconds using FFmpeg."""
+    cmd = [
+        'ffmpeg', '-y',
+        '-i', str(input_path),
+        '-filter_complex', f'apad=whole_len={int(target_duration * 24000)}',
+        '-t', f'{target_duration:.6f}',
+        '-c:a', 'pcm_s16le',
+        '-ar', '24000',
+        '-ac', '1',
+        str(output_path)
+    ]
+    subprocess.run(cmd, capture_output=True)
+    return output_path
+
 def generate_tick_sound(output_path, duration=5.0):
     """Generate TikTok-style tick-tock countdown beeps using FFmpeg.
-    5 sharp tick beeps (one per second) mixed with a low suspense drone in WAV format."""
+    5 sharp tick beeps mixed with a low suspense drone in WAV format.
+    Ticks occur at 1s, 2s, 3s, 4s (880Hz, 80ms) and 4.9s (1000Hz, 100ms) to align with number changes."""
     # Build inputs: 1 drone + 5 tick beeps
     inputs_args = ['-f', 'lavfi', '-i', f'sine=frequency=120:duration={duration}']
-    for i in range(5):
+    
+    # 4 standard ticks at 1.0s, 2.0s, 3.0s, 4.0s
+    for i in range(1, 5):
         t_ms = i * 1000
         inputs_args += [
             '-f', 'lavfi', '-i',
             f'sine=frequency=880:duration=0.08,adelay={t_ms}|{t_ms}'
         ]
+        
+    # Final tick at 4.9s (duration 0.1s, 1000Hz)
+    inputs_args += [
+        '-f', 'lavfi', '-i',
+        f'sine=frequency=1000:duration=0.1,adelay=4900|4900'
+    ]
+    
     mix_inputs = ''.join(f'[{j}:a]' for j in range(6))
     filter_complex = f'{mix_inputs}amix=inputs=6:normalize=0,volume=2.5[outa]'
     cmd = ['ffmpeg', '-y'] + inputs_args + [
@@ -207,7 +232,7 @@ def compose_quiz_video(frame_paths, audio_path, question_id):
         '-f', 'concat', '-safe', '0',
         '-i', str(concat_file),
         '-i', str(audio_path),
-        '-vf', 'scale=2160:3840:flags=lanczos,fps=30',
+        '-vf', 'fps=30',
         '-c:v', 'libx264',
         '-preset', 'slow',
         '-crf', '15',
@@ -388,6 +413,54 @@ async def main():
     t_e2 = get_audio_duration(e2_audio)
     t_e3 = get_audio_duration(e3_audio)
     
+    # Calculate pre-countdown natural duration
+    t_q_natural = t_intro + t_delay + t_question + t_delay + t_opt0 + t_delay + t_opt1 + t_delay + t_opt2 + t_delay + t_opt3 + t_delay + t_outro
+    
+    # 5. Frame counts aligned exactly to FPS
+    n_q = int(round(t_q_natural * FPS))
+    n_c = int(round(t_c * FPS))
+    n_r = int(round(t_r * FPS))
+    n_e0 = int(round(t_e0 * FPS))
+    n_e1 = int(round(t_e1 * FPS))
+    n_e2 = int(round(t_e2 * FPS))
+    n_e3 = int(round(t_e3 * FPS))
+    
+    # Target durations aligned to 30 FPS
+    t_q_target = n_q / FPS
+    t_c_target = n_c / FPS
+    t_r_target = n_r / FPS
+    t_e0_target = n_e0 / FPS
+    t_e1_target = n_e1 / FPS
+    t_e2_target = n_e2 / FPS
+    t_e3_target = n_e3 / FPS
+    
+    # Pre-countdown alignment: adjust duration of the last silence delay (index 11)
+    t_other = t_intro + t_delay + t_question + t_delay + t_opt0 + t_delay + t_opt1 + t_delay + t_opt2 + t_delay + t_opt3 + t_outro
+    t_last_silence = max(0.01, t_q_target - t_other)
+    
+    # Generate custom last silence
+    last_silence = temp_dir / "last_silence.wav"
+    subprocess.run([
+        'ffmpeg', '-y', '-f', 'lavfi', '-i', 'anullsrc=r=24000:cl=mono',
+        '-t', f'{t_last_silence:.6f}', '-c:a', 'pcm_s16le', str(last_silence)
+    ], capture_output=True)
+    
+    # Pad and trim post-countdown voiceovers to exact 30 FPS boundary
+    r_audio_padded = temp_dir / "reveal_padded.wav"
+    pad_trim_audio(r_audio, t_r_target, r_audio_padded)
+    
+    e0_audio_padded = temp_dir / "explain0_padded.wav"
+    pad_trim_audio(e0_audio, t_e0_target, e0_audio_padded)
+    
+    e1_audio_padded = temp_dir / "explain1_padded.wav"
+    pad_trim_audio(e1_audio, t_e1_target, e1_audio_padded)
+    
+    e2_audio_padded = temp_dir / "explain2_padded.wav"
+    pad_trim_audio(e2_audio, t_e2_target, e2_audio_padded)
+    
+    e3_audio_padded = temp_dir / "explain3_padded.wav"
+    pad_trim_audio(e3_audio, t_e3_target, e3_audio_padded)
+    
     timings = {
         "start_intro": 0.0,
         "end_intro": t_intro,
@@ -402,11 +475,10 @@ async def main():
         "start_opt3": t_intro + t_delay + t_question + t_delay + t_opt0 + t_delay + t_opt1 + t_delay + t_opt2 + t_delay,
         "end_opt3": t_intro + t_delay + t_question + t_delay + t_opt0 + t_delay + t_opt1 + t_delay + t_opt2 + t_delay + t_opt3,
         "start_outro": t_intro + t_delay + t_question + t_delay + t_opt0 + t_delay + t_opt1 + t_delay + t_opt2 + t_delay + t_opt3 + t_delay,
-        "end_outro": t_intro + t_delay + t_question + t_delay + t_opt0 + t_delay + t_opt1 + t_delay + t_opt2 + t_delay + t_opt3 + t_delay + t_outro
+        "end_outro": t_q_target
     }
     
-    t_q = timings["end_outro"]
-    total_audio_time = t_q + t_c + t_r + t_e0 + t_e1 + t_e2 + t_e3
+    total_audio_time = t_q_target + t_c_target + t_r_target + t_e0_target + t_e1_target + t_e2_target + t_e3_target
     
     # 4. Merge Audios (countdown uses tick_audio - TikTok style!)
     print("Concatenating all 19 audio segments...")
@@ -424,28 +496,19 @@ async def main():
         '-i', str(q_opt2_audio),      # 8
         '-i', str(opt_silence),       # 9
         '-i', str(q_opt3_audio),      # 10
-        '-i', str(opt_silence),       # 11
+        '-i', str(last_silence),      # 11 (Aligned silence)
         '-i', str(q_outro_audio),     # 12
-        '-i', str(tick_audio),        # 13 ← TikTok tick-tock countdown!
-        '-i', str(r_audio),           # 14
-        '-i', str(e0_audio),          # 15
-        '-i', str(e1_audio),          # 16
-        '-i', str(e2_audio),          # 17
-        '-i', str(e3_audio),          # 18
+        '-i', str(tick_audio),        # 13 (Ticks aligned to number changes)
+        '-i', str(r_audio_padded),    # 14
+        '-i', str(e0_audio_padded),   # 15
+        '-i', str(e1_audio_padded),   # 16
+        '-i', str(e2_audio_padded),   # 17
+        '-i', str(e3_audio_padded),   # 18
         '-filter_complex', '[0:a][1:a][2:a][3:a][4:a][5:a][6:a][7:a][8:a][9:a][10:a][11:a][12:a][13:a][14:a][15:a][16:a][17:a][18:a]concat=n=19:v=0:a=1[outa]',
         '-map', '[outa]',
         str(merged_audio)
     ]
     subprocess.run(cmd_merge, capture_output=True)
-    
-    # 5. Frame counts
-    n_q = int(t_q * FPS)
-    n_c = int(t_c * FPS)
-    n_r = int(t_r * FPS)
-    n_e0 = int(t_e0 * FPS)
-    n_e1 = int(t_e1 * FPS)
-    n_e2 = int(t_e2 * FPS)
-    n_e3 = int(t_e3 * FPS)
     
     # 6. Render Frames
     frame_paths = await render_html_frames(quiz_data, n_q, n_c, n_r, n_e0, n_e1, n_e2, n_e3, timings)
@@ -459,7 +522,9 @@ async def main():
         except: pass
     for audio in [q_intro_audio, q_question_audio, q_opt0_audio, q_opt1_audio,
                   q_opt2_audio, q_opt3_audio, q_outro_audio, r_audio,
-                  tick_audio, opt_silence, e0_audio, e1_audio, e2_audio, e3_audio]:
+                  tick_audio, opt_silence, e0_audio, e1_audio, e2_audio, e3_audio,
+                  last_silence, r_audio_padded, e0_audio_padded, e1_audio_padded,
+                  e2_audio_padded, e3_audio_padded]:
         try: os.remove(audio)
         except: pass
 

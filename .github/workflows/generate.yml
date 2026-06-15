@@ -2,11 +2,13 @@ name: Teacher Bot - Generate Video
 
 on:
   schedule:
-    # Four times daily in IST: 8:00 AM, 1:00 PM, 6:00 PM, 11:00 PM
-    - cron: '30 2 * * *'
-    - cron: '30 7 * * *'
+    # Six times daily in IST: 6:00 AM, 10:00 AM, 2:00 PM, 6:00 PM, 10:00 PM, 2:00 AM
+    - cron: '30 0 * * *'
+    - cron: '30 4 * * *'
+    - cron: '30 8 * * *'
     - cron: '30 12 * * *'
-    - cron: '30 17 * * *'
+    - cron: '30 16 * * *'
+    - cron: '30 20 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -33,7 +35,7 @@ jobs:
       - name: Rate limit check
         id: rate_check
         run: |
-          # Check if a LUCENT quiz video was generated in the last 5 hours
+          # Check if a LUCENT quiz video was generated in the last 4 hours
           if [ -f data/video_history.json ]; then
             LAST_RUN=$(python3 -c "
           import json
@@ -61,10 +63,10 @@ jobs:
               echo "Force run enabled. Overriding rate limit check."
               echo "skip=false" >> $GITHUB_OUTPUT
             else
-              SKIP=$(python3 -c "print('true' if float('$LAST_RUN') < 5.0 else 'false')")
+              SKIP=$(python3 -c "print('true' if float('$LAST_RUN') < 3.5 else 'false')")
               echo "skip=$SKIP" >> $GITHUB_OUTPUT
               if [ "$SKIP" = "true" ]; then
-                echo "Last lucent video was less than 5 hours ago. Skipping."
+                echo "Last lucent video was less than 4 hours ago. Skipping."
               fi
             fi
           else
@@ -76,7 +78,7 @@ jobs:
         if: steps.rate_check.outputs.skip != 'true'
         id: daily_check
         run: |
-          # Max 4 lucent videos per day — steady YouTube upload pace
+          # Max 6 lucent videos per day — steady YouTube upload pace
           if [ -f data/video_history.json ]; then
             TODAY_COUNT=$(python3 -c "
           import json
@@ -106,8 +108,8 @@ jobs:
               echo "Force run enabled. Overriding daily limit check."
               echo "skip=false" >> $GITHUB_OUTPUT
             else
-              if [ "$TODAY_COUNT" -ge 4 ]; then
-                echo "Daily limit (4 videos) reached. Skipping."
+              if [ "$TODAY_COUNT" -ge 6 ]; then
+                echo "Daily limit (6 videos) reached. Skipping."
                 echo "skip=true" >> $GITHUB_OUTPUT
               else
                 echo "skip=false" >> $GITHUB_OUTPUT

@@ -429,5 +429,13 @@
     "video_file": "quiz_polity_q5.mp4",
     "uploaded": false,
     "timestamp": "2026-06-15T08:03:03.850638+00:00"
+  },
+  {
+    "id": 6,
+    "topic": "CONSTITUTIONAL PROVISIONS (संवैधानिक प्रावधान)",
+    "question": "भारतीय संविधान का कौन सा भाग नागरिकता से संबंधित है?",
+    "video_file": "quiz_polity_q6.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-15T08:31:36.545219+00:00"
   }
 ]

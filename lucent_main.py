@@ -330,6 +330,8 @@ async def main():
     clean_question = question_data["question_hi"].rstrip("।").rstrip("?")
     q_question_audio = await generate_tts(f"{clean_question}? दिए गए विकल्पों में से अपना जवाब कमेंट में बताइए।", "q_question.mp3")
     
+    t_delay = 0.25
+
     # Generate Countdown Tick Sound + Silence Audios (Need silence early for dummy assignments)
     print("Generating tick-tock countdown sound...")
     tick_audio = temp_dir / "tick_tock.mp3"

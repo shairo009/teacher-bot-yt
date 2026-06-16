@@ -461,5 +461,13 @@
     "video_file": "quiz_polity_q9.mp4",
     "uploaded": true,
     "timestamp": "2026-06-16T05:52:56.311269+00:00"
+  },
+  {
+    "id": 10,
+    "topic": "QUALIFICATIONS (योग्यताएं)",
+    "question": "भारत के राष्ट्रपति पद के लिए न्यूनतम आयु सीमा क्या है?",
+    "video_file": "quiz_polity_q10.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-16T09:49:02.778146+00:00"
   }
 ]

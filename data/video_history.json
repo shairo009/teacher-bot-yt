@@ -469,5 +469,13 @@
     "video_file": "quiz_polity_q10.mp4",
     "uploaded": true,
     "timestamp": "2026-06-16T09:49:02.778146+00:00"
+  },
+  {
+    "id": 11,
+    "topic": "SPECIAL MAJORITY (विशेष बहुमत)",
+    "question": "संविधान के किस भाग को केवल संसद द्वारा 'विशेष बहुमत' के साथ ही संशोधित किया जा सकता है?",
+    "video_file": "quiz_polity_q11.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-16T17:42:40.271744+00:00"
   }
 ]

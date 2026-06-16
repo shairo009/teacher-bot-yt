@@ -477,5 +477,13 @@
     "video_file": "quiz_polity_q11.mp4",
     "uploaded": true,
     "timestamp": "2026-06-16T17:42:40.271744+00:00"
+  },
+  {
+    "id": 12,
+    "topic": "RIGHT TO EQUALITY (समानता का अधिकार)",
+    "question": "भारतीय संविधान का अनुच्छेद 14 क्या सुनिश्चित करता है?",
+    "video_file": "quiz_polity_q12.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-16T22:41:07.052280+00:00"
   }
 ]

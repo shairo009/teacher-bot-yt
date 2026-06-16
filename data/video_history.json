@@ -453,5 +453,13 @@
     "video_file": "quiz_polity_q8.mp4",
     "uploaded": true,
     "timestamp": "2026-06-15T20:10:02.234963+00:00"
+  },
+  {
+    "id": 9,
+    "topic": "AMENDMENT AND ADDITION (संशोधन और जोड़ना)",
+    "question": "भारतीय संविधान में मौलिक कर्तव्यों को किस वर्ष जोड़ा गया था?",
+    "video_file": "quiz_polity_q9.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-16T05:52:56.311269+00:00"
   }
 ]

@@ -493,5 +493,13 @@
     "video_file": "quiz_polity_q13.mp4",
     "uploaded": true,
     "timestamp": "2026-06-17T05:30:27.322051+00:00"
+  },
+  {
+    "id": 14,
+    "topic": "COLLECTIVE RESPONSIBILITY (सामूहिक उत्तरदायित्व)",
+    "question": "मंत्रिपरिषद का सामूहिक उत्तरदायित्व किसके प्रति होता है?",
+    "video_file": "quiz_polity_q14.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-17T09:29:31.910268+00:00"
   }
 ]

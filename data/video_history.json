@@ -485,5 +485,13 @@
     "video_file": "quiz_polity_q12.mp4",
     "uploaded": true,
     "timestamp": "2026-06-16T22:41:07.052280+00:00"
+  },
+  {
+    "id": 13,
+    "topic": "PRESIDENT'S VETO (राष्ट्रपति का वीटो)",
+    "question": "किस प्रकार के विधेयक पर राष्ट्रपति 'निर्णयात्मक वीटो' (Absolute Veto) का प्रयोग कर सकता है?",
+    "video_file": "quiz_polity_q13.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-17T05:30:27.322051+00:00"
   }
 ]

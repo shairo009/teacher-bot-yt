@@ -533,5 +533,13 @@
     "video_file": "quiz_polity_q18.mp4",
     "uploaded": true,
     "timestamp": "2026-06-18T09:14:47.893116+00:00"
+  },
+  {
+    "id": 19,
+    "topic": "ATTORNEY GENERAL (अटॉर्नी जनरल)",
+    "question": "भारत का अटॉर्नी जनरल किसके द्वारा नियुक्त किया जाता है?",
+    "video_file": "quiz_polity_q19.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-18T16:17:14.443694+00:00"
   }
 ]

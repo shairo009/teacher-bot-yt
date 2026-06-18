@@ -541,5 +541,13 @@
     "video_file": "quiz_polity_q19.mp4",
     "uploaded": true,
     "timestamp": "2026-06-18T16:17:14.443694+00:00"
+  },
+  {
+    "id": 20,
+    "topic": "PARLIAMENTARY COMMITTEES (संसदीय समितियां)",
+    "question": "प्राक्कलन समिति (Public Accounts Committee) का अध्यक्ष कौन होता है?",
+    "video_file": "quiz_polity_q20.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-18T22:44:41.145256+00:00"
   }
 ]

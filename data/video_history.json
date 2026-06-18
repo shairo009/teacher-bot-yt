@@ -525,5 +525,13 @@
     "video_file": "quiz_polity_q17.mp4",
     "uploaded": true,
     "timestamp": "2026-06-18T05:21:53.222646+00:00"
+  },
+  {
+    "id": 18,
+    "topic": "VICE PRESIDENT (उपराष्ट्रपति)",
+    "question": "उपराष्ट्रपति का कार्यकाल कितने वर्षों का होता है?",
+    "video_file": "quiz_polity_q18.mp4",
+    "uploaded": true,
+    "timestamp": "2026-06-18T09:14:47.893116+00:00"
   }
 ]

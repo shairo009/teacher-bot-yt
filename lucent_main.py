@@ -16,6 +16,187 @@ WIDTH = 2160
 HEIGHT = 3840
 FPS = 30
 
+# ─────────────────────────────────────────────────────────────────────────────
+# AI Question Generator — infinite fresh GK questions, kabhi repeat nahi
+# OpenCode API (deepseek-v4-flash-free — FREE forever)
+# ─────────────────────────────────────────────────────────────────────────────
+
+SUBJECT_ROTATION = [
+    ("Indian History",   "Ancient India",              "Indus Valley & Vedic Age"),
+    ("Indian History",   "Ancient India",              "Maurya Empire & Ashoka"),
+    ("Indian History",   "Ancient India",              "Gupta Empire & Golden Age"),
+    ("Indian History",   "Medieval India",             "Delhi Sultanate"),
+    ("Indian History",   "Medieval India",             "Mughal Empire"),
+    ("Indian History",   "Modern India",               "British East India Company"),
+    ("Indian History",   "Modern India",               "Freedom Movement & Gandhi"),
+    ("Indian History",   "Modern India",               "Revolt of 1857 & Leaders"),
+    ("Indian Geography", "Physical Features",          "Himalayan Ranges & Peaks"),
+    ("Indian Geography", "Physical Features",          "Rivers, Lakes & Waterfalls"),
+    ("Indian Geography", "Climate & Agriculture",      "Monsoon, Seasons & Crops"),
+    ("Indian Geography", "States & Capitals",          "States, UTs & Boundaries"),
+    ("Indian Geography", "Natural Resources",          "Minerals, Soils & Forests"),
+    ("Indian Polity",    "Constitution",               "Fundamental Rights & Duties"),
+    ("Indian Polity",    "Parliament",                 "Lok Sabha & Rajya Sabha"),
+    ("Indian Polity",    "Executive",                  "President, PM & Cabinet"),
+    ("Indian Polity",    "Judiciary",                  "Supreme Court & High Courts"),
+    ("Indian Polity",    "Amendments",                 "Important Constitutional Amendments"),
+    ("Indian Polity",    "Local Governance",           "Panchayati Raj & 73rd Amendment"),
+    ("General Science",  "Physics",                    "Laws of Motion & Gravitation"),
+    ("General Science",  "Chemistry",                  "Elements, Compounds & Periodic Table"),
+    ("General Science",  "Biology",                    "Human Body Systems & Diseases"),
+    ("General Science",  "Biology",                    "Plants, Animals & Ecology"),
+    ("General Science",  "Technology",                 "ISRO Missions & Defence"),
+    ("Indian Economy",   "Planning & Policy",          "Five Year Plans & NITI Aayog"),
+    ("Indian Economy",   "Banking & Finance",          "RBI, SEBI & Stock Market"),
+    ("Indian Economy",   "Budget & Taxation",          "GST, Union Budget & Taxes"),
+    ("Indian Economy",   "Agriculture & Industry",     "Green Revolution & MSP"),
+    ("Sports",           "Olympics & Asian Games",     "India in Olympics"),
+    ("Sports",           "Cricket",                    "ICC Tournaments & Records"),
+    ("Awards & Honours", "National Awards",            "Bharat Ratna & Padma Awards"),
+    ("Awards & Honours", "International Awards",       "Nobel Prize Winners from India"),
+    ("Art & Culture",    "Classical Arts",             "Indian Dance & Music Forms"),
+    ("Art & Culture",    "Festivals & Religions",      "Major Festivals of India"),
+    ("Art & Culture",    "Literature & Heritage",      "Indian Authors & World Heritage Sites"),
+    ("Environment",      "National Parks & Wildlife",  "Tiger Reserves & Sanctuaries"),
+    ("Environment",      "Climate & Conservation",     "Environmental Laws & Schemes"),
+    ("General Science",  "Physics",                    "Light, Sound & Electricity"),
+    ("Indian History",   "Ancient India",              "Buddhist & Jain Philosophy"),
+    ("Indian Economy",   "Schemes & Initiatives",      "Government Flagship Schemes"),
+]
+
+CORRECT_LABELS = ["विकल्प ए", "विकल्प बी", "विकल्प सी", "विकल्प डी"]
+
+
+def generate_ai_question(question_id: int) -> dict | None:
+    """Generate a fresh Indian GK question using AI — infinite, kabhi repeat nahi."""
+    import urllib.request
+    import urllib.error
+    import re
+
+    api_key = os.environ.get("OPENCODE_API_KEY", "")
+    if not api_key:
+        print("⚠️  OPENCODE_API_KEY not set — cannot generate AI question.")
+        return None
+
+    # Rotate through subjects for maximum variety
+    subj, chapter, topic = SUBJECT_ROTATION[(question_id - 1) % len(SUBJECT_ROTATION)]
+
+    prompt = f"""You are an expert Indian GK quiz maker for UPSC, SSC, Railway exams.
+Generate exactly 1 multiple-choice question on: {subj} > {chapter} > {topic}
+
+STRICT RULES:
+- Factually 100% accurate, verified GK fact only
+- 4 options: only one correct, others are plausible distractors
+- Reply ONLY with valid JSON — no markdown, no code fences, no extra text
+- Hindi text must be proper Devanagari script
+- exp0-exp3: one-sentence Hindi explanation for EACH option (why correct or why wrong)
+- correct_idx must be integer 0, 1, 2, or 3
+
+EXACT JSON FORMAT (fill all values, no placeholders):
+{{
+  "subject": "{subj}",
+  "chapter": "{chapter}",
+  "topic": "{topic}",
+  "question_hi": "<question in Hindi ending with ?>",
+  "question_en": "<question in English ending with ?>",
+  "opt0_hi": "<option A in Hindi>",
+  "opt1_hi": "<option B in Hindi>",
+  "opt2_hi": "<option C in Hindi>",
+  "opt3_hi": "<option D in Hindi>",
+  "opt0_en": "<option A in English>",
+  "opt1_en": "<option B in English>",
+  "opt2_en": "<option C in English>",
+  "opt3_en": "<option D in English>",
+  "correct_idx": 0,
+  "exp0": "<1-sentence Hindi explanation for option A>",
+  "exp1": "<1-sentence Hindi explanation for option B>",
+  "exp2": "<1-sentence Hindi explanation for option C>",
+  "exp3": "<1-sentence Hindi explanation for option D>"
+}}"""
+
+    payload = json.dumps({{
+        "model": "deepseek-v4-flash-free",
+        "max_tokens": 2500,
+        "messages": [{{"role": "user", "content": prompt}}]
+    }}).encode("utf-8")
+
+    req = urllib.request.Request(
+        "https://opencode.ai/zen/v1/chat/completions",
+        data=payload,
+        headers={{
+            "Authorization": f"Bearer {{api_key}}",
+            "Content-Type": "application/json",
+        }}
+    )
+
+    for attempt in range(1, 4):
+        try:
+            with urllib.request.urlopen(req, timeout=90) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+
+            content_text = (
+                data.get("choices", [{{}}])[0]
+                    .get("message", {{}})
+                    .get("content", "")
+                or ""
+            )
+            if not content_text.strip():
+                print(f"⚠️  AI returned empty content (attempt {{attempt}})")
+                continue
+
+            # Extract JSON block robustly
+            json_match = re.search(r'\{{[\s\S]*\}}', content_text)
+            if not json_match:
+                print(f"⚠️  No JSON found in AI response (attempt {{attempt}})")
+                continue
+            q = json.loads(json_match.group())
+
+            # Validate required fields
+            required = [
+                "question_hi", "question_en",
+                "opt0_hi", "opt0_en", "opt1_hi", "opt1_en",
+                "opt2_hi", "opt2_en", "opt3_hi", "opt3_en",
+                "correct_idx", "exp0", "exp1", "exp2", "exp3"
+            ]
+            for field in required:
+                if field not in q:
+                    raise ValueError(f"Missing field: {{field}}")
+
+            correct_idx = int(q["correct_idx"])
+            correct_label = CORRECT_LABELS[correct_idx]
+
+            # Build complete question_data matching JSON bank format
+            q["id"] = question_id
+            q["subject_hi"] = q["subject"]
+            q["chapter_hi"] = q["chapter"]
+            q["topic_hi"] = q["topic"]
+            q["narration"] = {{
+                "q_intro": "क्या आप जानते हैं",
+                "q_question": f"{{q['question_hi'].rstrip('।').rstrip('?')}}?",
+                "opt0": f"ए, {{q['opt0_hi']}},",
+                "opt1": f"बी, {{q['opt1_hi']}},",
+                "opt2": f"सी, {{q['opt2_hi']}},",
+                "opt3": f"या डी, {{q['opt3_hi']}}।",
+                "q_outro": "समय शुरू होता है अब!",
+                "r_narration": f"समय समाप्त! सही जवाब है {{correct_label}}।",
+                "e0_narration": q["exp0"],
+                "e1_narration": q["exp1"],
+                "e2_narration": q["exp2"],
+                "e3_narration": q["exp3"],
+            }}
+
+            print(f"✅ AI Question (id={{question_id}}, subject={{subj}}): {{q['question_hi']}}")
+            return q
+
+        except json.JSONDecodeError as e:
+            print(f"⚠️  JSON parse error (attempt {{attempt}}): {{e}}")
+        except Exception as e:
+            print(f"⚠️  AI generation error (attempt {{attempt}}): {{e}}")
+
+    print("❌ AI question generation failed after 3 attempts.")
+    return None
+
+
 def get_audio_duration(file_path):
     """Query exact duration of audio using ffprobe."""
     cmd = [
@@ -212,7 +393,7 @@ def compose_quiz_video(frame_paths, audio_path, question_id):
     """Compile frames and audio into final video using FFmpeg."""
     outputs_dir = PROJECT_ROOT / "outputs"
     outputs_dir.mkdir(exist_ok=True)
-    output_video_path = outputs_dir / f"quiz_polity_q{question_id}.mp4"
+    output_video_path = outputs_dir / f"quiz_gk_q{question_id}.mp4"
     
     concat_file = outputs_dir / "quiz_concat.txt"
     frame_dur = 1.0 / FPS
@@ -283,11 +464,15 @@ async def main():
     if args.question_id is not None:
         current_id = args.question_id
 
-    # Find matching question
+    # Find matching question — AI fallback when JSON bank exhausted
     question_data = next((q for q in questions if q["id"] == current_id), None)
     if not question_data:
-        print(f"All questions generated! ({current_id} is out of bounds)")
-        return
+        print(f"\n📚 JSON bank exhausted (id={current_id}). Calling AI to generate fresh question...")
+        question_data = generate_ai_question(current_id)
+        if not question_data:
+            print("❌ Both JSON bank and AI generation failed. Bot exiting.")
+            return
+        print(f"🤖 AI question ready: {question_data['subject']} > {question_data['topic']}")
 
     print(f"\n============================================================")
     print(f"  Teacher Bot - Lucent GK Shorts Series (QID: {question_data['id']})")
@@ -543,10 +728,9 @@ async def main():
             uploader = YouTubeUploader()
             
             # Generate SEO optimized metadata
-            chapter_num = question_data['chapter'].split(':')[0].replace('CHAPTER', '').strip()
-            title = f"Lucent GK Quiz: {question_data['question_hi'][:45]}... | #shorts #gk #lucentgk"
+            title = f"GK Quiz #{question_data['id']}: {question_data['question_hi'][:48]}... | #shorts #gk"
             
-            description = f"""📚 Lucent सामान्य ज्ञान Series - Indian Polity (भारतीय राजव्यवस्था)
+            description = f"""📚 GK Quiz Series | {question_data['subject']}
 
 ❓ प्रश्न:
 {question_data['question_hi']}
@@ -564,7 +748,8 @@ D. {question_data['opt3_hi']}
 
 #shorts #gk #lucentgk #gkinhindi #politygk #constitution #exam #upsc #ssc #railway
 """
-            tags = ["lucent gk", "polity gk", "gk shorts", "indian constitution", "gk in hindi", "ssc gk", "upsc polity"]
+            subject_tag = question_data["subject"].lower().replace(" ", "")
+            tags = ["gk", "gkinhindi", "gkshorts", "lucentgk", "upsc", "ssc", "railway", subject_tag]
             
             metadata = {
                 "title": title,

@@ -392,7 +392,7 @@ Generate a dark-neon game-style visual scene JSON. Rules:
 - scene_type: one of "flow" | "transform" | "cycle" | "compare" | "network" | "stack" | "race"
 - nodes: 3-6 boxes/shapes. Each has id, label (short CAPS), type (one of: box|gate|database|cloud|brain|chip|server|user|module), x (50-1030), y (200-1600), color (neon hex)
 - paths: connections between nodes [{{"from":"id1","to":"id2"}}] — 2-5 paths
-- steps: exactly 4 short punchy English narration lines (max 12 words each) that teach the concept
+- steps: exactly 6 Hinglish narration lines (max 15 words each) — mix English tech terms with simple Hindi explanation. Every line must teach something new and specific. Style: "Python mein variable ek box hota hai jo value store karta hai" or "Binary search O(log n) mein kaam karta hai — sorted array mein"
 - title: concept name (2-3 words max)
 - subtitle: what it does (5-7 words)
 - hook: engaging question (max 10 words, ends with ?)
@@ -414,7 +414,7 @@ Reply with ONLY valid JSON, no markdown, no explanation:
   "scene_type": "...",
   "nodes": [{{"id":"...","label":"...","type":"...","x":0,"y":0,"color":"#RRGGBB"}}],
   "paths": [{{"from":"...","to":"..."}}],
-  "steps": ["...","...","...","..."],
+  "steps": ["...","...","...","...","...","..."],
   "counter_a": {{"label":"...","max":0}},
   "counter_b": {{"label":"...","max":0}}
 }}"""
@@ -453,8 +453,8 @@ Reply with ONLY valid JSON, no markdown, no explanation:
             for f in required:
                 if f not in scene:
                     raise ValueError(f"Missing field: {f}")
-            if len(scene["steps"]) < 4:
-                scene["steps"] = (scene["steps"] * 4)[:4]
+            if len(scene["steps"]) < 6:
+                scene["steps"] = (scene["steps"] * 6)[:6]
             scene["series"]  = series
             scene["chapter"] = chapter
             scene["topic"]   = topic
@@ -508,11 +508,11 @@ async def generate_audio(steps, output_dir):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     paths = []
-    voice = "en-US-AriaNeural"
+    voice = "hi-IN-SwaraNeural"
     for i, text in enumerate(steps):
         out = str(output_dir / f"step_{i:03d}.mp3")
         try:
-            comm = edge_tts.Communicate(text, voice, rate="+5%")
+            comm = edge_tts.Communicate(text, voice, rate="-5%")
             await comm.save(out)
             if Path(out).exists() and Path(out).stat().st_size > 100:
                 paths.append(out)
@@ -539,7 +539,49 @@ def get_audio_duration(path):
 # VIDEO COMPOSITION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def compose_video(frame_dir, audio_paths, output_path, durations):
+
+    def download_bgm(output_path, duration_secs):
+      """Download free CC0 lo-fi track or generate ambient fallback."""
+      urls = [
+          "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+          "https://www.bensound.com/bensound-music/bensound-ukulele.mp3",
+      ]
+      raw = Path(output_path).parent / "bgm_raw.mp3"
+      for url in urls:
+          try:
+              req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+              with urllib.request.urlopen(req, timeout=20) as resp:
+                  raw.write_bytes(resp.read())
+              r = subprocess.run([
+                  "ffmpeg", "-y", "-stream_loop", "-1", "-i", str(raw),
+                  "-t", str(int(duration_secs) + 3),
+                  "-af", f"volume=0.07,afade=t=in:st=0:d=2,afade=t=out:st={max(1,int(duration_secs)-2)}:d=2",
+                  "-c:a", "aac", "-b:a", "128k", output_path
+              ], capture_output=True, timeout=60)
+              if r.returncode == 0:
+                  print("  🎵 Background music: downloaded track")
+                  return True
+          except Exception:
+              continue
+      # Fallback: ffmpeg synthesized ambient chord
+      try:
+          total = int(duration_secs) + 3
+          r = subprocess.run([
+              "ffmpeg", "-y", "-f", "lavfi",
+              "-i", f"aevalsrc=0.05*sin(2*PI*220*t)+0.04*sin(2*PI*165*t)+0.03*sin(2*PI*110*t):s=44100:c=stereo",
+              "-t", str(total),
+              "-af", f"volume=0.12,lowpass=f=500,aecho=0.6:0.5:150:0.3,afade=t=in:st=0:d=2,afade=t=out:st={max(1,total-2)}:d=2",
+              "-c:a", "aac", "-b:a", "128k", output_path
+          ], capture_output=True, timeout=60)
+          if r.returncode == 0:
+              print("  🎵 Background music: ambient tone")
+              return True
+      except Exception:
+          pass
+      print("  ⚠️  No background music (will skip)")
+      return False
+
+    def compose_video(frame_dir, audio_paths, output_path, durations):
     """Compose frames + audio into final mp4."""
     frame_dir   = Path(frame_dir)
     output_path = Path(output_path)
@@ -553,7 +595,7 @@ def compose_video(frame_dir, audio_paths, output_path, durations):
         return None
 
     fps_per_frame = FPS
-    frames_per_step = 60  # 2s per step at 30fps
+    frames_per_step = 135  # 4.5s per step at 30fps
 
     with open(concat_file, "w") as f:
         for i, frame in enumerate(frames):
@@ -632,7 +674,29 @@ def generate_thumbnail(scene, output_path):
 # MAIN
 # ─────────────────────────────────────────────────────────────────────────────
 
-async def main():
+
+    def ensure_fonts():
+      """Download Montserrat fonts from Google Fonts if not present."""
+      font_dir = PROJECT_ROOT / "assets" / "fonts"
+      font_dir.mkdir(parents=True, exist_ok=True)
+      fonts = {
+          "Montserrat-Bold.ttf":    "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-Bold.ttf",
+          "Montserrat-Regular.ttf": "https://github.com/google/fonts/raw/main/ofl/montserrat/static/Montserrat-Regular.ttf",
+      }
+      for fname, url in fonts.items():
+          dest = font_dir / fname
+          if not dest.exists():
+              try:
+                  req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+                  with urllib.request.urlopen(req, timeout=30) as resp:
+                      dest.write_bytes(resp.read())
+                  print(f"  ✅ Font: {fname}")
+              except Exception as e:
+                  print(f"  ⚠️  Font download failed ({fname}): {e}")
+
+    async def main():
+    print("\n[0/5] Downloading fonts...")
+    ensure_fonts()
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", "-d", action="store_true")
     parser.add_argument("--force",   "-f", action="store_true")

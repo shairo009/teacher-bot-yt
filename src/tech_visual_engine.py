@@ -76,17 +76,17 @@ def get_font(size, bold=False):
     candidates = []
     if bold:
         candidates = [
+            "assets/fonts/Montserrat-Bold.ttf",
             "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
             "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf",
             "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
-            "assets/fonts/Montserrat-Bold.ttf",
         ]
     else:
         candidates = [
+            "assets/fonts/Montserrat-Regular.ttf",
             "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
             "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
             "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-            "assets/fonts/Montserrat-Regular.ttf",
         ]
     for p in candidates:
         try:

@@ -147,9 +147,9 @@ except:
         run: |
           DRY="${{ github.event.inputs.dry_run || 'false' }}"
           if [ "$DRY" = "true" ] || [ ! -f token.json ]; then
-            python lucent_main.py --dry-run
+            python main.py --dry-run
           else
-            python lucent_main.py
+            python main.py
           fi
 
       - name: Upload video artifact

@@ -420,7 +420,7 @@ Reply with ONLY valid JSON, no markdown, no explanation:
 }}"""
 
     payload = json.dumps({
-        "model": "deepseek-v4-flash-free",
+        "model": "deepseek-v4-pro",
         "max_tokens": 1200,
         "messages": [{"role": "user", "content": prompt}]
     }).encode("utf-8")

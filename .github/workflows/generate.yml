@@ -1,14 +1,12 @@
-name: Tech Series Bot - Generate Video
+name: Expert Tech Bot — Generate 2-Min Video
 
 on:
   schedule:
-    # Six times daily in IST: 6 AM, 10 AM, 2 PM, 6 PM, 10 PM, 2 AM
-    - cron: '30 0 * * *'
-    - cron: '30 4 * * *'
-    - cron: '30 8 * * *'
-    - cron: '30 12 * * *'
-    - cron: '30 16 * * *'
-    - cron: '30 20 * * *'
+    # Four times daily in IST: 7 AM, 1 PM, 7 PM, 1 AM
+    - cron: '30 1 * * *'
+    - cron: '30 7 * * *'
+    - cron: '30 13 * * *'
+    - cron: '30 19 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -21,10 +19,16 @@ on:
         required: false
         default: 'false'
         type: boolean
+      topic_id:
+        description: 'Force a specific topic index (optional)'
+        required: false
+        default: ''
+        type: string
 
 jobs:
   generate-video:
     runs-on: ubuntu-latest
+    timeout-minutes: 50          # 2-min video takes ~25-35 min to render
     permissions:
       contents: write
 
@@ -32,11 +36,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Rate limit check (min 3.5h between videos)
+      - name: Rate limit check (min 5h between videos)
         id: rate_check
         run: |
+          FORCE="${{ github.event.inputs.force || 'false' }}"
+          if [ "$FORCE" = "true" ]; then
+            echo "skip=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
           if [ -f data/video_history.json ]; then
-            LAST_RUN=$(python3 -c "
+            HOURS=$(python3 -c "
 import json
 from datetime import datetime, timezone
 try:
@@ -46,60 +55,49 @@ try:
         last = datetime.fromisoformat(history[-1]['timestamp'])
         if last.tzinfo is None:
             last = last.replace(tzinfo=timezone.utc)
-        hours = (datetime.now(timezone.utc) - last).total_seconds() / 3600
-        print(f'{hours:.1f}')
+        print(f'{(datetime.now(timezone.utc) - last).total_seconds() / 3600:.2f}')
     else:
         print('999')
 except:
     print('999')
 ")
-            echo "Hours since last video: $LAST_RUN"
-            FORCE="${{ github.event.inputs.force || 'false' }}"
-            if [ "$FORCE" = "true" ]; then
-              echo "skip=false" >> $GITHUB_OUTPUT
-            else
-              SKIP=$(python3 -c "print('true' if float('$LAST_RUN') < 3.5 else 'false')")
-              echo "skip=$SKIP" >> $GITHUB_OUTPUT
-            fi
+            echo "Hours since last video: $HOURS"
+            SKIP=$(python3 -c "print('true' if float('$HOURS') < 5.0 else 'false')")
+            echo "skip=$SKIP" >> $GITHUB_OUTPUT
           else
             echo "skip=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Daily limit check (max 6/day)
+      - name: Daily limit check (max 4/day)
         if: steps.rate_check.outputs.skip != 'true'
         id: daily_check
         run: |
-          if [ -f data/video_history.json ]; then
-            TODAY_COUNT=$(python3 -c "
+          FORCE="${{ github.event.inputs.force || 'false' }}"
+          if [ "$FORCE" = "true" ]; then
+            echo "skip=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          COUNT=$(python3 -c "
 import json
 from datetime import datetime, timezone
 try:
     with open('data/video_history.json') as f:
         history = json.load(f)
     today = datetime.now(timezone.utc).date()
-    def get_date(h):
+    def d(h):
         try:
             ts = datetime.fromisoformat(h['timestamp'])
-            if ts.tzinfo is None:
-                ts = ts.replace(tzinfo=timezone.utc)
+            if ts.tzinfo is None: ts = ts.replace(tzinfo=timezone.utc)
             return ts.date()
-        except:
-            return None
-    count = sum(1 for h in history if get_date(h) == today)
-    print(count)
+        except: return None
+    print(sum(1 for h in history if d(h) == today))
 except:
     print(0)
-")
-            echo "Videos today: $TODAY_COUNT"
-            FORCE="${{ github.event.inputs.force || 'false' }}"
-            if [ "$FORCE" = "true" ]; then
-              echo "skip=false" >> $GITHUB_OUTPUT
-            elif [ "$TODAY_COUNT" -ge 6 ]; then
-              echo "Daily limit reached. Skipping."
-              echo "skip=true" >> $GITHUB_OUTPUT
-            else
-              echo "skip=false" >> $GITHUB_OUTPUT
-            fi
+" 2>/dev/null || echo 0)
+          echo "Videos today: $COUNT"
+          if [ "$COUNT" -ge 4 ]; then
+            echo "Daily limit reached."
+            echo "skip=true" >> $GITHUB_OUTPUT
           else
             echo "skip=false" >> $GITHUB_OUTPUT
           fi
@@ -116,7 +114,10 @@ except:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            ffmpeg fonts-noto fonts-dejavu-core \
+            ffmpeg \
+            fonts-noto \
+            fonts-dejavu-core \
+            fonts-liberation \
             libgdk-pixbuf2.0-dev
 
       - name: Install Python dependencies
@@ -125,49 +126,50 @@ except:
           pip install --upgrade pip wheel
           pip install -r requirements.txt
 
-      - name: Write YouTube credentials
-        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
-        env:
-          TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
-          CLIENT_SECRETS_JSON: ${{ secrets.CLIENT_SECRETS_JSON }}
-        run: |
-          if [ -n "$TOKEN_JSON" ]; then
-            echo "$TOKEN_JSON" > token.json
-            echo "$CLIENT_SECRETS_JSON" > client_secrets.json
-            echo "YouTube credentials written"
-          else
-            echo "No YouTube credentials — will dry-run"
-          fi
-
       - name: Generate video
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENAI_API_KEY:       ${{ secrets.OPENAI_API_KEY }}
+          OPENROUTER_API_KEY:   ${{ secrets.OPENROUTER_API_KEY }}
+          OPENCODE_API_KEY:     ${{ secrets.OPENCODE_API_KEY }}
+          TOKEN_JSON:           ${{ secrets.TOKEN_JSON }}
+          CLIENT_SECRETS_JSON:  ${{ secrets.CLIENT_SECRETS_JSON }}
         run: |
           DRY="${{ github.event.inputs.dry_run || 'false' }}"
-          if [ "$DRY" = "true" ] || [ ! -f token.json ]; then
-            python main.py --dry-run
-          else
-            python main.py
-          fi
+          TOPIC="${{ github.event.inputs.topic_id || '' }}"
+
+          CMD="python main.py"
+          [ "$DRY" = "true" ] && CMD="$CMD --dry-run"
+          [ -n "$TOPIC" ] && CMD="$CMD --topic-id $TOPIC"
+          [ -z "$TOKEN_JSON" ] && CMD="$CMD --dry-run"
+
+          echo "Running: $CMD"
+          $CMD
 
       - name: Upload video artifact
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: tech-video-${{ github.run_number }}
-          path: outputs/*.mp4
+          name: expert-video-${{ github.run_number }}
+          path: |
+            tmp/**/final.mp4
+            tmp/**/thumbnail.jpg
           retention-days: 7
           if-no-files-found: warn
 
       - name: Save progress to repo
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         run: |
-          git config user.name 'github-actions[bot]'
+          git config user.name  'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add data/tech_progress.json data/video_history.json
-          git diff --cached --quiet && echo "No changes to commit" && exit 0
-          NEXT=$(python3 -c "import json; d=json.load(open('data/tech_progress.json')); print(d['current_id'])")
+          git diff --cached --quiet && echo "No changes" && exit 0
+          NEXT=$(python3 -c "
+import json
+try:
+    print(json.load(open('data/tech_progress.json'))['current_id'])
+except:
+    print('?')
+")
           git commit -m "Video #$NEXT complete [skip ci]"
           git push

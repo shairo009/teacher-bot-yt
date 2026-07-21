@@ -1,7 +1,9 @@
 """
-Tech Series Video Bot v2 — Expert Edition
-2-minute deep-dive videos for advanced engineers.
-Every video: unique visual theme + video-game mechanic explanation style.
+Tech Series Video Bot v3 — Puzzle Edition
+2-minute coding puzzle game style videos for advanced engineers.
+Every video: looks like a real coding game (Human Resource Machine / Zachtronics).
+Python code is shown with syntax highlighting, executes step by step,
+live visualization (bars, graphs, trees, grids), and test cases passing.
 """
 
 import os, sys, json, asyncio, argparse, subprocess, re, math, random, urllib.request
@@ -287,130 +289,145 @@ OBJECTS = [
 # LLM SCENE GENERATION
 # ─────────────────────────────────────────────────────────────────────────────
 
-LLM_SYSTEM_PROMPT = """You are a senior engineer who explains deep technical concepts to other expert engineers.
-You generate JSON scene layouts for 2-minute educational YouTube Shorts aimed at experts with 5-10+ years of experience.
-Every explanation uses a VIDEO GAME mechanic framing — boss fights, skill trees, XP grind, quests, raids.
-Never simplify. Always go deep. Every concept explained at the implementation level, not the abstraction level.
-The audience knows data structures, distributed systems, compilers, networking. Skip the basics entirely."""
+LLM_SYSTEM_PROMPT = """You are a senior engineer creating CODING PUZZLE GAME style educational YouTube Shorts.
+The visual looks exactly like a real coding game (Human Resource Machine, Zachtronics, CodeCombat).
+- A Python code editor panel fills the top half — real, runnable Python with syntax highlighting.
+- An execution visualization fills the bottom half — bars sorting, graph traversal, call stack growing, DP grid filling, or a maze.
+- Test cases appear at the bottom, ticking green one by one.
+Every video is for EXPERT engineers (5-10+ years). No basics. Internals, edge cases, trade-offs only.
+The audience knows compilers, distributed systems, OS internals, advanced algorithms deeply."""
 
-def build_llm_prompt(topic: tuple, game_mechanic: str, game_tag: str, theme_name: str,
-                     obj_a: str, obj_b: str) -> str:
+
+def build_llm_prompt(topic: tuple, game_mechanic: str, game_tag: str,
+                     puzzle_num: int) -> str:
     series, chapter, topic_desc = topic
-    return f"""Generate a JSON scene layout for a 2-minute YouTube Short teaching expert engineers:
 
+    # Choose viz_type based on topic category
+    viz_hints = {
+        "Algorithms": "bars",
+        "Concurrency": "graph",
+        "Distributed": "graph",
+        "Databases": "grid",
+        "Compilers": "stack",
+        "Systems": "memory",
+        "AI/ML": "grid",
+        "Networking": "graph",
+        "Security": "memory",
+        "Cloud": "graph",
+    }
+    viz_type = viz_hints.get(series, "bars")
+
+    return f"""Generate a JSON scene for a coding-puzzle-game style 2-minute YouTube Short.
+
+PUZZLE #{puzzle_num:03d}
 TOPIC: {topic_desc}
 SERIES: {series} › {chapter}
-VISUAL THEME: {theme_name}
 GAME MECHANIC: {game_mechanic} ({game_tag})
-ANIMATED OBJECTS: {obj_a} and {obj_b} roam the diagram
+VISUALIZATION TYPE: {viz_type}
 
-REQUIREMENTS:
-- This is for EXPERT engineers (senior+ level). No basics. No "what is X". Go straight to internals, edge cases, and implementation trade-offs.
-- The game mechanic ({game_mechanic}) must be woven into the explanation — not cosmetic.
-- For boss_fight: The concept's complexity IS the boss. Each step chips away at it.
-- For skill_tree: Prerequisites and unlockables are literal skills in a tree.
-- For xp_grind: Each step is a practical exercise/challenge to earn XP.
-- For quest: Clear objective, 4-6 milestones, final reward.
-- For raid: Team phases, coordination, wipe conditions (common mistakes), loot (insights).
-- 9 steps total to fill ~2 minutes. Each step = ~13 seconds of narration.
-- Nodes should show REAL technical values (not "Node A"). Use actual terms, variable names, constants, formulas.
-- captions_steps: 9 strings. Each must be 1-2 dense sentences of expert insight. No fluff. Implementation-level depth.
-- narration: 9 strings. 30-40 words each. Fast-paced technical narration. No "Hello" or "In this video". Jump straight in.
+STRICT REQUIREMENTS:
+1. code: 18-24 lines of REAL, runnable Python that demonstrates the concept at the implementation level.
+   - No pseudocode. Actual Python with correct syntax.
+   - Include imports, class/function definitions, key algorithm steps.
+   - Show the most insightful implementation detail — not the textbook version.
+2. active_lines: list of 9 integers (0-indexed), one per step, showing which code line is "executing" that step.
+   Progress through the code: start at top, end near bottom.
+3. viz_type: "{viz_type}" — match the visualization to the topic.
+4. viz_data: populate FULLY for type "{viz_type}":
+   - "bars": values (10 ints 10-99), steps (9 arrays showing sorted state), highlight (dict step→[i,j] of compared indices), operations (9 strings like "Compare arr[3] > arr[4]")
+   - "grid": rows, cols, grid (flat list of values), row_headers, col_headers
+   - "graph": nodes (list of {{id,label,x,y}} with x in 100-980, y in 50-450), edges (list of [a,b]), visited (list of node ids in visit order), queue_by_step (9 lists)
+   - "stack": frame_states (9 lists of strings — call stack frames at each step)
+   - "memory": memory (list of {{addr,label,value}} rows, 6-10 rows)
+   - "maze": maze (6×6 int grid, 0=open 1=wall), path (list of [row,col] visited cells by step)
+5. test_cases: exactly 4 test cases with real inputs/outputs for this algorithm.
+6. narration: 9 strings, 30-40 words each, expert-level, no intro fluff — jump straight into the technical meat.
+7. time_complexity and space_complexity: real Big-O with brief reason.
+8. difficulty: "HARD" or "EXTREME" (no easy/medium — this is expert content).
+9. puzzle_stars: always 3 (expert puzzle).
+10. title: punchy, ≤8 words, technical.
 
-Return ONLY valid JSON, no markdown:
+Return ONLY valid JSON — no markdown fences, no comments:
 
 {{
-  "title": "short punchy technical title (max 8 words)",
-  "subtitle": "one-line technical precision statement",
-  "hook": "first 5 words that grab an expert's attention",
-  "game_tag": "{game_tag}",
-  "game_mechanic": "{game_mechanic}",
-  "boss_name": "name of the conceptual enemy (only for boss_fight, else omit)",
+  "title": "...",
+  "subtitle": "one precise technical statement",
   "series": "{series}",
   "chapter": "{chapter}",
-  "counters": [
-    {{"label": "technical metric 1", "value": 42}},
-    {{"label": "technical metric 2", "value": 1024}},
-    {{"label": "technical metric 3", "value": 7}}
+  "puzzle_num": {puzzle_num},
+  "puzzle_stars": 3,
+  "difficulty": "HARD",
+  "game_tag": "{game_tag}",
+  "game_mechanic": "{game_mechanic}",
+  "time_complexity": "O(...) — reason",
+  "space_complexity": "O(...) — reason",
+  "viz_type": "{viz_type}",
+  "viz_label": "one-word label shown next to EXECUTION header",
+  "code": [
+    "line 0 of real Python",
+    "line 1",
+    "...",
+    "line N"
   ],
-  "damage_values": ["-25% Throughput", "-40% Latency", "+100ms P99", "-50% CPU", "-80% Cache Hit"],
-  "quest_steps": ["step 1 (short)", "step 2", "step 3", "step 4", "step 5"],
-  "nodes": [
-    {{"x": 540, "y": 550, "r": 70, "label": "real technical term", "sublabel": "brief note"}},
-    {{"x": 240, "y": 780, "r": 58, "label": "real value/const", "sublabel": ""}},
-    {{"x": 840, "y": 780, "r": 58, "label": "real formula", "sublabel": ""}},
-    {{"x": 200, "y": 1050, "r": 50, "label": "implementation detail", "sublabel": ""}},
-    {{"x": 540, "y": 1100, "r": 62, "label": "key insight", "sublabel": ""}},
-    {{"x": 880, "y": 1050, "r": 50, "label": "trade-off", "sublabel": ""}},
-    {{"x": 350, "y": 1300, "r": 48, "label": "edge case", "sublabel": ""}},
-    {{"x": 730, "y": 1300, "r": 48, "label": "optimization", "sublabel": ""}}
-  ],
-  "paths": [
-    {{"from": 0, "to": 1}}, {{"from": 0, "to": 2}},
-    {{"from": 1, "to": 3}}, {{"from": 2, "to": 5}},
-    {{"from": 3, "to": 4}}, {{"from": 5, "to": 4}},
-    {{"from": 4, "to": 6}}, {{"from": 4, "to": 7}}
-  ],
-  "captions_steps": [
-    "Step 0 expert insight sentence (one or two dense sentences).",
-    "Step 1 ...",
-    "Step 2 ...",
-    "Step 3 ...",
-    "Step 4 ...",
-    "Step 5 ...",
-    "Step 6 ...",
-    "Step 7 ...",
-    "Step 8 ..."
+  "active_lines": [0, 2, 4, 6, 8, 10, 13, 16, 18],
+  "viz_data": {{ ... fully populated for viz_type "{viz_type}" ... }},
+  "test_cases": [
+    {{"label": "basic", "input": "...", "expected": "..."}},
+    {{"label": "edge",  "input": "...", "expected": "..."}},
+    {{"label": "large", "input": "...", "expected": "..."}},
+    {{"label": "worst", "input": "...", "expected": "..."}}
   ],
   "narration": [
-    "30-40 word narration for step 0 — deep and technical.",
-    "Step 1 narration...",
-    "Step 2 narration...",
-    "Step 3 narration...",
-    "Step 4 narration...",
-    "Step 5 narration...",
-    "Step 6 narration...",
-    "Step 7 narration...",
-    "Step 8 narration..."
+    "step 0: 30-40 word expert narration",
+    "step 1: ...",
+    "step 2: ...",
+    "step 3: ...",
+    "step 4: ...",
+    "step 5: ...",
+    "step 6: ...",
+    "step 7: ...",
+    "step 8: ..."
   ]
 }}"""
 
 
 async def call_llm(prompt: str, api_key: str) -> dict:
-    """Call DeepSeek (or OpenAI-compatible) for scene JSON."""
+    """Call OpenAI (or compatible) API for puzzle scene JSON."""
     import urllib.request, json as jsonlib
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}",
-    }
-    body = jsonlib.dumps({
-        "model": "deepseek/deepseek-chat-v3-5",
-        "messages": [
-            {"role": "system", "content": LLM_SYSTEM_PROMPT},
-            {"role": "user",   "content": prompt},
-        ],
-        "max_tokens": 2800,
-        "temperature": 0.85,
-    }).encode()
 
+    # Try OpenAI first, then OpenRouter as fallback
     endpoints = [
-        "https://openrouter.ai/api/v1/chat/completions",
-        "https://opencode.ai/api/v1/chat/completions",
-        "https://api.openai.com/v1/chat/completions",
+        ("https://api.openai.com/v1/chat/completions",  "gpt-4o-mini"),
+        ("https://openrouter.ai/api/v1/chat/completions","openai/gpt-4o-mini"),
+        ("https://opencode.ai/api/v1/chat/completions", "deepseek/deepseek-chat-v3-5"),
     ]
-    for endpoint in endpoints:
+
+    for endpoint, model in endpoints:
         try:
+            body = jsonlib.dumps({
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": LLM_SYSTEM_PROMPT},
+                    {"role": "user",   "content": prompt},
+                ],
+                "max_tokens": 3200,
+                "temperature": 0.7,
+                "response_format": {"type": "json_object"},
+            }).encode()
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}",
+            }
             req = urllib.request.Request(endpoint, data=body, headers=headers, method="POST")
-            with urllib.request.urlopen(req, timeout=90) as resp:
+            with urllib.request.urlopen(req, timeout=120) as resp:
                 data = jsonlib.loads(resp.read())
                 raw  = data["choices"][0]["message"]["content"].strip()
-                # Strip markdown code fences if present
                 if raw.startswith("```"):
                     raw = re.sub(r"^```[a-z]*\n?", "", raw)
-                    raw = re.sub(r"\n?```$", "", raw)
+                    raw = re.sub(r"\n?```$", "", raw.strip())
                 return jsonlib.loads(raw)
         except Exception as e:
-            print(f"  ⚠ LLM endpoint {endpoint} failed: {e}")
+            print(f"  ⚠ {endpoint} failed: {e}")
             continue
     raise RuntimeError("All LLM endpoints failed")
 
@@ -436,15 +453,14 @@ async def generate_tts(text: str, output_path: str) -> bool:
 # VIDEO RENDERING
 # ─────────────────────────────────────────────────────────────────────────────
 
-def render_frames(scene: dict, obj_a: str, obj_b: str, theme: dict,
-                  output_dir: Path) -> list[Path]:
-    from src.tech_visual_engine import TechVisualEngine
-    engine = TechVisualEngine(obj_a, obj_b, theme=theme)
+def render_frames(scene: dict, series: str, output_dir: Path) -> list[Path]:
+    from src.puzzle_visual_engine import PuzzleEngine
+    engine = PuzzleEngine(series=series)
 
     total_steps = N_STEPS
     frames      = []
 
-    print(f"  🎨 Rendering {total_steps * FRAMES_PER_STEP} frames ({total_steps} steps × {FRAMES_PER_STEP} frames)…")
+    print(f"  🎮 Rendering {total_steps * FRAMES_PER_STEP} frames ({total_steps} steps × {FRAMES_PER_STEP} frames)…")
 
     for step_idx in range(total_steps):
         for fi in range(FRAMES_PER_STEP):
@@ -456,7 +472,7 @@ def render_frames(scene: dict, obj_a: str, obj_b: str, theme: dict,
             img.save(str(frame_path), "JPEG", quality=88)
             frames.append(frame_path)
 
-        print(f"    Step {step_idx + 1}/{total_steps} rendered")
+        print(f"    Step {step_idx + 1}/{total_steps} ✓")
 
     return frames
 
@@ -525,10 +541,10 @@ def compose_video(frames: list[Path], audio_paths: list[str],
 # THUMBNAIL
 # ─────────────────────────────────────────────────────────────────────────────
 
-def generate_thumbnail(scene: dict, obj_a: str, obj_b: str, theme: dict, output_path: Path) -> str | None:
+def generate_thumbnail(scene: dict, series: str, output_path: Path) -> str | None:
     try:
-        from src.tech_visual_engine import TechVisualEngine
-        engine = TechVisualEngine(obj_a, obj_b, theme=theme)
+        from src.puzzle_visual_engine import PuzzleEngine
+        engine = PuzzleEngine(series=series)
         img = engine.render_thumbnail(scene)
         img.save(str(output_path), "JPEG", quality=95)
         print(f"  🖼  Thumbnail: {output_path}")
@@ -576,39 +592,33 @@ async def main():
     print(f"\n🎮 Video #{current_id} — {series} › {chapter}")
     print(f"   Topic: {topic_desc}")
 
-    # ── Pick theme & game mechanic ─────────────────────────────────────────
-    from src.visual_themes import pick_theme
-    theme, theme_key = pick_theme(current_id)
-    theme_name = theme.get("name", theme_key)
-
-    rng = random.Random(current_id * 999 + 3)
+    # ── Pick game mechanic (deterministic per video id) ───────────────────
+    rng           = random.Random(current_id * 999 + 3)
     game_mechanic = rng.choice(GAME_MECHANICS)
     game_tag      = GAME_TAGS[game_mechanic]
+    puzzle_num    = current_id + 1
 
-    obj_rng = random.Random(current_id * 12345)
-    obj_a   = obj_rng.choice(OBJECTS)
-    remaining = [o for o in OBJECTS if o != obj_a]
-    obj_b   = obj_rng.choice(remaining)
-
-    print(f"   Theme: {theme_name}  |  Mechanic: {game_tag}  |  Objects: {obj_a}, {obj_b}")
+    print(f"   Mechanic: {game_tag}  |  Puzzle #{puzzle_num:03d}")
 
     # ── Build LLM prompt & call ────────────────────────────────────────────
-    prompt = build_llm_prompt(topic, game_mechanic, game_tag, theme_name, obj_a, obj_b)
+    prompt = build_llm_prompt(topic, game_mechanic, game_tag, puzzle_num)
 
-    print("  🤖 Calling LLM for scene layout…")
+    print("  🤖 Calling LLM for puzzle scene…")
     if not api_key:
         print("⚠ No API key — using mock scene")
-        scene = _mock_scene(topic, game_mechanic, game_tag)
+        scene = _mock_scene(topic, game_mechanic, game_tag, puzzle_num)
     else:
         try:
             scene = await call_llm(prompt, api_key)
-            scene["game_mechanic"] = game_mechanic
-            scene["game_tag"]      = game_tag
-            scene["series"]        = series
-            scene["chapter"]       = chapter
+            # Ensure critical fields are set
+            scene.setdefault("game_mechanic", game_mechanic)
+            scene.setdefault("game_tag",      game_tag)
+            scene.setdefault("series",        series)
+            scene.setdefault("chapter",       chapter)
+            scene.setdefault("puzzle_num",    puzzle_num)
         except Exception as e:
             print(f"❌ LLM failed: {e} — using mock scene")
-            scene = _mock_scene(topic, game_mechanic, game_tag)
+            scene = _mock_scene(topic, game_mechanic, game_tag, puzzle_num)
 
     print(f"  📋 Scene: {scene.get('title', '?')}")
 
@@ -648,7 +658,7 @@ async def main():
     # ── Render frames ──────────────────────────────────────────────────────
     frames_dir = tmp_dir / "frames"
     frames_dir.mkdir(exist_ok=True)
-    frames = render_frames(scene, obj_a, obj_b, theme, frames_dir)
+    frames = render_frames(scene, series, frames_dir)
 
     # ── Compose video ──────────────────────────────────────────────────────
     final_video = tmp_dir / "final.mp4"
@@ -659,7 +669,7 @@ async def main():
 
     # ── Generate thumbnail ─────────────────────────────────────────────────
     thumb_path = tmp_dir / "thumbnail.jpg"
-    generate_thumbnail(scene, obj_a, obj_b, theme, thumb_path)
+    generate_thumbnail(scene, series, thumb_path)
 
     # ── Upload to YouTube ──────────────────────────────────────────────────
     video_uploaded = False
@@ -681,12 +691,15 @@ async def main():
                 "advanced", "deep dive", game_mechanic.replace("_", " "),
                 "distributed systems", "CS", "backend", "tech"]
 
+        tc = scene.get("time_complexity", "")
+        sc_val = scene.get("space_complexity", "")
         description = (
             f"{game_tag} — {topic_desc}\n\n"
             f"Series: {series} › {chapter}\n"
-            f"Visual Theme: {theme_name}\n\n"
+            f"Puzzle #{puzzle_num:03d}  |  {tc}  |  Space: {sc_val}\n\n"
             f"{'=' * 40}\n"
-            f"Expert-level 2-minute deep-dives for senior engineers.\n"
+            f"Coding-puzzle-game style 2-minute deep dives for senior engineers.\n"
+            f"Real Python code, live execution visualization, test cases.\n"
             f"No basics. Just internals, trade-offs, and implementation details.\n"
         )
 
@@ -723,9 +736,11 @@ async def main():
             pass
     history.append({
         "id": current_id, "topic_idx": topic_idx,
+        "puzzle_num": puzzle_num,
         "series": series, "chapter": chapter, "topic": topic_desc,
-        "title": scene.get("title", ""), "theme": theme_key,
-        "game_mechanic": game_mechanic, "obj_a": obj_a, "obj_b": obj_b,
+        "title": scene.get("title", ""),
+        "viz_type": scene.get("viz_type", ""),
+        "game_mechanic": game_mechanic,
         "uploaded": video_uploaded,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
@@ -744,58 +759,89 @@ async def main():
     print(f"\n✅ Done! Next → #{next_id}: {next_topic[0]} › {next_topic[2][:50]}")
 
 
-# ── Mock scene for dry-run without API key ────────────────────────────────────
-def _mock_scene(topic: tuple, game_mechanic: str, game_tag: str) -> dict:
+# ── Mock scene (used when no API key or LLM fails) ───────────────────────────
+def _mock_scene(topic: tuple, game_mechanic: str, game_tag: str, puzzle_num: int) -> dict:
     series, chapter, topic_desc = topic
     return {
-        "title":         topic_desc[:60],
-        "subtitle":      f"{chapter} internals — expert level",
-        "hook":          "Here's what actually happens",
-        "game_tag":      game_tag,
-        "game_mechanic": game_mechanic,
-        "boss_name":     "THE COMPLEXITY",
-        "series":        series,
-        "chapter":       chapter,
-        "counters":      [{"label": "Complexity", "value": "O(n²)"}, {"label": "Nodes", "value": 8}],
-        "damage_values": ["-25% Throughput", "-40% Latency", "+100ms P99", "-50% CPU", "-80% Hit Rate"],
-        "quest_steps":   ["Understand the problem", "See the internals", "Find the edge case", "Apply the fix", "Benchmark"],
-        "nodes": [
-            {"x": 540, "y": 580, "r": 72, "label": topic_desc[:20], "sublabel": "entry"},
-            {"x": 250, "y": 800, "r": 58, "label": "Phase 1", "sublabel": "init"},
-            {"x": 830, "y": 800, "r": 58, "label": "Phase 2", "sublabel": "exec"},
-            {"x": 180, "y": 1040, "r": 50, "label": "Edge Case", "sublabel": ""},
-            {"x": 540, "y": 1120, "r": 64, "label": "Trade-Off", "sublabel": ""},
-            {"x": 900, "y": 1040, "r": 50, "label": "Optimization", "sublabel": ""},
-            {"x": 340, "y": 1320, "r": 48, "label": "Gotcha", "sublabel": ""},
-            {"x": 740, "y": 1320, "r": 48, "label": "Fix", "sublabel": ""},
+        "title":           topic_desc[:55],
+        "subtitle":        f"{chapter} — implementation-level deep dive",
+        "series":          series,
+        "chapter":         chapter,
+        "puzzle_num":      puzzle_num,
+        "puzzle_stars":    3,
+        "difficulty":      "HARD",
+        "game_tag":        game_tag,
+        "game_mechanic":   game_mechanic,
+        "time_complexity": "O(n log n) — divide and conquer",
+        "space_complexity":"O(n) — merge buffer",
+        "viz_type":        "bars",
+        "viz_label":       "SORT",
+        "code": [
+            "def merge_sort(arr: list[int]) -> list[int]:",
+            "    # Base case: single element is sorted",
+            "    if len(arr) <= 1:",
+            "        return arr",
+            "",
+            "    mid = len(arr) // 2",
+            "    left  = merge_sort(arr[:mid])   # O(log n) depth",
+            "    right = merge_sort(arr[mid:])   # recursive halving",
+            "",
+            "    return _merge(left, right)",
+            "",
+            "def _merge(left: list, right: list) -> list:",
+            "    result = []",
+            "    i = j = 0",
+            "    while i < len(left) and j < len(right):",
+            "        if left[i] <= right[j]:   # stable: equal goes left",
+            "            result.append(left[i]); i += 1",
+            "        else:",
+            "            result.append(right[j]); j += 1",
+            "    # Drain remaining elements",
+            "    return result + left[i:] + right[j:]",
         ],
-        "paths": [
-            {"from": 0, "to": 1}, {"from": 0, "to": 2},
-            {"from": 1, "to": 3}, {"from": 2, "to": 5},
-            {"from": 3, "to": 4}, {"from": 5, "to": 4},
-            {"from": 4, "to": 6}, {"from": 4, "to": 7},
-        ],
-        "captions_steps": [
-            f"Deep dive into {topic_desc[:40]}.",
-            "This is where most engineers get it wrong.",
-            "The internals reveal the real performance profile.",
-            "Edge cases expose the design trade-offs.",
-            "Here's the critical implementation detail.",
-            "This is the optimization that changes everything.",
-            "The gotcha that has caused production incidents.",
-            "The fix — and why the naive fix doesn't work.",
-            "What this means for system design at scale.",
+        "active_lines": [0, 2, 5, 6, 7, 9, 11, 14, 19],
+        "viz_data": {
+            "values":     [64, 34, 25, 12, 22, 11, 90, 43],
+            "steps": [
+                [64, 34, 25, 12, 22, 11, 90, 43],
+                [34, 64, 12, 25, 11, 22, 43, 90],
+                [12, 34, 64, 25, 11, 22, 43, 90],
+                [12, 25, 34, 64, 11, 22, 43, 90],
+                [11, 12, 22, 25, 34, 43, 64, 90],
+                [11, 12, 22, 25, 34, 43, 64, 90],
+                [11, 12, 22, 25, 34, 43, 64, 90],
+                [11, 12, 22, 25, 34, 43, 64, 90],
+                [11, 12, 22, 25, 34, 43, 64, 90],
+            ],
+            "highlight":  {"0": [0,1], "1": [2,3], "2": [1,2], "3": [3,4], "4": [0,4]},
+            "operations": [
+                "merge_sort([64,34,25,12,22,11,90,43])",
+                "Split → left=[64,34,25,12]  right=[22,11,90,43]",
+                "merge_sort([64,34])  →  merge([34],[64])",
+                "merge_sort([25,12])  →  merge([12],[25])",
+                "_merge([12,34,64], [25])  ← stable compare",
+                "_merge([11,22], [43,90])  ← drain right",
+                "Merging halves: compare left[0]=12 vs right[0]=22",
+                "Drain: left[i:] appended, no extra compare",
+                "Result: [11,12,22,25,34,43,64,90]  ✓ sorted",
+            ],
+        },
+        "test_cases": [
+            {"label": "basic",   "input": "[5,3,1,4]",   "expected": "[1,3,4,5]"},
+            {"label": "equal",   "input": "[2,2,2]",     "expected": "[2,2,2]"},
+            {"label": "reverse", "input": "[9,7,5,3,1]", "expected": "[1,3,5,7,9]"},
+            {"label": "single",  "input": "[42]",         "expected": "[42]"},
         ],
         "narration": [
-            f"Let's dissect {topic_desc[:50]}. Not the textbook version. The real one.",
-            "Most tutorials skip this part. We won't. Here's what's actually happening under the hood.",
-            "The naive implementation runs into this problem at scale. Here's the failure mode.",
-            "The runtime behavior diverges from the spec here. This is where bugs are born.",
-            "This is the critical path. Every operation flows through this bottleneck.",
-            "The optimization changes the complexity class. But it introduces a new trade-off.",
-            "This edge case has caused outages at major companies. Know it. Memorize it.",
-            "The correct fix is counterintuitive. Here's why the obvious fix makes it worse.",
-            "In production: profile first, optimize second. This is where you start.",
+            f"We're implementing {topic_desc[:45]}. Skip the textbook. Here's what actually runs.",
+            "Split at midpoint. Two recursive calls, each halving the problem. That's where O(log n) depth comes from.",
+            "Left half sorted. Right half sorted. Now the expensive part: merging two sorted arrays.",
+            "Two-pointer merge. We compare head of left vs head of right, pick the smaller. O(n) each level.",
+            "Stability is critical here. Equal elements: left side always wins. That preserves original order.",
+            "After one pointer exhausts, drain the rest. No comparison needed — already sorted in place.",
+            "Total work per level: O(n) comparisons. Total levels: O(log n). Multiply: O(n log n) time.",
+            "Space: O(n) for the merge buffer. In-place merge sort exists but destroys cache performance.",
+            "Merge sort wins on linked lists. On arrays, Timsort (Python's sort) adds insertion sort for small runs.",
         ],
     }
 

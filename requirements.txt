@@ -1,23 +1,12 @@
-# Teacher Bot YT - Requirements
+# Expert Tech Bot YT v3 — Puzzle Edition
 
-# PDF handling
-pdfplumber>=0.10.0
-PyPDF2>=3.0.0
-
-# Video/Audio generation
-moviepy>=1.0.3
+# Image rendering (code editor, visualizations)
 pillow>=10.0.0
 
-# TTS - Free female Hindi voice
+# TTS — free, fast, high quality
 edge-tts>=6.1.0
 
-# Web rendering for animated frames
-playwright>=1.40.0
-
-# Template rendering
-jinja2>=3.1.0
-
-# YouTube API
+# YouTube API upload
 google-api-python-client>=2.100.0
 google-auth-oauthlib>=1.1.0
 google-auth-httplib2>=0.1.0
@@ -26,9 +15,3 @@ google-auth-httplib2>=0.1.0
 python-dotenv>=1.0.0
 requests>=2.31.0
 aiofiles>=23.0.0
-
-# LLM for visual generation
-openai>=1.6.0
-
-# Development
-python-dotenv

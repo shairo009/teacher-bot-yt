@@ -1,8 +1,8 @@
-name: Teacher Bot - Generate Video
+name: Tech Series Bot - Generate Video
 
 on:
   schedule:
-    # Six times daily in IST: 6:00 AM, 10:00 AM, 2:00 PM, 6:00 PM, 10:00 PM, 2:00 AM
+    # Six times daily in IST: 6 AM, 10 AM, 2 PM, 6 PM, 10 PM, 2 AM
     - cron: '30 0 * * *'
     - cron: '30 4 * * *'
     - cron: '30 8 * * *'
@@ -17,7 +17,7 @@ on:
         default: 'false'
         type: boolean
       force:
-        description: 'Force run (skip rate limits)'
+        description: 'Force run (skip rate limit check)'
         required: false
         default: 'false'
         type: boolean
@@ -32,88 +32,73 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Rate limit check
+      - name: Rate limit check (min 3.5h between videos)
         id: rate_check
         run: |
-          # Check if a LUCENT quiz video was generated in the last 4 hours
           if [ -f data/video_history.json ]; then
             LAST_RUN=$(python3 -c "
-          import json
-          from datetime import datetime, timezone
-          try:
-              with open('data/video_history.json') as f:
-                  history = json.load(f)
-              # Only look at lucent quiz entries (they have 'id' field)
-              lucent_history = [h for h in history if 'id' in h]
-              if lucent_history:
-                  last = datetime.fromisoformat(lucent_history[-1]['timestamp'])
-                  if last.tzinfo is None:
-                      last = last.replace(tzinfo=timezone.utc)
-                  now = datetime.now(timezone.utc)
-                  hours_since = (now - last).total_seconds() / 3600
-                  print(f'{hours_since:.1f}')
-              else:
-                  print('999')
-          except Exception as e:
-              print('999')
-          ")
-            echo "Hours since last lucent video: $LAST_RUN"
+import json
+from datetime import datetime, timezone
+try:
+    with open('data/video_history.json') as f:
+        history = json.load(f)
+    if history:
+        last = datetime.fromisoformat(history[-1]['timestamp'])
+        if last.tzinfo is None:
+            last = last.replace(tzinfo=timezone.utc)
+        hours = (datetime.now(timezone.utc) - last).total_seconds() / 3600
+        print(f'{hours:.1f}')
+    else:
+        print('999')
+except:
+    print('999')
+")
+            echo "Hours since last video: $LAST_RUN"
             FORCE="${{ github.event.inputs.force || 'false' }}"
             if [ "$FORCE" = "true" ]; then
-              echo "Force run enabled. Overriding rate limit check."
               echo "skip=false" >> $GITHUB_OUTPUT
             else
               SKIP=$(python3 -c "print('true' if float('$LAST_RUN') < 3.5 else 'false')")
               echo "skip=$SKIP" >> $GITHUB_OUTPUT
-              if [ "$SKIP" = "true" ]; then
-                echo "Last lucent video was less than 4 hours ago. Skipping."
-              fi
             fi
           else
-            echo "No history file. Running."
             echo "skip=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Check daily limit
+      - name: Daily limit check (max 6/day)
         if: steps.rate_check.outputs.skip != 'true'
         id: daily_check
         run: |
-          # Max 6 lucent videos per day — steady YouTube upload pace
           if [ -f data/video_history.json ]; then
             TODAY_COUNT=$(python3 -c "
-          import json
-          from datetime import datetime, timezone
-          try:
-              with open('data/video_history.json') as f:
-                  history = json.load(f)
-              # Only count lucent quiz entries (they have 'id' field)
-              lucent_history = [h for h in history if 'id' in h]
-              today = datetime.now(timezone.utc).date()
-              def safe_date(h):
-                  try:
-                      ts = datetime.fromisoformat(h['timestamp'])
-                      if ts.tzinfo is None:
-                          ts = ts.replace(tzinfo=timezone.utc)
-                      return ts.date()
-                  except:
-                      return None
-              count = sum(1 for h in lucent_history if safe_date(h) == today)
-              print(count)
-          except:
-              print(0)
-          ")
+import json
+from datetime import datetime, timezone
+try:
+    with open('data/video_history.json') as f:
+        history = json.load(f)
+    today = datetime.now(timezone.utc).date()
+    def get_date(h):
+        try:
+            ts = datetime.fromisoformat(h['timestamp'])
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=timezone.utc)
+            return ts.date()
+        except:
+            return None
+    count = sum(1 for h in history if get_date(h) == today)
+    print(count)
+except:
+    print(0)
+")
             echo "Videos today: $TODAY_COUNT"
             FORCE="${{ github.event.inputs.force || 'false' }}"
             if [ "$FORCE" = "true" ]; then
-              echo "Force run enabled. Overriding daily limit check."
               echo "skip=false" >> $GITHUB_OUTPUT
+            elif [ "$TODAY_COUNT" -ge 6 ]; then
+              echo "Daily limit reached. Skipping."
+              echo "skip=true" >> $GITHUB_OUTPUT
             else
-              if [ "$TODAY_COUNT" -ge 6 ]; then
-                echo "Daily limit (6 videos) reached. Skipping."
-                echo "skip=true" >> $GITHUB_OUTPUT
-              else
-                echo "skip=false" >> $GITHUB_OUTPUT
-              fi
+              echo "skip=false" >> $GITHUB_OUTPUT
             fi
           else
             echo "skip=false" >> $GITHUB_OUTPUT
@@ -131,19 +116,14 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            ffmpeg libcairo2-dev libpango1.0-dev \
-            libgdk-pixbuf2.0-dev fonts-noto cm-super
+            ffmpeg fonts-noto fonts-dejavu-core \
+            libgdk-pixbuf2.0-dev
 
       - name: Install Python dependencies
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         run: |
           pip install --upgrade pip wheel
           pip install -r requirements.txt
-
-      - name: Install Playwright browser
-        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
-        run: |
-          python -m playwright install chromium --with-deps
 
       - name: Write YouTube credentials
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
@@ -156,16 +136,14 @@ jobs:
             echo "$CLIENT_SECRETS_JSON" > client_secrets.json
             echo "YouTube credentials written"
           else
-            echo "No YouTube credentials found, skipping"
+            echo "No YouTube credentials — will dry-run"
           fi
 
       - name: Generate video
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         env:
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         run: |
           DRY="${{ github.event.inputs.dry_run || 'false' }}"
           if [ "$DRY" = "true" ] || [ ! -f token.json ]; then
@@ -178,18 +156,18 @@ jobs:
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: video-${{ github.run_number }}
+          name: tech-video-${{ github.run_number }}
           path: outputs/*.mp4
           retention-days: 7
           if-no-files-found: warn
 
-      - name: Save progress
+      - name: Save progress to repo
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          # Only commit tracked progress files (not junk)
-          git add data/lucent_progress.json data/video_history.json
-          git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "Video #$(jq .current_id data/lucent_progress.json) complete [skip ci]"
+          git add data/tech_progress.json data/video_history.json
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          NEXT=$(python3 -c "import json; d=json.load(open('data/tech_progress.json')); print(d['current_id'])")
+          git commit -m "Video #$NEXT complete [skip ci]"
           git push

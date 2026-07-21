@@ -1,110 +1,88 @@
-# Teacher Bot YT - NCERT Video Creator 🤖📚
+# Tech Series Bot 🎮💻
 
-Automated YouTube channel that teaches **Class 1 to 10 NCERT Mathematics** with a unique pencil animation style.
+**Automated YouTube Shorts** teaching Computer Science & Programming with **game-style dark neon visuals**.
 
-## Features
+Every video is unique — different tech concept + different animated objects (fish, rockets, cars, robots, crystals...).
 
-- 📖 **Downloads actual NCERT books** (Class 1-10, English + Hindi medium)
-- 📝 **Sequential topic coverage** — up to four topics daily, never repeats
-- ✏️ **Pencil animation style** — white page with animated pencil drawing content
-- 🔊 **Female Hindi voice** — using free Edge-TTS (no costs!)
-- 🎬 **Auto-upload to YouTube** — 4 daily automation slots via GitHub Actions
+## What It Makes
 
-## Video Style
+Each video:
+- 🌑 **Dark neon background** with animated grid
+- 🎮 **Game-style diagram** — nodes, glowing connections, counters
+- 🐟🚀 **Random animated objects** (fish, rockets, robots, crystals...) flowing through the concept
+- 🔊 **English narration** via Edge-TTS
+- ⚡ **30 FPS smooth animation** at 1080×1920
 
-Each video features:
-- Pure white background
-- Animated pencil that "writes" content line-by-line
-- Class and chapter labels
-- Hindi female voice narration
+## Topics Covered (500+)
+
+| Series | Examples |
+|--------|----------|
+| **Python** | Variables, OOP, Decorators, asyncio, Generators... |
+| **DSA** | Binary Search, BFS/DFS, Dijkstra, DP, Sorting... |
+| **System Design** | API Gateway, Load Balancer, CAP Theorem, Kafka... |
+| **AI/ML** | Transformers, Backprop, CNN, LSTM, LoRA... |
+| **LLMs** | Tokens, Embeddings, RAG, Agents, Fine-tuning... |
+| **Web Dev** | REST, JWT, OAuth, WebSockets, GraphQL... |
+| **DevOps** | Docker, Kubernetes, CI/CD, Prometheus... |
+| **Databases** | SQL Joins, Indexes, CAP, NoSQL, Redis... |
+| **Networking** | OSI, TCP/UDP, TLS, DNS, HTTP/3... |
+| **Design Patterns** | Singleton, Observer, Strategy, CQRS... |
+| **Git** | Merge vs Rebase, Interactive Rebase, bisect... |
+| **CS Fundamentals** | Memory, Concurrency, OS, Crypto... |
+
+Topics cycle infinitely — **never repeats** within a full cycle.
+
+## Animated Objects (30+)
+
+Every video randomly picks 2 objects from:
+`fish • rocket • car • robot • crystal • satellite • packet • bird • dragon • submarine • gear • lightning • diamond • comet • ufo • bug • train • airplane • bubble • star • turtle • cat • token • hexagon • molecule • flame • snowflake • leaf • virus • crown • shield • key • bolt • wave...`
 
 ## How It Works
 
 ```
-1. Download NCERT PDF books (Class 1-10)
-2. Extract topics from PDFs
-3. Track progress (up to 4 lessons per day)
-4. Render animated frames (pencil drawing)
-5. Generate Hindi audio narration
-6. Compose video
-7. Upload to YouTube
+1. Pick next topic from 500+ ordered list (never repeats)
+2. Pick 2 random animated objects (different every run)
+3. LLM (DeepSeek free) generates unique scene layout + narration
+4. PIL renders dark-neon game-style frames (30fps)
+5. Edge-TTS generates English narration audio (free)
+6. FFmpeg composes final 1080×1920 MP4
+7. Upload to YouTube automatically
 ```
 
 ## Setup
 
-### 1. Clone the repo
+### 1. Clone
 ```bash
 git clone https://github.com/shairo009/teacher-bot-yt.git
 cd teacher-bot-yt
 ```
 
-### 2. Get YouTube API credentials
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a project and enable **YouTube Data API v3**
-3. Create OAuth 2.0 credentials (Desktop app)
-4. Download `client_secrets.json`
-5. Run once locally to get `token.json`
+### 2. Add GitHub Secrets
+| Secret | Value |
+|--------|-------|
+| `OPENAI_API_KEY` | OpenCode API key (free at opencode.ai) |
+| `TOKEN_JSON` | YouTube OAuth token.json content |
+| `CLIENT_SECRETS_JSON` | YouTube client_secrets.json content |
 
-### 3. Add GitHub Secrets
-In your repo, go to Settings → Secrets and add:
-- `TOKEN_JSON` — content of token.json
-- `CLIENT_SECRETS_JSON` — content of client_secrets.json
-
-### 4. Run locally (optional)
+### 3. Run locally
 ```bash
 pip install -r requirements.txt
-playwright install chromium
-python main.py
+python lucent_main.py --dry-run   # test without uploading
+python lucent_main.py             # full run + upload
 ```
 
-## Running Modes
+## GitHub Actions Schedule
 
-| Mode | Command | Description |
-|------|---------|-------------|
-| Full | `python main.py` | Download PDFs, create video, upload |
-| Dry run | `python main.py --dry-run` | Create video without uploading |
-| Force download | `python main.py --force` | Re-download all PDFs |
+Runs **6 times daily** at IST: 6 AM, 10 AM, 2 PM, 6 PM, 10 PM, 2 AM
 
-## File Structure
+## Cost: **Zero** 💰
 
-```
-teacher-bot-yt/
-├── main.py              # Entry point
-├── requirements.txt     # Dependencies
-├── .env.example         # Environment template
-├── src/
-│   ├── pdf_downloader.py    # Download NCERT PDFs
-│   ├── pdf_extractor.py     # Extract text from PDFs
-│   ├── topic_manager.py     # Track daily progress
-│   ├── render_engine.py     # Pencil animation renderer
-│   ├── audio_engine.py      # Hindi TTS
-│   ├── video_engine.py      # Video composition
-│   └── uploader.py          # YouTube upload
-├── templates/
-│   └── lesson_template.html # HTML template for animation
-└── data/
-    ├── books/           # Downloaded PDFs
-    ├── topics_index.json    # All topics index
-    └── topics_progress.json # Progress tracking
-```
-
-## Curriculum Coverage
-
-| Class | Medium | Status |
-|-------|--------|--------|
-| 1-5 | English + Hindi | ✅ |
-| 6-10 | English + Hindi | ✅ |
-
-Each class has ~15 chapters with multiple topics.
-
-## Cost
-
-- **Zero cost!** Uses only free tools:
-  - Edge-TTS (no API key needed)
-  - Playwright + Chromium (free browser)
-  - GitHub Actions (free tier)
-  - Google OAuth (free)
+- Edge-TTS: free
+- PIL + FFmpeg: free
+- GitHub Actions: free tier
+- LLM: DeepSeek via OpenCode (free)
+- YouTube API: free
 
 ## License
 
-MIT License
+MIT

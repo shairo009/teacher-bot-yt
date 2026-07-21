@@ -635,21 +635,42 @@ def get_audio_duration(path):
         "-i", audio_list, "-c", "copy", merged_audio
     ], capture_output=True, timeout=60)
 
-    r = subprocess.run([
-        "ffmpeg", "-y",
-        "-i", raw_video,
-        "-i", merged_audio,
-        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
-        "-shortest", str(output_path)
-    ], capture_output=True, text=True, timeout=300)
+    # Mix BGM at low volume under voice narration
+      bgm_path = str(output_path.parent / "bgm.aac")
+      total_dur = sum(durations) if durations else 40
+      has_bgm = download_bgm(bgm_path, total_dur)
 
-    if r.returncode == 0 and output_path.exists():
-        size_mb = output_path.stat().st_size / 1e6
-        print(f"✅ Video composed: {output_path} ({size_mb:.1f}MB)")
-        return str(output_path)
+      if has_bgm and os.path.exists(bgm_path):
+          r = subprocess.run([
+              "ffmpeg", "-y",
+              "-i", raw_video, "-i", merged_audio, "-i", bgm_path,
+              "-filter_complex",
+              "[1:a]volume=1.0[voice];[2:a]volume=0.08[bgm];[voice][bgm]amix=inputs=2:duration=first[aout]",
+              "-map", "0:v", "-map", "[aout]",
+              "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+              "-shortest", str(output_path)
+          ], capture_output=True, text=True, timeout=300)
+          if r.returncode == 0 and output_path.exists():
+              size_mb = output_path.stat().st_size / 1e6
+              print(f"✅ Video composed (with BGM): {output_path} ({size_mb:.1f}MB)")
+              return str(output_path)
+          print(f"⚠️  BGM mix failed, falling back to voice-only")
 
-    print(f"❌ Final compose error: {r.stderr[-400:]}")
-    return None
+      # Fallback: voice only, no BGM
+      r = subprocess.run([
+          "ffmpeg", "-y",
+          "-i", raw_video, "-i", merged_audio,
+          "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+          "-shortest", str(output_path)
+      ], capture_output=True, text=True, timeout=300)
+
+      if r.returncode == 0 and output_path.exists():
+          size_mb = output_path.stat().st_size / 1e6
+          print(f"✅ Video composed: {output_path} ({size_mb:.1f}MB)")
+          return str(output_path)
+
+      print(f"❌ Final compose error: {r.stderr[-300:]}")
+      return None
 
 
 # ─────────────────────────────────────────────────────────────────────────────

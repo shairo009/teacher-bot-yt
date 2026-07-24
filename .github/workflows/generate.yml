@@ -46,21 +46,21 @@ jobs:
           fi
           if [ -f data/video_history.json ]; then
             HOURS=$(python3 -c "
-              import json
-              from datetime import datetime, timezone
-              try:
-                  with open('data/video_history.json') as f:
-                      history = json.load(f)
-                  if history:
-                      last = datetime.fromisoformat(history[-1]['timestamp'])
-                      if last.tzinfo is None:
-                          last = last.replace(tzinfo=timezone.utc)
-                      print(f'{(datetime.now(timezone.utc) - last).total_seconds() / 3600:.2f}')
-                  else:
-                      print('999')
-              except:
+          import json
+          from datetime import datetime, timezone
+          try:
+              with open('data/video_history.json') as f:
+                  history = json.load(f)
+              if history:
+                  last = datetime.fromisoformat(history[-1]['timestamp'])
+                  if last.tzinfo is None:
+                      last = last.replace(tzinfo=timezone.utc)
+                  print(f'{(datetime.now(timezone.utc) - last).total_seconds() / 3600:.2f}')
+              else:
                   print('999')
-              ")
+          except:
+              print('999')
+          ")
             echo "Hours since last video: $HOURS"
             SKIP=$(python3 -c "print('true' if float('$HOURS') < 5.0 else 'false')")
             echo "skip=$SKIP" >> $GITHUB_OUTPUT
@@ -78,22 +78,22 @@ jobs:
             exit 0
           fi
           COUNT=$(python3 -c "
-            import json
-            from datetime import datetime, timezone
-            try:
-                with open('data/video_history.json') as f:
-                    history = json.load(f)
-                today = datetime.now(timezone.utc).date()
-                def d(h):
-                    try:
-                        ts = datetime.fromisoformat(h['timestamp'])
-                        if ts.tzinfo is None: ts = ts.replace(tzinfo=timezone.utc)
-                        return ts.date()
-                    except: return None
-                print(sum(1 for h in history if d(h) == today))
-            except:
-                print(0)
-            " 2>/dev/null || echo 0)
+          import json
+          from datetime import datetime, timezone
+          try:
+              with open('data/video_history.json') as f:
+                  history = json.load(f)
+              today = datetime.now(timezone.utc).date()
+              def d(h):
+                  try:
+                      ts = datetime.fromisoformat(h['timestamp'])
+                      if ts.tzinfo is None: ts = ts.replace(tzinfo=timezone.utc)
+                      return ts.date()
+                  except: return None
+              print(sum(1 for h in history if d(h) == today))
+          except:
+              print(0)
+          " 2>/dev/null || echo 0)
           echo "Videos today: $COUNT"
           if [ "$COUNT" -ge 4 ]; then
             echo "Daily limit reached."
@@ -165,11 +165,11 @@ jobs:
           git add data/tech_progress.json data/video_history.json
           git diff --cached --quiet && echo "No changes" && exit 0
           NEXT=$(python3 -c "
-            import json
-            try:
-                print(json.load(open('data/tech_progress.json'))['current_id'])
-            except:
-                print('?')
-            ")
+          import json
+          try:
+              print(json.load(open('data/tech_progress.json'))['current_id'])
+          except:
+              print('?')
+          ")
           git commit -m "Video #$NEXT complete [skip ci]"
           git push

@@ -549,5 +549,18 @@
     "video_file": "quiz_polity_q20.mp4",
     "uploaded": true,
     "timestamp": "2026-06-18T22:44:41.145256+00:00"
+  },
+  {
+    "id": 0,
+    "topic_idx": 0,
+    "puzzle_num": 1,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "Branch Prediction: how CPUs guess your if-else 95% of the time",
+    "title": "Branch Prediction: how CPUs guess your if-else 95% of t",
+    "viz_type": "bars",
+    "game_mechanic": "skill_tree",
+    "uploaded": false,
+    "timestamp": "2026-07-24T21:17:44.914237+00:00"
   }
 ]

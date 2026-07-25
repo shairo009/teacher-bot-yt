@@ -588,5 +588,18 @@
     "game_mechanic": "raid",
     "uploaded": false,
     "timestamp": "2026-07-25T14:52:49.932936+00:00"
+  },
+  {
+    "id": 3,
+    "topic_idx": 3,
+    "puzzle_num": 4,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "Cache Coherence: MESI protocol keeping multi-core caches in sync",
+    "title": "Cache Coherence: MESI protocol keeping multi-core cache",
+    "viz_type": "bars",
+    "game_mechanic": "skill_tree",
+    "uploaded": false,
+    "timestamp": "2026-07-25T20:29:27.771835+00:00"
   }
 ]

@@ -562,5 +562,18 @@
     "game_mechanic": "skill_tree",
     "uploaded": false,
     "timestamp": "2026-07-24T21:17:44.914237+00:00"
+  },
+  {
+    "id": 1,
+    "topic_idx": 1,
+    "puzzle_num": 2,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "Out-of-Order Execution: CPU runs instructions before you ask",
+    "title": "Out-of-Order Execution: CPU runs instructions before yo",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": false,
+    "timestamp": "2026-07-25T04:43:59.742708+00:00"
   }
 ]

@@ -575,5 +575,18 @@
     "game_mechanic": "raid",
     "uploaded": false,
     "timestamp": "2026-07-25T04:43:59.742708+00:00"
+  },
+  {
+    "id": 2,
+    "topic_idx": 2,
+    "puzzle_num": 3,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "Superscalar Pipelines: executing 4+ instructions per clock cycle",
+    "title": "Superscalar Pipelines: executing 4+ instructions per cl",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": false,
+    "timestamp": "2026-07-25T14:52:49.932936+00:00"
   }
 ]

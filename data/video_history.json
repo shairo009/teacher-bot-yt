@@ -627,5 +627,18 @@
     "game_mechanic": "boss_fight",
     "uploaded": false,
     "timestamp": "2026-07-26T14:54:05.602189+00:00"
+  },
+  {
+    "id": 6,
+    "topic_idx": 6,
+    "puzzle_num": 7,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "Memory Ordering: happens-before, acquire-release, sequential consistency",
+    "title": "Memory Ordering: happens-before, acquire-release, seque",
+    "viz_type": "bars",
+    "game_mechanic": "quest",
+    "uploaded": false,
+    "timestamp": "2026-07-26T20:31:42.338190+00:00"
   }
 ]

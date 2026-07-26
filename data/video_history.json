@@ -601,5 +601,18 @@
     "game_mechanic": "skill_tree",
     "uploaded": false,
     "timestamp": "2026-07-25T20:29:27.771835+00:00"
+  },
+  {
+    "id": 4,
+    "topic_idx": 4,
+    "puzzle_num": 5,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "NUMA Architecture: memory latency depends on which CPU owns it",
+    "title": "NUMA Architecture: memory latency depends on which CPU ",
+    "viz_type": "bars",
+    "game_mechanic": "quest",
+    "uploaded": false,
+    "timestamp": "2026-07-26T04:56:31.863536+00:00"
   }
 ]

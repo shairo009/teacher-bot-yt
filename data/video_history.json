@@ -614,5 +614,18 @@
     "game_mechanic": "quest",
     "uploaded": false,
     "timestamp": "2026-07-26T04:56:31.863536+00:00"
+  },
+  {
+    "id": 5,
+    "topic_idx": 5,
+    "puzzle_num": 6,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "TLB Shootdowns: the hidden cost of freeing shared memory pages",
+    "title": "TLB Shootdowns: the hidden cost of freeing shared memor",
+    "viz_type": "bars",
+    "game_mechanic": "boss_fight",
+    "uploaded": false,
+    "timestamp": "2026-07-26T14:54:05.602189+00:00"
   }
 ]

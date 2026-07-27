@@ -666,5 +666,18 @@
     "game_mechanic": "raid",
     "uploaded": false,
     "timestamp": "2026-07-27T10:58:32.427040+00:00"
+  },
+  {
+    "id": 9,
+    "topic_idx": 9,
+    "puzzle_num": 10,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "Prefetcher Friendly Code: spatial vs temporal locality in hot loops",
+    "title": "Prefetcher Friendly Code: spatial vs temporal locality ",
+    "viz_type": "bars",
+    "game_mechanic": "quest",
+    "uploaded": false,
+    "timestamp": "2026-07-27T16:04:23.641255+00:00"
   }
 ]

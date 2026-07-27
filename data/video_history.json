@@ -640,5 +640,18 @@
     "game_mechanic": "quest",
     "uploaded": false,
     "timestamp": "2026-07-26T20:31:42.338190+00:00"
+  },
+  {
+    "id": 7,
+    "topic_idx": 7,
+    "puzzle_num": 8,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "Spectre and Meltdown: exploiting speculative execution via cache timing",
+    "title": "Spectre and Meltdown: exploiting speculative execution ",
+    "viz_type": "bars",
+    "game_mechanic": "boss_fight",
+    "uploaded": false,
+    "timestamp": "2026-07-27T05:08:38.203245+00:00"
   }
 ]

@@ -653,5 +653,18 @@
     "game_mechanic": "boss_fight",
     "uploaded": false,
     "timestamp": "2026-07-27T05:08:38.203245+00:00"
+  },
+  {
+    "id": 8,
+    "topic_idx": 8,
+    "puzzle_num": 9,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "False Sharing: cache lines destroyed by unrelated adjacent variables",
+    "title": "False Sharing: cache lines destroyed by unrelated adjac",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": false,
+    "timestamp": "2026-07-27T10:58:32.427040+00:00"
   }
 ]

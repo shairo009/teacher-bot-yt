@@ -718,5 +718,18 @@
     "game_mechanic": "boss_fight",
     "uploaded": false,
     "timestamp": "2026-07-28T15:56:27.047671+00:00"
+  },
+  {
+    "id": 13,
+    "topic_idx": 13,
+    "puzzle_num": 14,
+    "series": "Systems",
+    "chapter": "Memory",
+    "topic": "Memory Compaction: defragmenting RAM without a garbage collector",
+    "title": "Memory Compaction: defragmenting RAM without a garbage ",
+    "viz_type": "bars",
+    "game_mechanic": "skill_tree",
+    "uploaded": false,
+    "timestamp": "2026-07-29T04:45:55.392755+00:00"
   }
 ]

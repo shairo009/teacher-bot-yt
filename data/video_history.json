@@ -783,5 +783,18 @@
     "game_mechanic": "xp_grind",
     "uploaded": false,
     "timestamp": "2026-07-30T10:02:04.383666+00:00"
+  },
+  {
+    "id": 18,
+    "topic_idx": 18,
+    "puzzle_num": 19,
+    "series": "Systems",
+    "chapter": "OS Internals",
+    "topic": "Completely Fair Scheduler: vruntime, red-black tree, and cgroups",
+    "title": "Completely Fair Scheduler: vruntime, red-black tree, an",
+    "viz_type": "bars",
+    "game_mechanic": "boss_fight",
+    "uploaded": false,
+    "timestamp": "2026-07-30T15:38:15.868751+00:00"
   }
 ]

@@ -796,5 +796,18 @@
     "game_mechanic": "boss_fight",
     "uploaded": false,
     "timestamp": "2026-07-30T15:38:15.868751+00:00"
+  },
+  {
+    "id": 19,
+    "topic_idx": 19,
+    "puzzle_num": 20,
+    "series": "Systems",
+    "chapter": "OS Internals",
+    "topic": "io_uring: zero-copy async I/O that made Linux 40% faster",
+    "title": "io_uring: zero-copy async I/O that made Linux 40% faste",
+    "viz_type": "bars",
+    "game_mechanic": "boss_fight",
+    "uploaded": false,
+    "timestamp": "2026-07-30T20:43:47.297220+00:00"
   }
 ]

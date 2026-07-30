@@ -757,5 +757,18 @@
     "game_mechanic": "boss_fight",
     "uploaded": false,
     "timestamp": "2026-07-29T15:36:25.753529+00:00"
+  },
+  {
+    "id": 16,
+    "topic_idx": 16,
+    "puzzle_num": 17,
+    "series": "Systems",
+    "chapter": "Memory",
+    "topic": "Transparent Huge Pages: 2MB pages, silent performance killer",
+    "title": "Transparent Huge Pages: 2MB pages, silent performance k",
+    "viz_type": "bars",
+    "game_mechanic": "quest",
+    "uploaded": false,
+    "timestamp": "2026-07-30T04:32:29.500653+00:00"
   }
 ]

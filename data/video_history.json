@@ -809,5 +809,18 @@
     "game_mechanic": "boss_fight",
     "uploaded": false,
     "timestamp": "2026-07-30T20:43:47.297220+00:00"
+  },
+  {
+    "id": 20,
+    "topic_idx": 20,
+    "puzzle_num": 21,
+    "series": "Systems",
+    "chapter": "OS Internals",
+    "topic": "eBPF: programmable kernel without writing a kernel module",
+    "title": "eBPF: programmable kernel without writing a kernel modu",
+    "viz_type": "bars",
+    "game_mechanic": "skill_tree",
+    "uploaded": false,
+    "timestamp": "2026-07-31T04:57:58.386862+00:00"
   }
 ]

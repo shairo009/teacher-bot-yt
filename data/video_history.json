@@ -835,5 +835,18 @@
     "game_mechanic": "raid",
     "uploaded": false,
     "timestamp": "2026-07-31T10:10:14.706672+00:00"
+  },
+  {
+    "id": 22,
+    "topic_idx": 22,
+    "puzzle_num": 23,
+    "series": "Systems",
+    "chapter": "OS Internals",
+    "topic": "VDSO: syscalls that aren't syscalls — gettimeofday in 3 ns",
+    "title": "VDSO: syscalls that aren't syscalls — gettimeofday in 3",
+    "viz_type": "bars",
+    "game_mechanic": "quest",
+    "uploaded": false,
+    "timestamp": "2026-07-31T15:42:50.352530+00:00"
   }
 ]

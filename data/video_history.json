@@ -822,5 +822,18 @@
     "game_mechanic": "skill_tree",
     "uploaded": false,
     "timestamp": "2026-07-31T04:57:58.386862+00:00"
+  },
+  {
+    "id": 21,
+    "topic_idx": 21,
+    "puzzle_num": 22,
+    "series": "Systems",
+    "chapter": "OS Internals",
+    "topic": "Futex: user-space mutex that only calls the kernel on contention",
+    "title": "Futex: user-space mutex that only calls the kernel on c",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": false,
+    "timestamp": "2026-07-31T10:10:14.706672+00:00"
   }
 ]

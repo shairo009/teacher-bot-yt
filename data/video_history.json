@@ -861,5 +861,18 @@
     "game_mechanic": "skill_tree",
     "uploaded": false,
     "timestamp": "2026-08-01T04:51:30.816589+00:00"
+  },
+  {
+    "id": 24,
+    "topic_idx": 24,
+    "puzzle_num": 25,
+    "series": "Systems",
+    "chapter": "OS Internals",
+    "topic": "Namespaces: the six Linux primitives that make containers possible",
+    "title": "Namespaces: the six Linux primitives that make containe",
+    "viz_type": "bars",
+    "game_mechanic": "xp_grind",
+    "uploaded": false,
+    "timestamp": "2026-08-01T14:51:03.828834+00:00"
   }
 ]

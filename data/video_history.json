@@ -874,5 +874,18 @@
     "game_mechanic": "xp_grind",
     "uploaded": false,
     "timestamp": "2026-08-01T14:51:03.828834+00:00"
+  },
+  {
+    "id": 25,
+    "topic_idx": 25,
+    "puzzle_num": 26,
+    "series": "Systems",
+    "chapter": "OS Internals",
+    "topic": "Signals: real-time vs standard, SA_SIGINFO, signal safety rules",
+    "title": "Signals: real-time vs standard, SA_SIGINFO, signal safe",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": false,
+    "timestamp": "2026-08-01T20:28:52.073465+00:00"
   }
 ]

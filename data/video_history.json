@@ -887,5 +887,18 @@
     "game_mechanic": "raid",
     "uploaded": false,
     "timestamp": "2026-08-01T20:28:52.073465+00:00"
+  },
+  {
+    "id": 26,
+    "topic_idx": 26,
+    "puzzle_num": 27,
+    "series": "Systems",
+    "chapter": "OS Internals",
+    "topic": "Epoll internals: edge-triggered vs level-triggered, thundering herd",
+    "title": "Epoll internals: edge-triggered vs level-triggered, thu",
+    "viz_type": "bars",
+    "game_mechanic": "skill_tree",
+    "uploaded": false,
+    "timestamp": "2026-08-02T04:53:35.745007+00:00"
   }
 ]

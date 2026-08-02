@@ -900,5 +900,18 @@
     "game_mechanic": "skill_tree",
     "uploaded": false,
     "timestamp": "2026-08-02T04:53:35.745007+00:00"
+  },
+  {
+    "id": 27,
+    "topic_idx": 27,
+    "puzzle_num": 28,
+    "series": "Systems",
+    "chapter": "Network Stack",
+    "topic": "TCP's Nagle Algorithm vs TCP_NODELAY: latency vs throughput tradeoff",
+    "title": "TCP's Nagle Algorithm vs TCP_NODELAY: latency vs throug",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": false,
+    "timestamp": "2026-08-02T14:51:22.148171+00:00"
   }
 ]

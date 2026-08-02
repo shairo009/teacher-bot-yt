@@ -913,5 +913,18 @@
     "game_mechanic": "raid",
     "uploaded": false,
     "timestamp": "2026-08-02T14:51:22.148171+00:00"
+  },
+  {
+    "id": 28,
+    "topic_idx": 28,
+    "puzzle_num": 29,
+    "series": "Systems",
+    "chapter": "Network Stack",
+    "topic": "BBR Congestion Control: bandwidth-delay product and pacing",
+    "title": "BBR Congestion Control: bandwidth-delay product and pac",
+    "viz_type": "bars",
+    "game_mechanic": "xp_grind",
+    "uploaded": false,
+    "timestamp": "2026-08-02T20:31:03.751157+00:00"
   }
 ]

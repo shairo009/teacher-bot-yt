@@ -952,5 +952,18 @@
     "game_mechanic": "xp_grind",
     "uploaded": false,
     "timestamp": "2026-08-03T10:58:58.504423+00:00"
+  },
+  {
+    "id": 31,
+    "topic_idx": 31,
+    "puzzle_num": 32,
+    "series": "Systems",
+    "chapter": "Network Stack",
+    "topic": "XDP: bypassing the kernel network stack for 100Gbps packet processing",
+    "title": "XDP: bypassing the kernel network stack for 100Gbps pac",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": false,
+    "timestamp": "2026-08-03T16:08:44.333225+00:00"
   }
 ]

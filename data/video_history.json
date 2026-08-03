@@ -926,5 +926,18 @@
     "game_mechanic": "xp_grind",
     "uploaded": false,
     "timestamp": "2026-08-02T20:31:03.751157+00:00"
+  },
+  {
+    "id": 29,
+    "topic_idx": 29,
+    "puzzle_num": 30,
+    "series": "Systems",
+    "chapter": "Network Stack",
+    "topic": "TCP Fast Open: eliminating the 3-way handshake for repeat connections",
+    "title": "TCP Fast Open: eliminating the 3-way handshake for repe",
+    "viz_type": "bars",
+    "game_mechanic": "quest",
+    "uploaded": false,
+    "timestamp": "2026-08-03T05:03:11.720905+00:00"
   }
 ]

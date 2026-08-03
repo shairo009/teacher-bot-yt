@@ -939,5 +939,18 @@
     "game_mechanic": "quest",
     "uploaded": false,
     "timestamp": "2026-08-03T05:03:11.720905+00:00"
+  },
+  {
+    "id": 30,
+    "topic_idx": 30,
+    "puzzle_num": 31,
+    "series": "Systems",
+    "chapter": "Network Stack",
+    "topic": "QUIC Protocol: how HTTP/3 removed head-of-line blocking at the transport layer",
+    "title": "QUIC Protocol: how HTTP/3 removed head-of-line blocking",
+    "viz_type": "bars",
+    "game_mechanic": "xp_grind",
+    "uploaded": false,
+    "timestamp": "2026-08-03T10:58:58.504423+00:00"
   }
 ]

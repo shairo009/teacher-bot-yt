@@ -965,5 +965,18 @@
     "game_mechanic": "raid",
     "uploaded": false,
     "timestamp": "2026-08-03T16:08:44.333225+00:00"
+  },
+  {
+    "id": 32,
+    "topic_idx": 32,
+    "puzzle_num": 33,
+    "series": "Systems",
+    "chapter": "Network Stack",
+    "topic": "RSS and RPS: spreading NIC interrupts across CPU cores",
+    "title": "RSS and RPS: spreading NIC interrupts across CPU cores",
+    "viz_type": "bars",
+    "game_mechanic": "boss_fight",
+    "uploaded": false,
+    "timestamp": "2026-08-04T04:43:26.162505+00:00"
   }
 ]

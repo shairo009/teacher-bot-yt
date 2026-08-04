@@ -978,5 +978,18 @@
     "game_mechanic": "boss_fight",
     "uploaded": false,
     "timestamp": "2026-08-04T04:43:26.162505+00:00"
+  },
+  {
+    "id": 33,
+    "topic_idx": 33,
+    "puzzle_num": 34,
+    "series": "Systems",
+    "chapter": "Network Stack",
+    "topic": "Receive Side Scaling: NIC hardware hash → CPU affinity for flows",
+    "title": "Receive Side Scaling: NIC hardware hash → CPU affinity ",
+    "viz_type": "bars",
+    "game_mechanic": "xp_grind",
+    "uploaded": false,
+    "timestamp": "2026-08-04T10:13:18.562994+00:00"
   }
 ]

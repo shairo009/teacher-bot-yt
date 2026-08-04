@@ -991,5 +991,18 @@
     "game_mechanic": "xp_grind",
     "uploaded": false,
     "timestamp": "2026-08-04T10:13:18.562994+00:00"
+  },
+  {
+    "id": 34,
+    "topic_idx": 34,
+    "puzzle_num": 35,
+    "series": "Compilers",
+    "chapter": "IR & Optimization",
+    "topic": "SSA Form: Static Single Assignment and why every modern compiler uses it",
+    "title": "SSA Form: Static Single Assignment and why every modern",
+    "viz_type": "bars",
+    "game_mechanic": "boss_fight",
+    "uploaded": false,
+    "timestamp": "2026-08-04T16:01:28.988215+00:00"
   }
 ]

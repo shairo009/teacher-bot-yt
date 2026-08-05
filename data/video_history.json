@@ -1017,5 +1017,18 @@
     "game_mechanic": "quest",
     "uploaded": false,
     "timestamp": "2026-08-05T04:43:03.599187+00:00"
+  },
+  {
+    "id": 36,
+    "topic_idx": 36,
+    "puzzle_num": 37,
+    "series": "Compilers",
+    "chapter": "IR & Optimization",
+    "topic": "Strength Reduction: replacing multiply with shifts inside loops",
+    "title": "Strength Reduction: replacing multiply with shifts insi",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": false,
+    "timestamp": "2026-08-05T10:09:26.395763+00:00"
   }
 ]

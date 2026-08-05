@@ -1030,5 +1030,18 @@
     "game_mechanic": "raid",
     "uploaded": false,
     "timestamp": "2026-08-05T10:09:26.395763+00:00"
+  },
+  {
+    "id": 37,
+    "topic_idx": 37,
+    "puzzle_num": 38,
+    "series": "Compilers",
+    "chapter": "IR & Optimization",
+    "topic": "Inlining Heuristics: when inlining hurts more than it helps",
+    "title": "Inlining Heuristics: when inlining hurts more than it h",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": false,
+    "timestamp": "2026-08-05T15:44:45.421097+00:00"
   }
 ]

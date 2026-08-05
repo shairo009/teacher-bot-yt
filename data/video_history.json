@@ -1004,5 +1004,18 @@
     "game_mechanic": "boss_fight",
     "uploaded": false,
     "timestamp": "2026-08-04T16:01:28.988215+00:00"
+  },
+  {
+    "id": 35,
+    "topic_idx": 35,
+    "puzzle_num": 36,
+    "series": "Compilers",
+    "chapter": "IR & Optimization",
+    "topic": "Loop Invariant Code Motion: pulling constants out of hot loops",
+    "title": "Loop Invariant Code Motion: pulling constants out of ho",
+    "viz_type": "bars",
+    "game_mechanic": "quest",
+    "uploaded": false,
+    "timestamp": "2026-08-05T04:43:03.599187+00:00"
   }
 ]

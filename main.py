@@ -776,12 +776,27 @@ async def main():
     print(f"\n✅ Done! Next → #{next_id}: {next_topic[0]} › {next_topic[2][:50]}")
 
 
-# ── Mock scene (used when no API key or LLM fails) ───────────────────────────
+# ── Mock scene (Dynamic Topic-Specific Generator) ───────────────────────────
 def _mock_scene(topic: tuple, game_mechanic: str, game_tag: str, puzzle_num: int) -> dict:
     series, chapter, topic_desc = topic
-    return {
+    desc_lower = topic_desc.lower()
+
+    # Determine visual type dynamically based on topic keywords or puzzle rotation
+    if any(k in desc_lower for k in ['stack', 'frame', 'call', 'recursion', 'prologue', 'epilogue', 'abi', 'calling']):
+        viz_type = "stack"
+    elif any(k in desc_lower for k in ['graph', 'jit', 'tree', 'ast', 'register', 'dep', 'route', 'hash', 'bpf', 'mesh']):
+        viz_type = "graph"
+    elif any(k in desc_lower for k in ['grid', 'matrix', 'table', 'cache', 'schedule', 'attention', 'dp', 'hpack']):
+        viz_type = "grid"
+    elif any(k in desc_lower for k in ['memory', 'pointer', 'gc', 'alloc', 'lock', 'segregated', 'buddy', 'rop', 'heap']):
+        viz_type = "memory"
+    else:
+        v_types = ["stack", "graph", "grid", "memory", "bars"]
+        viz_type = v_types[puzzle_num % len(v_types)]
+
+    base = {
         "title":           topic_desc[:55],
-        "subtitle":        f"{chapter} — implementation-level deep dive",
+        "subtitle":        f"{series} › {chapter}",
         "series":          series,
         "chapter":         chapter,
         "puzzle_num":      puzzle_num,
@@ -789,78 +804,259 @@ def _mock_scene(topic: tuple, game_mechanic: str, game_tag: str, puzzle_num: int
         "difficulty":      "HARD",
         "game_tag":        game_tag,
         "game_mechanic":   game_mechanic,
-        "time_complexity": "O(n log n) — divide and conquer",
-        "space_complexity":"O(n) — merge buffer",
-        "viz_type":        "bars",
-        "viz_label":       "SORT",
-        "code": [
-            "def merge_sort(arr: list[int]) -> list[int]:",
-            "    # Base case: single element is sorted",
-            "    if len(arr) <= 1:",
-            "        return arr",
-            "",
-            "    mid = len(arr) // 2",
-            "    left  = merge_sort(arr[:mid])   # O(log n) depth",
-            "    right = merge_sort(arr[mid:])   # recursive halving",
-            "",
-            "    return _merge(left, right)",
-            "",
-            "def _merge(left: list, right: list) -> list:",
-            "    result = []",
-            "    i = j = 0",
-            "    while i < len(left) and j < len(right):",
-            "        if left[i] <= right[j]:   # stable: equal goes left",
-            "            result.append(left[i]); i += 1",
-            "        else:",
-            "            result.append(right[j]); j += 1",
-            "    # Drain remaining elements",
-            "    return result + left[i:] + right[j:]",
-        ],
-        "active_lines": [0, 2, 5, 6, 7, 9, 11, 14, 19],
-        "viz_data": {
-            "values":     [64, 34, 25, 12, 22, 11, 90, 43],
-            "steps": [
-                [64, 34, 25, 12, 22, 11, 90, 43],
-                [34, 64, 12, 25, 11, 22, 43, 90],
-                [12, 34, 64, 25, 11, 22, 43, 90],
-                [12, 25, 34, 64, 11, 22, 43, 90],
-                [11, 12, 22, 25, 34, 43, 64, 90],
-                [11, 12, 22, 25, 34, 43, 64, 90],
-                [11, 12, 22, 25, 34, 43, 64, 90],
-                [11, 12, 22, 25, 34, 43, 64, 90],
-                [11, 12, 22, 25, 34, 43, 64, 90],
-            ],
-            "highlight":  {"0": [0,1], "1": [2,3], "2": [1,2], "3": [3,4], "4": [0,4]},
-            "operations": [
-                "merge_sort([64,34,25,12,22,11,90,43])",
-                "Split → left=[64,34,25,12]  right=[22,11,90,43]",
-                "merge_sort([64,34])  →  merge([34],[64])",
-                "merge_sort([25,12])  →  merge([12],[25])",
-                "_merge([12,34,64], [25])  ← stable compare",
-                "_merge([11,22], [43,90])  ← drain right",
-                "Merging halves: compare left[0]=12 vs right[0]=22",
-                "Drain: left[i:] appended, no extra compare",
-                "Result: [11,12,22,25,34,43,64,90]  ✓ sorted",
-            ],
-        },
-        "test_cases": [
-            {"label": "basic",   "input": "[5,3,1,4]",   "expected": "[1,3,4,5]"},
-            {"label": "equal",   "input": "[2,2,2]",     "expected": "[2,2,2]"},
-            {"label": "reverse", "input": "[9,7,5,3,1]", "expected": "[1,3,5,7,9]"},
-            {"label": "single",  "input": "[42]",         "expected": "[42]"},
-        ],
-        "narration": [
-            f"We're implementing {topic_desc[:45]}. Skip the textbook. Here's what actually runs.",
-            "Split at midpoint. Two recursive calls, each halving the problem. That's where O(log n) depth comes from.",
-            "Left half sorted. Right half sorted. Now the expensive part: merging two sorted arrays.",
-            "Two-pointer merge. We compare head of left vs head of right, pick the smaller. O(n) each level.",
-            "Stability is critical here. Equal elements: left side always wins. That preserves original order.",
-            "After one pointer exhausts, drain the rest. No comparison needed — already sorted in place.",
-            "Total work per level: O(n) comparisons. Total levels: O(log n). Multiply: O(n log n) time.",
-            "Space: O(n) for the merge buffer. In-place merge sort exists but destroys cache performance.",
-            "Merge sort wins on linked lists. On arrays, Timsort (Python's sort) adds insertion sort for small runs.",
-        ],
+        "time_complexity": "O(1) — internal optimization",
+        "space_complexity":"O(n) — frame storage",
+        "viz_type":        viz_type,
+        "viz_label":       viz_type.upper(),
     }
+
+    if viz_type == "stack":
+        base["code"] = [
+            f"def execute_{chapter.lower().replace(' ', '_')}(arg1: int, arg2: int) -> int:",
+            "    # System V AMD64 ABI function prologue",
+            "    # push rbp; mov rbp, rsp",
+            "    frame_ptr = 'rbp'",
+            "    stack_ptr = 'rsp - 0x20'  # 32B local space",
+            "",
+            "    # Red Zone: 128B safe area below RSP",
+            "    red_zone = [arg1 * 2, arg2 + 10]",
+            "    res = compute_internal(red_zone[0], red_zone[1])",
+            "",
+            "    # Epilogue: mov rsp, rbp; pop rbp; ret",
+            "    return res",
+            "",
+            "def compute_internal(x: int, y: int) -> int:",
+            "    local_val = (x ^ y) & 0xFFFFFFFF",
+            "    return local_val + 42",
+        ]
+        base["active_lines"] = [0, 1, 3, 4, 7, 8, 13, 14, 11]
+        base["viz_data"] = {
+            "frame_states": [
+                ["main()"],
+                ["main()", "prologue: push rbp"],
+                ["main()", "prologue: mov rbp, rsp"],
+                ["main()", "sub rsp, 0x20 (32B alloc)"],
+                ["main()", "red_zone [rsp-128..rsp]"],
+                ["main()", "compute_internal(x, y)"],
+                ["main()", "compute_internal() → return"],
+                ["main()", "epilogue: mov rsp, rbp"],
+                ["main()", "epilogue: pop rbp; ret"],
+            ]
+        }
+        base["test_cases"] = [
+            {"label": "prologue", "input": "arg1=10, arg2=20", "expected": "RBP saved, RSP-32"},
+            {"label": "red_zone", "input": "rsp-128..rsp",     "expected": "128B reserved"},
+            {"label": "abi_pass", "input": "RDI=10, RSI=20",    "expected": "Passed in reg"},
+            {"label": "epilogue", "input": "ret instruction",  "expected": "Caller RBP restored"},
+        ]
+        base["narration"] = [
+            f"Deep dive into {topic_desc[:45]}. Let's inspect the call stack at the assembly level.",
+            "Function prologue executes: saving caller's RBP on stack and establishing frame pointer.",
+            "Stack pointer RSP moves down by 32 bytes to reserve space for local variables.",
+            "Red Zone: System V AMD64 ABI permits 128 bytes below RSP without adjusting RSP.",
+            "Function arguments passed in registers RDI, RSI, RDX, RCX, R8, R9 per System V ABI.",
+            "Internal computations execute safely using frame-relative offsets RBP-0x8 and RBP-0x10.",
+            "Function epilogue begins: restoring original RSP from RBP frame pointer.",
+            "RBP popped off stack, restoring caller frame context seamlessly.",
+            "RET instruction pops return address into RIP. Stack frame destroyed cleanly.",
+        ]
+
+    elif viz_type == "graph":
+        base["code"] = [
+            f"class {series.replace('/', '')}GraphSolver:",
+            "    def __init__(self, nodes_cnt: int):",
+            "        self.nodes = list(range(nodes_cnt))",
+            "        self.edges = [(0,1), (1,2), (2,3), (3,4), (0,4)]",
+            "",
+            "    def traverse_hot_path(self, start: int) -> list[int]:",
+            "        visited, queue = [], [start]",
+            "        while queue:",
+            "            node = queue.pop(0)",
+            "            if node not in visited:",
+            "                visited.append(node)",
+            "                queue.extend(self.get_neighbors(node))",
+            "        return visited",
+            "",
+            "    def get_neighbors(self, u: int) -> list[int]:",
+            "        return [v for a, v in self.edges if a == u]",
+        ]
+        base["active_lines"] = [0, 1, 3, 5, 6, 7, 8, 10, 12]
+        base["viz_data"] = {
+            "nodes": [
+                {"id": 0, "label": "Node0", "x": 280, "y": 140},
+                {"id": 1, "label": "Node1", "x": 540, "y": 120},
+                {"id": 2, "label": "Node2", "x": 800, "y": 160},
+                {"id": 3, "label": "Node3", "x": 750, "y": 380},
+                {"id": 4, "label": "Node4", "x": 420, "y": 390},
+                {"id": 5, "label": "Node5", "x": 200, "y": 300},
+            ],
+            "edges": [(0, 1), (1, 2), (2, 3), (3, 4), (0, 4), (1, 5)],
+            "visited": [0, 1, 2, 3, 4, 5],
+        }
+        base["test_cases"] = [
+            {"label": "root",   "input": "start=0", "expected": "visited=[0,1,2,3,4,5]"},
+            {"label": "cycle",  "input": "(0,4) edge", "expected": "No infinite loop"},
+            {"label": "degree", "input": "deg(0)=2",  "expected": "Out-edges checked"},
+            {"label": "path",   "input": "0->1->2",   "expected": "Optimal hot path"},
+        ]
+        base["narration"] = [
+            f"Analyzing {topic_desc[:45]}. Graph traversal maps execution dependencies.",
+            "Vertices represent computation nodes while directed edges encode execution flow.",
+            "Queue-based BFS traversal expands nodes level by level to discover hot execution paths.",
+            "Visited set prevents redundant node evaluations and breaks cycle deadlocks.",
+            "Register interference graph maps overlapping live variable lifetimes.",
+            "Simplification phase pushes candidate nodes onto allocation stack.",
+            "Coalescing merges non-interfering copy operations to eliminate instruction overhead.",
+            "Graph coloring assigns available CPU registers without memory spill.",
+            "Final traversal completes in O(V + E) time with zero register collisions.",
+        ]
+
+    elif viz_type == "grid":
+        base["code"] = [
+            f"def schedule_{series.lower()}_grid(items: list) -> list:",
+            "    # Execution Grid & Pipeline Schedule",
+            "    rows, cols = 5, 6",
+            "    grid = [[0]*cols for _ in range(rows)]",
+            "",
+            "    for r in range(rows):",
+            "        for c in range(cols):",
+            "            # Pipeline cycle allocation",
+            "            grid[r][c] = (r * 10 + c * 3) % 99",
+            "",
+            "    # Out-of-order execution reorder",
+            "    return [val for row in grid for val in row]",
+        ]
+        base["active_lines"] = [0, 2, 3, 5, 6, 8, 10, 11, 11]
+        base["viz_data"] = {
+            "rows": 5,
+            "cols": 6,
+            "grid": [15, 28, 42, 56, 70, 84,  30, 44, 58, 72, 86, 12,  45, 59, 73, 87, 13, 27,  60, 74, 88, 14, 28, 42,  75, 89, 15, 29, 43, 57],
+            "row_headers": ["FETCH", "DECODE", "EXEC", "MEM", "WRITE"],
+            "col_headers": ["C0", "C1", "C2", "C3", "C4", "C5"],
+        }
+        base["test_cases"] = [
+            {"label": "pipeline", "input": "5x6 grid", "expected": "30 cycles scheduled"},
+            {"label": "hazard",   "input": "RAW check", "expected": "Zero pipeline stalls"},
+            {"label": "latency",  "input": "C0..C5",   "expected": "100% execution efficiency"},
+            {"label": "reorder",  "input": "ROB buffer","expected": "In-order commit"},
+        ]
+        base["narration"] = [
+            f"Deep dive into {topic_desc[:45]}. Pipeline grid scheduling hides hardware latency.",
+            "Execution matrix tracks fetch, decode, execute, memory access, and writeback stages.",
+            "Read-After-Write hazards detected between consecutive instruction pipeline cycles.",
+            "Instruction reorder buffer fills bubbles with independent computations.",
+            "Multi-issue superscalar pipeline executes multiple instructions per clock cycle.",
+            "L1 data cache hits complete memory stage in a single clock cycle.",
+            "Branch predictor speculative execution stream validated at commit stage.",
+            "Out-of-order execution engine maintains sequential program semantics.",
+            "Optimal scheduling matrix achieves peak instruction throughput.",
+        ]
+
+    elif viz_type == "memory":
+        base["code"] = [
+            f"class {chapter.replace(' ', '')}Allocator:",
+            "    def __init__(self, size_bytes: int = 1024):",
+            "        self.heap = bytearray(size_bytes)",
+            "        self.free_head = 0x7FFF00",
+            "",
+            "    def allocate_chunk(self, req_size: int) -> int:",
+            "        # Segregated free-list allocation",
+            "        chunk_addr = self.free_head",
+            "        self.free_head += req_size + 16  # 16B header",
+            "        return chunk_addr",
+            "",
+            "    def free_chunk(self, ptr: int):",
+            "        # Coalesce adjacent free blocks",
+            "        pass",
+        ]
+        base["active_lines"] = [0, 1, 2, 3, 5, 7, 8, 9, 11]
+        base["viz_data"] = {
+            "memory": [
+                {"addr": "0x7FFF00", "label": "HEADER", "value": "16B [ALLOC]"},
+                {"addr": "0x7FFF10", "label": "DATA",   "value": "256B payload"},
+                {"addr": "0x7FFF110","label": "HEADER", "value": "16B [FREE]"},
+                {"addr": "0x7FFF120","label": "DATA",   "value": "512B available"},
+            ]
+        }
+        base["test_cases"] = [
+            {"label": "alloc",  "input": "req=256B",  "expected": "ptr=0x7FFF00"},
+            {"label": "header", "input": "16B meta",  "expected": "Size & flags set"},
+            {"label": "align",  "input": "64B align", "expected": "L1 cache aligned"},
+            {"label": "free",   "input": "coalesce",  "expected": "Merged contiguous"},
+        ]
+        base["narration"] = [
+            f"Analyzing {topic_desc[:45]}. Heap allocators manage raw memory blocks.",
+            "Segregated free lists group chunks into size classes for O(1) allocation.",
+            "16-byte chunk headers store allocation size and in-use flags.",
+            "Boundary tag coalescing merges adjacent free memory blocks on free().",
+            "Buddy allocation splits powers-of-two blocks dynamically.",
+            "Generational GC tracks young generation vs old generation promotion thresholds.",
+            "Card table marking tracks cross-generational pointers from old to young objects.",
+            "Tri-color marking guarantees concurrent GC safety without stop-the-world pause.",
+            "Memory layouts aligned to 64-byte boundaries for maximum cache throughput.",
+        ]
+
+    else: # bars
+        base["code"] = [
+            f"def process_{series.lower()}_simd(vector: list[int]) -> list[int]:",
+            "    # SIMD AVX-512 parallel execution loop",
+            "    n = len(vector)",
+            "    for i in range(0, n, 8):",
+            "        # Parallel processing 8 64-bit integers",
+            "        vector[i:i+8] = [x * 2 for x in vector[i:i+8]]",
+            "",
+            "    # Scalar cleanup loop for tail elements",
+            "    for i in range(n - (n % 8), n):",
+            "        vector[i] *= 2",
+            "    return vector",
+        ]
+        base["active_lines"] = [0, 2, 3, 5, 5, 8, 9, 10, 10]
+        base["viz_data"] = {
+            "values": [92, 84, 76, 65, 52, 41, 30, 15],
+            "steps": [
+                [92, 84, 76, 65, 52, 41, 30, 15],
+                [184, 168, 152, 130, 52, 41, 30, 15],
+                [184, 168, 152, 130, 104, 82, 60, 30],
+                [184, 168, 152, 130, 104, 82, 60, 30],
+                [184, 168, 152, 130, 104, 82, 60, 30],
+                [184, 168, 152, 130, 104, 82, 60, 30],
+                [184, 168, 152, 130, 104, 82, 60, 30],
+                [184, 168, 152, 130, 104, 82, 60, 30],
+                [184, 168, 152, 130, 104, 82, 60, 30],
+            ],
+            "highlight": {"0": [0,4], "1": [4,8], "2": [0,8]},
+            "operations": [
+                f"SIMD Init: {topic_desc[:35]}",
+                "AVX-512 ZMM0: Vector multiply [0..4]",
+                "AVX-512 ZMM1: Vector multiply [4..8]",
+                "FMA Instruction: (A * B) + C in 1 cycle",
+                "Loop Unrolling: 8x instruction parallelism",
+                "Scalar Tail Loop: Remaining elements",
+                "64-byte Aligned Memory Load",
+                "Execution Complete",
+                "Result Verified ✓",
+            ],
+        }
+        base["test_cases"] = [
+            {"label": "vector",  "input": "8x64bit", "expected": "ZMM register loaded"},
+            {"label": "fma",     "input": "FMA3",    "expected": "1 clock cycle"},
+            {"label": "tail",    "input": "3 extra", "expected": "Scalar tail clean"},
+            {"label": "speedup", "input": "AVX-512", "expected": "8x throughput"},
+        ]
+        base["narration"] = [
+            f"Deep dive into {topic_desc[:45]}. SIMD vectorization executes 8 parallel operations.",
+            "Auto-vectorizer checks loop stride and memory alignment requirements.",
+            "AVX-512 zmm registers load 512 bits of data in a single clock cycle.",
+            "Data alignment at 64-byte boundaries prevents misaligned vector penalty.",
+            "Loop unrolling expands inner loop body to maximize instruction parallelism.",
+            "Fused Multiply-Add (FMA) computes (A * B) + C in 1 CPU cycle.",
+            "Mask registers handle conditional execution inside vector loops without branching.",
+            "Scalar cleanup loop processes remaining tail elements seamlessly.",
+            "Final result achieves 8x throughput speedup over scalar execution.",
+        ]
+
+    return base
+
 
 
 if __name__ == "__main__":

@@ -269,18 +269,26 @@ def draw_code_editor(draw: ImageDraw.Draw, code_lines: list[str],
 
         tokens = tokenize_python_line(line)
         x = CODE_LEFT + 8
+        max_x = WIDTH - CODE_PAD_R - 10
         for token_text, color in tokens:
-            if x > WIDTH - CODE_PAD_R:
+            if x >= max_x:
+                break
+            tw_val = text_w(token_text, font)
+            if x + tw_val > max_x:
+                avail_chars = max(1, int(len(token_text) * (max_x - x) / max(1, tw_val)))
+                token_text = token_text[:avail_chars]
+                draw.text((x, y_top + LINE_H // 2 - 1), token_text,
+                          font=font, fill=color, anchor="lm")
                 break
             draw.text((x, y_top + LINE_H // 2 - 1), token_text,
                       font=font, fill=color, anchor="lm")
-            x += text_w(token_text, font)
+            x += tw_val
 
         if is_active:
             cursor_blink = step_progress % 0.5 < 0.25 or step_progress > 0.8
             if cursor_blink:
                 cursor_x = x + 2
-                cursor_x = max(CODE_LEFT + 10, min(cursor_x, WIDTH - CODE_PAD_R - 6))
+                cursor_x = max(CODE_LEFT + 10, min(cursor_x, max_x))
                 draw.rectangle([cursor_x, y_top + 6, cursor_x + 3, y_top + LINE_H - 6],
                                fill=CURSOR_COL)
 
@@ -336,27 +344,28 @@ def draw_game_header(draw: ImageDraw.Draw, scene: dict, accent: tuple,
     draw.text((36 + tw // 2, 69), tag_text, font=fn_tag, fill=accent, anchor="mm")
 
     badge_text = f"{series} › {chapter}" if chapter else series
-    if len(badge_text) > 35:
-        badge_text = badge_text[:32] + "..."
+    if len(badge_text) > 30:
+        badge_text = badge_text[:27] + "..."
     fn_series  = get_font(19, bold=False)
     draw.text((WIDTH - 36, 69), badge_text, font=fn_series,
               fill=(120, 135, 170), anchor="rm")
 
     # Row 3 (Y = 100-240): Wrapped Title & Subtitle (Strict Non-Overlapping Padding)
-    fn_title = get_font(36, bold=True)
-    fn_sub   = get_font(22, bold=False)
-    title_lines = _wrap(title, fn_title, WIDTH - 80)[:2]
+    fn_title = get_font(32, bold=True)
+    fn_sub   = get_font(21, bold=False)
+    title_lines = _wrap(title, fn_title, WIDTH - 100)[:2]
     
-    title_y = 118
+    title_y = 116
     for ln in title_lines:
         draw.text((WIDTH // 2, title_y), ln, font=fn_title, fill=(235, 240, 250), anchor="mm")
-        title_y += 44
+        title_y += 40
 
     if subtitle:
-        if len(subtitle) > 60:
-            subtitle = subtitle[:57] + "..."
-        draw.text((WIDTH // 2, min(title_y + 4, HEADER_BOT - 18)), subtitle, font=fn_sub,
+        if len(subtitle) > 55:
+            subtitle = subtitle[:52] + "..."
+        draw.text((WIDTH // 2, min(title_y + 4, HEADER_BOT - 20)), subtitle, font=fn_sub,
                   fill=(110, 125, 160), anchor="mm")
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────

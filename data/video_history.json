@@ -1082,5 +1082,19 @@
     "game_mechanic": "skill_tree",
     "uploaded": true,
     "timestamp": "2026-08-06T11:06:20.566807+00:00"
+  },
+  {
+    "id": 41,
+    "topic_idx": 41,
+    "puzzle_num": 42,
+    "series": "Compilers",
+    "chapter": "IR & Optimization",
+    "topic": "Profile-Guided Optimization: recompiling with real execution data",
+    "title": "Profile-Guided Optimization: recompiling with real exec",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": false,
+    "video_id": null,
+    "timestamp": "2026-08-06T11:42:10.128725+00:00"
   }
 ]

@@ -1096,5 +1096,19 @@
     "uploaded": false,
     "video_id": null,
     "timestamp": "2026-08-06T11:42:10.128725+00:00"
+  },
+  {
+    "id": 42,
+    "topic_idx": 42,
+    "puzzle_num": 43,
+    "series": "Compilers",
+    "chapter": "IR & Optimization",
+    "topic": "Auto-Vectorization: when the compiler generates SIMD for your loop",
+    "title": "Auto-Vectorization: when the compiler generates SIMD fo",
+    "viz_type": "bars",
+    "game_mechanic": "xp_grind",
+    "uploaded": false,
+    "video_id": null,
+    "timestamp": "2026-08-06T12:10:28.510810+00:00"
   }
 ]

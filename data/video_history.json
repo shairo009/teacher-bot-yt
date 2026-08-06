@@ -1152,5 +1152,19 @@
     "uploaded": false,
     "video_id": null,
     "timestamp": "2026-08-06T14:46:32.116211+00:00"
+  },
+  {
+    "id": 46,
+    "topic_idx": 46,
+    "puzzle_num": 47,
+    "series": "Compilers",
+    "chapter": "Backend",
+    "topic": "Stack Frame Layout: red zone, frame pointer, and prologue/epilogue",
+    "title": "Stack Frame Layout: red zone, frame pointer, and prolog",
+    "viz_type": "bars",
+    "game_mechanic": "quest",
+    "uploaded": true,
+    "video_id": "JJ_PWaErTxo",
+    "timestamp": "2026-08-06T15:04:47.523400+00:00"
   }
 ]

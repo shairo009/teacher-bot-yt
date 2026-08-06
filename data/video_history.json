@@ -1110,5 +1110,19 @@
     "uploaded": false,
     "video_id": null,
     "timestamp": "2026-08-06T12:10:28.510810+00:00"
+  },
+  {
+    "id": 43,
+    "topic_idx": 43,
+    "puzzle_num": 44,
+    "series": "Compilers",
+    "chapter": "Backend",
+    "topic": "Register Allocation: graph coloring, spilling, and live ranges",
+    "title": "Register Allocation: graph coloring, spilling, and live",
+    "viz_type": "bars",
+    "game_mechanic": "boss_fight",
+    "uploaded": false,
+    "video_id": null,
+    "timestamp": "2026-08-06T13:33:36.181440+00:00"
   }
 ]

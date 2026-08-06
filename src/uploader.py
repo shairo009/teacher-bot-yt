@@ -41,9 +41,13 @@ class YouTubeUploader:
         if self.token_path.exists():
             try:
                 from google.oauth2.credentials import Credentials
-                creds = Credentials.from_authorized_user_file(str(self.token_path), self.SCOPES)
-            except Exception:
+                with open(self.token_path, 'r', encoding='utf-8-sig') as f:
+                    token_data = json.load(f)
+                creds = Credentials.from_authorized_user_info(token_data, self.SCOPES)
+            except Exception as e:
+                print(f"  ⚠ Token load warning: {e}")
                 pass
+
 
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:

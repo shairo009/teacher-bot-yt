@@ -677,11 +677,14 @@ async def main():
     video_uploaded = False
     if not args.dry_run and token_json and client_json:
         from src.uploader import YouTubeUploader
-        # Write credential files
+        # Write credential files (stripping any UTF-8 BOM)
+        token_json = token_json.lstrip("\ufeff").strip()
+        client_json = client_json.lstrip("\ufeff").strip()
         token_file   = tmp_dir / "token.json"
         client_file  = tmp_dir / "client_secrets.json"
-        token_file.write_text(token_json)
-        client_file.write_text(client_json)
+        token_file.write_text(token_json, encoding="utf-8")
+        client_file.write_text(client_json, encoding="utf-8")
+
 
         uploader = YouTubeUploader(str(token_file), str(client_file))
         title    = scene.get("title", topic_desc[:60])

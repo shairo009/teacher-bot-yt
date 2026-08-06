@@ -1166,5 +1166,19 @@
     "uploaded": true,
     "video_id": "JJ_PWaErTxo",
     "timestamp": "2026-08-06T15:04:47.523400+00:00"
+  },
+  {
+    "id": 47,
+    "topic_idx": 47,
+    "puzzle_num": 48,
+    "series": "Compilers",
+    "chapter": "JIT Compilation",
+    "topic": "Tracing JIT: recording hot paths and compiling them at runtime",
+    "title": "Tracing JIT: recording hot paths and compiling them at ",
+    "viz_type": "bars",
+    "game_mechanic": "skill_tree",
+    "uploaded": true,
+    "video_id": "vX270emLw5E",
+    "timestamp": "2026-08-06T15:24:17.437088+00:00"
   }
 ]

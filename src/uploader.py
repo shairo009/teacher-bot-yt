@@ -43,10 +43,11 @@ class YouTubeUploader:
                 from google.oauth2.credentials import Credentials
                 with open(self.token_path, 'r', encoding='utf-8-sig') as f:
                     token_data = json.load(f)
-                creds = Credentials.from_authorized_user_info(token_data, self.SCOPES)
+                creds = Credentials.from_authorized_user_info(token_data)
             except Exception as e:
                 print(f"  ⚠ Token load warning: {e}")
                 pass
+
 
 
         if not creds or not creds.valid:

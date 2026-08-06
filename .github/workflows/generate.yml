@@ -170,4 +170,6 @@ jobs:
               print('?')
           ")
           git commit -m "Video #$NEXT complete [skip ci]"
+          git pull --rebase origin main
           git push
+

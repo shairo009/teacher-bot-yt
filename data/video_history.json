@@ -1180,5 +1180,19 @@
     "uploaded": true,
     "video_id": "vX270emLw5E",
     "timestamp": "2026-08-06T15:24:17.437088+00:00"
+  },
+  {
+    "id": 48,
+    "topic_idx": 48,
+    "puzzle_num": 49,
+    "series": "Compilers",
+    "chapter": "JIT Compilation",
+    "topic": "V8's Turbofan: hidden classes, deoptimization, and feedback vectors",
+    "title": "V8's Turbofan: hidden classes, deoptimization, and feed",
+    "viz_type": "bars",
+    "game_mechanic": "quest",
+    "uploaded": true,
+    "video_id": "sy-nHInZu_A",
+    "timestamp": "2026-08-06T15:42:29.464932+00:00"
   }
 ]

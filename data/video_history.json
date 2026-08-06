@@ -1138,5 +1138,19 @@
     "uploaded": false,
     "video_id": null,
     "timestamp": "2026-08-06T14:31:57.722472+00:00"
+  },
+  {
+    "id": 45,
+    "topic_idx": 45,
+    "puzzle_num": 46,
+    "series": "Compilers",
+    "chapter": "Backend",
+    "topic": "Calling Conventions: System V AMD64 ABI register assignments",
+    "title": "Calling Conventions: System V AMD64 ABI register assign",
+    "viz_type": "bars",
+    "game_mechanic": "boss_fight",
+    "uploaded": false,
+    "video_id": null,
+    "timestamp": "2026-08-06T14:46:32.116211+00:00"
   }
 ]

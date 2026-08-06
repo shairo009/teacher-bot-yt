@@ -524,7 +524,8 @@ def compose_video(frames: list[Path], audio_paths: list[str],
     r = subprocess.run([
         "ffmpeg", "-y",
         "-i", raw_video, "-i", merged_audio,
-        "-c:v", "copy", "-c:a", "aac", "-strict", "-2", "-b:a", "192k",
+        "-c:v", "copy", "-c:a", "aac", "-strict", "-2",
+
 
         "-shortest", str(output_path)
     ], capture_output=True, text=True, timeout=600)

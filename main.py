@@ -744,10 +744,22 @@ async def main():
         "viz_type": scene.get("viz_type", ""),
         "game_mechanic": game_mechanic,
         "uploaded": video_uploaded,
+        "video_id": locals().get("video_id"),
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
     with open(history_path, "w") as f:
         json.dump(history, f, ensure_ascii=False, indent=2)
+
+    # ── Channel Analytics & Auto-Growth Optimization ───────────────────────
+    try:
+        from src.analytics import ChannelAnalytics
+        active_uploader = locals().get("uploader")
+        analytics = ChannelAnalytics(active_uploader)
+        growth_stats = analytics.analyze_performance(history_path)
+        print(f"📊 Growth Analytics: {growth_stats.get('recommendation', 'Active')}")
+    except Exception as e:
+        print(f"  ⚠ Analytics skipped: {e}")
+
 
     # Cleanup frames (keep final video)
     if os.environ.get("GITHUB_ACTIONS") == "true":

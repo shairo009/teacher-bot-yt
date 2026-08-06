@@ -502,8 +502,8 @@ def draw_visualization(draw: ImageDraw.Draw, scene: dict, step_idx: int,
     elif viz_type == "maze":       _viz_maze(draw, scene, step_idx, step_progress, global_frame, accent, x0, viz_y0, x1, y1)
     else:                          _viz_bars(draw, scene, step_idx, step_progress, global_frame, accent, x0, viz_y0, x1, y1)
 
-    # 2. Animated Floating XP / Status Skill Badge
-    _draw_floating_skill_badge(draw, step_idx, global_frame, accent, x1 - 160, viz_y0 + 20)
+    # 2. Animated Floating XP / Status Skill Badge (Positioned safely at bottom-right of viz)
+    _draw_floating_skill_badge(draw, step_idx, global_frame, accent, x1 - 140, y1 - 24)
 
 
 def _draw_floating_skill_badge(draw: ImageDraw.Draw, step_idx: int, frame: int,
@@ -513,12 +513,12 @@ def _draw_floating_skill_badge(draw: ImageDraw.Draw, step_idx: int, frame: int,
     badge_text = badges[step_idx % len(badges)]
     
     # Float Y-offset animation
-    float_y = int(6 * math.sin(frame * 0.12))
-    fn_badge = get_font(20, bold=True)
+    float_y = int(5 * math.sin(frame * 0.12))
+    fn_badge = get_font(19, bold=True)
     
     bw = text_w(badge_text, fn_badge) + 16
-    draw.rounded_rectangle([x - bw // 2, y + float_y - 14, x + bw // 2, y + float_y + 14],
-                            radius=8, fill=lerp_c(accent, (0, 0, 0), 0.8), outline=accent, width=2)
+    draw.rounded_rectangle([x - bw // 2, y + float_y - 12, x + bw // 2, y + float_y + 12],
+                            radius=6, fill=lerp_c(accent, (0, 0, 0), 0.8), outline=accent, width=2)
     draw.text((x, y + float_y), badge_text, font=fn_badge, fill=(255, 255, 255), anchor="mm")
 
 
@@ -579,8 +579,12 @@ def _viz_bars(draw, scene, step_idx, progress, frame, accent, x0, y0, x1, y1):
 
     ops = scene.get("viz_data", {}).get("operations", [])
     if ops and step_idx < len(ops):
-        fn_op = get_font(24, bold=True, mono=True)
-        draw.text((x0, y0 + 16), ops[step_idx], font=fn_op, fill=(255, 200, 60), anchor="lm")
+        op_str = ops[step_idx]
+        if len(op_str) > 28:
+            op_str = op_str[:25] + "..."
+        fn_op = get_font(22, bold=True, mono=True)
+        draw.text((x0, y0 + 16), op_str, font=fn_op, fill=(255, 200, 60), anchor="lm")
+
 
 
 # ── GRID — DP table visualizer ───────────────────────────────────────────────

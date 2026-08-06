@@ -1056,5 +1056,18 @@
     "game_mechanic": "raid",
     "uploaded": false,
     "timestamp": "2026-08-06T04:43:08.460160+00:00"
+  },
+  {
+    "id": 39,
+    "topic_idx": 39,
+    "puzzle_num": 40,
+    "series": "Compilers",
+    "chapter": "IR & Optimization",
+    "topic": "Devirtualization: removing vtable dispatch when the type is known",
+    "title": "Devirtualization: removing vtable dispatch when the typ",
+    "viz_type": "bars",
+    "game_mechanic": "skill_tree",
+    "uploaded": false,
+    "timestamp": "2026-08-06T10:11:32.496402+00:00"
   }
 ]

@@ -1043,5 +1043,18 @@
     "game_mechanic": "raid",
     "uploaded": false,
     "timestamp": "2026-08-05T15:44:45.421097+00:00"
+  },
+  {
+    "id": 38,
+    "topic_idx": 38,
+    "puzzle_num": 39,
+    "series": "Compilers",
+    "chapter": "IR & Optimization",
+    "topic": "Escape Analysis: proving an object never leaves a function's scope",
+    "title": "Escape Analysis: proving an object never leaves a funct",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": false,
+    "timestamp": "2026-08-06T04:43:08.460160+00:00"
   }
 ]

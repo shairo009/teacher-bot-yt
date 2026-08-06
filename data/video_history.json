@@ -1069,5 +1069,18 @@
     "game_mechanic": "skill_tree",
     "uploaded": false,
     "timestamp": "2026-08-06T10:11:32.496402+00:00"
+  },
+  {
+    "id": 40,
+    "topic_idx": 40,
+    "puzzle_num": 41,
+    "series": "Compilers",
+    "chapter": "IR & Optimization",
+    "topic": "Link-Time Optimization (LTO): cross-file inlining and DCE",
+    "title": "Link-Time Optimization (LTO): cross-file inlining and D",
+    "viz_type": "bars",
+    "game_mechanic": "skill_tree",
+    "uploaded": true,
+    "timestamp": "2026-08-06T11:06:20.566807+00:00"
   }
 ]

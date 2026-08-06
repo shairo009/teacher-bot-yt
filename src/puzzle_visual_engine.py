@@ -42,21 +42,34 @@ GUTTER_FG     = (70,  80, 110)
 LINE_HL       = (40,  48,  72)   # active line highlight
 CURSOR_COL    = (220, 220, 80)   # cursor color
 
-# Syntax colors
+# Dynamic vibrant neon color palettes (Rotates per puzzle so EVERY video looks unique & fresh!)
+DYNAMIC_PALETTES = [
+    ( 80, 220, 160),   # Electric Emerald
+    (160, 110, 255),   # Cyber Violet
+    (255, 130,  50),   # Solar Orange
+    ( 80, 200, 255),   # Ice Cyan
+    (255,  80, 140),   # Neon Pink
+    (255, 200,  60),   # Cyber Gold
+    ( 80, 240, 220),   # Matrix Mint
+    (220,  80, 220),   # Synth Wave Purple
+]
+
+# Syntax colors (Ultra-high contrast for crystal clear reading on phones)
 SYN = {
-    "keyword":   (197, 120, 221),  # purple  – def, for, if, return, class
-    "builtin":   ( 86, 182, 194),  # cyan    – range, len, print, enumerate
-    "string":    (152, 195, 121),  # green   – "text", 'text'
-    "number":    (209, 154,  98),  # orange  – 42, 3.14
-    "comment":   ( 92, 100, 125),  # dim     – # comment
-    "decorator": (224, 108,  78),  # red-ish – @property
-    "operator":  ( 86, 182, 194),  # cyan    – == != <= >=
-    "class_name":(229, 192, 123),  # yellow  – ClassName
-    "func_name": ( 97, 175, 239),  # blue    – function name after def
-    "default":   (171, 178, 191),  # light   – everything else
-    "self_kw":   (224, 108,  78),  # reddish – self
-    "bracket":   (229, 192, 123),  # yellow  – ( ) [ ] { }
+    "keyword":   (215, 130, 255),  # vibrant purple – def, for, if, return, class
+    "builtin":   ( 90, 215, 235),  # vibrant cyan   – range, len, print, enumerate
+    "string":    (160, 230, 120),  # vibrant lime   – "text", 'text'
+    "number":    (255, 175,  90),  # solar amber    – 42, 3.14
+    "comment":   (110, 120, 150),  # crisp gray     – # comment
+    "decorator": (255, 110,  90),  # coral red      – @property
+    "operator":  ( 90, 215, 235),  # cyan           – == != <= >=
+    "class_name":(255, 215, 100),  # bright gold    – ClassName
+    "func_name": (110, 200, 255),  # electric blue  – function name after def
+    "default":   (220, 230, 245),  # crisp white    – everything else
+    "self_kw":   (255, 110,  90),  # coral red      – self
+    "bracket":   (255, 215, 100),  # bright gold    – ( ) [ ] { }
 }
+
 
 PY_KEYWORDS = {
     "def","class","return","if","elif","else","for","while","in","not","and",
@@ -879,13 +892,16 @@ def _wrap(text, font, max_w):
 class PuzzleEngine:
     def __init__(self, series: str = "Algorithms"):
         self.series = series
-        self.accent = SERIES_COLORS.get(series, (80, 180, 255))
+
+    def _get_accent(self, scene: dict) -> tuple:
+        pnum = scene.get("puzzle_num", 1)
+        return DYNAMIC_PALETTES[(pnum - 1) % len(DYNAMIC_PALETTES)]
 
     def render_frame(self, scene: dict, step_idx: int, step_progress: float,
                      global_frame: int, total_steps: int) -> Image.Image:
         img  = Image.new("RGB", (WIDTH, HEIGHT), color=(10, 12, 20))
         draw = ImageDraw.Draw(img)
-        accent = self.accent
+        accent = self._get_accent(scene)
 
         draw_game_header(draw, scene, accent, step_idx, total_steps)
 
@@ -905,8 +921,9 @@ class PuzzleEngine:
     def render_thumbnail(self, scene: dict) -> Image.Image:
         img  = Image.new("RGB", (WIDTH, HEIGHT), color=(10, 12, 20))
         draw = ImageDraw.Draw(img)
-        accent = self.accent
+        accent = self._get_accent(scene)
         draw_game_header(draw, scene, accent, 3, 9)
         code_lines = scene.get("code", ["# code loading..."])
         draw_code_editor(draw, code_lines, 0, accent, 0.0)
         return img
+

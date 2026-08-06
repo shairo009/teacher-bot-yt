@@ -67,8 +67,9 @@ cd teacher-bot-yt
 ### 3. Run locally
 ```bash
 pip install -r requirements.txt
-python lucent_main.py --dry-run   # test without uploading
-python lucent_main.py             # full run + upload
+python main.py --dry-run   # test without uploading
+python main.py             # full run + upload
+
 ```
 
 ## GitHub Actions Schedule

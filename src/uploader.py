@@ -402,6 +402,20 @@ class YouTubeUploader:
             print(f"  Upload failed: {e}")
             return None
 
+    def upload(self, video_path, title, description="", tags=None,
+               thumbnail_path=None, category_id="27", made_for_kids=False,
+               playlist_id=None, schedule=False):
+        """Upload video directly with individual parameter arguments."""
+        metadata = {
+            'title': title,
+            'description': description,
+            'tags': tags or [],
+            'categoryId': category_id,
+        }
+        return self.upload_video(video_path, metadata, thumbnail_path=thumbnail_path,
+                                 playlist_id=playlist_id, schedule=schedule)
+
+
 
 if __name__ == "__main__":
     print("YouTube Uploader — Super Human Edition")

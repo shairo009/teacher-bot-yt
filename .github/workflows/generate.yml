@@ -2,11 +2,9 @@ name: Expert Tech Bot — Generate 2-Min Video
 
 on:
   schedule:
-    # Four times daily in IST: 7 AM, 1 PM, 7 PM, 1 AM
-    - cron: '30 1 * * *'
-    - cron: '30 7 * * *'
-    - cron: '30 13 * * *'
-    - cron: '30 19 * * *'
+    # Automatic 24/7 Cloud Execution Every 4 Hours (6 Times Daily):
+    # Runs at 00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC (Even if user PC is OFF!)
+    - cron: '0 */4 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -36,7 +34,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Rate limit check (min 5h between videos)
+      - name: Rate limit check (min 3.5h between videos)
         id: rate_check
         run: |
           FORCE="${{ github.event.inputs.force || 'false' }}"
@@ -62,13 +60,13 @@ jobs:
               print('999')
           ")
             echo "Hours since last video: $HOURS"
-            SKIP=$(python3 -c "print('true' if float('$HOURS') < 5.0 else 'false')")
+            SKIP=$(python3 -c "print('true' if float('$HOURS') < 3.5 else 'false')")
             echo "skip=$SKIP" >> $GITHUB_OUTPUT
           else
             echo "skip=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Daily limit check (max 4/day)
+      - name: Daily limit check (max 6/day)
         if: steps.rate_check.outputs.skip != 'true'
         id: daily_check
         run: |
@@ -95,7 +93,7 @@ jobs:
               print(0)
           " 2>/dev/null || echo 0)
           echo "Videos today: $COUNT"
-          if [ "$COUNT" -ge 4 ]; then
+          if [ "$COUNT" -ge 6 ]; then
             echo "Daily limit reached."
             echo "skip=true" >> $GITHUB_OUTPUT
           else

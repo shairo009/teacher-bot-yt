@@ -1194,5 +1194,33 @@
     "uploaded": true,
     "video_id": "sy-nHInZu_A",
     "timestamp": "2026-08-06T15:42:29.464932+00:00"
+  },
+  {
+    "id": 49,
+    "topic_idx": 49,
+    "puzzle_num": 50,
+    "series": "Compilers",
+    "chapter": "JIT Compilation",
+    "topic": "JVM JIT: tiered compilation, C1 vs C2, on-stack replacement",
+    "title": "JVM JIT: tiered compilation, C1 vs C2, on-stack replace",
+    "viz_type": "stack",
+    "game_mechanic": "skill_tree",
+    "uploaded": false,
+    "video_id": null,
+    "timestamp": "2026-08-06T16:21:16.333450+00:00"
+  },
+  {
+    "id": 49,
+    "topic_idx": 49,
+    "puzzle_num": 50,
+    "series": "Compilers",
+    "chapter": "JIT Compilation",
+    "topic": "JVM JIT: tiered compilation, C1 vs C2, on-stack replacement",
+    "title": "JVM JIT: tiered compilation, C1 vs C2, on-stack replace",
+    "viz_type": "graph",
+    "game_mechanic": "skill_tree",
+    "uploaded": true,
+    "video_id": "0aZDmZ2vB2w",
+    "timestamp": "2026-08-06T16:22:00+00:00"
   }
 ]

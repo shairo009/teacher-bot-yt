@@ -1250,5 +1250,19 @@
     "uploaded": true,
     "video_id": "7zKN9asCwNM",
     "timestamp": "2026-08-07T05:48:14.441315+00:00"
+  },
+  {
+    "id": 52,
+    "topic_idx": 52,
+    "puzzle_num": 53,
+    "series": "Compilers",
+    "chapter": "GC Internals",
+    "topic": "G1 GC: region-based heap, concurrent marking, remembered sets",
+    "title": "G1 GC: region-based heap, concurrent marking, remembere",
+    "viz_type": "memory",
+    "game_mechanic": "boss_fight",
+    "uploaded": true,
+    "video_id": "EyxY1v0yF1U",
+    "timestamp": "2026-08-07T13:19:54.267743+00:00"
   }
 ]

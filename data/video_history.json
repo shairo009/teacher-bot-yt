@@ -1264,5 +1264,19 @@
     "uploaded": true,
     "video_id": "EyxY1v0yF1U",
     "timestamp": "2026-08-07T13:19:54.267743+00:00"
+  },
+  {
+    "id": 53,
+    "topic_idx": 53,
+    "puzzle_num": 54,
+    "series": "Compilers",
+    "chapter": "GC Internals",
+    "topic": "ZGC and Shenandoah: sub-millisecond GC pauses via colored pointers",
+    "title": "ZGC and Shenandoah: sub-millisecond GC pauses via color",
+    "viz_type": "memory",
+    "game_mechanic": "xp_grind",
+    "uploaded": true,
+    "video_id": "LvB-OHPWvho",
+    "timestamp": "2026-08-07T17:02:51.609765+00:00"
   }
 ]

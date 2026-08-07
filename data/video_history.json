@@ -1236,5 +1236,19 @@
     "uploaded": true,
     "video_id": "ZercCD4LihM",
     "timestamp": "2026-08-07T00:58:12.556717+00:00"
+  },
+  {
+    "id": 51,
+    "topic_idx": 51,
+    "puzzle_num": 52,
+    "series": "Compilers",
+    "chapter": "GC Internals",
+    "topic": "Tri-color Mark-Sweep: write barrier, floating garbage, stop-the-world",
+    "title": "Tri-color Mark-Sweep: write barrier, floating garbage, ",
+    "viz_type": "grid",
+    "game_mechanic": "raid",
+    "uploaded": true,
+    "video_id": "7zKN9asCwNM",
+    "timestamp": "2026-08-07T05:48:14.441315+00:00"
   }
 ]

@@ -1278,5 +1278,19 @@
     "uploaded": true,
     "video_id": "LvB-OHPWvho",
     "timestamp": "2026-08-07T17:02:51.609765+00:00"
+  },
+  {
+    "id": 54,
+    "topic_idx": 54,
+    "puzzle_num": 55,
+    "series": "Compilers",
+    "chapter": "GC Internals",
+    "topic": "Reference Counting vs Tracing GC: Python vs Go trade-offs",
+    "title": "Reference Counting vs Tracing GC: Python vs Go trade-of",
+    "viz_type": "memory",
+    "game_mechanic": "boss_fight",
+    "uploaded": true,
+    "video_id": "up02GFzFZaE",
+    "timestamp": "2026-08-07T20:51:59.121987+00:00"
   }
 ]

@@ -1222,5 +1222,19 @@
     "uploaded": true,
     "video_id": "0aZDmZ2vB2w",
     "timestamp": "2026-08-06T16:22:00+00:00"
+  },
+  {
+    "id": 50,
+    "topic_idx": 50,
+    "puzzle_num": 51,
+    "series": "Compilers",
+    "chapter": "JIT Compilation",
+    "topic": "LLVM MCJIT: building your own JIT in 200 lines with LLVM",
+    "title": "LLVM MCJIT: building your own JIT in 200 lines with LLV",
+    "viz_type": "graph",
+    "game_mechanic": "skill_tree",
+    "uploaded": true,
+    "video_id": "ZercCD4LihM",
+    "timestamp": "2026-08-07T00:58:12.556717+00:00"
   }
 ]

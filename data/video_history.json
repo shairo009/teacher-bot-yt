@@ -1306,5 +1306,19 @@
     "uploaded": true,
     "video_id": "1lFUIEMuJ5s",
     "timestamp": "2026-08-08T02:03:25.251327+00:00"
+  },
+  {
+    "id": 56,
+    "topic_idx": 56,
+    "puzzle_num": 57,
+    "series": "Distributed",
+    "chapter": "Consensus",
+    "topic": "Paxos Made Simple: prepare, promise, accept, commit in depth",
+    "title": "Paxos Made Simple: prepare, promise, accept, commit in ",
+    "viz_type": "graph",
+    "game_mechanic": "skill_tree",
+    "uploaded": true,
+    "video_id": "9w85kIWiaR4",
+    "timestamp": "2026-08-08T08:54:17.019390+00:00"
   }
 ]

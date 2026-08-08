@@ -1348,5 +1348,19 @@
     "uploaded": true,
     "video_id": "x4L-4x42UCI",
     "timestamp": "2026-08-08T16:44:03.680592+00:00"
+  },
+  {
+    "id": 59,
+    "topic_idx": 59,
+    "puzzle_num": 60,
+    "series": "Distributed",
+    "chapter": "Consensus",
+    "topic": "Viewstamped Replication: the OG consensus protocol from 1988",
+    "title": "Viewstamped Replication: the OG consensus protocol from",
+    "viz_type": "stack",
+    "game_mechanic": "raid",
+    "uploaded": true,
+    "video_id": "vxQMC2kFKBM",
+    "timestamp": "2026-08-08T20:44:58.525806+00:00"
   }
 ]

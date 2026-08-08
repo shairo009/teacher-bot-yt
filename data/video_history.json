@@ -1334,5 +1334,19 @@
     "uploaded": true,
     "video_id": "onPJPJ6x5kM",
     "timestamp": "2026-08-08T13:03:01.241061+00:00"
+  },
+  {
+    "id": 58,
+    "topic_idx": 58,
+    "puzzle_num": 59,
+    "series": "Distributed",
+    "chapter": "Consensus",
+    "topic": "Multi-Paxos vs Raft: performance differences under leader churn",
+    "title": "Multi-Paxos vs Raft: performance differences under lead",
+    "viz_type": "bars",
+    "game_mechanic": "xp_grind",
+    "uploaded": true,
+    "video_id": "x4L-4x42UCI",
+    "timestamp": "2026-08-08T16:44:03.680592+00:00"
   }
 ]

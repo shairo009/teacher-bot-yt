@@ -1292,5 +1292,19 @@
     "uploaded": true,
     "video_id": "up02GFzFZaE",
     "timestamp": "2026-08-07T20:51:59.121987+00:00"
+  },
+  {
+    "id": 55,
+    "topic_idx": 55,
+    "puzzle_num": 56,
+    "series": "Compilers",
+    "chapter": "GC Internals",
+    "topic": "Generational Hypothesis: why 90% of objects die young",
+    "title": "Generational Hypothesis: why 90% of objects die young",
+    "viz_type": "graph",
+    "game_mechanic": "skill_tree",
+    "uploaded": true,
+    "video_id": "1lFUIEMuJ5s",
+    "timestamp": "2026-08-08T02:03:25.251327+00:00"
   }
 ]

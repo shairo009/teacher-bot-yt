@@ -1320,5 +1320,19 @@
     "uploaded": true,
     "video_id": "9w85kIWiaR4",
     "timestamp": "2026-08-08T08:54:17.019390+00:00"
+  },
+  {
+    "id": 57,
+    "topic_idx": 57,
+    "puzzle_num": 58,
+    "series": "Distributed",
+    "chapter": "Consensus",
+    "topic": "Raft Consensus: leader election, log replication, safety proof",
+    "title": "Raft Consensus: leader election, log replication, safet",
+    "viz_type": "memory",
+    "game_mechanic": "xp_grind",
+    "uploaded": true,
+    "video_id": "onPJPJ6x5kM",
+    "timestamp": "2026-08-08T13:03:01.241061+00:00"
   }
 ]

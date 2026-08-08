@@ -20,6 +20,7 @@ data/extracted_images/
 data/books/
 
 # Temp files (created during video generation, cleaned up after)
+tmp/
 temp_frames/
 temp_audio/
 temp_*.html

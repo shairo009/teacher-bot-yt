@@ -52,8 +52,13 @@ class YouTubeUploader:
 
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
+                try:
+                    creds.refresh(Request())
+                except Exception as e:
+                    print(f"  ⚠ Token refresh failed: {e}")
+                    creds = None
+            
+            if not creds or not creds.valid:
                 if not self.secrets_path.exists():
                     print(f"ERROR: {self.secrets_path} not found!")
                     return False

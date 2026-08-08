@@ -486,13 +486,13 @@ def compose_video(frames: list[Path], audio_paths: list[str],
     tmp_dir      = output_path.parent
     concat_file  = str(tmp_dir / "frame_list.txt")
 
-    with open(concat_file, "w") as f:
+    with open(concat_file, "w", encoding="utf-8") as f:
         for i, frame in enumerate(frames):
             step_idx = i // FRAMES_PER_STEP
             dur = durations[step_idx] / FRAMES_PER_STEP if step_idx < len(durations) else 1.0 / FPS
-            f.write(f"file '{frame.absolute()}'\n")
+            f.write(f"file '{frame.resolve().as_posix()}'\n")
             f.write(f"duration {dur:.6f}\n")
-        f.write(f"file '{frames[-1].absolute()}'\n")
+        f.write(f"file '{frames[-1].resolve().as_posix()}'\n")
 
     raw_video = str(tmp_dir / "raw_video.mp4")
     r = subprocess.run([
@@ -511,9 +511,9 @@ def compose_video(frames: list[Path], audio_paths: list[str],
         return str(output_path)
 
     audio_list = str(tmp_dir / "audio_list.txt")
-    with open(audio_list, "w") as f:
+    with open(audio_list, "w", encoding="utf-8") as f:
         for ap in audio_paths:
-            f.write(f"file '{Path(ap).absolute()}'\n")
+            f.write(f"file '{Path(ap).resolve().as_posix()}'\n")
 
     merged_audio = str(tmp_dir / "merged_audio.mp3")
     subprocess.run([

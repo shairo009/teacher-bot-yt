@@ -1418,5 +1418,19 @@
     "uploaded": true,
     "video_id": "iM0cvT8l620",
     "timestamp": "2026-08-09T16:50:39.237294+00:00"
+  },
+  {
+    "id": 64,
+    "topic_idx": 64,
+    "puzzle_num": 65,
+    "series": "Distributed",
+    "chapter": "CRDTs",
+    "topic": "G-Counter CRDT: commutative, associative, idempotent merge",
+    "title": "G-Counter CRDT: commutative, associative, idempotent me",
+    "viz_type": "stack",
+    "game_mechanic": "raid",
+    "uploaded": true,
+    "video_id": "a6RyivfgUaw",
+    "timestamp": "2026-08-09T20:44:33.185984+00:00"
   }
 ]

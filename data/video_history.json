@@ -1362,5 +1362,19 @@
     "uploaded": true,
     "video_id": "vxQMC2kFKBM",
     "timestamp": "2026-08-08T20:44:58.525806+00:00"
+  },
+  {
+    "id": 60,
+    "topic_idx": 60,
+    "puzzle_num": 61,
+    "series": "Distributed",
+    "chapter": "Consistency",
+    "topic": "Linearizability: the strongest safety guarantee and its cost",
+    "title": "Linearizability: the strongest safety guarantee and its",
+    "viz_type": "stack",
+    "game_mechanic": "xp_grind",
+    "uploaded": true,
+    "video_id": "W9Xy9m8YBLU",
+    "timestamp": "2026-08-09T02:15:55.271438+00:00"
   }
 ]

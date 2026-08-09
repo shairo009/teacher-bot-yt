@@ -1376,5 +1376,19 @@
     "uploaded": true,
     "video_id": "W9Xy9m8YBLU",
     "timestamp": "2026-08-09T02:15:55.271438+00:00"
+  },
+  {
+    "id": 61,
+    "topic_idx": 61,
+    "puzzle_num": 62,
+    "series": "Distributed",
+    "chapter": "Consistency",
+    "topic": "Sequential Consistency: weaker than linearizability, what breaks",
+    "title": "Sequential Consistency: weaker than linearizability, wh",
+    "viz_type": "stack",
+    "game_mechanic": "quest",
+    "uploaded": true,
+    "video_id": "tSJ2SXJWaX0",
+    "timestamp": "2026-08-09T08:59:48.637075+00:00"
   }
 ]

@@ -1404,5 +1404,19 @@
     "uploaded": true,
     "video_id": "hfn7mMvZMyk",
     "timestamp": "2026-08-09T13:08:07.354151+00:00"
+  },
+  {
+    "id": 63,
+    "topic_idx": 63,
+    "puzzle_num": 64,
+    "series": "Distributed",
+    "chapter": "Consistency",
+    "topic": "Causal Consistency: happens-before without global ordering",
+    "title": "Causal Consistency: happens-before without global order",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": true,
+    "video_id": "iM0cvT8l620",
+    "timestamp": "2026-08-09T16:50:39.237294+00:00"
   }
 ]

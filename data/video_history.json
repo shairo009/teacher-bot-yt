@@ -1390,5 +1390,19 @@
     "uploaded": true,
     "video_id": "tSJ2SXJWaX0",
     "timestamp": "2026-08-09T08:59:48.637075+00:00"
+  },
+  {
+    "id": 62,
+    "topic_idx": 62,
+    "puzzle_num": 63,
+    "series": "Distributed",
+    "chapter": "Consistency",
+    "topic": "Eventual Consistency: what it actually guarantees (less than you think)",
+    "title": "Eventual Consistency: what it actually guarantees (less",
+    "viz_type": "memory",
+    "game_mechanic": "quest",
+    "uploaded": true,
+    "video_id": "hfn7mMvZMyk",
+    "timestamp": "2026-08-09T13:08:07.354151+00:00"
   }
 ]

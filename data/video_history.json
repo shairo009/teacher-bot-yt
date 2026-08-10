@@ -1446,5 +1446,19 @@
     "uploaded": true,
     "video_id": "yzLPvPsJCI8",
     "timestamp": "2026-08-10T02:20:11.459269+00:00"
+  },
+  {
+    "id": 66,
+    "topic_idx": 66,
+    "puzzle_num": 67,
+    "series": "Distributed",
+    "chapter": "CRDTs",
+    "topic": "RGA: Replicated Growable Array for collaborative text editing",
+    "title": "RGA: Replicated Growable Array for collaborative text e",
+    "viz_type": "grid",
+    "game_mechanic": "raid",
+    "uploaded": true,
+    "video_id": "4V8Dde3vkLY",
+    "timestamp": "2026-08-10T09:47:47.206008+00:00"
   }
 ]

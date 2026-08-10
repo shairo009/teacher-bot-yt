@@ -1432,5 +1432,19 @@
     "uploaded": true,
     "video_id": "a6RyivfgUaw",
     "timestamp": "2026-08-09T20:44:33.185984+00:00"
+  },
+  {
+    "id": 65,
+    "topic_idx": 65,
+    "puzzle_num": 66,
+    "series": "Distributed",
+    "chapter": "CRDTs",
+    "topic": "OR-Set CRDT: add-wins delete-wins conflict resolution",
+    "title": "OR-Set CRDT: add-wins delete-wins conflict resolution",
+    "viz_type": "graph",
+    "game_mechanic": "quest",
+    "uploaded": true,
+    "video_id": "yzLPvPsJCI8",
+    "timestamp": "2026-08-10T02:20:11.459269+00:00"
   }
 ]

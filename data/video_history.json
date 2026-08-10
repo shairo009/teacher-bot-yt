@@ -1474,5 +1474,19 @@
     "uploaded": true,
     "video_id": "-38LIw1UGq8",
     "timestamp": "2026-08-10T13:29:05.959239+00:00"
+  },
+  {
+    "id": 68,
+    "topic_idx": 68,
+    "puzzle_num": 69,
+    "series": "Distributed",
+    "chapter": "Time",
+    "topic": "Vector Clocks: partial ordering of events in distributed systems",
+    "title": "Vector Clocks: partial ordering of events in distribute",
+    "viz_type": "memory",
+    "game_mechanic": "quest",
+    "uploaded": true,
+    "video_id": "xqXEo82OCEo",
+    "timestamp": "2026-08-10T20:59:39.031224+00:00"
   }
 ]

@@ -1544,5 +1544,19 @@
     "uploaded": true,
     "video_id": "Vnrq1DLJTAY",
     "timestamp": "2026-08-11T17:12:06.138015+00:00"
+  },
+  {
+    "id": 73,
+    "topic_idx": 73,
+    "puzzle_num": 74,
+    "series": "Distributed",
+    "chapter": "Failure",
+    "topic": "PBFT: Practical Byzantine Fault Tolerance step by step",
+    "title": "PBFT: Practical Byzantine Fault Tolerance step by step",
+    "viz_type": "bars",
+    "game_mechanic": "raid",
+    "uploaded": true,
+    "video_id": "O6rgRA4KswY",
+    "timestamp": "2026-08-11T21:00:43.572430+00:00"
   }
 ]

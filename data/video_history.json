@@ -1530,5 +1530,19 @@
     "uploaded": true,
     "video_id": "61U-jINoQto",
     "timestamp": "2026-08-11T13:26:09.191863+00:00"
+  },
+  {
+    "id": 72,
+    "topic_idx": 72,
+    "puzzle_num": 73,
+    "series": "Distributed",
+    "chapter": "Failure",
+    "topic": "Byzantine Fault Tolerance: f failures need 3f+1 nodes — here's why",
+    "title": "Byzantine Fault Tolerance: f failures need 3f+1 nodes —",
+    "viz_type": "memory",
+    "game_mechanic": "boss_fight",
+    "uploaded": true,
+    "video_id": "Vnrq1DLJTAY",
+    "timestamp": "2026-08-11T17:12:06.138015+00:00"
   }
 ]

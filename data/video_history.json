@@ -1502,5 +1502,19 @@
     "uploaded": true,
     "video_id": "oEU8mAI1mjU",
     "timestamp": "2026-08-11T02:15:06.111734+00:00"
+  },
+  {
+    "id": 70,
+    "topic_idx": 70,
+    "puzzle_num": 71,
+    "series": "Distributed",
+    "chapter": "Time",
+    "topic": "TrueTime: Google Spanner's GPS + atomic clock uncertainty bound",
+    "title": "TrueTime: Google Spanner's GPS + atomic clock uncertain",
+    "viz_type": "memory",
+    "game_mechanic": "boss_fight",
+    "uploaded": true,
+    "video_id": "yUpbU0P-utk",
+    "timestamp": "2026-08-11T09:14:34.312076+00:00"
   }
 ]

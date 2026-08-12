@@ -408,7 +408,7 @@ async def call_llm(prompt: str, api_key: str) -> dict:
         ),
         (
             "https://openrouter.ai/api/v1/chat/completions",
-            "deepseek/deepseek-chat-v3-5:free",
+            "inclusionai/ling-3.0-tiny:free",
             or_key or api_key,
             {"HTTP-Referer": "https://github.com/shairo009/teacher-bot-yt", "X-Title": "TeacherBotYT"}
         ),

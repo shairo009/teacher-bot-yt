@@ -392,14 +392,17 @@ Return ONLY valid JSON — no markdown fences, no comments:
 
 
 async def call_llm(prompt: str, api_key: str) -> dict:
-    """Call OpenAI (or compatible) API for puzzle scene JSON."""
+    """Call OpenCode (or compatible) API for puzzle scene JSON."""
     import urllib.request, json as jsonlib
 
-    # Try OpenAI first, then OpenRouter as fallback
+    base_url   = os.environ.get("OPENCODE_BASE_URL", "https://opencode.ai/zen").rstrip("/")
+    model_name = os.environ.get("OPENCODE_MODEL_NAME", "deepseek-v4-flash-free")
+
+    # Primary: OpenCode endpoint; fallbacks: OpenAI, OpenRouter
     endpoints = [
-        ("https://api.openai.com/v1/chat/completions",  "gpt-4o-mini"),
-        ("https://openrouter.ai/api/v1/chat/completions","openai/gpt-4o-mini"),
-        ("https://opencode.ai/api/v1/chat/completions", "deepseek/deepseek-chat-v3-5"),
+        (f"{base_url}/chat/completions", model_name),
+        ("https://api.openai.com/v1/chat/completions",   "gpt-4o-mini"),
+        ("https://openrouter.ai/api/v1/chat/completions", "openai/gpt-4o-mini"),
     ]
 
     for endpoint, model in endpoints:
@@ -561,14 +564,33 @@ def generate_thumbnail(scene: dict, series: str, output_path: Path) -> str | Non
 # ─────────────────────────────────────────────────────────────────────────────
 
 async def main():
+    # ── Load .env ──────────────────────────────────────────────────────────
+    from dotenv import load_dotenv
+    load_dotenv(PROJECT_ROOT / ".env", override=True)
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Skip YouTube upload")
     parser.add_argument("--topic-id", type=int, default=None, help="Force specific topic index")
     args = parser.parse_args()
 
-    api_key      = os.environ.get("OPENAI_API_KEY") or os.environ.get("OPENROUTER_API_KEY", "")
-    token_json   = os.environ.get("TOKEN_JSON", "")
-    client_json  = os.environ.get("CLIENT_SECRETS_JSON", "")
+    # API key: support OPENCODE_API_KEY (primary), OPENAI_API_KEY, OPENROUTER_API_KEY
+    api_key = (
+        os.environ.get("OPENCODE_API_KEY")
+        or os.environ.get("OPENAI_API_KEY")
+        or os.environ.get("OPENROUTER_API_KEY", "")
+    )
+
+    # YouTube credentials: read from local files if env vars not set
+    token_json  = os.environ.get("TOKEN_JSON", "")
+    client_json = os.environ.get("CLIENT_SECRETS_JSON", "")
+    if not token_json:
+        _tf = PROJECT_ROOT / "token.json"
+        if _tf.exists():
+            token_json = _tf.read_text(encoding="utf-8")
+    if not client_json:
+        _cf = PROJECT_ROOT / "client_secrets.json"
+        if _cf.exists():
+            client_json = _cf.read_text(encoding="utf-8")
 
     progress_path = PROJECT_ROOT / "data" / "tech_progress.json"
     history_path  = PROJECT_ROOT / "data" / "video_history.json"

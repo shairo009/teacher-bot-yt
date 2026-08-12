@@ -1586,5 +1586,19 @@
     "uploaded": true,
     "video_id": "w9dNU6_0-ec",
     "timestamp": "2026-08-12T09:26:25.848068+00:00"
+  },
+  {
+    "id": 76,
+    "topic_idx": 76,
+    "puzzle_num": 77,
+    "series": "Distributed",
+    "chapter": "Failure",
+    "topic": "Chaos Engineering: steady-state hypothesis, blast radius, GameDay",
+    "title": "Chaos Engineering: steady-state hypothesis, blast radiu",
+    "viz_type": "graph",
+    "game_mechanic": "xp_grind",
+    "uploaded": true,
+    "video_id": "cLHgo0dPD_o",
+    "timestamp": "2026-08-12T13:29:55.697731+00:00"
   }
 ]

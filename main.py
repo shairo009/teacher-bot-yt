@@ -395,17 +395,28 @@ async def call_llm(prompt: str, api_key: str) -> dict:
     """Call OpenCode (or compatible) API for puzzle scene JSON."""
     import urllib.request, json as jsonlib
 
-    base_url   = os.environ.get("OPENCODE_BASE_URL", "https://opencode.ai/zen").rstrip("/")
-    model_name = os.environ.get("OPENCODE_MODEL_NAME", "deepseek-v4-flash-free")
+    base_url   = os.environ.get("OPENCODE_BASE_URL", "https://opencode.ai/zen/v1").rstrip("/")
+    model_name = os.environ.get("OPENCODE_MODEL_NAME", "mimo-v2.5-free")
+    or_key     = os.environ.get("OPENROUTER_API_KEY", "")
 
-    # Primary: OpenCode endpoint; fallbacks: OpenAI, OpenRouter
+    # (endpoint, model, key, extra_headers)
     endpoints = [
-        (f"{base_url}/chat/completions", model_name),
-        ("https://api.openai.com/v1/chat/completions",   "gpt-4o-mini"),
-        ("https://openrouter.ai/api/v1/chat/completions", "openai/gpt-4o-mini"),
+        (
+            f"{base_url}/chat/completions", model_name, api_key,
+            {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+             "Origin": "https://opencode.ai", "Accept": "application/json"}
+        ),
+        (
+            "https://openrouter.ai/api/v1/chat/completions",
+            "deepseek/deepseek-chat-v3-5:free",
+            or_key or api_key,
+            {"HTTP-Referer": "https://github.com/shairo009/teacher-bot-yt", "X-Title": "TeacherBotYT"}
+        ),
     ]
 
-    for endpoint, model in endpoints:
+    for endpoint, model, key, extra_headers in endpoints:
+        if not key:
+            continue
         try:
             body = jsonlib.dumps({
                 "model": model,
@@ -418,22 +429,22 @@ async def call_llm(prompt: str, api_key: str) -> dict:
             }).encode()
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}",
-                # Browser-like UA required for opencode.ai (Cloudflare protection)
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-                "Origin": "https://opencode.ai",
-                "Accept": "application/json",
+                "Authorization": f"Bearer {key}",
+                **extra_headers,
             }
             req = urllib.request.Request(endpoint, data=body, headers=headers, method="POST")
             with urllib.request.urlopen(req, timeout=120) as resp:
                 data = jsonlib.loads(resp.read())
-                raw  = data["choices"][0]["message"]["content"].strip()
+                raw  = data["choices"][0]["message"]["content"]
+                if not raw:
+                    raise ValueError("Empty content — model still reasoning, retry")
+                raw = raw.strip()
                 if raw.startswith("```"):
                     raw = re.sub(r"^```[a-z]*\n?", "", raw)
                     raw = re.sub(r"\n?```$", "", raw.strip())
                 return jsonlib.loads(raw)
         except Exception as e:
-            print(f"  ⚠ {endpoint} failed: {e}")
+            print(f"  ⚠ {endpoint} ({model}) failed: {e}")
             continue
     raise RuntimeError("All LLM endpoints failed")
 

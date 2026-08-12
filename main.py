@@ -415,11 +415,14 @@ async def call_llm(prompt: str, api_key: str) -> dict:
                 ],
                 "max_tokens": 3200,
                 "temperature": 0.7,
-                "response_format": {"type": "json_object"},
             }).encode()
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {api_key}",
+                # Browser-like UA required for opencode.ai (Cloudflare protection)
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+                "Origin": "https://opencode.ai",
+                "Accept": "application/json",
             }
             req = urllib.request.Request(endpoint, data=body, headers=headers, method="POST")
             with urllib.request.urlopen(req, timeout=120) as resp:

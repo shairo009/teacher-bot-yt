@@ -1572,5 +1572,19 @@
     "uploaded": true,
     "video_id": "RhnLWMLaH5k",
     "timestamp": "2026-08-12T02:31:40.576578+00:00"
+  },
+  {
+    "id": 75,
+    "topic_idx": 75,
+    "puzzle_num": 76,
+    "series": "Distributed",
+    "chapter": "Failure",
+    "topic": "Gossip Protocol: epidemic spread, convergence time, anti-entropy",
+    "title": "Gossip Protocol: epidemic spread, convergence time, ant",
+    "viz_type": "memory",
+    "game_mechanic": "boss_fight",
+    "uploaded": true,
+    "video_id": "w9dNU6_0-ec",
+    "timestamp": "2026-08-12T09:26:25.848068+00:00"
   }
 ]

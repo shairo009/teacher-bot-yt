@@ -1362,5 +1362,19 @@
     "uploaded": false,
     "video_id": null,
     "timestamp": "2026-08-08T17:16:46.883156+00:00"
+  },
+  {
+    "id": 2,
+    "topic_idx": 2,
+    "puzzle_num": 3,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "Superscalar Pipelines: executing 4+ instructions per clock cycle",
+    "title": "Superscalar Pipelines: executing 4+ instructions per cl",
+    "viz_type": "memory",
+    "game_mechanic": "raid",
+    "uploaded": true,
+    "video_id": "iN3CwLPDkgw",
+    "timestamp": "2026-08-12T21:03:06.949466+00:00"
   }
 ]

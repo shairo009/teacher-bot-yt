@@ -2,11 +2,11 @@
 Puzzle Visual Engine — Coding Game Style Renderer v5 (Fixed Layout & Vector Icons)
 Looks like a real high-end coding puzzle game (Human Resource Machine / Zachtronics / CodeCombat).
 Layout:
-  [0   – 220]  Game header: puzzle# + vector stars + topic title + difficulty badge
-  [220 – 820]  Python code editor panel (auto-scaled syntax highlighted code, line cursor)
-  [820 – 1540] Execution visualization (720px height, 0 bleed, perfect node/bar positioning)
-  [1540– 1760] Test cases panel (vector badges)
-  [1760– 1920] Step dots + complexity stats + speedrun timer footer
+  [0   – 200]  Game header: puzzle# + topic title + difficulty badge
+  [200 – 1060] Large live execution visual (the primary focal point)
+  [1060– 1140] One-line live explanation / CTA strip
+  [1140– 1740] Python code editor panel (auto-scaled syntax highlighted code)
+  [1740– 1920] Step dots + complexity stats + speedrun timer footer
 """
 
 import math, random, re
@@ -19,14 +19,14 @@ FPS    = 30
 
 # ── Zone constants (Strict Non-Overlapping Boundaries) ──────────────────────
 HEADER_TOP   = 0
-HEADER_BOT   = 220
-CODE_TOP     = 220
-CODE_BOT     = 820
-VIZ_TOP      = 820
-VIZ_BOT      = 1540
-TESTS_TOP    = 1540
-TESTS_BOT    = 1760
-FOOTER_TOP   = 1760
+HEADER_BOT   = 200
+VIZ_TOP      = 200
+VIZ_BOT      = 1060
+TESTS_TOP    = 1060
+TESTS_BOT    = 1140
+CODE_TOP     = 1140
+CODE_BOT     = 1740
+FOOTER_TOP   = 1740
 FOOTER_BOT   = 1920
 
 CODE_PAD_L   = 28
@@ -292,7 +292,7 @@ def draw_code_editor(draw: ImageDraw.Draw, code_lines: list[str],
             tw_val = text_w(token_text, font)
             if x + tw_val > max_x:
                 avail_chars = max(1, int(len(token_text) * (max_x - x) / max(1, tw_val)))
-                token_text = token_text[:avail_chars]
+                token_text = token_text[:max(1, avail_chars - 3)] + "..."
                 draw.text((x, y_top + line_h // 2 - 1), token_text,
                           font=font, fill=color, anchor="lm")
                 break
@@ -353,16 +353,15 @@ def draw_game_header(draw: ImageDraw.Draw, scene: dict, accent: tuple,
 
     # Row 2 (Y = 62): Game Tag Pill (Left) & Series Chapter Badge (Right)
     fn_tag = get_font(18, bold=True)
-    tag_text = f" {game_tag} "
+    tag_text = f" {_fit_text(game_tag, fn_tag, 260)} "
     tw = text_w(tag_text, fn_tag) + 12
     draw.rounded_rectangle([36, 50, 36 + tw, 76], radius=5,
                             fill=lerp_c(accent, (0, 0, 0), 0.8), outline=accent, width=1)
     draw.text((36 + tw // 2, 63), tag_text, font=fn_tag, fill=accent, anchor="mm")
 
     badge_text = f"{series} > {chapter}" if chapter else series
-    if len(badge_text) > 35:
-        badge_text = badge_text[:32] + "..."
     fn_series  = get_font(18, bold=False)
+    badge_text = _fit_text(badge_text, fn_series, 370)
     draw.text((WIDTH - 36, 63), badge_text, font=fn_series,
               fill=(120, 135, 170), anchor="rm")
 
@@ -370,6 +369,8 @@ def draw_game_header(draw: ImageDraw.Draw, scene: dict, accent: tuple,
     fn_title = get_font(30, bold=True)
     fn_sub   = get_font(20, bold=False)
     title_lines = _wrap(title, fn_title, WIDTH - 100)[:2]
+    if len(_wrap(title, fn_title, WIDTH - 100)) > 2:
+        title_lines[-1] = _fit_text(title_lines[-1], fn_title, WIDTH - 100)
     
     title_y = 110
     for ln in title_lines:
@@ -377,8 +378,7 @@ def draw_game_header(draw: ImageDraw.Draw, scene: dict, accent: tuple,
         title_y += 36
 
     if subtitle:
-        if len(subtitle) > 60:
-            subtitle = subtitle[:57] + "..."
+        subtitle = _fit_text(subtitle, fn_sub, WIDTH - 100)
         draw.text((WIDTH // 2, min(title_y + 2, HEADER_BOT - 16)), subtitle, font=fn_sub,
                   fill=(110, 125, 160), anchor="mm")
 
@@ -389,60 +389,32 @@ def draw_game_header(draw: ImageDraw.Draw, scene: dict, accent: tuple,
 
 def draw_test_panel(draw: ImageDraw.Draw, scene: dict, step_idx: int,
                     total_steps: int, accent: tuple):
-    tests = scene.get("test_cases", [])
-    if not tests:
-        return
+    """Compact bridge between the visual and code panels.
 
+    Keeping just one takeaway preserves space for a large visual and readable
+    code, which is much easier to follow in a vertical short.
+    """
     draw.rectangle([0, TESTS_TOP, WIDTH, TESTS_BOT], fill=(14, 16, 24))
     draw.line([0, TESTS_TOP, WIDTH, TESTS_TOP], fill=EDITOR_BORDER, width=2)
+    captions = scene.get("captions", scene.get("caption_steps", []))
+    narration = scene.get("narration", [])
+    message = "Watch the visual, then read the highlighted code."
+    if step_idx < len(captions):
+        message = str(captions[step_idx])
+    elif step_idx < len(narration):
+        message = str(narration[step_idx])
+    message = re.sub(r"\s+", " ", message).strip()
+    message_font = get_font(19)
+    max_message_width = WIDTH - 330
+    original_message = message
+    while message and text_w(message, message_font) > max_message_width:
+        message = message.rsplit(" ", 1)[0]
+    if message != original_message:
+        message = message.rstrip(".") + "..."
 
-    fn_head = get_font(20, bold=True)
-    fn_test = get_font(19, mono=True)
-    fn_badge = get_font(18, bold=True)
-
-    draw.text((36, TESTS_TOP + 20), "TEST CASES", font=fn_head, fill=accent, anchor="lm")
-
-    pass_ratio = (step_idx + 1) / max(total_steps, 1)
-    n_pass     = int(len(tests) * pass_ratio)
-    draw.text((WIDTH - 36, TESTS_TOP + 20),
-              f"{n_pass}/{len(tests)} passing", font=fn_head,
-              fill=(80, 200, 80) if n_pass == len(tests) else (200, 200, 80),
-              anchor="rm")
-
-    col_w = (WIDTH - 72) // min(len(tests), 4)
-    for ti, test in enumerate(tests[:4]):
-        passing = ti < n_pass
-        tx      = 36 + ti * col_w
-        ty      = TESTS_TOP + 44
-
-        box_c   = (20, 42, 24) if passing else (32, 20, 24)
-        brd_c   = (60, 180, 70) if passing else (90, 50, 50)
-        lbl_text= "PASS" if passing else "TEST"
-        lbl_c   = (90, 230, 90) if passing else (120, 120, 140)
-
-        draw.rounded_rectangle([tx, ty, tx + col_w - 8, ty + (TESTS_BOT - TESTS_TOP - 54)],
-                                radius=6, fill=box_c, outline=brd_c, width=2)
-
-        # Vector Icon + Badge Text
-        icon_cx = tx + 24
-        icon_cy = ty + 20
-        if passing:
-            draw_check_icon(draw, icon_cx, icon_cy, size=14, color=(90, 230, 90))
-        else:
-            draw_circle_icon(draw, icon_cx, icon_cy, r=6, color=(90, 90, 110))
-
-        draw.text((tx + 42, ty + 20), lbl_text, font=fn_badge, fill=lbl_c, anchor="lm")
-
-        in_str  = str(test.get('input', '?')).replace('\n', '')[:11]
-        exp_str = str(test.get('expected', '?')).replace('\n', '')[:11]
-
-        draw.text((tx + 10, ty + 46), f"in: {in_str}", font=fn_test, fill=(150, 160, 190))
-        draw.text((tx + 10, ty + 72), f"> {exp_str}",  font=fn_test,
-                  fill=(90, 210, 90) if passing else (150, 160, 190))
-
-        label = test.get("label", f"test_{ti+1}")
-        draw.text((tx + col_w // 2, ty + 106), label, font=get_font(16),
-                  fill=(80, 95, 130), anchor="mm")
+    y = (TESTS_TOP + TESTS_BOT) // 2
+    draw.text((36, y), "LIVE TAKEAWAY", font=get_font(18, bold=True), fill=accent, anchor="lm")
+    draw.text((250, y), message, font=message_font, fill=(225, 232, 245), anchor="lm")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -857,7 +829,11 @@ def _viz_memory(draw, scene, step_idx, progress, frame, accent, x0, y0, x1, y1):
     ])
 
     active_rows = min(step_idx + 1, len(mem_rows))
-    row_h    = min(54, (y1 - y0 - 50) // max(active_rows, 1))
+    # Use the large upper visual panel instead of leaving a tiny table at its
+    # top.  A 4-10 row memory map stays legible and visually centred on mobile.
+    row_h    = min(90, (y1 - y0 - 90) // max(active_rows, 1))
+    table_h  = active_rows * row_h
+    table_y  = y0 + max(44, (y1 - y0 - table_h) // 2)
     col_addr = 160
     col_lbl  = 140
     col_val  = (x1 - x0 - col_addr - col_lbl - 20)
@@ -867,13 +843,13 @@ def _viz_memory(draw, scene, step_idx, progress, frame, accent, x0, y0, x1, y1):
     fn_lbl  = get_font(20, bold=True, mono=True)
     fn_val  = get_font(22, mono=True)
 
-    draw.text((rx + col_addr // 2, y0 + 14), "ADDRESS", font=fn_addr, fill=(60, 70, 100), anchor="mm")
-    draw.text((rx + col_addr + col_lbl // 2, y0 + 14), "NAME", font=fn_addr, fill=(60, 70, 100), anchor="mm")
-    draw.text((rx + col_addr + col_lbl + col_val // 2, y0 + 14), "VALUE", font=fn_addr, fill=(60, 70, 100), anchor="mm")
-    draw.line([rx, y0 + 28, x1 - 10, y0 + 28], fill=(38, 45, 70), width=1)
+    draw.text((rx + col_addr // 2, table_y - 20), "ADDRESS", font=fn_addr, fill=(60, 70, 100), anchor="mm")
+    draw.text((rx + col_addr + col_lbl // 2, table_y - 20), "NAME", font=fn_addr, fill=(60, 70, 100), anchor="mm")
+    draw.text((rx + col_addr + col_lbl + col_val // 2, table_y - 20), "VALUE", font=fn_addr, fill=(60, 70, 100), anchor="mm")
+    draw.line([rx, table_y - 8, x1 - 10, table_y - 8], fill=(38, 45, 70), width=1)
 
     for ri, row in enumerate(mem_rows[:active_rows]):
-        ry = y0 + 34 + ri * row_h
+        ry = table_y + ri * row_h
         is_active = ri == active_rows - 1
         bg_c = lerp_c(accent, (12, 14, 22), 0.82) if is_active else (14, 16, 24)
         draw.rectangle([rx, ry, x1 - 10, ry + row_h - 4], fill=bg_c)
@@ -940,6 +916,17 @@ def _wrap(text, font, max_w):
     return lines or [""]
 
 
+def _fit_text(text, font, max_w):
+    """Return a single line that cannot paint outside its assigned panel."""
+    text = str(text).replace("\n", " ").strip()
+    if text_w(text, font) <= max_w:
+        return text
+    ellipsis = "..."
+    while text and text_w(text + ellipsis, font) > max_w:
+        text = text[:-1]
+    return text.rstrip() + ellipsis
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # MAIN ENGINE CLASS
 # ─────────────────────────────────────────────────────────────────────────────
@@ -950,7 +937,11 @@ class PuzzleEngine:
 
     def _get_accent(self, scene: dict) -> tuple:
         pnum = scene.get("puzzle_num", 1)
-        return DYNAMIC_PALETTES[(pnum - 1) % len(DYNAMIC_PALETTES)]
+        # Stable per-scene variation keeps one video consistent while avoiding
+        # an identical palette when a topic is generated again.
+        variant = str(scene.get("visual_variant", scene.get("title", "")))
+        variant_seed = sum(ord(char) for char in variant)
+        return DYNAMIC_PALETTES[(pnum * 7 + variant_seed) % len(DYNAMIC_PALETTES)]
 
     def render_frame(self, scene: dict, step_idx: int, step_progress: float,
                      global_frame: int, total_steps: int) -> Image.Image:

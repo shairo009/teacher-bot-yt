@@ -291,9 +291,9 @@ OBJECTS = [
 
 LLM_SYSTEM_PROMPT = """You are a senior engineer creating CODING PUZZLE GAME style educational YouTube Shorts.
 The visual looks exactly like a real coding game (Human Resource Machine, Zachtronics, CodeCombat).
-- A Python code editor panel fills the top half — real, runnable Python with syntax highlighting.
-- An execution visualization fills the bottom half — bars sorting, graph traversal, call stack growing, DP grid filling, or a maze.
-- Test cases appear at the bottom, ticking green one by one.
+- A large live execution visualization fills the UPPER half — bars sorting, graph traversal, call stack growing, DP grid filling, or a maze.
+- A readable Python code editor fills the LOWER half — real, runnable Python with syntax highlighting and a moving active line.
+- Between them, show one short takeaway that explains the visual currently on screen.
 Every video is for EXPERT engineers (5-10+ years). No basics. Internals, edge cases, trade-offs only.
 The audience knows compilers, distributed systems, OS internals, advanced algorithms deeply."""
 
@@ -346,6 +346,8 @@ STRICT REQUIREMENTS:
 8. difficulty: "HARD" or "EXTREME" (no easy/medium — this is expert content).
 9. puzzle_stars: always 3 (expert puzzle).
 10. title: punchy, ≤8 words, technical.
+11. visual_variant: a distinctive 2-4 word visual direction based on the actual mechanism.
+12. captions: 9 short (max 12 words) visual takeaways, one for each animation step.
 
 Return ONLY valid JSON — no markdown fences, no comments:
 
@@ -359,6 +361,7 @@ Return ONLY valid JSON — no markdown fences, no comments:
   "difficulty": "HARD",
   "game_tag": "{game_tag}",
   "game_mechanic": "{game_mechanic}",
+  "visual_variant": "e.g. cache-line ping-pong",
   "time_complexity": "O(...) — reason",
   "space_complexity": "O(...) — reason",
   "viz_type": "{viz_type}",
@@ -377,6 +380,7 @@ Return ONLY valid JSON — no markdown fences, no comments:
     {{"label": "large", "input": "...", "expected": "..."}},
     {{"label": "worst", "input": "...", "expected": "..."}}
   ],
+  "captions": ["short visual takeaway for step 0", "..."],
   "narration": [
     "step 0: 30-40 word expert narration",
     "step 1: ...",
@@ -395,8 +399,9 @@ async def call_llm(prompt: str, api_key: str) -> dict:
     """Call OpenCode (or compatible) API for puzzle scene JSON."""
     import urllib.request, json as jsonlib
 
-    base_url   = os.environ.get("OPENCODE_BASE_URL", "https://opencode.ai/zen/v1").rstrip("/")
-    model_name = os.environ.get("OPENCODE_MODEL_NAME", "mimo-v2.5-free")
+    # OpenCode Go's OpenAI-compatible endpoint and current Hy3 model.
+    base_url   = os.environ.get("OPENCODE_BASE_URL", "https://opencode.ai/zen/go/v1").rstrip("/")
+    model_name = os.environ.get("OPENCODE_MODEL_NAME", "hy3")
     or_key     = os.environ.get("OPENROUTER_API_KEY", "")
 
     # (endpoint, model, key, extra_headers)
@@ -654,6 +659,7 @@ async def main():
             scene.setdefault("series",        series)
             scene.setdefault("chapter",       chapter)
             scene.setdefault("puzzle_num",    puzzle_num)
+            scene.setdefault("visual_variant", f"{series}-{chapter}-{current_id}")
         except Exception as e:
             print(f"❌ LLM failed: {e} — using mock scene")
             scene = _mock_scene(topic, game_mechanic, game_tag, puzzle_num)

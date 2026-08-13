@@ -1418,5 +1418,19 @@
     "uploaded": true,
     "video_id": "it2GqcvWKr4",
     "timestamp": "2026-08-13T13:34:28.118422+00:00"
+  },
+  {
+    "id": 6,
+    "topic_idx": 6,
+    "puzzle_num": 7,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "Memory Ordering: happens-before, acquire-release, sequential consistency",
+    "title": "Memory Ordering: happens-before, acquire-release, seque",
+    "viz_type": "memory",
+    "game_mechanic": "quest",
+    "uploaded": true,
+    "video_id": "bbTvs9lLPiA",
+    "timestamp": "2026-08-13T18:17:37.713749+00:00"
   }
 ]

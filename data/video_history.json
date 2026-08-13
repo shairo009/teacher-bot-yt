@@ -1376,5 +1376,19 @@
     "uploaded": true,
     "video_id": "iN3CwLPDkgw",
     "timestamp": "2026-08-12T21:03:06.949466+00:00"
+  },
+  {
+    "id": 3,
+    "topic_idx": 3,
+    "puzzle_num": 4,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "Cache Coherence: MESI protocol keeping multi-core caches in sync",
+    "title": "Cache Coherence: MESI protocol keeping multi-core cache",
+    "viz_type": "grid",
+    "game_mechanic": "skill_tree",
+    "uploaded": true,
+    "video_id": "t1tcZbW7TmI",
+    "timestamp": "2026-08-13T02:34:37.714734+00:00"
   }
 ]

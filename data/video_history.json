@@ -1390,5 +1390,19 @@
     "uploaded": true,
     "video_id": "t1tcZbW7TmI",
     "timestamp": "2026-08-13T02:34:37.714734+00:00"
+  },
+  {
+    "id": 4,
+    "topic_idx": 4,
+    "puzzle_num": 5,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "NUMA Architecture: memory latency depends on which CPU owns it",
+    "title": "NUMA Architecture: memory latency depends on which CPU ",
+    "viz_type": "graph",
+    "game_mechanic": "quest",
+    "uploaded": true,
+    "video_id": "5RPIUaogLww",
+    "timestamp": "2026-08-13T09:27:44.314603+00:00"
   }
 ]

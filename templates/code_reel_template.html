@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiny Volcano - SVG Displacement Physics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #030406;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; overflow: hidden;
+    }
+    
+    /* 1080x1920 9:16 Full HD Reel Container */
+    .video-canvas-container {
+      width: 540px; height: 960px;
+      background: linear-gradient(135deg, #197c75 0%, #136660 50%, #0d4a46 100%);
+      display: flex; justify-content: center; align-items: center;
+      position: relative; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+      border-radius: 16px; overflow: hidden;
+    }
+
+    .background-ambient-glow {
+      position: absolute; width: 420px; height: 420px;
+      background: radial-gradient(circle, rgba(255, 61, 0, 0.4) 0%, rgba(255, 171, 0, 0.2) 50%, rgba(0,0,0,0) 75%);
+      top: 25%; left: 50%; transform: translate(-50%, -50%);
+      filter: blur(50px); opacity: 0.7; pointer-events: none;
+    }
+
+    .reel-frame {
+      width: 100%; height: 100%; padding: 32px 26px 26px 26px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: space-between; position: relative; z-index: 2;
+    }
+
+    /* Title Header */
+    .title-header { text-align: center; margin-bottom: 4px; }
+    .title-header h1 {
+      font-family: 'Outfit', sans-serif; font-size: 36px; font-weight: 900;
+      color: #FFFFFF; text-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+      letter-spacing: -0.5px;
+    }
+
+    /* Top Volcano Visual Stage (55%) */
+    .visual-stage {
+      position: relative; width: 100%; height: 380px;
+      display: flex; justify-content: center; align-items: flex-end;
+    }
+    #effectsCanvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 2;
+    }
+    .volcano-svg-wrap {
+      width: 380px; height: 310px; position: relative; z-index: 3;
+    }
+    #volcanoSvg {
+      width: 100%; height: 100%; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3));
+    }
+
+    /* Comment Badge */
+    .comment-badge-wrap { margin-top: -6px; margin-bottom: 10px; }
+    .comment-badge {
+      background: #000000; padding: 8px 24px; border-radius: 30px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+    }
+    .badge-text {
+      color: #FFFFFF; font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 15px; letter-spacing: -0.2px;
+    }
+
+    /* macOS VS Code Glassmorphic Editor Card (Bottom 40%) */
+    .code-card {
+      width: 100%; height: 380px; background: rgba(18, 22, 32, 0.95);
+      border-radius: 16px; border: 1.5px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); overflow: hidden;
+      display: flex; flex-direction: column; backdrop-filter: blur(12px);
+    }
+
+    .code-header {
+      background: rgba(12, 15, 23, 0.96); padding: 10px 16px; display: flex;
+      align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .mac-dots { display: flex; gap: 7px; }
+    .dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dot-red { background: #FF5F56; } .dot-yellow { background: #FFBD2E; } .dot-green { background: #27C93F; }
+
+    .file-info { display: flex; align-items: center; gap: 8px; }
+    .file-icon { font-size: 14px; }
+    .file-name { color: #A0AEC0; font-family: 'Fira Code', monospace; font-size: 13.5px; font-weight: 600; }
+
+    .code-body {
+      padding: 14px 16px; font-family: 'Fira Code', monospace;
+      font-size: 12px; line-height: 1.55; color: #E2E8F0;
+      overflow: hidden; height: 100%; display: flex;
+    }
+
+    .line-numbers {
+      display: flex; flex-direction: column; color: #475569;
+      padding-right: 14px; border-right: 1px solid rgba(255, 255, 255, 0.08);
+      user-select: none; font-size: 12px;
+    }
+    .code-content-wrapper { padding-left: 14px; width: 100%; overflow: hidden; }
+
+    .typing-cursor {
+      display: inline-block; color: #61AFEF; font-weight: 900; width: 8px;
+      animation: blink 0.5s infinite alternate;
+    }
+    @keyframes blink { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+    .token-func { color: #61AFEF; } .token-str { color: #98C379; }
+    .token-prop { color: #E06C75; } .token-keyword { color: #C678DD; }
+    .token-num { color: #D19A66; } .token-val { color: #98C379; font-weight: 700; background: rgba(152, 195, 121, 0.2); padding: 0 4px; border-radius: 4px; }
+    .token-component { color: #E5C07B; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="video-canvas-container">
+    <div class="background-ambient-glow"></div>
+    <div class="reel-frame">
+      <header class="title-header">
+        <h1>Tiny Volcano 🌋</h1>
+      </header>
+
+      <div class="visual-stage">
+        <!-- SVG Filters for Physics Displacement -->
+        <svg style="display: none;">
+          <defs>
+            <filter id="lavaDisplacement" x="-30%" y="-30%" width="160%" height="160%">
+              <feTurbulence id="feTurbulence" type="fractalNoise" baseFrequency="0.08" numOctaves="4" result="noise" />
+              <feDisplacementMap id="feDisplacement" in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+          </defs>
+        </svg>
+
+        <canvas id="effectsCanvas" width="480" height="380"></canvas>
+
+        <div class="volcano-svg-wrap">
+          <svg id="volcanoSvg" viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg">
+            <circle id="eruptionGlow" cx="150" cy="80" r="55" fill="rgba(255, 61, 0, 0.35)" />
+
+            <!-- Lava Layer with SVG Displacement Physics -->
+            <g id="lavaLayer" filter="url(#lavaDisplacement)">
+              <path id="lavaFountain" d="M125 75 Q150 -10 175 75 Q150 20 125 75 Z" fill="#FF3D00" />
+              <ellipse cx="150" cy="76" rx="24" ry="8" fill="#FF6D00" />
+              <path id="lavaDrips" d="M134 78 Q130 95 136 110 M144 78 Q148 105 145 125 M156 78 Q160 100 154 118 M164 78 Q168 92 163 105" stroke="#FFAB00" stroke-width="4.5" stroke-linecap="round" fill="none" />
+            </g>
+
+            <!-- Volcano Body -->
+            <path id="volcanoBody" d="M 55 220 C 78 175, 115 85, 130 75 L 170 75 C 185 85, 222 175, 245 220 C 255 228, 45 228, 55 220 Z" fill="#8D6E63" stroke="#5D4037" stroke-width="4.5" />
+            <path d="M 72 210 Q 110 160 132 82" stroke="#A1887F" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.6" />
+            <path d="M 228 210 Q 190 160 168 82" stroke="#4E342E" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.4" />
+
+            <!-- Cute Face Group -->
+            <g id="faceGroup">
+              <g id="eyesNormal" opacity="0">
+                <ellipse cx="132" cy="142" rx="4.5" ry="6.5" fill="#212121" />
+                <ellipse cx="168" cy="142" rx="4.5" ry="6.5" fill="#212121" />
+                <circle cx="133.5" cy="140" r="1.8" fill="#FFFFFF" />
+                <circle cx="169.5" cy="140" r="1.8" fill="#FFFFFF" />
+              </g>
+
+              <g id="eyesErupt" opacity="1">
+                <circle cx="132" cy="142" r="7.5" fill="#212121" />
+                <circle cx="168" cy="142" r="7.5" fill="#212121" />
+                <circle cx="134" cy="140" r="2.8" fill="#FFFFFF" />
+                <circle cx="170" cy="140" r="2.8" fill="#FFFFFF" />
+              </g>
+
+              <circle cx="123" cy="148" r="5.5" fill="#FF8A80" opacity="0.8" />
+              <circle cx="177" cy="148" r="5.5" fill="#FF8A80" opacity="0.8" />
+
+              <path id="mouthNormal" d="M 144 150 Q 150 156 156 150" stroke="#212121" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0" />
+              <ellipse id="mouthErupt" cx="150" cy="153" rx="5.5" ry="7.5" fill="#212121" opacity="1" />
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="comment-badge-wrap">
+        <div class="comment-badge">
+          <span class="badge-text">Comment :- "Tiny" 🗻</span>
+        </div>
+      </div>
+
+      <div class="code-card">
+        <div class="code-header">
+          <div class="mac-dots">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+          </div>
+          <div class="file-info">
+            <span class="file-icon">📄</span>
+            <span class="file-name">Volcano.js</span>
+          </div>
+          <div style="width: 40px;"></div>
+        </div>
+        <div class="code-body">
+          <div class="line-numbers">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12</div>
+          <div class="code-content-wrapper">
+            <pre><code id="codeTyped"></code><span class="typing-cursor" id="cursor">█</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const VOLCANO_CODE_LINES = [
+      '<span class="token-func">React.createElement</span>(<span class="token-str">"g"</span>, { <span class="token-prop">id</span>: <span class="token-str">"face2"</span> },',
+      '  <span class="token-func">React.createElement</span>(<span class="token-str">"path"</span>, { <span class="token-prop">id</span>: <span class="token-str">"XMLID_21_"</span>, <span class="token-prop">className</span>: <span class="token-str">"st4"</span> }),',
+      '  <span class="token-func">React.createElement</span>(<span class="token-str">"path"</span>, { <span class="token-prop">id</span>: <span class="token-str">"XMLID_22_"</span>, <span class="token-prop">className</span>: <span class="token-str">"st4"</span> })',
+      ');',
+      '<span class="token-keyword">componentDidMount</span>() {',
+      '  <span class="token-func">setTimeout</span>(<span class="token-keyword">this</span>.<span class="token-method">toggleLava</span>, <span class="token-num">1000</span>);',
+      '}',
+      '<span class="token-keyword">toggleLava</span>() {',
+      '  <span class="token-keyword">this</span>.<span class="token-func">setState</span>({ <span class="token-prop">eruption</span>: !<span class="token-keyword">this</span>.<span class="token-prop">state</span>.<span class="token-prop">eruption</span> });',
+      '}',
+      '<span class="token-func">React.createElement</span>(<span class="token-component">SquigglySVG</span>, {',
+      '  <span class="token-prop">id</span>: <span class="token-str">"lava"</span>, <span class="token-prop">scale</span>: <span class="token-num">18</span>, <span class="token-prop">baseFrequency</span>: <span class="token-num">0.10</span>,',
+      '  <span class="token-prop">type</span>: <span class="token-str">"fractalNoise"</span>, <span class="token-prop">start</span>: <span class="token-val">true</span>',
+      '})'
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const feTurbulence = document.getElementById('feTurbulence');
+      const feDisplacement = document.getElementById('feDisplacement');
+      const codeTyped = document.getElementById('codeTyped');
+      const cursor = document.getElementById('cursor');
+      const canvas = document.getElementById('effectsCanvas');
+      const ctx = canvas.getContext('2d');
+
+      // Rule: Code Types ONCE, stays permanently!
+      let currentLineIndex = 0;
+      function typeNextLineOnce() {
+        if (currentLineIndex < VOLCANO_CODE_LINES.length) {
+          let currentContent = '';
+          for (let i = 0; i <= currentLineIndex; i++) {
+            currentContent += VOLCANO_CODE_LINES[i] + '\n';
+          }
+          codeTyped.innerHTML = currentContent;
+          currentLineIndex++;
+          setTimeout(typeNextLineOnce, 1200);
+        } else {
+          cursor.style.display = 'none';
+        }
+      }
+      typeNextLineOnce();
+
+      // Continuous Eruption Physics Loop (Particles, Smoke, Turbulence)
+      const particles = [];
+      const smokeParticles = [];
+
+      class LavaParticle {
+        constructor() {
+          this.x = 240 + (Math.random() * 24 - 12);
+          this.y = 110;
+          this.vx = (Math.random() - 0.5) * 7;
+          this.vy = -(Math.random() * 9 + 6);
+          this.radius = Math.random() * 5 + 3;
+          this.color = Math.random() > 0.3 ? '#FF3D00' : '#FFD600';
+          this.life = 1.0;
+          this.decay = Math.random() * 0.025 + 0.015;
+        }
+        update() {
+          this.x += this.vx; this.y += this.vy;
+          this.vy += 0.25; // Gravity
+          this.life -= this.decay;
+        }
+        draw(c) {
+          c.save(); c.globalAlpha = Math.max(0, this.life);
+          c.fillStyle = this.color;
+          c.beginPath(); c.arc(this.x, this.y, this.radius, 0, Math.PI * 2); c.fill();
+          c.restore();
+        }
+      }
+
+      class SmokeParticle {
+        constructor() {
+          this.x = 240 + (Math.random() * 20 - 10);
+          this.y = 100;
+          this.vx = (Math.random() - 0.5) * 1.8;
+          this.vy = -(Math.random() * 2.5 + 1.2);
+          this.radius = Math.random() * 9 + 7;
+          this.life = 0.85;
+          this.decay = 0.012;
+        }
+        update() {
+          this.x += this.vx; this.y += this.vy;
+          this.radius += 0.35; this.life -= this.decay;
+        }
+        draw(c) {
+          c.save(); c.globalAlpha = Math.max(0, this.life * 0.4);
+          c.fillStyle = '#ECEFF1';
+          c.beginPath(); c.arc(this.x, this.y, this.radius, 0, Math.PI * 2); c.fill();
+          c.restore();
+        }
+      }
+
+      let animTime = 0;
+      function renderVolcanoPhysics() {
+        animTime += 0.04;
+
+        // Animate SVG Turbulence & Displacement Filter
+        const baseFreq = 0.08 + Math.sin(animTime * 3) * 0.02;
+        const scaleVal = 18 + Math.sin(animTime * 4) * 4;
+
+        feTurbulence.setAttribute('baseFrequency', baseFreq.toFixed(3));
+        feDisplacement.setAttribute('scale', scaleVal.toFixed(1));
+
+        // Spawn Lava & Smoke Particles
+        if (Math.random() > 0.3) particles.push(new LavaParticle());
+        if (Math.random() > 0.4) smokeParticles.push(new SmokeParticle());
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i]; p.update(); p.draw(ctx);
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+
+        for (let i = smokeParticles.length - 1; i >= 0; i--) {
+          const sp = smokeParticles[i]; sp.update(); sp.draw(ctx);
+          if (sp.life <= 0) smokeParticles.splice(i, 1);
+        }
+
+        requestAnimationFrame(renderVolcanoPhysics);
+      }
+
+      renderVolcanoPhysics();
+    });
+  </script>
+</body>
+</html>

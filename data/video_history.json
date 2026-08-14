@@ -1460,5 +1460,19 @@
     "uploaded": true,
     "video_id": "i-Yk-1pWht8",
     "timestamp": "2026-08-14T09:21:49.623424+00:00"
+  },
+  {
+    "id": 9,
+    "topic_idx": 9,
+    "puzzle_num": 10,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "Prefetcher Friendly Code: spatial vs temporal locality in hot loops",
+    "title": "Prefetcher Friendly Code: spatial vs temporal locality ",
+    "viz_type": "stack",
+    "game_mechanic": "quest",
+    "uploaded": true,
+    "video_id": "UisIPvgKdv4",
+    "timestamp": "2026-08-14T13:26:55.591060+00:00"
   }
 ]

@@ -1474,5 +1474,19 @@
     "uploaded": true,
     "video_id": "UisIPvgKdv4",
     "timestamp": "2026-08-14T13:26:55.591060+00:00"
+  },
+  {
+    "id": 10,
+    "topic_idx": 10,
+    "puzzle_num": 11,
+    "series": "Systems",
+    "chapter": "Memory",
+    "topic": "Virtual Memory: page tables, TLB, huge pages, and address spaces",
+    "title": "Virtual Memory: page tables, TLB, huge pages, and addre",
+    "viz_type": "grid",
+    "game_mechanic": "xp_grind",
+    "uploaded": true,
+    "video_id": "g5r_1bplpvY",
+    "timestamp": "2026-08-14T17:08:21.481964+00:00"
   }
 ]

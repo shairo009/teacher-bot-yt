@@ -1446,5 +1446,19 @@
     "uploaded": true,
     "video_id": "cu5VZ1Jx1Wo",
     "timestamp": "2026-08-14T02:31:11.291859+00:00"
+  },
+  {
+    "id": 8,
+    "topic_idx": 8,
+    "puzzle_num": 9,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "False Sharing: cache lines destroyed by unrelated adjacent variables",
+    "title": "False Sharing: cache lines destroyed by unrelated adjac",
+    "viz_type": "grid",
+    "game_mechanic": "raid",
+    "uploaded": true,
+    "video_id": "i-Yk-1pWht8",
+    "timestamp": "2026-08-14T09:21:49.623424+00:00"
   }
 ]

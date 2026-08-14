@@ -1432,5 +1432,19 @@
     "uploaded": true,
     "video_id": "bbTvs9lLPiA",
     "timestamp": "2026-08-13T18:17:37.713749+00:00"
+  },
+  {
+    "id": 7,
+    "topic_idx": 7,
+    "puzzle_num": 8,
+    "series": "Systems",
+    "chapter": "CPU Internals",
+    "topic": "Spectre and Meltdown: exploiting speculative execution via cache timing",
+    "title": "Spectre and Meltdown: exploiting speculative execution ",
+    "viz_type": "grid",
+    "game_mechanic": "boss_fight",
+    "uploaded": true,
+    "video_id": "cu5VZ1Jx1Wo",
+    "timestamp": "2026-08-14T02:31:11.291859+00:00"
   }
 ]

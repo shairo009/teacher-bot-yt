@@ -1,6 +1,8 @@
 name: Expert Tech Bot — Generate 2-Min Video
 
 on:
+  push:
+    branches: [main]
   schedule:
     - cron: '0 */4 * * *'
   workflow_dispatch:

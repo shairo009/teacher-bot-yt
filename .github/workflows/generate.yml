@@ -90,12 +90,18 @@ jobs:
         run: |
           DRY="${{ github.event.inputs.dry_run || 'false' }}"
           TOPIC="${{ github.event.inputs.topic_id || '' }}"
-          CMD="PYTHONPATH=. python src/advanced_runtime.py"
-          [ "$DRY" = "true" ] && CMD="$CMD --dry-run"
-          [ -n "$TOPIC" ] && CMD="$CMD --topic-id $TOPIC"
-          [ -z "$TOKEN_JSON" ] && CMD="$CMD --dry-run"
-          echo "Running advanced runtime: $CMD"
-          $CMD
+
+          # Keep PYTHONPATH as an environment variable, not part of the command name.
+          export PYTHONPATH="."
+          CMD=(python src/advanced_runtime.py)
+          [ "$DRY" = "true" ] && CMD+=(--dry-run)
+          [ -n "$TOPIC" ] && CMD+=(--topic-id "$TOPIC")
+          [ -z "$TOKEN_JSON" ] && CMD+=(--dry-run)
+
+          printf 'Running advanced runtime:'
+          printf ' %q' "${CMD[@]}"
+          echo
+          "${CMD[@]}"
 
       - name: Upload video + QA artifacts
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'

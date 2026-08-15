@@ -2,7 +2,6 @@ name: Expert Tech Bot — Generate 2-Min Video
 
 on:
   schedule:
-    # Automatic 24/7 Cloud Execution Every 4 Hours (6 Times Daily):
     - cron: '0 */4 * * *'
   workflow_dispatch:
     inputs:
@@ -37,67 +36,40 @@ jobs:
         id: rate_check
         run: |
           FORCE="${{ github.event.inputs.force || 'false' }}"
-          if [ "$FORCE" = "true" ]; then
-            echo "skip=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
+          if [ "$FORCE" = "true" ]; then echo "skip=false" >> $GITHUB_OUTPUT; exit 0; fi
           if [ -f data/video_history.json ]; then
             HOURS=$(python3 -c "
           import json
           from datetime import datetime, timezone
           try:
-              with open('data/video_history.json') as f:
-                  history = json.load(f)
-              if history:
-                  last = datetime.fromisoformat(history[-1]['timestamp'])
-                  if last.tzinfo is None:
-                      last = last.replace(tzinfo=timezone.utc)
-                  print(f'{(datetime.now(timezone.utc) - last).total_seconds() / 3600:.2f}')
-              else:
-                  print('999')
-          except:
-              print('999')
-          ")
+              h=json.load(open('data/video_history.json'))
+              last=datetime.fromisoformat(h[-1]['timestamp'])
+              if last.tzinfo is None: last=last.replace(tzinfo=timezone.utc)
+              print(f'{(datetime.now(timezone.utc)-last).total_seconds()/3600:.2f}')
+          except: print('999')")
             echo "Hours since last video: $HOURS"
-            SKIP=$(python3 -c "print('true' if float('$HOURS') < 3.5 else 'false')")
-            echo "skip=$SKIP" >> $GITHUB_OUTPUT
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-          fi
+            echo "skip=$(python3 -c \"print('true' if float('$HOURS') < 3.5 else 'false')\")" >> $GITHUB_OUTPUT
+          else echo "skip=false" >> $GITHUB_OUTPUT; fi
 
       - name: Daily limit check (max 6/day)
         if: steps.rate_check.outputs.skip != 'true'
         id: daily_check
         run: |
           FORCE="${{ github.event.inputs.force || 'false' }}"
-          if [ "$FORCE" = "true" ]; then
-            echo "skip=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
+          if [ "$FORCE" = "true" ]; then echo "skip=false" >> $GITHUB_OUTPUT; exit 0; fi
           COUNT=$(python3 -c "
           import json
           from datetime import datetime, timezone
           try:
-              with open('data/video_history.json') as f:
-                  history = json.load(f)
-              today = datetime.now(timezone.utc).date()
-              def d(h):
+              h=json.load(open('data/video_history.json')); today=datetime.now(timezone.utc).date()
+              def d(x):
                   try:
-                      ts = datetime.fromisoformat(h['timestamp'])
-                      if ts.tzinfo is None: ts = ts.replace(tzinfo=timezone.utc)
-                      return ts.date()
+                      t=datetime.fromisoformat(x['timestamp']); t=t if t.tzinfo else t.replace(tzinfo=timezone.utc); return t.date()
                   except: return None
-              print(sum(1 for h in history if d(h) == today))
-          except:
-              print(0)
-          " 2>/dev/null || echo 0)
+              print(sum(1 for x in h if d(x)==today))
+          except: print(0)" 2>/dev/null || echo 0)
           echo "Videos today: $COUNT"
-          if [ "$COUNT" -ge 6 ]; then
-            echo "Daily limit reached."
-            echo "skip=true" >> $GITHUB_OUTPUT
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-          fi
+          if [ "$COUNT" -ge 6 ]; then echo "skip=true" >> $GITHUB_OUTPUT; else echo "skip=false" >> $GITHUB_OUTPUT; fi
 
       - name: Setup Python 3.11
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
@@ -110,12 +82,7 @@ jobs:
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends \
-            ffmpeg \
-            fonts-noto \
-            fonts-dejavu-core \
-            fonts-liberation \
-            libgdk-pixbuf2.0-dev
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-noto fonts-dejavu-core fonts-liberation libgdk-pixbuf2.0-dev
 
       - name: Install Python dependencies
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
@@ -123,7 +90,7 @@ jobs:
           pip install --upgrade pip wheel
           pip install -r requirements.txt
 
-      - name: Generate video — Production Quality Pipeline
+      - name: Generate video — Advanced AI Director + QA
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         env:
           OPENAI_API_KEY:       ${{ secrets.OPENAI_API_KEY }}
@@ -134,16 +101,14 @@ jobs:
         run: |
           DRY="${{ github.event.inputs.dry_run || 'false' }}"
           TOPIC="${{ github.event.inputs.topic_id || '' }}"
-
-          CMD="PYTHONPATH=. python src/pro_quality_pipeline.py"
+          CMD="PYTHONPATH=. python src/advanced_runtime.py"
           [ "$DRY" = "true" ] && CMD="$CMD --dry-run"
           [ -n "$TOPIC" ] && CMD="$CMD --topic-id $TOPIC"
           [ -z "$TOKEN_JSON" ] && CMD="$CMD --dry-run"
-
-          echo "Running production pipeline: $CMD"
+          echo "Running advanced runtime: $CMD"
           $CMD
 
-      - name: Upload video artifact
+      - name: Upload video + QA artifacts
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
@@ -151,23 +116,18 @@ jobs:
           path: |
             tmp/**/final.mp4
             tmp/**/thumbnail.jpg
+            tmp/**/quality_report.json
           retention-days: 7
           if-no-files-found: warn
 
-      - name: Save progress to repo
+      - name: Save progress and creative memory
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         run: |
-          git config user.name  'github-actions[bot]'
+          git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data/tech_progress.json data/video_history.json
-          git diff --cached --quiet && echo "No changes" && exit 0
-          NEXT=$(python3 -c "
-          import json
-          try:
-              print(json.load(open('data/tech_progress.json'))['current_id'])
-          except:
-              print('?')
-          ")
-          git commit -m "Video #$NEXT complete [skip ci]"
+          git add data/tech_progress.json data/video_history.json data/creative_memory.json
+          git diff --cached --quiet && echo 'No changes' && exit 0
+          NEXT=$(python3 -c "import json; print(json.load(open('data/tech_progress.json')).get('current_id','?'))" 2>/dev/null || echo '?')
+          git commit -m "Advanced video #$NEXT complete [skip ci]"
           git pull --rebase origin main
           git push

@@ -135,7 +135,7 @@ jobs:
           DRY="${{ github.event.inputs.dry_run || 'false' }}"
           TOPIC="${{ github.event.inputs.topic_id || '' }}"
 
-          CMD="python src/pro_quality_pipeline.py"
+          CMD="PYTHONPATH=. python src/pro_quality_pipeline.py"
           [ "$DRY" = "true" ] && CMD="$CMD --dry-run"
           [ -n "$TOPIC" ] && CMD="$CMD --topic-id $TOPIC"
           [ -z "$TOKEN_JSON" ] && CMD="$CMD --dry-run"

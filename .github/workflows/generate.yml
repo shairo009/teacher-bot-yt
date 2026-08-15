@@ -104,8 +104,14 @@ jobs:
             tmp/**/final.mp4
             tmp/**/thumbnail.jpg
             tmp/**/quality_report.json
-          retention-days: 7
+          retention-days: 2
           if-no-files-found: warn
+
+      - name: Cleanup generated media
+        if: always()
+        run: |
+          rm -rf tmp/*
+          find . -type f \( -name '*.mp4' -o -name '*.wav' -o -name '*.mp3' -o -name '*.m4a' -o -name '*.mov' \) -not -path './.git/*' -delete || true
 
       - name: Save progress and creative memory
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'

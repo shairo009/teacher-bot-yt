@@ -1502,5 +1502,19 @@
     "uploaded": true,
     "video_id": "jBAxlP05go4",
     "timestamp": "2026-08-15T01:45:42.325458+00:00"
+  },
+  {
+    "id": 12,
+    "topic_idx": 12,
+    "puzzle_num": 13,
+    "series": "Systems",
+    "chapter": "Memory",
+    "topic": "Slab Allocator: pre-carved object pools for zero-cost kernel allocs",
+    "title": "Slab Allocator: pre-carved object pools for zero-cost k",
+    "viz_type": "memory",
+    "game_mechanic": "boss_fight",
+    "uploaded": true,
+    "video_id": "MPkvUxOw3hE",
+    "timestamp": "2026-08-15T08:45:39.437307+00:00"
   }
 ]

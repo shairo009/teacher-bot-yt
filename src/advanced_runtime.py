@@ -31,6 +31,8 @@ def _save_memory(data):
 
 
 def install_advanced():
+    # Lock the final runtime to the intended 2-minute format: 9 scenes x ~13.33s.
+    pro_quality_pipeline.MIN_STEP_SECONDS = 13.333333
     base = pro_quality_pipeline.install()
     original_prompt = base.build_llm_prompt
     original_call = base.call_llm

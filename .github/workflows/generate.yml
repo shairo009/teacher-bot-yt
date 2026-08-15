@@ -38,40 +38,25 @@ jobs:
         id: rate_check
         run: |
           FORCE="${{ github.event.inputs.force || 'false' }}"
-          if [ "$FORCE" = "true" ]; then echo "skip=false" >> $GITHUB_OUTPUT; exit 0; fi
+          if [ "$FORCE" = "true" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
           if [ -f data/video_history.json ]; then
-            HOURS=$(python3 -c "
-          import json
-          from datetime import datetime, timezone
-          try:
-              h=json.load(open('data/video_history.json'))
-              last=datetime.fromisoformat(h[-1]['timestamp'])
-              if last.tzinfo is None: last=last.replace(tzinfo=timezone.utc)
-              print(f'{(datetime.now(timezone.utc)-last).total_seconds()/3600:.2f}')
-          except: print('999')")
+            HOURS=$(python3 -c 'import json; from datetime import datetime,timezone; h=json.load(open("data/video_history.json")); last=datetime.fromisoformat(h[-1]["timestamp"]); last=last if last.tzinfo else last.replace(tzinfo=timezone.utc); print((datetime.now(timezone.utc)-last).total_seconds()/3600)' 2>/dev/null || echo 999)
             echo "Hours since last video: $HOURS"
-            echo "skip=$(python3 -c \"print('true' if float('$HOURS') < 3.5 else 'false')\")" >> $GITHUB_OUTPUT
-          else echo "skip=false" >> $GITHUB_OUTPUT; fi
+            SKIP=$(awk -v h="$HOURS" 'BEGIN {print (h < 3.5 ? "true" : "false")}')
+            echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Daily limit check (max 6/day)
         if: steps.rate_check.outputs.skip != 'true'
         id: daily_check
         run: |
           FORCE="${{ github.event.inputs.force || 'false' }}"
-          if [ "$FORCE" = "true" ]; then echo "skip=false" >> $GITHUB_OUTPUT; exit 0; fi
-          COUNT=$(python3 -c "
-          import json
-          from datetime import datetime, timezone
-          try:
-              h=json.load(open('data/video_history.json')); today=datetime.now(timezone.utc).date()
-              def d(x):
-                  try:
-                      t=datetime.fromisoformat(x['timestamp']); t=t if t.tzinfo else t.replace(tzinfo=timezone.utc); return t.date()
-                  except: return None
-              print(sum(1 for x in h if d(x)==today))
-          except: print(0)" 2>/dev/null || echo 0)
+          if [ "$FORCE" = "true" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          COUNT=$(python3 -c 'import json; from datetime import datetime,timezone; h=json.load(open("data/video_history.json")); today=datetime.now(timezone.utc).date(); print(sum(1 for x in h if (datetime.fromisoformat(x["timestamp"]).replace(tzinfo=timezone.utc) if datetime.fromisoformat(x["timestamp"]).tzinfo is None else datetime.fromisoformat(x["timestamp"]).astimezone(timezone.utc)).date()==today))' 2>/dev/null || echo 0)
           echo "Videos today: $COUNT"
-          if [ "$COUNT" -ge 6 ]; then echo "skip=true" >> $GITHUB_OUTPUT; else echo "skip=false" >> $GITHUB_OUTPUT; fi
+          if [ "$COUNT" -ge 6 ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; else echo "skip=false" >> "$GITHUB_OUTPUT"; fi
 
       - name: Setup Python 3.11
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
@@ -95,11 +80,11 @@ jobs:
       - name: Generate video — Advanced AI Director + QA
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         env:
-          OPENAI_API_KEY:       ${{ secrets.OPENAI_API_KEY }}
-          OPENROUTER_API_KEY:   ${{ secrets.OPENROUTER_API_KEY }}
-          OPENCODE_API_KEY:     ${{ secrets.OPENCODE_API_KEY }}
-          TOKEN_JSON:           ${{ secrets.TOKEN_JSON }}
-          CLIENT_SECRETS_JSON:  ${{ secrets.CLIENT_SECRETS_JSON }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
+          CLIENT_SECRETS_JSON: ${{ secrets.CLIENT_SECRETS_JSON }}
         run: |
           DRY="${{ github.event.inputs.dry_run || 'false' }}"
           TOPIC="${{ github.event.inputs.topic_id || '' }}"
@@ -129,7 +114,7 @@ jobs:
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add data/tech_progress.json data/video_history.json data/creative_memory.json
           git diff --cached --quiet && echo 'No changes' && exit 0
-          NEXT=$(python3 -c "import json; print(json.load(open('data/tech_progress.json')).get('current_id','?'))" 2>/dev/null || echo '?')
+          NEXT=$(python3 -c 'import json; print(json.load(open("data/tech_progress.json")).get("current_id","?"))' 2>/dev/null || echo '?')
           git commit -m "Advanced video #$NEXT complete [skip ci]"
           git pull --rebase origin main
           git push

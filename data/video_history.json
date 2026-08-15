@@ -1488,5 +1488,19 @@
     "uploaded": true,
     "video_id": "g5r_1bplpvY",
     "timestamp": "2026-08-14T17:08:21.481964+00:00"
+  },
+  {
+    "id": 11,
+    "topic_idx": 11,
+    "puzzle_num": 12,
+    "series": "Systems",
+    "chapter": "Memory",
+    "topic": "Buddy Allocator: how Linux kernel splits and merges memory blocks",
+    "title": "Buddy Allocator: how Linux kernel splits and merges mem",
+    "viz_type": "memory",
+    "game_mechanic": "skill_tree",
+    "uploaded": true,
+    "video_id": "jBAxlP05go4",
+    "timestamp": "2026-08-15T01:45:42.325458+00:00"
   }
 ]

@@ -38,6 +38,7 @@ jobs:
         id: rate_check
         run: |
           FORCE="${{ github.event.inputs.force || 'false' }}"
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.event.head_commit.message }}" = "RUN VIDEO NOW" ]; then FORCE="true"; fi
           if [ "$FORCE" = "true" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
           if [ -f data/video_history.json ]; then
             HOURS=$(python3 -c 'import json; from datetime import datetime,timezone; h=json.load(open("data/video_history.json")); last=datetime.fromisoformat(h[-1]["timestamp"]); last=last if last.tzinfo else last.replace(tzinfo=timezone.utc); print((datetime.now(timezone.utc)-last).total_seconds()/3600)' 2>/dev/null || echo 999)
@@ -53,6 +54,7 @@ jobs:
         id: daily_check
         run: |
           FORCE="${{ github.event.inputs.force || 'false' }}"
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.event.head_commit.message }}" = "RUN VIDEO NOW" ]; then FORCE="true"; fi
           if [ "$FORCE" = "true" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
           COUNT=$(python3 -c 'import json; from datetime import datetime,timezone; h=json.load(open("data/video_history.json")); today=datetime.now(timezone.utc).date(); print(sum(1 for x in h if (datetime.fromisoformat(x["timestamp"]).replace(tzinfo=timezone.utc) if datetime.fromisoformat(x["timestamp"]).tzinfo is None else datetime.fromisoformat(x["timestamp"]).astimezone(timezone.utc)).date()==today))' 2>/dev/null || echo 0)
           echo "Videos today: $COUNT"

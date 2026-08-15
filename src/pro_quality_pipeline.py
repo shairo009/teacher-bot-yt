@@ -24,7 +24,7 @@ from src.visual_variant_bank import variant_for
 
 MIN_STEP_SECONDS = 7.0
 WIDTH, HEIGHT, FPS = 1080, 1920, 30
-VIZ_BOX = (28, 212, 1052, 1048)  # strict safe area inside the existing visual panel
+VIZ_BOX = (28, 212, 1052, 1048)
 
 
 def _seed(text: str) -> int:
@@ -32,7 +32,6 @@ def _seed(text: str) -> int:
 
 
 def _secondary(accent):
-    # Stable complementary-ish accent without changing the base engine palette.
     r, g, b = accent
     return (min(255, 255 - r // 3), min(255, 255 - g // 4), min(255, 255 - b // 5))
 
@@ -47,17 +46,11 @@ def _overlay_variant(img: Image.Image, variant: str, global_frame: int, step_idx
     x0, y0, x1, y1 = VIZ_BOX
     cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
     s = _seed(variant)
-    accent = (
-        70 + (s * 17) % 170,
-        70 + (s * 31) % 170,
-        70 + (s * 47) % 170,
-    )
+    accent = (70 + (s * 17) % 170, 70 + (s * 31) % 170, 70 + (s * 47) % 170)
     secondary = _secondary(accent)
     effect, motif = variant.split(" ", 1)
     t = global_frame / FPS
 
-    # Everything below stays within VIZ_BOX and uses low alpha so the actual
-    # algorithm visualization remains the focal point.
     if effect == "orbit":
         r = 250 + int(20 * math.sin(t * 2.0))
         d.ellipse((cx-r, cy-r, cx+r, cy+r), outline=(*accent, 48), width=2)
@@ -71,12 +64,13 @@ def _overlay_variant(img: Image.Image, variant: str, global_frame: int, step_idx
         y = y0 + 80 + int((t * 180) % max(1, y1-y0-160))
         d.line((x0+15, y, x1-15, y), fill=(*accent, 48), width=3)
     elif effect == "flow":
-        for i in range(9):
-            yy = y0 + 120 + i * 105
+        for i in range(8):
+            yy = y0 + 80 + i * 120
             shift = int((t * (40 + i*5) + s % 100) % 120)
             x = x0 + 35 + shift
-            d.line((x, yy, min(x+150, x1-20), yy), fill=(*accent, 42), width=2)
-            d.polygon([(min(x+150, x1-20), yy), (min(x+138, x1-20), yy-6), (min(x+138, x1-20), yy+6)], fill=(*secondary, 70))
+            end = min(x+150, x1-20)
+            d.line((x, yy, end, yy), fill=(*accent, 42), width=2)
+            d.polygon([(end, yy), (max(x, end-12), yy-6), (max(x, end-12), yy+6)], fill=(*secondary, 70))
     elif effect == "radar":
         r = 300
         a = t * 1.4
@@ -84,18 +78,14 @@ def _overlay_variant(img: Image.Image, variant: str, global_frame: int, step_idx
         d.line((cx, cy, ex, ey), fill=(*accent, 65), width=3)
         d.arc((cx-r, cy-r, cx+r, cy+r), start=0, end=int((a*180/math.pi)%360), fill=(*accent, 35), width=2)
     elif effect == "wave":
-        pts = []
-        for xx in range(x0+20, x1-20, 18):
-            yy = cy + int(45 * math.sin(xx/75 + t*2.4 + s%17))
-            pts.append((xx, yy))
+        pts = [(xx, cy + int(45 * math.sin(xx/75 + t*2.4 + s%17))) for xx in range(x0+20, x1-20, 18)]
         d.line(pts, fill=(*accent, 55), width=3)
     elif effect == "constellation":
         pts = []
         rng = __import__("random").Random(s)
         for i in range(14):
             px = rng.randint(x0+50, x1-50)
-            py = rng.randint(y0+100, y1-50)
-            py += int(15 * math.sin(t + i))
+            py = rng.randint(y0+100, y1-50) + int(15 * math.sin(t + i))
             pts.append((px, py))
             d.ellipse((px-3, py-3, px+3, py+3), fill=(*secondary, 95))
         for i in range(len(pts)-1):
@@ -114,19 +104,19 @@ def _overlay_variant(img: Image.Image, variant: str, global_frame: int, step_idx
             d.rectangle((x0+80+off, yy, x1-80+off, yy+2), fill=(*accent, 40))
     elif effect == "circuit":
         rng = __import__("random").Random(s)
-        for i in range(8):
-            yy = y0 + 80 + i*115
+        for i in range(7):
+            yy = y0 + 60 + i*150
             start = x0 + rng.randint(30, 140)
-            mid = start + 90 + (s+i*31)%110
+            mid = min(x1-180, start + 90 + (s+i*31)%110)
             end = min(x1-30, mid + 150)
             d.line((start, yy, mid, yy), fill=(*accent, 45), width=2)
-            d.line((mid, yy, mid, yy+35), fill=(*accent, 45), width=2)
-            d.line((mid, yy+35, end, yy+35), fill=(*secondary, 45), width=2)
-            d.ellipse((end-4, yy+31, end+4, yy+39), fill=(*accent, 85))
+            d.line((mid, yy, mid, min(y1-20, yy+35)), fill=(*accent, 45), width=2)
+            d.line((mid, min(y1-20, yy+35), end, min(y1-20, yy+35)), fill=(*secondary, 45), width=2)
+            d.ellipse((end-4, min(y1-24, yy+31), end+4, min(y1-16, yy+39)), fill=(*accent, 85))
     elif effect == "rings":
         for i in range(4):
             r = 90 + i*75 + int(10*math.sin(t*1.7+i))
-            d.ellipse((cx-r, cy-r, cx+r, cy+r), outline=(*accent, 28+i*8), width=2)
+            d.ellipse((cx-r,cy-r,cx+r,cy+r), outline=(*accent, 28+i*8), width=2)
     elif effect == "particles":
         rng = __import__("random").Random(s)
         for i in range(45):
@@ -336,13 +326,14 @@ def install():
             print(f"❌ Final compose error: {r.stderr[-1000:]}")
             return None
 
-        # Hard postcondition checks. Never upload an incorrectly shaped video.
         probe=subprocess.run(["ffprobe","-v","error","-select_streams","v:0","-show_entries","stream=width,height,sample_aspect_ratio","-of","csv=p=0",str(output_path)],capture_output=True,text=True)
         vals=probe.stdout.strip().split(",")
         if len(vals)>=2:
             w,h=int(vals[0]),int(vals[1])
             if (w,h)!=(1080,1920):
                 raise RuntimeError(f"Output canvas check failed: {w}x{h}; expected 1080x1920")
+            if len(vals)>=3 and vals[2] not in ("1:1", "1/1"):
+                raise RuntimeError(f"Output pixel aspect check failed: {vals[2]}")
         duration=_probe(output_path)
         if duration < MIN_STEP_SECONDS*base.N_STEPS-0.5:
             raise RuntimeError(f"Output duration check failed: {duration:.2f}s")
@@ -365,7 +356,6 @@ def install():
     base.render_frames=render_frames
     base.compose_video=compose_video
     base.generate_thumbnail=generate_thumbnail
-
     return base
 
 

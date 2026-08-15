@@ -1,7 +1,4 @@
-"""Advanced runtime wrapper.
-Adds director planning, anti-repeat memory, post-render QA, and evidence-based tuning
-without replacing the stable YouTube/auth/upload code in main.py.
-"""
+"""Advanced runtime wrapper with clean phone-first rendering."""
 from __future__ import annotations
 import asyncio, hashlib, json, re
 from pathlib import Path
@@ -9,6 +6,7 @@ from pathlib import Path
 from src import pro_quality_pipeline
 from src.advanced_director import director_brief, prompt_suffix
 from src.quality_auditor import audit_video
+from src.clean_short_layout import clean_frame
 
 ROOT = Path(__file__).resolve().parent.parent
 HISTORY = ROOT / "data" / "video_history.json"
@@ -21,8 +19,10 @@ def _puzzle_number(prompt: str) -> int:
 
 
 def _load_memory():
-    try: return json.loads(MEMORY.read_text(encoding="utf-8"))
-    except Exception: return {"fingerprints": [], "variants": {}, "topics": {}}
+    try:
+        return json.loads(MEMORY.read_text(encoding="utf-8"))
+    except Exception:
+        return {"fingerprints": [], "variants": {}, "topics": {}}
 
 
 def _save_memory(data):
@@ -36,21 +36,37 @@ def install_advanced():
     original_call = base.call_llm
     original_compose = base.compose_video
 
+    # Final phone-first pass: remove non-essential game UI text after rendering.
+    original_render = pro_quality_pipeline.VariantPuzzleEngine.render_frame
+    original_thumb = pro_quality_pipeline.VariantPuzzleEngine.render_thumbnail
+
+    def clean_render(self, scene, step_idx, step_progress, global_frame, total_steps):
+        frame = original_render(self, scene, step_idx, step_progress, global_frame, total_steps)
+        return clean_frame(frame, scene)
+
+    def clean_thumbnail(self, scene):
+        frame = original_thumb(self, scene)
+        return clean_frame(frame, scene)
+
+    pro_quality_pipeline.VariantPuzzleEngine.render_frame = clean_render
+    pro_quality_pipeline.VariantPuzzleEngine.render_thumbnail = clean_thumbnail
+
     def build_prompt(topic, game_mechanic, game_tag, puzzle_num):
         p = original_prompt(topic, game_mechanic, game_tag, puzzle_num)
         brief = director_brief(int(puzzle_num), HISTORY)
         memory = _load_memory()
         recent = list(memory.get("variants", {}).keys())[-20:]
-        anti_repeat = "Avoid these recent creative signatures: " + ", ".join(recent) if recent else "No recent signatures; maximize novelty."
+        anti_repeat = (
+            "Avoid these recent creative signatures: " + ", ".join(recent)
+            if recent else "No recent signatures; maximize novelty."
+        )
         return p + prompt_suffix(brief) + "\nANTI-REPEAT RULE: " + anti_repeat + "\n"
 
     async def call_llm(prompt, api_key):
         scene = await original_call(prompt, api_key)
         n = _puzzle_number(prompt)
-        brief = director_brief(n, HISTORY)
-        scene["director"] = brief
+        scene["director"] = director_brief(n, HISTORY)
         scene["puzzle_num"] = n
-        # Keep spoken content concise enough for natural TTS while preserving 9-step structure.
         narr = list(scene.get("narration") or [])
         scene["narration"] = [str(x).strip() for x in narr[:base.N_STEPS]]
         return scene

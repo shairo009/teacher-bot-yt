@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 W, H = 1080, 1920
 HEADER = (0, 200)
-VIZ = (200, 1060)
+VIZ_UI = (200, 285)
 CTA = (1060, 1140)
 CODE = (1140, 1740)
 FOOTER = (1740, 1920)
@@ -27,29 +27,25 @@ def _font(size=42, bold=True):
 
 
 def clean_frame(img: Image.Image, scene: dict) -> Image.Image:
-    """Return a clean 9:16 frame with only useful educational text.
-
-    We intentionally remove puzzle numbers, difficulty, stars, CTA strips,
-    timers, complexity stats, and decorative labels. The topic title remains.
-    """
+    """Return a clean 9:16 frame with only useful educational text."""
     img = img.convert("RGB")
     out = img.copy()
     d = ImageDraw.Draw(out)
+    bg = (9, 11, 18)
 
-    # Preserve the visual and code areas; simplify the surrounding UI bands.
-    d.rectangle([0, HEADER[0], W, HEADER[1]], fill=(9, 11, 18))
-    d.rectangle([0, CTA[0], W, CTA[1]], fill=(9, 11, 18))
-    d.rectangle([0, FOOTER[0], W, FOOTER[1]], fill=(9, 11, 18))
+    # Remove all non-essential game/UI text bands.
+    d.rectangle([0, HEADER[0], W, HEADER[1]], fill=bg)
+    d.rectangle([0, VIZ_UI[0], W, VIZ_UI[1]], fill=(7, 10, 17))
+    d.rectangle([0, CTA[0], W, CTA[1]], fill=bg)
+    d.rectangle([0, FOOTER[0], W, FOOTER[1]], fill=bg)
 
-    # Remove the editor's decorative filename tab, leaving the code itself.
-    d.rectangle([0, CODE[0], W, CODE[0] + 36], fill=(18, 20, 28))
+    # Remove only the decorative editor filename tab.
+    d.rectangle([0, CODE[0], W, CODE[0] + 38], fill=(18, 20, 28))
 
-    # Keep only the useful topic title. No puzzle number, difficulty, stars,
-    # live-execution label, CTA, timer, memory/complexity stats, or step text.
-    title = str(scene.get("title", "")).strip()
+    # Keep only the useful educational topic title.
+    title = str(scene.get("title", scene.get("topic", ""))).strip()
     if title:
         font = _font(44, True)
-        # Safe horizontal clipping so long AI titles never leave the canvas.
         max_chars = 42
         if len(title) > max_chars:
             title = title[: max_chars - 1].rstrip() + "…"

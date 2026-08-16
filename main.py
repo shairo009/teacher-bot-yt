@@ -632,7 +632,34 @@ async def main():
     topic       = TECH_TOPICS[topic_idx]
     series, chapter, topic_desc = topic
 
-    print(f"\n🎮 Video #{current_id} — {series} › {chapter}")
+    # ── Duplicate detection: skip IDs already in tech history ────────────
+    # Prevents same video being uploaded if progress.json didn't get pushed
+    tech_done_ids = set()
+    if history_path.exists():
+        try:
+            with open(history_path) as f:
+                all_hist = json.load(f)
+            tech_done_ids = {h['id'] for h in all_hist if 'id' in h}
+        except:
+            pass
+
+    original_id = current_id
+    while current_id in tech_done_ids and args.topic_id is None:
+        current_id += 1
+    if current_id != original_id:
+        print(f"  \u26a0 IDs {original_id}-{current_id-1} already done \u2014 jumping to #{current_id}")
+        topic_idx = current_id % total
+        topic     = TECH_TOPICS[topic_idx]
+        series, chapter, topic_desc = topic
+
+    # ── Save progress IMMEDIATELY ───────────────────────────────────────
+    # Even if this run crashes mid-render, next run will start at current_id+1
+    if args.topic_id is None:  # don't save if manually forced
+        with open(progress_path, "w") as f:
+            json.dump({"current_id": current_id + 1}, f, indent=2)
+        print(f"  \U0001f4be Progress saved \u2192 next run = #{current_id + 1}")
+
+    print(f"\n\U0001f3ae Video #{current_id} \u2014 {series} \u203a {chapter}")
     print(f"   Topic: {topic_desc}")
 
     # ── Pick game mechanic (deterministic per video id) ───────────────────

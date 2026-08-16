@@ -1544,5 +1544,19 @@
     "uploaded": true,
     "video_id": "iudG-q-8cLo",
     "timestamp": "2026-08-15T20:41:34.743600+00:00"
+  },
+  {
+    "id": 16,
+    "topic_idx": 16,
+    "puzzle_num": 17,
+    "series": "Systems",
+    "chapter": "Memory",
+    "topic": "Transparent Huge Pages: 2MB pages, silent performance killer",
+    "title": "Transparent Huge Pages: 2MB pages, silent performance k",
+    "viz_type": "grid",
+    "game_mechanic": "quest",
+    "uploaded": true,
+    "video_id": "bHBy66M7KtI",
+    "timestamp": "2026-08-16T01:49:10.374088+00:00"
   }
 ]

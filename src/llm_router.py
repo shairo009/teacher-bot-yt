@@ -1,7 +1,7 @@
 """Reliable free-model router for Teacher Bot scene generation.
 
-Uses the current OpenCode Zen free chat-completions endpoint first, then
-OpenRouter's dynamic free-model router. Secrets are read only from env vars.
+Prefers OpenRouter's dynamic free router when a key is configured, then falls
+back to OpenCode's current free inference endpoint. Secrets stay in env vars.
 """
 from __future__ import annotations
 
@@ -12,17 +12,15 @@ import time
 import urllib.error
 import urllib.request
 
-OPENCODE_BASE = "https://opencode.ai/zen/v1/chat/completions"
 OPENROUTER_BASE = "https://openrouter.ai/api/v1/chat/completions"
+OPENCODE_BASE = "https://opencode.ai/inference/openai/v1/chat/completions"
 
-# Current OpenCode Zen free models. Keep several fallbacks because free
-# endpoints can be temporarily rate-limited or rotated.
+# Current OpenCode free models supported by the OpenAI-compatible inference API.
 OPENCODE_FREE_MODELS = [
-    "hy3-free",
-    "deepseek-v4-flash-free",
     "mimo-v2.5-free",
-    "laguna-s-2.1-free",
-    "nemotron-3.5-lightning-free",
+    "hy3-free",
+    "nemotron-3-super-free",
+    "big-pickle",
 ]
 
 
@@ -34,14 +32,13 @@ def _extract_json(raw: str) -> dict:
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
-        # Some models add a short preamble. Recover the outer JSON object.
         start, end = raw.find("{"), raw.rfind("}")
         if start >= 0 and end > start:
             return json.loads(raw[start:end + 1])
         raise
 
 
-def _request(url: str, model: str, key: str, messages: list[dict], headers: dict) -> dict:
+def _request(url: str, model: str, key: str, messages: list[dict], headers: dict | None = None) -> dict:
     body = json.dumps({
         "model": model,
         "messages": messages,
@@ -50,10 +47,12 @@ def _request(url: str, model: str, key: str, messages: list[dict], headers: dict
     }).encode("utf-8")
     req_headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {key}",
-        "User-Agent": "TeacherBotYT/3.0",
-        **headers,
+        "User-Agent": "TeacherBotYT/3.1",
     }
+    if key:
+        req_headers["Authorization"] = f"Bearer {key}"
+    if headers:
+        req_headers.update(headers)
     req = urllib.request.Request(url, data=body, headers=req_headers, method="POST")
     with urllib.request.urlopen(req, timeout=120) as resp:
         data = json.loads(resp.read())
@@ -63,47 +62,67 @@ def _request(url: str, model: str, key: str, messages: list[dict], headers: dict
     return _extract_json(str(content or ""))
 
 
+def _try_openrouter(messages: list[dict], failures: list[str]) -> dict | None:
+    key = os.environ.get("OPENROUTER_API_KEY", "").strip()
+    if not key:
+        return None
+    model = os.environ.get("OPENROUTER_MODEL", "openrouter/free").strip() or "openrouter/free"
+    try:
+        result = _request(
+            OPENROUTER_BASE,
+            model,
+            key,
+            messages,
+            {
+                "HTTP-Referer": "https://github.com/shairo009/teacher-bot-yt",
+                "X-Title": "TeacherBotYT",
+            },
+        )
+        print(f"  ✅ LLM: OpenRouter / {model}")
+        return result
+    except Exception as exc:
+        failures.append(f"OpenRouter/{model}: {exc}")
+        print(f"  ⚠ OpenRouter/{model} failed: {exc}")
+        return None
+
+
+def _try_opencode(messages: list[dict], failures: list[str]) -> dict | None:
+    # OpenCode's current inference endpoint allows free models without auth.
+    configured_key = os.environ.get("OPENCODE_API_KEY", "").strip()
+    preferred = os.environ.get("OPENCODE_MODEL_NAME", "mimo-v2.5-free").strip()
+    models = [preferred] + [m for m in OPENCODE_FREE_MODELS if m != preferred]
+    for model in models:
+        try:
+            result = _request(OPENCODE_BASE, model, configured_key, messages)
+            print(f"  ✅ LLM: OpenCode inference / {model}")
+            return result
+        except Exception as exc:
+            failures.append(f"OpenCode/{model}: {exc}")
+            print(f"  ⚠ OpenCode/{model} failed: {exc}")
+            time.sleep(0.25)
+    return None
+
+
 def call_llm(prompt: str, api_key: str = "") -> dict:
-    """Try current free routes in order; fail only after all candidates fail."""
+    """Try current free routes and fail only after every configured route fails."""
     system = os.environ.get("LLM_SYSTEM_PROMPT", "")
-    messages = []
+    messages: list[dict] = []
     if system:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
 
-    failures = []
-    opencode_key = os.environ.get("OPENCODE_API_KEY", "") or api_key
-    if opencode_key:
-        preferred = os.environ.get("OPENCODE_MODEL_NAME", "hy3-free")
-        models = [preferred] + [m for m in OPENCODE_FREE_MODELS if m != preferred]
-        for model in models:
-            try:
-                result = _request(OPENCODE_BASE, model, opencode_key, messages, {"Origin": "https://opencode.ai"})
-                print(f"  ✅ LLM: OpenCode Zen / {model}")
-                return result
-            except Exception as exc:
-                failures.append(f"OpenCode/{model}: {exc}")
-                print(f"  ⚠ OpenCode/{model} failed: {exc}")
-                time.sleep(0.4)
+    failures: list[str] = []
 
-    openrouter_key = os.environ.get("OPENROUTER_API_KEY", "")
-    if openrouter_key:
-        # openrouter/free automatically selects a currently available free model.
-        try:
-            result = _request(
-                OPENROUTER_BASE,
-                os.environ.get("OPENROUTER_MODEL", "openrouter/free"),
-                openrouter_key,
-                messages,
-                {
-                    "HTTP-Referer": "https://github.com/shairo009/teacher-bot-yt",
-                    "X-Title": "TeacherBotYT",
-                },
-            )
-            print("  ✅ LLM: OpenRouter / openrouter/free")
-            return result
-        except Exception as exc:
-            failures.append(f"OpenRouter: {exc}")
-            print(f"  ⚠ OpenRouter/free failed: {exc}")
+    # OpenRouter is the primary route when its secret exists; unlike hard-coded
+    # model IDs, openrouter/free dynamically selects an available free model.
+    result = _try_openrouter(messages, failures)
+    if result is not None:
+        return result
 
-    raise RuntimeError("All free LLM routes failed: " + " | ".join(failures[-8:]))
+    # OpenCode free inference is the no-key fallback. This avoids treating an
+    # expired OpenCode Zen billing key as the only path to free generation.
+    result = _try_opencode(messages, failures)
+    if result is not None:
+        return result
+
+    raise RuntimeError("All free LLM routes failed: " + " | ".join(failures[-10:]))

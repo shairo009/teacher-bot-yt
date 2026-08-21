@@ -7,6 +7,7 @@ from src import pro_quality_pipeline
 from src.advanced_director import director_brief, prompt_suffix
 from src.quality_auditor import audit_video
 from src.clean_short_layout import clean_frame
+from src.llm_router import call_llm as routed_call_llm
 
 ROOT = Path(__file__).resolve().parent.parent
 HISTORY = ROOT / "data" / "video_history.json"
@@ -35,6 +36,9 @@ def install_advanced():
     pro_quality_pipeline.MIN_STEP_SECONDS = 13.333333
     base = pro_quality_pipeline.install()
     original_prompt = base.build_llm_prompt
+
+    # Replace the old provider chain with the current free-model router.
+    base.call_llm = routed_call_llm
     original_call = base.call_llm
     original_compose = base.compose_video
 
@@ -65,7 +69,8 @@ def install_advanced():
         return p + prompt_suffix(brief) + "\nANTI-REPEAT RULE: " + anti_repeat + "\n"
 
     async def call_llm(prompt, api_key):
-        scene = await original_call(prompt, api_key)
+        # The router is synchronous; run it in a worker so the async pipeline stays responsive.
+        scene = await asyncio.to_thread(original_call, prompt, api_key)
         n = _puzzle_number(prompt)
         scene["director"] = director_brief(n, HISTORY)
         scene["puzzle_num"] = n

@@ -1,182 +1,79 @@
-name: Animal Shorts — Generate a New Real Animal Video
+name: Animal Shorts
 
 on:
-  push:
-    branches: [main]
   schedule:
-    - cron: '0 */4 * * *'
+    # 6 AM, 10 AM, 2 PM, 6 PM, 10 PM and 2 AM India Standard Time.
+    - cron: "30 0,4,8,12,16,20 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run (skip YouTube upload)'
+        description: "Create the video artifact without advancing the animal rotation"
         required: false
-        default: 'false'
+        default: false
         type: boolean
-      force:
-        description: 'Force run (skip rate limit check)'
+      animal_id:
+        description: "Optional animal index (0 = Tiger, 1 = Red Panda, …)"
         required: false
-        default: 'false'
-        type: boolean
-      topic_id:
-        description: 'Force a specific animal rotation index (optional)'
-        required: false
-        default: ''
+        default: ""
         type: string
 
-# Prevent two scheduled/manual runs from generating and pushing history at once.
-# This removes the main source of concurrent git-push/rebase conflicts.
 concurrency:
-  group: teacher-bot-video-generation
+  group: animal-short-generation
   cancel-in-progress: false
 
+permissions:
+  contents: write
+
 jobs:
-  generate-video:
+  generate-animal-short:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    permissions:
-      contents: write
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Rate limit check (min 3.5h between videos)
-        id: rate_check
-        run: |
-          FORCE="${{ github.event.inputs.force || 'false' }}"
-          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.event.head_commit.message }}" = "RUN VIDEO NOW" ]; then FORCE="true"; fi
-          if [ "$FORCE" = "true" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
-          if [ -f data/video_history.json ]; then
-            HOURS=$(python3 - <<'EOF'
-import json, sys
-from datetime import datetime, timezone
-try:
-    h = json.load(open('data/video_history.json'))
-    tech = [x for x in h if 'id' in x and 'timestamp' in x]
-    if not tech:
-        print(999)
-    else:
-        last = datetime.fromisoformat(tech[-1]['timestamp'])
-        if last.tzinfo is None:
-            last = last.replace(tzinfo=timezone.utc)
-        print((datetime.now(timezone.utc) - last).total_seconds() / 3600)
-except Exception as e:
-    print(999, file=sys.stderr)
-    print(999)
-EOF
-)
-            echo "Hours since last video: $HOURS"
-            SKIP=$(awk -v h="$HOURS" 'BEGIN {print (h < 3.5 ? "true" : "false")}')
-            echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Daily limit check (max 6/day)
-        if: steps.rate_check.outputs.skip != 'true'
-        id: daily_check
-        run: |
-          FORCE="${{ github.event.inputs.force || 'false' }}"
-          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.event.head_commit.message }}" = "RUN VIDEO NOW" ]; then FORCE="true"; fi
-          if [ "$FORCE" = "true" ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0; fi
-          COUNT=$(python3 - <<'EOF'
-import json, sys
-from datetime import datetime, timezone
-try:
-    h = json.load(open('data/video_history.json'))
-    today = datetime.now(timezone.utc).date()
-    tech = [x for x in h if 'id' in x and 'timestamp' in x]
-    def get_date(x):
-        try:
-            ts = datetime.fromisoformat(x['timestamp'])
-            if ts.tzinfo is None: ts = ts.replace(tzinfo=timezone.utc)
-            return ts.date()
-        except: return None
-    print(sum(1 for x in tech if get_date(x) == today))
-except:
-    print(0)
-EOF
-)
-          echo "Videos today: $COUNT"
-          if [ "$COUNT" -ge 6 ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; else echo "skip=false" >> "$GITHUB_OUTPUT"; fi
-
-      - name: Setup Python 3.11
-        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: "3.11"
+          cache: pip
 
-      - name: Install system dependencies
-        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
+      - name: Install video dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends ffmpeg fonts-noto fonts-dejavu-core fonts-liberation libgdk-pixbuf2.0-dev
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
 
-      - name: Install Python dependencies
-        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
-        run: |
-          pip install --upgrade pip wheel
-          pip install -r requirements.txt
-
-      - name: Generate real animal Short — no API key
-        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
+      - name: Generate a real animal Short
         env:
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          ANIMAL_ID: ${{ inputs.animal_id || '' }}
         run: |
-          DRY="${{ github.event.inputs.dry_run || 'false' }}"
-          ANIMAL="${{ github.event.inputs.topic_id || '' }}"
-          export PYTHONPATH="."
-          CMD=(python src/animal_short_generator.py)
-          [ "$DRY" = "true" ] && CMD+=(--dry-run)
-          [ -n "$ANIMAL" ] && CMD+=(--animal-id "$ANIMAL")
-          printf 'Running animal generator:'
-          printf ' %q' "${CMD[@]}"
+          command=(python src/animal_short_generator.py)
+          if [ "$DRY_RUN" = "true" ]; then command+=(--dry-run); fi
+          if [ -n "$ANIMAL_ID" ]; then command+=(--animal-id "$ANIMAL_ID"); fi
+          printf 'Running:'
+          printf ' %q' "${command[@]}"
           echo
-          "${CMD[@]}"
+          "${command[@]}"
 
-      - name: Upload video + QA artifacts
-        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
+      - name: Upload video artifact
         uses: actions/upload-artifact@v4
         with:
           name: animal-short-${{ github.run_number }}
-          path: |
-            tmp/animal_*/*.mp4
+          path: tmp/animal_*/*.mp4
           retention-days: 2
-          if-no-files-found: warn
+          if-no-files-found: error
 
-      - name: Cleanup generated media
-        if: always()
+      - name: Save animal rotation
+        if: inputs.dry_run != 'true'
         run: |
-          rm -rf tmp/*
-          find . -type f \( -name '*.mp4' -o -name '*.wav' -o -name '*.mp3' -o -name '*.m4a' -o -name '*.mov' \) -not -path './.git/*' -delete || true
-
-      - name: Save progress and creative memory
-        if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
-        run: |
-          set -e
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-
-          # The concurrency group serializes runs, but rebase once before the
-          # commit as an extra guard against changes that landed during checkout.
-          git pull --rebase --autostash origin main
-
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/animal_progress.json data/animal_history.json
-          git diff --cached --quiet && echo 'No changes' && exit 0
-
-          NEXT=$(python3 -c 'import json; print(json.load(open("data/animal_progress.json")).get("current_id","?"))' 2>/dev/null || echo '?')
-          git commit -m "Animal Short #$NEXT complete [skip ci]"
-
-          pushed=false
-          for i in 1 2 3; do
-            if git pull --rebase --autostash origin main && git push origin HEAD:main; then
-              pushed=true
-              break
-            fi
-            echo "Push attempt $i failed, retrying in 10s..."
-            sleep 10
-          done
-          if [ "$pushed" != "true" ]; then
-            echo 'ERROR: failed to push generated progress after 3 attempts.'
-            exit 1
-          fi
+          git diff --cached --quiet && exit 0
+          next=$(python -c "import json; print(json.load(open('data/animal_progress.json'))['current_id'])")
+          git commit -m "Animal Short #${next} complete [skip ci]"
+          git push origin HEAD:main

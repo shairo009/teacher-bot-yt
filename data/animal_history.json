@@ -4,5 +4,11 @@
     "animal": "Tiger",
     "file": "tmp/animal_0000/tiger_short.mp4",
     "timestamp": "2026-08-22T18:52:25.854416+00:00"
+  },
+  {
+    "id": 1,
+    "animal": "Red Panda",
+    "file": "tmp/animal_0001/red_panda_short.mp4",
+    "timestamp": "2026-08-22T20:45:43.646425+00:00"
   }
 ]

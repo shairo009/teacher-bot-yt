@@ -1,4 +1,20 @@
-# Tech Series Bot 🎮💻
+# Real Animal Shorts Bot 🐾
+
+Creates polished 8.8-second vertical animal Shorts in a clean dark-teal poster style. Every run uses the next animal in a fixed rotation, puts its name clearly on screen, and uses a real wildlife photo with motion — no LLM or API key required.
+
+It uses Wikimedia Commons' public image search (no account or token); the first run for an animal needs an internet connection and later runs use the local cache.
+
+```bash
+python src/animal_short_generator.py            # next animal, saves rotation
+python src/animal_short_generator.py --dry-run  # preview without advancing it
+python src/animal_short_generator.py --animal-id 0  # Tiger preview
+```
+
+Videos are saved under `tmp/animal_####/`. The GitHub Action uploads an MP4 artifact for each successful run. YouTube uploading is intentionally disabled because this version has no OAuth/API-key dependency.
+
+---
+
+# Legacy Tech Series Bot 🎮💻
 
 **Automated YouTube Shorts** teaching Computer Science & Programming with **game-style dark neon visuals**.
 

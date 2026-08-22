@@ -1,4 +1,4 @@
-name: Expert Tech Bot — Generate 2-Min Video
+name: Animal Shorts — Generate a New Real Animal Video
 
 on:
   push:
@@ -18,7 +18,7 @@ on:
         default: 'false'
         type: boolean
       topic_id:
-        description: 'Force a specific topic index (optional)'
+        description: 'Force a specific animal rotation index (optional)'
         required: false
         default: ''
         type: string
@@ -119,23 +119,17 @@ EOF
           pip install --upgrade pip wheel
           pip install -r requirements.txt
 
-      - name: Generate video — Advanced AI Director + QA
+      - name: Generate real animal Short — no API key
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-          TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
-          CLIENT_SECRETS_JSON: ${{ secrets.CLIENT_SECRETS_JSON }}
         run: |
           DRY="${{ github.event.inputs.dry_run || 'false' }}"
-          TOPIC="${{ github.event.inputs.topic_id || '' }}"
+          ANIMAL="${{ github.event.inputs.topic_id || '' }}"
           export PYTHONPATH="."
-          CMD=(python src/advanced_runtime.py)
+          CMD=(python src/animal_short_generator.py)
           [ "$DRY" = "true" ] && CMD+=(--dry-run)
-          [ -n "$TOPIC" ] && CMD+=(--topic-id "$TOPIC")
-          [ -z "$TOKEN_JSON" ] && CMD+=(--dry-run)
-          printf 'Running advanced runtime:'
+          [ -n "$ANIMAL" ] && CMD+=(--animal-id "$ANIMAL")
+          printf 'Running animal generator:'
           printf ' %q' "${CMD[@]}"
           echo
           "${CMD[@]}"
@@ -144,11 +138,9 @@ EOF
         if: steps.rate_check.outputs.skip != 'true' && steps.daily_check.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: expert-video-${{ github.run_number }}
+          name: animal-short-${{ github.run_number }}
           path: |
-            tmp/**/final.mp4
-            tmp/**/thumbnail.jpg
-            tmp/**/quality_report.json
+            tmp/animal_*/*.mp4
           retention-days: 2
           if-no-files-found: warn
 
@@ -169,12 +161,11 @@ EOF
           # commit as an extra guard against changes that landed during checkout.
           git pull --rebase --autostash origin main
 
-          git add data/tech_progress.json data/video_history.json
-          if [ -f data/creative_memory.json ]; then git add data/creative_memory.json; fi
+          git add data/animal_progress.json data/animal_history.json
           git diff --cached --quiet && echo 'No changes' && exit 0
 
-          NEXT=$(python3 -c 'import json; print(json.load(open("data/tech_progress.json")).get("current_id","?"))' 2>/dev/null || echo '?')
-          git commit -m "Advanced video #$NEXT complete [skip ci]"
+          NEXT=$(python3 -c 'import json; print(json.load(open("data/animal_progress.json")).get("current_id","?"))' 2>/dev/null || echo '?')
+          git commit -m "Animal Short #$NEXT complete [skip ci]"
 
           pushed=false
           for i in 1 2 3; do

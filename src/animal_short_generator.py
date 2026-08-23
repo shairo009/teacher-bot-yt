@@ -1,12 +1,13 @@
 """
 Realistic Generative Creature Interactive Cursor Generator
-100% Code-Generated Animation matching realistic_komodo_dragon_cursor_demo.mp4:
+100% Code-Generated Animation matching minimalist code-reel format:
 - Resolution: 1080 x 1920 Full HD Vertical
-- Deep Midnight Navy Background with framed warm canvas
-- Mathematical Generative Creature with Inverse Kinematics & undulating rib tendrils
-- Real JavaScript Canvas / SVG transform syntax code in macOS VS Code card
-- Procedural Audio: Key typing clicks, cyber swooshes, tech drone
-- Automatic YouTube Shorts upload with optimized tags & titles
+- Top Bar: Animal Name ONLY
+- Upper Section: Clean Framed Box with Articulated Creature
+- Lower Section: macOS Dark Code Window with Auto-Sliding/Scrolling JS Code
+- Rotating Catalog of Unique Species (Scorpion, Dragon, Wolf, Viper, Mantis, Spider)
+- Procedural Audio: Mechanical typing clicks + cyber swooshes + drone
+- Automatic YouTube Shorts upload with rotating species
 """
 from __future__ import annotations
 
@@ -93,7 +94,7 @@ def _upload_to_youtube(video_path: Path, species: dict, dry_run: bool) -> str | 
         from src.uploader import YouTubeUploader
         uploader = YouTubeUploader(str(token_file), str(client_file))
 
-        title = species.get("yt_title", f"Realistic Interactive {species['name']} Cursor in JavaScript 🐉✨ #Shorts")[:100]
+        title = species.get("yt_title", f"Realistic Interactive {species['name']} in JavaScript ✨ #Shorts")[:100]
         description = species.get("yt_desc", "Realistic Interactive JavaScript Canvas Animation Short!")
         tags = [
             "javascript", "web development", "creative coding", "coding", "shorts",
@@ -106,7 +107,7 @@ def _upload_to_youtube(video_path: Path, species: dict, dry_run: bool) -> str | 
             title=title,
             description=description,
             tags=tags,
-            category_id="28",  # Science & Tech / Education
+            category_id="28",
             made_for_kids=False,
         )
         if video_id:
@@ -127,8 +128,8 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
     index = current_id % len(CREATURE_SPECIES)
     species = CREATURE_SPECIES[index]
 
-    print(f"\n⚡ [Realistic Generative Engine] Generating Short #{current_id}: {species['name']} ({species['scientific']})")
-    run_dir = TMP_DIR / f"realistic_{current_id:04d}"
+    print(f"\n⚡ [Minimalist Code-Reel Engine] Generating Short #{current_id}: {species['name']}")
+    run_dir = TMP_DIR / f"reel_{current_id:04d}"
     frames_dir = run_dir / "frames"
     frames_dir.mkdir(parents=True, exist_ok=True)
 
@@ -138,12 +139,11 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
         frame = render_generative_frame(species, number, total_frames)
         frame.save(frames_dir / f"frame_{number:04d}.jpg", quality=95, optimize=True)
 
-    # Generate procedural audio
     audio_wav = run_dir / "audio.wav"
     print("Synthesizing procedural audio (mechanical typing + cyber swooshes + drone)...")
     generate_reel_audio(audio_wav, duration=duration, typing_events=len(species.get("code_lines", [])))
 
-    output_file = run_dir / f"{species['id']}_realistic_short.mp4"
+    output_file = run_dir / f"{species['id']}_short.mp4"
     print("Encoding Full HD 1080x1920 video & audio with FFmpeg...")
     _encode_video(frames_dir, audio_wav, output_file)
     print(f"✅ Video created: {output_file}")
@@ -152,7 +152,6 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
     if not dry_run:
         video_id = _upload_to_youtube(output_file, species, dry_run)
 
-    # Advance rotation if not dry-run
     if not dry_run and animal_id is None:
         progress["current_id"] = current_id + 1
         PROGRESS_FILE.write_text(json.dumps(progress, indent=2), encoding="utf-8")
@@ -160,7 +159,7 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
         history_entry = {
             "id": current_id,
             "species": species["name"],
-            "scientific": species["scientific"],
+            "scientific": species.get("scientific", species["name"]),
             "file": str(output_file.relative_to(ROOT)),
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
@@ -174,7 +173,7 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate Realistic Interactive Creature Cursor Code Reels")
+    parser = argparse.ArgumentParser(description="Generate Minimalist Code-Reel Animal Shorts")
     parser.add_argument("--animal-id", type=int, help="Force a specific species index from catalog")
     parser.add_argument("--duration", type=float, default=DEFAULT_DURATION, help="Video length in seconds (default: 8.8)")
     parser.add_argument("--dry-run", action="store_true", help="Create video without uploading or advancing rotation")

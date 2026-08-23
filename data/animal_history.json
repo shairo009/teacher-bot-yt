@@ -42,5 +42,13 @@
     "timestamp": "2026-08-23T16:45:58.351634+00:00",
     "video_id": "MMpKpARdOsY",
     "uploaded": true
+  },
+  {
+    "id": 7,
+    "animal": "Sea Turtle",
+    "file": "tmp/animal_0007/sea_turtle_short.mp4",
+    "timestamp": "2026-08-23T16:48:36.137886+00:00",
+    "video_id": "NmMX-FirCT0",
+    "uploaded": true
   }
 ]

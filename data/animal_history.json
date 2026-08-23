@@ -68,5 +68,14 @@
     "timestamp": "2026-08-23T17:20:08.674997+00:00",
     "video_id": "AWkqEVU9dIU",
     "uploaded": true
+  },
+  {
+    "id": 10,
+    "creature": "Emperor Scorpion",
+    "file_name": "cyberScorpion.js",
+    "file": "tmp/creature_0010/cyber_scorpion_interactive_short.mp4",
+    "timestamp": "2026-08-23T18:25:10.363603+00:00",
+    "video_id": "5SSFqAIytq0",
+    "uploaded": true
   }
 ]

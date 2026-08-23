@@ -16,5 +16,11 @@
     "animal": "African Elephant",
     "file": "tmp/animal_0002/african_elephant_short.mp4",
     "timestamp": "2026-08-23T02:07:35.623830+00:00"
+  },
+  {
+    "id": 3,
+    "animal": "Snow Leopard",
+    "file": "tmp/animal_0003/snow_leopard_short.mp4",
+    "timestamp": "2026-08-23T04:58:53.253659+00:00"
   }
 ]

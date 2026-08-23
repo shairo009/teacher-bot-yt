@@ -1,17 +1,19 @@
 """
-Minimalist Code-Reel Engine with 10 Distinct Articulated Modular Creatures
-100% Procedural Math & Vector IK — Zero API Keys Needed for Generation!
-Features:
-- Top Header: Animal Name ONLY
-- Upper Section: Clean Framed Canvas Box with Articulated Creature
-- Lower Section: macOS Dark Code Window with Auto-Sliding/Scrolling JS Code
-- Rotating Catalog of 10 Unique Species (Scorpion, Dragon, Wolf, Viper, Mantis, Spider, Centipede, Eel, Peacock, Octopus)
+Realistic Articulated Creature Code-Reel Engine
+Exact 1-to-1 Discrete Physics Simulation Ported from HTML:
+- Smooth, natural walking speed (not hyper fast)
+- True 8-Legged Tripod Stepping Gait with foot planting & lift arcs
+- 3-Joint Ball & Socket Pincer Arms reaching and snapping
+- 7 Articulated Mesosoma Armor Plates with Dorsal Keels
+- 5-Segment 3D Curved Stinger Tail with Glowing Venom Bulb
+- Lower macOS Dark Editor with smooth sliding JS code
+- Minimalist layout: Top header = Animal Name ONLY
+- NO Audio (Clean video for YouTube Shorts)
 """
 from __future__ import annotations
 
 import math
 import os
-import random
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
@@ -106,7 +108,7 @@ CREATURE_SPECIES = [
             "  }",
             "",
             "  // 4. 5 Metasoma Tail Segments & Venom Stinger",
-            "  curlStingerTail(scorpion.tail, Math.sin(frm * 3.5) * 0.4);",
+            "  curlStingerTail(scorpion.tail, Math.sin(frm * 2.5) * 0.35);",
             "  renderTelsonBulb(ctx, scorpion.tail.end, '#EAB308');",
             "};"
         ],
@@ -173,7 +175,7 @@ CREATURE_SPECIES = [
             "    const dx = prev.x - curr.x;",
             "    const dy = prev.y - curr.y;",
             "    const dist = Math.hypot(dx, dy);",
-            "    const wave = Math.sin(time * 8 + i * 0.35) * 6;",
+            "    const wave = Math.sin(time * 6 + i * 0.35) * 6;",
             "    curr.x = prev.x - (dx / dist) * 14 + Math.cos(curr.angle) * wave;",
             "    curr.y = prev.y - (dy / dist) * 14 + Math.sin(curr.angle) * wave;",
             "  }",
@@ -275,9 +277,132 @@ CREATURE_SPECIES = [
     }
 ]
 
+# ─────────────────────────────────────────────────────────────────────────────
+# DISCRETE SKELETAL SIMULATOR (Identical to JavaScript HTML Engine)
+# ─────────────────────────────────────────────────────────────────────────────
+class ScorpionSimulator:
+    def __init__(self, cx: float, cy: float, rx: float, ry: float):
+        self.cx = cx
+        self.cy = cy
+        self.rx = rx
+        self.ry = ry
+        self.x = cx
+        self.y = cy
+        self.angle = 0.0
+        self.speed = 0.0
+        self.tergites = [{"x": cx, "y": cy, "angle": 0.0} for _ in range(7)]
+        self.tail = [{"x": cx, "y": cy, "angle": 0.0} for _ in range(5)]
+        
+        # 8 Walking Legs (4 Left, 4 Right)
+        self.legs = [
+            {"id": "L1", "side": -1, "spread": -0.85, "rest_d": 88, "l1": 26, "l2": 36, "l3": 32, "group": 0, "cur": [cx - 85, cy + 40], "tgt": [cx - 85, cy + 40], "start": [cx - 85, cy + 40], "prog": 1.0},
+            {"id": "L2", "side": -1, "spread": -1.30, "rest_d": 102, "l1": 30, "l2": 42, "l3": 36, "group": 1, "cur": [cx - 95, cy + 40], "tgt": [cx - 95, cy + 40], "start": [cx - 95, cy + 40], "prog": 1.0},
+            {"id": "L3", "side": -1, "spread": -1.75, "rest_d": 106, "l1": 32, "l2": 44, "l3": 38, "group": 0, "cur": [cx - 100, cy + 40], "tgt": [cx - 100, cy + 40], "start": [cx - 100, cy + 40], "prog": 1.0},
+            {"id": "L4", "side": -1, "spread": -2.20, "rest_d": 94, "l1": 28, "l2": 38, "l3": 34, "group": 1, "cur": [cx - 90, cy + 40], "tgt": [cx - 90, cy + 40], "start": [cx - 90, cy + 40], "prog": 1.0},
+            
+            {"id": "R1", "side":  1, "spread":  0.85, "rest_d": 88, "l1": 26, "l2": 36, "l3": 32, "group": 1, "cur": [cx + 85, cy + 40], "tgt": [cx + 85, cy + 40], "start": [cx + 85, cy + 40], "prog": 1.0},
+            {"id": "R2", "side":  1, "spread":  1.30, "rest_d": 102, "l1": 30, "l2": 42, "l3": 36, "group": 0, "cur": [cx + 95, cy + 40], "tgt": [cx + 95, cy + 40], "start": [cx + 95, cy + 40], "prog": 1.0},
+            {"id": "R3", "side":  1, "spread":  1.75, "rest_d": 106, "l1": 32, "l2": 44, "l3": 38, "group": 1, "cur": [cx + 100, cy + 40], "tgt": [cx + 100, cy + 40], "start": [cx + 100, cy + 40], "prog": 1.0},
+            {"id": "R4", "side":  1, "spread":  2.20, "rest_d": 94, "l1": 28, "l2": 38, "l3": 34, "group": 0, "cur": [cx + 90, cy + 40], "tgt": [cx + 90, cy + 40], "start": [cx + 90, cy + 40], "prog": 1.0},
+        ]
+        self.pincers = [
+            {"id": "Chela-L", "side": -1, "reach": -0.42, "l1": 54, "l2": 62},
+            {"id": "Chela-R", "side":  1, "reach":  0.42, "l1": 54, "l2": 62}
+        ]
+
+    def update(self, sim_time: float):
+        # 1. Smooth Wandering Patrol Target (Gentle speed, exactly matching HTML)
+        target_x = self.cx + math.cos(sim_time * 0.7) * (self.rx * 0.9) + math.sin(sim_time * 1.4) * (self.rx * 0.25)
+        target_y = self.cy + math.sin(sim_time * 0.9) * (self.ry * 0.85) + math.cos(sim_time * 1.8) * (self.ry * 0.20)
+
+        # 2. Smooth Steering & Realistic Forward Crawl
+        dx = target_x - self.x
+        dy = target_y - self.y
+        dist = math.hypot(dx, dy)
+        target_ang = math.atan2(dy, dx)
+
+        diff = target_ang - self.angle
+        while diff < -math.pi: diff += math.pi * 2
+        while diff > math.pi: diff -= math.pi * 2
+        self.angle += diff * 0.07
+
+        if dist > 30:
+            target_spd = min(3.8, dist * 0.04)
+            self.speed += (target_spd - self.speed) * 0.08
+        else:
+            self.speed *= 0.88
+
+        self.x += math.cos(self.angle) * self.speed
+        self.y += math.sin(self.angle) * self.speed
+
+        cos_a = math.cos(self.angle)
+        sin_a = math.sin(self.angle)
+        perp_x = -sin_a
+        perp_y =  cos_a
+
+        # 3. 7 Tergite Plates Follow-Chain
+        prev_x, prev_y, prev_ang = self.x, self.y, self.angle
+        for i, t_seg in enumerate(self.tergites):
+            s_dist = 18 - i * 0.8
+            p_dx = prev_x - t_seg["x"]
+            p_dy = prev_y - t_seg["y"]
+            t_seg["angle"] = math.atan2(p_dy, p_dx)
+            t_seg["x"] = prev_x - math.cos(t_seg["angle"]) * s_dist
+            t_seg["y"] = prev_y - math.sin(t_seg["angle"]) * s_dist
+            prev_x, prev_y = t_seg["x"], t_seg["y"]
+
+        # 4. 5 Tail Segments Curving Arc
+        prev_tail_x, prev_tail_y = self.tergites[-1]["x"], self.tergites[-1]["y"]
+        prev_tail_ang = self.tergites[-1]["angle"]
+        tail_curl = math.sin(sim_time * 2.5) * 0.15
+        for i, t_seg in enumerate(self.tail):
+            s_dist = 20 - i * 1.5
+            t_ang = prev_tail_ang + tail_curl * (i + 1)
+            t_seg["angle"] = t_ang
+            t_seg["x"] = prev_tail_x - math.cos(t_ang) * s_dist
+            t_seg["y"] = prev_tail_y - math.sin(t_ang) * s_dist
+            prev_tail_x, prev_tail_y, prev_tail_ang = t_seg["x"], t_seg["y"], t_ang
+
+        # 5. 8 Walking Legs with True Alternating Tripod Stepping Gait
+        gait_clock = sim_time * 7.5
+        for idx, leg in enumerate(self.legs):
+            leg_i = idx % 4
+            hip_along = 12 - leg_i * 11
+            hip_x = self.x + cos_a * hip_along + perp_x * (24 * leg["side"])
+            hip_y = self.y + sin_a * hip_along + perp_y * (24 * leg["side"])
+            leg["hip"] = (hip_x, hip_y)
+
+            leg_spread = self.angle + leg["spread"]
+            ideal_x = hip_x + math.cos(leg_spread) * leg["rest_d"]
+            ideal_y = hip_y + math.sin(leg_spread) * leg["rest_d"]
+
+            dist_ideal = math.hypot(ideal_x - leg["cur"][0], ideal_y - leg["cur"][1])
+            group_phase = math.sin(gait_clock) if leg["group"] == 0 else -math.sin(gait_clock)
+
+            # Step Trigger
+            if dist_ideal > 36 and leg["prog"] >= 1.0 and group_phase > 0.1:
+                leg["prog"] = 0.0
+                leg["start"] = [leg["cur"][0], leg["cur"][1]]
+                leg["tgt"] = [
+                    ideal_x + math.cos(self.angle) * 26,
+                    ideal_y + math.sin(self.angle) * 26
+                ]
+
+            # Step Swing Progression
+            if leg["prog"] < 1.0:
+                leg["prog"] += 0.14
+                p = min(1.0, leg["prog"])
+                ease_p = 0.5 - math.cos(p * math.pi) / 2
+                leg["cur"][0] = leg["start"][0] + (leg["tgt"][0] - leg["start"][0]) * ease_p
+                leg["cur"][1] = leg["start"][1] + (leg["tgt"][1] - leg["start"][1]) * ease_p
+
+
+# Global simulation cache for smooth continuous video generation
+_SIM_CACHE = {}
+
 def render_generative_frame(species: dict, frame_idx: int, total_frames: int) -> Image.Image:
-    t = (frame_idx / total_frames) * 2 * math.pi
     progress = frame_idx / total_frames
+    sim_time = (frame_idx / FPS) * 1.05  # Smooth 1-to-1 real time speed!
 
     # 1. Deep Midnight Navy Background
     img = Image.new("RGBA", (WIDTH, HEIGHT), (11, 27, 38, 255))
@@ -311,12 +436,10 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     img = Image.alpha_composite(img, shadow.filter(ImageFilter.GaussianBlur(25)))
     draw = ImageDraw.Draw(img)
 
-    # Frame Outer Border (Bevel)
+    # Frame Outer Border & Parchment
     draw.rectangle([box_x - 12, box_y - 12, box_x + box_w + 12, box_y + box_h + 12], fill=(235, 230, 220), outline=(190, 185, 175), width=2)
-    # Box Inner Background (Warm Parchment #EFECE4)
     draw.rectangle([box_x, box_y, box_x + box_w, box_y + box_h], fill=(239, 236, 228))
 
-    # Center coordinates of framed canvas
     cb_x = box_x + box_w // 2
     cb_y = box_y + box_h // 2
     rad_x = box_w * 0.33
@@ -325,198 +448,116 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     sp_id = species.get("id", "emperor_scorpion")
     accent_color = species.get("accent", (234, 179, 8))
 
+    # Initialize / Advance Stateful Simulation for this render session
+    sim_key = f"{sp_id}_{total_frames}"
+    if frame_idx == 0 or sim_key not in _SIM_CACHE:
+        _SIM_CACHE[sim_key] = ScorpionSimulator(cb_x, cb_y, rad_x, rad_y)
+    
+    sim = _SIM_CACHE[sim_key]
+    sim.update(sim_time)
+
     # ─────────────────────────────────────────────────────────────
-    # PROCEDURAL RENDERING FOR EACH SPECIES
+    # DRAW MODULAR ARTICULATED SCORPION (Symmetric 8 Legs + Claws)
     # ─────────────────────────────────────────────────────────────
-    if sp_id in ["emperor_scorpion", "tarantula_spider"]:
-        scorp_x = cb_x + math.cos(3 * t) * rad_x
-        scorp_y = cb_y + math.sin(4 * t) * rad_y
-        dx_dt = -3 * math.sin(3 * t) * rad_x
-        dy_dt =  4 * math.cos(4 * t) * rad_y
-        scorp_angle = math.atan2(dy_dt, dx_dt)
+    cos_a = math.cos(sim.angle)
+    sin_a = math.sin(sim.angle)
+    perp_x = -sin_a
+    perp_y =  cos_a
 
-        cos_a, sin_a = math.cos(scorp_angle), math.sin(scorp_angle)
-        perp_x, perp_y = -sin_a, cos_a
+    # 1. 8 Walking Legs (Coxa + Femur + Tibia + Tarsus + Amber Nodes)
+    for leg in sim.legs:
+        h_p = leg["hip"]
+        foot_p = (leg["cur"][0], leg["cur"][1])
+        h_p, j1_p, j2_p, f_p = solve_ik_3segment(h_p, foot_p, leg["l1"], leg["l2"], leg["l3"], leg["side"])
 
-        # 8 Symmetrical Walking Legs
-        leg_spreads = [-0.85, -1.30, -1.75, -2.20, 0.85, 1.30, 1.75, 2.20]
-        for idx in range(8):
-            side = -1 if idx < 4 else 1
-            leg_i = idx % 4
-            hip_along = 14 - leg_i * 11
-            hip = (scorp_x + cos_a * hip_along + perp_x * (26 * side),
-                   scorp_y + sin_a * hip_along + perp_y * (26 * side))
+        draw.line([h_p, j1_p], fill=(16, 22, 32), width=7)
+        draw.line([j1_p, j2_p], fill=(24, 32, 46), width=6)
+        draw.line([j2_p, f_p], fill=(12, 16, 22), width=4)
+        draw.ellipse([j1_p[0]-3, j1_p[1]-3, j1_p[0]+3, j1_p[1]+3], fill=accent_color)
+        draw.ellipse([j2_p[0]-3, j2_p[1]-3, j2_p[0]+3, j2_p[1]+3], fill=accent_color)
+        draw.ellipse([f_p[0]-3, f_p[1]-3, f_p[0]+3, f_p[1]+3], fill=(10, 12, 16))
 
-            group = (idx % 2)
-            gait_clock = t * 12.0 + (math.pi if group == 1 else 0.0)
-            is_swing = math.sin(gait_clock) > 0.0
-            step_lead = math.cos(gait_clock) * 22 if is_swing else -10
-            step_lift = math.sin(gait_clock) * 10 if is_swing else 0
+    # 2. 7 Mesosoma Armor Tergite Plates with Dorsal Keels
+    for i, seg in enumerate(sim.tergites):
+        s_cos = math.cos(seg["angle"])
+        s_sin = math.sin(seg["angle"])
+        s_perp_x = -s_sin
+        s_perp_y =  s_cos
+        half_w = max(13, 34 - i * 3.0)
+        half_h = 8
 
-            reach_ang = scorp_angle + leg_spreads[idx]
-            rest_dist = 82 + (leg_i % 2) * 10
-            foot_x = hip[0] + math.cos(reach_ang) * rest_dist + cos_a * step_lead
-            foot_y = hip[1] + math.sin(reach_ang) * rest_dist + sin_a * step_lead - step_lift
-            foot = (foot_x, foot_y)
+        p1 = (seg["x"] - s_cos * half_h + s_perp_x * half_w, seg["y"] - s_sin * half_h + s_perp_y * half_w)
+        p2 = (seg["x"] + s_cos * half_h + s_perp_x * (half_w * 0.9), seg["y"] + s_sin * half_h + s_perp_y * (half_w * 0.9))
+        p3 = (seg["x"] + s_cos * half_h - s_perp_x * (half_w * 0.9), seg["y"] + s_sin * half_h - s_perp_y * (half_w * 0.9))
+        p4 = (seg["x"] - s_cos * half_h - s_perp_x * half_w, seg["y"] - s_sin * half_h - s_perp_y * half_w)
 
-            h_p, j1_p, j2_p, f_p = solve_ik_3segment(hip, foot, 26, 34, 30, side)
+        draw.polygon([p1, p2, p3, p4], fill=(16, 22, 32), outline=accent_color, width=1)
+        # Center Keel
+        draw.line([(seg["x"] - s_cos * 6, seg["y"] - s_sin * 6), (seg["x"] + s_cos * 6, seg["y"] + s_sin * 6)], fill=(202, 138, 4), width=2)
 
-            draw.line([h_p, j1_p], fill=(16, 22, 32), width=7)
-            draw.line([j1_p, j2_p], fill=(24, 32, 46), width=6)
-            draw.line([j2_p, f_p], fill=(12, 16, 22), width=4)
-            draw.ellipse([j1_p[0]-3, j1_p[1]-3, j1_p[0]+3, j1_p[1]+3], fill=accent_color)
-            draw.ellipse([j2_p[0]-3, j2_p[1]-3, j2_p[0]+3, j2_p[1]+3], fill=accent_color)
-            draw.ellipse([f_p[0]-3, f_p[1]-3, f_p[0]+3, f_p[1]+3], fill=(10, 12, 16))
+    # 3. Prosoma Head Carapace
+    c_front = (sim.x + cos_a * 34, sim.y + sin_a * 34)
+    c_r1 = (sim.x + cos_a * 18 + perp_x * 28, sim.y + sin_a * 18 + perp_y * 28)
+    c_r2 = (sim.x - cos_a * 16 + perp_x * 32, sim.y - sin_a * 16 + perp_y * 32)
+    c_l2 = (sim.x - cos_a * 16 - perp_x * 32, sim.y - sin_a * 16 - perp_y * 32)
+    c_l1 = (sim.x + cos_a * 18 - perp_x * 28, sim.y + sin_a * 18 - perp_y * 28)
+    draw.polygon([c_front, c_r1, c_r2, c_l2, c_l1], fill=(12, 16, 24), outline=accent_color, width=2)
 
-        # 7 Segmented Tergite Armor Plates
-        prev_x, prev_y = scorp_x, scorp_y
-        for b_idx in range(7):
-            b_lag = (b_idx + 1) * 0.02
-            bx = cb_x + math.cos(3 * (t - b_lag)) * rad_x
-            by = cb_y + math.sin(4 * (t - b_lag)) * rad_y
-            b_ang = math.atan2(prev_y - by, prev_x - bx)
-            b_cos, b_sin = math.cos(b_ang), math.sin(b_ang)
-            b_perp_x, b_perp_y = -b_sin, b_cos
+    eye_pos = (sim.x + cos_a * 14, sim.y + sin_a * 14)
+    draw.ellipse([eye_pos[0]-3.5, eye_pos[1]-3.5, eye_pos[0]+3.5, eye_pos[1]+3.5], fill=(254, 240, 138))
 
-            half_w = max(13, 34 - b_idx * 3.0)
-            half_h = 8
+    # 4. 2 Giant Front Pincer Crusher Arms (Hands / Chelae)
+    for p in sim.pincers:
+        shoulder = (sim.x + cos_a * 26 + perp_x * (22 * p["side"]),
+                    sim.y + sin_a * 26 + perp_y * (22 * p["side"]))
+        snap_open = math.sin(sim_time * 3.5 + p["side"]) * 0.2 + 0.35
+        pincer_ang = sim.angle + p["reach"]
+        p_target = (shoulder[0] + math.cos(pincer_ang) * 102,
+                    shoulder[1] + math.sin(pincer_ang) * 102)
 
-            p1 = (bx - b_cos * half_h + b_perp_x * half_w, by - b_sin * half_h + b_perp_y * half_w)
-            p2 = (bx + b_cos * half_h + b_perp_x * (half_w * 0.9), by + b_sin * half_h + b_perp_y * (half_w * 0.9))
-            p3 = (bx + b_cos * half_h - b_perp_x * (half_w * 0.9), by + b_sin * half_h - b_perp_y * (half_w * 0.9))
-            p4 = (bx - b_cos * half_h - b_perp_x * half_w, by - b_sin * half_h - b_perp_y * half_w)
+        sh_pt, elbow_pt, wrist_pt = solve_ik_2joint(shoulder, p_target, p["l1"], p["l2"], p["side"] * -1)
 
-            draw.polygon([p1, p2, p3, p4], fill=(16, 22, 32), outline=accent_color, width=1)
-            prev_x, prev_y = bx, by
+        draw.line([sh_pt, elbow_pt], fill=(16, 22, 32), width=12)
+        draw.line([elbow_pt, wrist_pt], fill=(24, 32, 46), width=10)
+        draw.ellipse([elbow_pt[0]-5, elbow_pt[1]-5, elbow_pt[0]+5, elbow_pt[1]+5], fill=accent_color)
 
-        # Prosoma Head Carapace
-        c_front = (scorp_x + cos_a * 30, scorp_y + sin_a * 30)
-        c_r1 = (scorp_x + cos_a * 14 + perp_x * 26, scorp_y + sin_a * 14 + perp_y * 26)
-        c_r2 = (scorp_x - cos_a * 16 + perp_x * 30, scorp_y - sin_a * 16 + perp_y * 30)
-        c_l2 = (scorp_x - cos_a * 16 - perp_x * 30, scorp_y - sin_a * 16 - perp_y * 30)
-        c_l1 = (scorp_x + cos_a * 14 - perp_x * 26, scorp_y + sin_a * 14 - perp_y * 26)
-        draw.polygon([c_front, c_r1, c_r2, c_l2, c_l1], fill=(12, 16, 24), outline=accent_color, width=2)
-        eye_pos = (scorp_x + cos_a * 12, scorp_y + sin_a * 12)
-        draw.ellipse([eye_pos[0]-3, eye_pos[1]-3, eye_pos[0]+3, eye_pos[1]+3], fill=accent_color)
+        w_ang = math.atan2(wrist_pt[1] - elbow_pt[1], wrist_pt[0] - elbow_pt[0])
+        w_cos, w_sin = math.cos(w_ang), math.sin(w_ang)
+        w_perp_x, w_perp_y = -w_sin, w_cos
 
-        if sp_id == "emperor_scorpion":
-            # 2 Giant Front Pincer Crusher Arms
-            for side in [-1, 1]:
-                shoulder = (scorp_x + cos_a * 24 + perp_x * (22 * side),
-                            scorp_y + sin_a * 24 + perp_y * (22 * side))
-                snap_open = math.sin(t * 6 + side) * 0.2 + 0.35
-                pincer_ang = scorp_angle + side * 0.45
-                p_target = (shoulder[0] + math.cos(pincer_ang) * 90,
-                            shoulder[1] + math.sin(pincer_ang) * 90)
-
-                sh_pt, elbow_pt, wrist_pt = solve_ik_2joint(shoulder, p_target, 48, 54, side * -1)
-
-                draw.line([sh_pt, elbow_pt], fill=(16, 22, 32), width=11)
-                draw.line([elbow_pt, wrist_pt], fill=(24, 32, 46), width=9)
-                draw.ellipse([elbow_pt[0]-4, elbow_pt[1]-4, elbow_pt[0]+4, elbow_pt[1]+4], fill=accent_color)
-
-                w_ang = math.atan2(wrist_pt[1] - elbow_pt[1], wrist_pt[0] - elbow_pt[0])
-                w_cos, w_sin = math.cos(w_ang), math.sin(w_ang)
-                w_perp_x, w_perp_y = -w_sin, w_cos
-
-                chela_poly = [
-                    (wrist_pt[0] - w_cos * 7 + w_perp_x * 14, wrist_pt[1] - w_sin * 7 + w_perp_y * 14),
-                    (wrist_pt[0] + w_cos * 20 + w_perp_x * 9, wrist_pt[1] + w_sin * 20 + w_perp_y * 9),
-                    (wrist_pt[0] + w_cos * 20 - w_perp_x * 9, wrist_pt[1] + w_sin * 20 - w_perp_y * 9),
-                    (wrist_pt[0] - w_cos * 7 - w_perp_x * 14, wrist_pt[1] - w_sin * 7 - w_perp_y * 14)
-                ]
-                draw.polygon(chela_poly, fill=(10, 14, 20), outline=accent_color, width=2)
-
-                f_tip = (wrist_pt[0] + math.cos(w_ang + side * 0.3) * 38,
-                         wrist_pt[1] + math.sin(w_ang + side * 0.3) * 38)
-                draw.line([(wrist_pt[0] + w_cos * 18, wrist_pt[1] + w_sin * 18), f_tip], fill=accent_color, width=4)
-
-                m_tip = (wrist_pt[0] + math.cos(w_ang - side * snap_open) * 34,
-                         wrist_pt[1] + math.sin(w_ang - side * snap_open) * 34)
-                draw.line([(wrist_pt[0] + w_cos * 18, wrist_pt[1] + w_sin * 18), m_tip], fill=(202, 138, 4), width=3)
-
-            # 5 Metasoma Tail Segments & Venom Stinger
-            tail_prev = (prev_x, prev_y)
-            t_angle_base = scorp_angle + math.pi
-            for s_i in range(5):
-                s_curl = math.sin(t * 4) * 0.2
-                t_ang = t_angle_base + s_curl * (s_i + 1)
-                t_len = 18 - s_i * 1.2
-                tx = tail_prev[0] + math.cos(t_ang) * t_len
-                ty = tail_prev[1] + math.sin(t_ang) * t_len
-                t_width = max(5, int(13 - s_i * 1.4))
-                draw.line([tail_prev, (tx, ty)], fill=(18, 24, 34), width=t_width)
-                draw.ellipse([tx - t_width//2, ty - t_width//2, tx + t_width//2, ty + t_width//2], fill=(28, 38, 52))
-                tail_prev = (tx, ty)
-
-            draw.ellipse([tail_prev[0]-8, tail_prev[1]-8, tail_prev[0]+8, tail_prev[1]+8], fill=(202, 138, 4), outline=(254, 240, 138), width=2)
-            sting_tip = (tail_prev[0] + math.cos(t_ang + 0.8) * 20, tail_prev[1] + math.sin(t_ang + 0.8) * 20)
-            draw.line([tail_prev, sting_tip], fill=(254, 240, 138), width=3)
-
-    else:
-        # Generic Serpentine / Dragon / Quadruped Kinematics
-        NUM_SEGS = 28
-        spine = []
-        for s_idx in range(NUM_SEGS):
-            tau = t - s_idx * 0.018
-            sx = cb_x + math.cos(3 * tau) * rad_x
-            sy = cb_y + math.sin(4 * tau) * rad_y
-            spine.append((sx, sy))
-
-        # 4 Articulated 2-Joint Legs
-        leg_anchors = [
-            {"spine_i": 5, "side": -1, "l1": 38, "l2": 42, "phase": 0.0},
-            {"spine_i": 5, "side":  1, "l1": 38, "l2": 42, "phase": math.pi},
-            {"spine_i": 18, "side": -1, "l1": 42, "l2": 46, "phase": math.pi},
-            {"spine_i": 18, "side":  1, "l1": 42, "l2": 46, "phase": 0.0},
+        chela_poly = [
+            (wrist_pt[0] - w_cos * 8 + w_perp_x * 15, wrist_pt[1] - w_sin * 8 + w_perp_y * 15),
+            (wrist_pt[0] + w_cos * 22 + w_perp_x * 10, wrist_pt[1] + w_sin * 22 + w_perp_y * 10),
+            (wrist_pt[0] + w_cos * 22 - w_perp_x * 10, wrist_pt[1] + w_sin * 22 - w_perp_y * 10),
+            (wrist_pt[0] - w_cos * 8 - w_perp_x * 15, wrist_pt[1] - w_sin * 8 - w_perp_y * 15)
         ]
-        for leg in leg_anchors:
-            s_pt = spine[leg["spine_i"]]
-            s_prev = spine[leg["spine_i"] - 1]
-            b_ang = math.atan2(s_pt[1] - s_prev[1], s_pt[0] - s_prev[0])
-            hip_ang = b_ang + (math.pi / 2) * leg["side"]
-            hip = (s_pt[0] + math.cos(hip_ang) * 18, s_pt[1] + math.sin(hip_ang) * 18)
+        draw.polygon(chela_poly, fill=(10, 14, 20), outline=accent_color, width=2)
 
-            gait_t = (t * 8.0 + leg["phase"]) % (2 * math.pi)
-            is_swing = math.sin(gait_t) > 0.0
-            step_lead = math.cos(gait_t) * 22 if is_swing else -10
-            step_lift = math.sin(gait_t) * 12 if is_swing else 0
+        f_tip = (wrist_pt[0] + math.cos(w_ang + p["side"] * 0.3) * 40,
+                 wrist_pt[1] + math.sin(w_ang + p["side"] * 0.3) * 40)
+        draw.line([(wrist_pt[0] + w_cos * 18, wrist_pt[1] + w_sin * 18), f_tip], fill=accent_color, width=4)
 
-            foot_ang = b_ang + leg["side"] * (math.pi * 0.45)
-            foot_x = hip[0] + math.cos(foot_ang) * 60 + math.cos(b_ang) * step_lead
-            foot_y = hip[1] + math.sin(foot_ang) * 60 + math.sin(b_ang) * step_lead - step_lift
+        m_tip = (wrist_pt[0] + math.cos(w_ang - p["side"] * snap_open) * 36,
+                 wrist_pt[1] + math.sin(w_ang - p["side"] * snap_open) * 36)
+        draw.line([(wrist_pt[0] + w_cos * 18, wrist_pt[1] + w_sin * 18), m_tip], fill=(202, 138, 4), width=3)
 
-            hp, kp, fp = solve_ik_2joint(hip, (foot_x, foot_y), leg["l1"], leg["l2"], leg["side"])
-            draw.line([hp, kp], fill=(20, 26, 36), width=8)
-            draw.line([kp, fp], fill=(12, 16, 22), width=6)
-            draw.ellipse([kp[0]-4, kp[1]-4, kp[0]+4, kp[1]+4], fill=accent_color)
-            draw.ellipse([fp[0]-4, fp[1]-4, fp[0]+4, fp[1]+4], fill=(10, 12, 16))
+    # 5. 5 Metasoma Tail Segments & Telson Venom Stinger
+    tail_prev = (sim.tergites[-1]["x"], sim.tergites[-1]["y"])
+    for i, t_seg in enumerate(sim.tail):
+        tx, ty = t_seg["x"], t_seg["y"]
+        t_width = max(5, int(14 - i * 1.4))
+        draw.line([tail_prev, (tx, ty)], fill=(18, 24, 34), width=t_width)
+        draw.ellipse([tx - t_width//2, ty - t_width//2, tx + t_width//2, ty + t_width//2], fill=(28, 38, 52))
+        tail_prev = (tx, ty)
 
-        # Main Spine Scales
-        for s_idx in range(len(spine) - 1, 0, -1):
-            p1 = spine[s_idx]
-            p0 = spine[s_idx - 1]
-            norm = s_idx / NUM_SEGS
-            v_width = max(4, int(26 * (1.0 - norm * 0.75)))
-            draw.line([p0, p1], fill=(16, 20, 26), width=v_width)
-            draw.ellipse([p1[0]-v_width//2, p1[1]-v_width//2, p1[0]+v_width//2, p1[1]+v_width//2], fill=(26, 32, 40), outline=accent_color, width=1)
-
-        # Head
-        hp = spine[0]
-        hp_prev = spine[1]
-        hang = math.atan2(hp[1] - hp_prev[1], hp[0] - hp_prev[0])
-        snout = (hp[0] + math.cos(hang) * 42, hp[1] + math.sin(hang) * 42)
-        j1 = (hp[0] - math.cos(hang) * 16 + math.cos(hang + math.pi/2) * 24, hp[1] - math.sin(hang) * 16 + math.sin(hang + math.pi/2) * 24)
-        j2 = (hp[0] - math.cos(hang) * 16 - math.cos(hang + math.pi/2) * 24, hp[1] - math.sin(hang) * 16 - math.sin(hang + math.pi/2) * 24)
-        crown = (hp[0] - math.cos(hang) * 32, hp[1] - math.sin(hang) * 32)
-        draw.polygon([snout, j1, crown, j2], fill=(12, 15, 20), outline=accent_color, width=2)
-        eye_l = (hp[0] + math.cos(hang) * 8 + math.cos(hang + math.pi/2) * 12, hp[1] + math.sin(hang) * 8 + math.sin(hang + math.pi/2) * 12)
-        eye_r = (hp[0] + math.cos(hang) * 8 - math.cos(hang + math.pi/2) * 12, hp[1] + math.sin(hang) * 8 - math.sin(hang + math.pi/2) * 12)
-        draw.ellipse([eye_l[0]-3, eye_l[0]-3, eye_l[0]+3, eye_l[0]+3], fill=accent_color)
-        draw.ellipse([eye_r[0]-3, eye_r[0]-3, eye_r[0]+3, eye_r[0]+3], fill=accent_color)
+    last_tail = sim.tail[-1]
+    telson_bulb = (last_tail["x"], last_tail["y"])
+    draw.ellipse([telson_bulb[0]-9, telson_bulb[1]-9, telson_bulb[0]+9, telson_bulb[1]+9], fill=(202, 138, 4), outline=(254, 240, 138), width=2)
+    sting_tip = (telson_bulb[0] + math.cos(last_tail["angle"] + 0.8) * 22, telson_bulb[1] + math.sin(last_tail["angle"] + 0.8) * 22)
+    draw.line([telson_bulb, sting_tip], fill=(254, 240, 138), width=3)
 
     # ─────────────────────────────────────────────────────────────
-    # 4. LOWER SECTION: macOS DARK CODE WINDOW WITH AUTO-SLIDING
+    # LOWER SECTION: macOS DARK CODE WINDOW WITH SLIDING CODE
     # ─────────────────────────────────────────────────────────────
     card_w, card_h = 920, 940
     card_x = (WIDTH - card_w) // 2
@@ -524,7 +565,6 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
 
     draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + card_h], radius=22, fill=(12, 18, 25), outline=(28, 38, 50), width=2)
 
-    # macOS Titlebar
     title_h = 56
     draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + title_h], radius=22, fill=(8, 13, 19))
     draw.rectangle([card_x, card_y + 30, card_x + card_w, card_y + title_h], fill=(8, 13, 19))
@@ -580,7 +620,7 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         else:
             draw.text((indent_x, y_pos), line_text, font=code_font, fill=(226, 232, 240))
 
-    # 5. Bottom Timeline Progress Bar
+    # Bottom Timeline Progress Bar
     bar_w = 920
     bar_x = (WIDTH - bar_w) // 2
     bar_y = 1855

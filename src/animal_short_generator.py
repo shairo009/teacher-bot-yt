@@ -2,20 +2,18 @@
 Realistic Generative Creature Interactive Cursor Generator
 100% Code-Generated Animation matching minimalist code-reel format:
 - Resolution: 1080 x 1920 Full HD Vertical
+- Discrete 1-to-1 Physics Simulation (Smooth real-life speed)
 - Top Bar: Animal Name ONLY
 - Upper Section: Clean Framed Box with Articulated Creature
 - Lower Section: macOS Dark Code Window with Auto-Sliding/Scrolling JS Code
 - Rotating Catalog of Unique Species (Scorpion, Dragon, Wolf, Viper, Mantis, Spider)
-- Procedural Audio: Mechanical typing clicks + cyber swooshes + drone
-- Automatic YouTube Shorts upload with rotating species
+- Clean Silent Video (Sound removed as requested)
 """
 from __future__ import annotations
 
 import argparse
 import json
-import math
 import os
-import random
 import shutil
 import subprocess
 import sys
@@ -26,7 +24,6 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from src.generative_dragon_engine import CREATURE_SPECIES, render_generative_frame, WIDTH, HEIGHT, FPS
-from src.sound_engine import generate_reel_audio
 
 DATA_DIR = ROOT / "data"
 TMP_DIR = ROOT / "tmp"
@@ -42,30 +39,19 @@ def _load_json(path: Path, default):
         return default
 
 
-def _encode_video(frames_dir: Path, audio_wav: Path, output_path: Path) -> None:
+def _encode_video(frames_dir: Path, output_path: Path) -> None:
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
         raise RuntimeError("ffmpeg is required to create the MP4")
     
+    # Pure clean silent video encoding at high quality
     cmd = [
         ffmpeg, "-y",
         "-framerate", str(FPS),
         "-i", str(frames_dir / "frame_%04d.jpg"),
+        "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+        "-movflags", "+faststart", str(output_path)
     ]
-    if audio_wav.exists():
-        cmd.extend([
-            "-i", str(audio_wav),
-            "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
-            "-c:a", "aac", "-b:a", "192k",
-            "-shortest",
-            "-movflags", "+faststart", str(output_path)
-        ])
-    else:
-        cmd.extend([
-            "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
-            "-movflags", "+faststart", str(output_path)
-        ])
-        
     result = subprocess.run(cmd, text=True, capture_output=True)
     if result.returncode:
         raise RuntimeError("ffmpeg failed: " + result.stderr[-1500:])
@@ -134,18 +120,14 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
     frames_dir.mkdir(parents=True, exist_ok=True)
 
     total_frames = max(1, round(duration * FPS))
-    print(f"Rendering {total_frames} Full HD (1080x1920) frames @ {FPS} FPS...")
+    print(f"Rendering {total_frames} Full HD (1080x1920) frames @ {FPS} FPS (Smooth Discrete Simulation)...")
     for number in range(total_frames):
         frame = render_generative_frame(species, number, total_frames)
         frame.save(frames_dir / f"frame_{number:04d}.jpg", quality=95, optimize=True)
 
-    audio_wav = run_dir / "audio.wav"
-    print("Synthesizing procedural audio (mechanical typing + cyber swooshes + drone)...")
-    generate_reel_audio(audio_wav, duration=duration, typing_events=len(species.get("code_lines", [])))
-
     output_file = run_dir / f"{species['id']}_short.mp4"
-    print("Encoding Full HD 1080x1920 video & audio with FFmpeg...")
-    _encode_video(frames_dir, audio_wav, output_file)
+    print("Encoding Full HD 1080x1920 video with FFmpeg (Sound removed)...")
+    _encode_video(frames_dir, output_file)
     print(f"✅ Video created: {output_file}")
 
     video_id = None

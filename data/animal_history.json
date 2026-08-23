@@ -104,5 +104,14 @@
     "timestamp": "2026-08-23T20:01:04.554812+00:00",
     "video_id": "CA7h_4ighl0",
     "uploaded": true
+  },
+  {
+    "id": 14,
+    "species": "NILE CROCODILE",
+    "scientific": "Crocodylus niloticus",
+    "file": "tmp/reel_0014/nile_crocodile_short.mp4",
+    "timestamp": "2026-08-23T20:27:00.363356+00:00",
+    "video_id": "VrWiYBSDKpM",
+    "uploaded": true
   }
 ]

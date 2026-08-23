@@ -50,5 +50,14 @@
     "timestamp": "2026-08-23T16:48:36.137886+00:00",
     "video_id": "NmMX-FirCT0",
     "uploaded": true
+  },
+  {
+    "id": 8,
+    "animal": "Orca (Killer Whale)",
+    "species_id": "orca",
+    "file": "tmp/animal_0008/orca_procedural_short.mp4",
+    "timestamp": "2026-08-23T16:59:23.811033+00:00",
+    "video_id": "fCoDEn6rB_A",
+    "uploaded": true
   }
 ]

@@ -1,16 +1,5 @@
 """
-Realistic Autonomous Emperor Scorpion & Creature Engine
-Features:
-- Full HD 1080 x 1920 Vertical format
-- Authentic Emperor Scorpion (Pandinus imperator) with:
-  1. Carapace with glowing median eyes
-  2. Two Giant Front 3-Joint Pincer Arms (Crusher Claws / Hands) snapping & reaching
-  3. 8 Articulated Walking Legs with realistic alternating tripod stepping gait
-  4. 7 Segmented Overlapping Abdominal Tergite Plates
-  5. 5-Segment Metasoma Stinger Tail curling upwards with venom bulb and sharp needle
-- Autonomous self-crawling animation & interactive cursor tracking
-- macOS Dark VS Code Card (Scorpion.js) with real inverse kinematics math
-- Bottom species pill card & progress timeline
+Realistic Autonomous Emperor Scorpion & Creature Engine (Symmetric 8 Legs + Claws)
 """
 from __future__ import annotations
 
@@ -60,6 +49,26 @@ def solve_ik_2joint(origin: tuple[float, float], target: tuple[float, float], l1
     knee = (origin[0] + math.cos(knee_angle) * l1, origin[1] + math.sin(knee_angle) * l1)
     return origin, knee, target
 
+def solve_ik_3segment(origin: tuple[float, float], target: tuple[float, float], l1: float, l2: float, l3: float, side: float):
+    dx = target[0] - origin[0]
+    dy = target[1] - origin[1]
+    base_angle = math.atan2(dy, dx)
+    
+    # Coxa segment
+    coxa_ang = base_angle + side * 0.35
+    j1 = (origin[0] + math.cos(coxa_ang) * l1, origin[1] + math.sin(coxa_ang) * l1)
+    
+    # Femur + Tibia 2-joint IK from j1 to target
+    d2 = math.hypot(target[0] - j1[0], target[1] - j1[1])
+    clamped_d2 = min(d2, l2 + l3 - 0.001)
+    base_ang2 = math.atan2(target[1] - j1[1], target[0] - j1[0])
+    
+    cos_a = (l2 * l2 + clamped_d2 * clamped_d2 - l3 * l3) / (2 * l2 * clamped_d2)
+    angle_a = math.acos(max(-1.0, min(1.0, cos_a)))
+    knee_ang = base_ang2 + angle_a * side
+    j2 = (j1[0] + math.cos(knee_ang) * l2, j1[1] + math.sin(knee_ang) * l2)
+    return origin, j1, j2, target
+
 CREATURE_SPECIES = [
     {
         "id": "emperor_scorpion",
@@ -73,10 +82,10 @@ CREATURE_SPECIES = [
             "const animateScorpion = () => {",
             "  requestAnimationFrame(animateScorpion);",
             "  const p = getTargetCoordinates();",
-            "  // 3-Joint Pincer Claws IK (Hands)",
+            "  // 3-Joint Pincer Claws IK (Left & Right Hands)",
             "  solvePincerIK(leftChela, p, 52, 60, -1);",
             "  solvePincerIK(rightChela, p, 52, 60, 1);",
-            "  // 8-Legged Tripod Stepping Gait",
+            "  // 8-Legged Tripod Stepping Gait (4 Left, 4 Right)",
             "  legs.forEach(leg => stepTripodIK(leg, frm));",
             "  // 5-Segment 3D Curved Stinger Tail",
             "  curlStingerTail(tail, Math.sin(frm * 3) * 0.4);",
@@ -85,33 +94,6 @@ CREATURE_SPECIES = [
         ],
         "yt_title": "Realistic Emperor Scorpion Interactive Cursor in JS 🦂🔥 #JavaScript #Shorts #WebDev",
         "yt_desc": "🦂 Build an Emperor Scorpion interactive cursor with 8-legged tripod gait & articulated pincer claws in Vanilla JavaScript!\n\nSpecies: Pandinus imperator\nComment 'Scorpion' to get the full source code!\n\n#JavaScript #CreativeCoding #WebDev #Shorts #Coding #Frontend"
-    },
-    {
-        "id": "komodo_dragon",
-        "name": "KOMODO DRAGON",
-        "title": "Interactive Dragon Cursor",
-        "scientific": "Varanus komodoensis",
-        "comment_keyword": "Dragon",
-        "file_name": "Dragon.js",
-        "accent": (255, 120, 40),
-        "code_lines": [
-            "const run = () => {",
-            "  requestAnimationFrame(run);",
-            "  let e = elems[0];",
-            "  const ax = (Math.cos(3 * frm) * rad * width) / height;",
-            "  const ay = (Math.sin(4 * frm) * rad * height) / width;",
-            "  e.x += (ax + pointer.x - e.x) / 10;",
-            "  e.y += (ay + pointer.y - e.y) / 10;",
-            "  for (let i = 1; i < N; i++) {",
-            "    let e = elems[i]; let ep = elems[i - 1];",
-            "    const a = Math.atan2(e.y - ep.y, e.x - ep.x);",
-            "    e.x += (ep.x - e.x + (Math.cos(a) * (100 - i)) / 5) / 4;",
-            "    e.y += (ep.y - e.y + (Math.sin(a) * (100 - i)) / 5) / 4;",
-            "  }",
-            "};"
-        ],
-        "yt_title": "Realistic Interactive Dragon Cursor in JavaScript 🐉✨ #JavaScript #Coding #Shorts",
-        "yt_desc": "🐉 Realistic Interactive Dragon Cursor in Vanilla JavaScript!\n\nSpecies: Varanus komodoensis\nComment 'Dragon' for code!\n\n#JavaScript #CreativeCoding #Shorts"
     }
 ]
 
@@ -163,17 +145,16 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     # Box Inner Background (Warm Parchment / Cream #EFECE4)
     draw.rectangle([box_x, box_y, box_x + box_w, box_y + box_h], fill=(239, 236, 228))
 
-    # 5. REALISTIC EMPEROR SCORPION DRAWING ROUTINE
+    # 5. REALISTIC 2D TOP-DOWN EMPEROR SCORPION
     cb_x = box_x + box_w // 2
     cb_y = box_y + box_h // 2
 
-    # Autonomous Crawling Path (Figure-8 wandering loop)
+    # Autonomous Crawling Path (Figure-8 loop)
     rad_x = box_w * 0.32
     rad_y = box_h * 0.28
 
     scorp_x = cb_x + math.cos(3 * t) * rad_x
     scorp_y = cb_y + math.sin(4 * t) * rad_y
-    # Direction tangent
     dx_dt = -3 * math.sin(3 * t) * rad_x
     dy_dt =  4 * math.cos(4 * t) * rad_y
     scorp_angle = math.atan2(dy_dt, dx_dt)
@@ -183,41 +164,41 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     perp_x = -sin_a
     perp_y =  cos_a
 
-    # 5.1 Draw 8 Walking Legs with Tripod Stepping Gait
-    leg_offsets = [-0.8, -1.2, -1.6, -2.0, 0.8, 1.2, 1.6, 2.0]
+    # 5.1 Draw 8 Symmetrical Walking Legs: 4 on LEFT (side = -1), 4 on RIGHT (side = +1)
+    leg_spreads = [-0.85, -1.30, -1.75, -2.20, 0.85, 1.30, 1.75, 2.20]
     for idx in range(8):
         side = -1 if idx < 4 else 1
         leg_i = idx % 4
         hip_along = 12 - leg_i * 10
-        hip = (scorp_x + cos_a * hip_along + perp_x * (20 * side),
-               scorp_y + sin_a * hip_along + perp_y * (20 * side))
+        hip = (scorp_x + cos_a * hip_along + perp_x * (24 * side),
+               scorp_y + sin_a * hip_along + perp_y * (24 * side))
 
-        # Tripod Gait phase
+        # Alternating Tripod Stepping Gait
         group = (idx % 2)
         gait_clock = t * 12.0 + (math.pi if group == 1 else 0.0)
         is_swing = math.sin(gait_clock) > 0.0
-        step_lead = math.cos(gait_clock) * 18 if is_swing else -10
-        step_lift = math.sin(gait_clock) * 8 if is_swing else 0
+        step_lead = math.cos(gait_clock) * 20 if is_swing else -10
+        step_lift = math.sin(gait_clock) * 10 if is_swing else 0
 
-        reach_ang = scorp_angle + leg_offsets[idx]
-        rest_dist = 56 + (leg_i % 2) * 8
+        reach_ang = scorp_angle + leg_spreads[idx]
+        rest_dist = 72 + (leg_i % 2) * 10
         foot_x = hip[0] + math.cos(reach_ang) * rest_dist + cos_a * step_lead
         foot_y = hip[1] + math.sin(reach_ang) * rest_dist + sin_a * step_lead - step_lift
         foot = (foot_x, foot_y)
 
-        # 2-Joint IK
-        hip_p, knee_p, foot_p = solve_ik_2joint(hip, foot, 30, 34, side)
+        # 3-Segment IK on its respective side
+        h_p, j1_p, j2_p, f_p = solve_ik_3segment(hip, foot, 24, 30, 26, side)
 
-        # Upper Limb (Coxa/Femur)
-        draw.line([hip_p, knee_p], fill=(22, 28, 38), width=5)
-        # Lower Limb (Tibia/Tarsus)
-        draw.line([knee_p, foot_p], fill=(12, 16, 22), width=3)
-        # Knee Joint Amber Node
-        draw.ellipse([knee_p[0]-3, knee_p[1]-3, knee_p[0]+3, knee_p[1]+3], fill=(234, 179, 8))
-        # Tarsus Claws
-        draw.ellipse([foot_p[0]-2.5, foot_p[1]-2.5, foot_p[0]+2.5, foot_p[1]+2.5], fill=(10, 12, 16))
+        # Coxa -> Femur -> Tibia lines
+        draw.line([h_p, j1_p], fill=(16, 22, 32), width=6)
+        draw.line([j1_p, j2_p], fill=(24, 32, 46), width=5)
+        draw.line([j2_p, f_p], fill=(12, 16, 22), width=3)
+        # Joints Amber Nodes
+        draw.ellipse([j1_p[0]-3, j1_p[1]-3, j1_p[0]+3, j1_p[1]+3], fill=(234, 179, 8))
+        draw.ellipse([j2_p[0]-3, j2_p[1]-3, j2_p[0]+3, j2_p[1]+3], fill=(234, 179, 8))
+        draw.ellipse([f_p[0]-2.5, f_p[1]-2.5, f_p[0]+2.5, f_p[1]+2.5], fill=(10, 12, 16))
 
-    # 5.2 Draw 7 Segmented Abdominal Tergite Plates (Mesosoma)
+    # 5.2 Draw 7 Segmented Tergite Plates (Mesosoma)
     prev_x, prev_y = scorp_x, scorp_y
     for b_idx in range(7):
         b_lag = (b_idx + 1) * 0.02
@@ -227,7 +208,7 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         b_cos, b_sin = math.cos(b_ang), math.sin(b_ang)
         b_perp_x, b_perp_y = -b_sin, b_cos
 
-        half_w = max(10, 28 - b_idx * 2.8)
+        half_w = max(12, 30 - b_idx * 2.8)
         half_h = 7
 
         p1 = (bx - b_cos * half_h + b_perp_x * half_w, by - b_sin * half_h + b_perp_y * half_w)
@@ -235,37 +216,35 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         p3 = (bx + b_cos * half_h - b_perp_x * (half_w * 0.9), by + b_sin * half_h - b_perp_y * (half_w * 0.9))
         p4 = (bx - b_cos * half_h - b_perp_x * half_w, by - b_sin * half_h - b_perp_y * half_w)
 
-        draw.polygon([p1, p2, p3, p4], fill=(16, 22, 32), outline=(30, 41, 59), width=1)
+        draw.polygon([p1, p2, p3, p4], fill=(16, 22, 32), outline=(234, 179, 8), width=1)
         prev_x, prev_y = bx, by
 
-    # 5.3 Draw Carapace (Prosoma Head Shield)
-    c_front = (scorp_x + cos_a * 24, scorp_y + sin_a * 24)
+    # 5.3 Draw Prosoma / Head Carapace
+    c_front = (scorp_x + cos_a * 26, scorp_y + sin_a * 26)
     c_r1 = (scorp_x + cos_a * 12 + perp_x * 24, scorp_y + sin_a * 12 + perp_y * 24)
     c_r2 = (scorp_x - cos_a * 14 + perp_x * 26, scorp_y - sin_a * 14 + perp_y * 26)
     c_l2 = (scorp_x - cos_a * 14 - perp_x * 26, scorp_y - sin_a * 14 - perp_y * 26)
     c_l1 = (scorp_x + cos_a * 12 - perp_x * 24, scorp_y + sin_a * 12 - perp_y * 24)
 
     draw.polygon([c_front, c_r1, c_r2, c_l2, c_l1], fill=(12, 16, 24), outline=(234, 179, 8), width=2)
-    # Glowing Amber Center Eyes
+    # Glowing Median Eyes
     eye_pos = (scorp_x + cos_a * 10, scorp_y + sin_a * 10)
     draw.ellipse([eye_pos[0]-3, eye_pos[1]-3, eye_pos[0]+3, eye_pos[1]+3], fill=(234, 179, 8))
 
-    # 5.4 Draw 2 Giant Front Pincer Arms (Hands / Chelae)
+    # 5.4 Draw 2 Giant Front Pincer Arms (Left & Right Hands)
     for side in [-1, 1]:
-        shoulder = (scorp_x + cos_a * 20 + perp_x * (18 * side),
-                    scorp_y + sin_a * 20 + perp_y * (18 * side))
+        shoulder = (scorp_x + cos_a * 20 + perp_x * (20 * side),
+                    scorp_y + sin_a * 20 + perp_y * (20 * side))
         
-        # Snapping claw animation
         snap_open = math.sin(t * 6 + side) * 0.2 + 0.35
         pincer_ang = scorp_angle + side * 0.45
-        p_target = (shoulder[0] + math.cos(pincer_ang) * 72,
-                    shoulder[1] + math.sin(pincer_ang) * 72)
+        p_target = (shoulder[0] + math.cos(pincer_ang) * 78,
+                    shoulder[1] + math.sin(pincer_ang) * 78)
 
-        sh_pt, elbow_pt, wrist_pt = solve_ik_2joint(shoulder, p_target, 40, 46, side * -1)
+        sh_pt, elbow_pt, wrist_pt = solve_ik_2joint(shoulder, p_target, 42, 48, side * -1)
 
-        # Bulky Arm Segments
-        draw.line([sh_pt, elbow_pt], fill=(16, 22, 32), width=9)
-        draw.line([elbow_pt, wrist_pt], fill=(24, 32, 46), width=7)
+        draw.line([sh_pt, elbow_pt], fill=(16, 22, 32), width=10)
+        draw.line([elbow_pt, wrist_pt], fill=(24, 32, 46), width=8)
         draw.ellipse([elbow_pt[0]-4, elbow_pt[1]-4, elbow_pt[0]+4, elbow_pt[1]+4], fill=(234, 179, 8))
 
         # Massive Crusher Chela Pincer Bulb
@@ -275,21 +254,21 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
 
         chela_poly = [
             (wrist_pt[0] - w_cos * 6 + w_perp_x * 12, wrist_pt[1] - w_sin * 6 + w_perp_y * 12),
-            (wrist_pt[0] + w_cos * 16 + w_perp_x * 8, wrist_pt[1] + w_sin * 16 + w_perp_y * 8),
-            (wrist_pt[0] + w_cos * 16 - w_perp_x * 8, wrist_pt[1] + w_sin * 16 - w_perp_y * 8),
+            (wrist_pt[0] + w_cos * 18 + w_perp_x * 8, wrist_pt[1] + w_sin * 18 + w_perp_y * 8),
+            (wrist_pt[0] + w_cos * 18 - w_perp_x * 8, wrist_pt[1] + w_sin * 18 - w_perp_y * 8),
             (wrist_pt[0] - w_cos * 6 - w_perp_x * 12, wrist_pt[1] - w_sin * 6 - w_perp_y * 12)
         ]
         draw.polygon(chela_poly, fill=(10, 14, 20), outline=(234, 179, 8), width=2)
 
-        # Fixed Finger (Curved Amber Blade)
-        f_tip = (wrist_pt[0] + math.cos(w_ang + side * 0.3) * 32,
-                 wrist_pt[1] + math.sin(w_ang + side * 0.3) * 32)
-        draw.line([(wrist_pt[0] + w_cos * 14, wrist_pt[1] + w_sin * 14), f_tip], fill=(234, 179, 8), width=4)
+        # Fixed Finger
+        f_tip = (wrist_pt[0] + math.cos(w_ang + side * 0.3) * 34,
+                 wrist_pt[1] + math.sin(w_ang + side * 0.3) * 34)
+        draw.line([(wrist_pt[0] + w_cos * 16, wrist_pt[1] + w_sin * 16), f_tip], fill=(234, 179, 8), width=4)
 
-        # Movable Finger (Snaps)
-        m_tip = (wrist_pt[0] + math.cos(w_ang - side * snap_open) * 28,
-                 wrist_pt[1] + math.sin(w_ang - side * snap_open) * 28)
-        draw.line([(wrist_pt[0] + w_cos * 14, wrist_pt[1] + w_sin * 14), m_tip], fill=(202, 138, 4), width=3)
+        # Movable Finger
+        m_tip = (wrist_pt[0] + math.cos(w_ang - side * snap_open) * 30,
+                 wrist_pt[1] + math.sin(w_ang - side * snap_open) * 30)
+        draw.line([(wrist_pt[0] + w_cos * 16, wrist_pt[1] + w_sin * 16), m_tip], fill=(202, 138, 4), width=3)
 
     # 5.5 Draw 5-Segment Stinger Tail (Metasoma Curving Arc)
     tail_prev = (prev_x, prev_y)
@@ -332,7 +311,6 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
 
     draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + card_h], radius=20, fill=(12, 18, 25), outline=(28, 38, 50), width=2)
 
-    # Titlebar
     draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + 52], radius=20, fill=(8, 13, 19))
     draw.ellipse([card_x + 24, card_y + 20, card_x + 38, card_y + 34], fill=(255, 95, 86))
     draw.ellipse([card_x + 48, card_y + 20, card_x + 62, card_y + 34], fill=(255, 189, 46))

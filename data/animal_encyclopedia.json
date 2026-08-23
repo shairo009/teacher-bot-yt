@@ -1,17 +1,17 @@
 [
   {
+    "name": "GOLDEN SHEPHERD DOG",
+    "scientific": "Canis lupus familiaris",
+    "class_type": "quadruped",
+    "accent": [245, 158, 11],
+    "file_name": "GoldenShepherd.js"
+  },
+  {
     "name": "EMPEROR SCORPION",
     "scientific": "Pandinus imperator",
     "class_type": "arachnid",
     "accent": [234, 179, 8],
     "file_name": "Scorpion.js"
-  },
-  {
-    "name": "KOMODO DRAGON",
-    "scientific": "Varanus komodoensis",
-    "class_type": "reptile",
-    "accent": [255, 120, 40],
-    "file_name": "Dragon.js"
   },
   {
     "name": "BLACK MAMBA VIPER",
@@ -21,11 +21,11 @@
     "file_name": "BlackMamba.js"
   },
   {
-    "name": "KING COBRA",
-    "scientific": "Ophiophagus hannah",
-    "class_type": "serpent",
-    "accent": [234, 179, 8],
-    "file_name": "KingCobra.js"
+    "name": "KOMODO DRAGON",
+    "scientific": "Varanus komodoensis",
+    "class_type": "reptile",
+    "accent": [255, 120, 40],
+    "file_name": "Dragon.js"
   },
   {
     "name": "PEACOCK MANTIS SHRIMP",
@@ -33,6 +33,13 @@
     "class_type": "crustacean",
     "accent": [6, 182, 212],
     "file_name": "MantisShrimp.js"
+  },
+  {
+    "name": "KING COBRA",
+    "scientific": "Ophiophagus hannah",
+    "class_type": "serpent",
+    "accent": [234, 179, 8],
+    "file_name": "KingCobra.js"
   },
   {
     "name": "GIANT PRAYING MANTIS",
@@ -49,27 +56,6 @@
     "file_name": "Tarantula.js"
   },
   {
-    "name": "GIANT TIGER CENTIPEDE",
-    "scientific": "Scolopendra gigantea",
-    "class_type": "myriapod",
-    "accent": [239, 68, 68],
-    "file_name": "Centipede.js"
-  },
-  {
-    "name": "ELECTRIC EEL",
-    "scientific": "Electrophorus electricus",
-    "class_type": "aquatic",
-    "accent": [56, 189, 248],
-    "file_name": "ElectricEel.js"
-  },
-  {
-    "name": "VEILED CHAMELEON",
-    "scientific": "Chamaeleo calyptratus",
-    "class_type": "reptile",
-    "accent": [52, 211, 153],
-    "file_name": "Chameleon.js"
-  },
-  {
     "name": "BLUE-RINGED OCTOPUS",
     "scientific": "Hapalochlaena maculosa",
     "class_type": "cephalopod",
@@ -77,66 +63,10 @@
     "file_name": "BlueRingedOctopus.js"
   },
   {
-    "name": "HERCULES STAG BEETLE",
-    "scientific": "Dynastes hercules",
-    "class_type": "insect",
-    "accent": [202, 138, 4],
-    "file_name": "HerculesBeetle.js"
-  },
-  {
-    "name": "GIANT COCONUT CRAB",
-    "scientific": "Birgus latro",
-    "class_type": "crustacean",
-    "accent": [168, 85, 247],
-    "file_name": "CoconutCrab.js"
-  },
-  {
     "name": "OCEANIC MANTA RAY",
     "scientific": "Mobula birostris",
     "class_type": "aquatic",
     "accent": [14, 165, 233],
     "file_name": "MantaRay.js"
-  },
-  {
-    "name": "NILE CROCODILE",
-    "scientific": "Crocodylus niloticus",
-    "class_type": "reptile",
-    "accent": [101, 163, 13],
-    "file_name": "Crocodile.js"
-  },
-  {
-    "name": "DEATHSTALKER SCORPION",
-    "scientific": "Leiurus quinquestriatus",
-    "class_type": "arachnid",
-    "accent": [250, 204, 21],
-    "file_name": "Deathstalker.js"
-  },
-  {
-    "name": "GREAT HAMMERHEAD SHARK",
-    "scientific": "Sphyrna mokarran",
-    "class_type": "aquatic",
-    "accent": [96, 165, 250],
-    "file_name": "HammerheadShark.js"
-  },
-  {
-    "name": "LEAFY SEADRAGON",
-    "scientific": "Phycodurus eques",
-    "class_type": "aquatic",
-    "accent": [16, 185, 129],
-    "file_name": "Seadragon.js"
-  },
-  {
-    "name": "MAJESTIC PEACOCK",
-    "scientific": "Pavo cristatus",
-    "class_type": "avian",
-    "accent": [6, 182, 212],
-    "file_name": "Peacock.js"
-  },
-  {
-    "name": "CYBER ROBOT WOLF",
-    "scientific": "Canis lupus cyberneticus",
-    "class_type": "quadruped",
-    "accent": [0, 220, 255],
-    "file_name": "CyberWolf.js"
   }
 ]

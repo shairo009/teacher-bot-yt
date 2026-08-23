@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import random
 import shutil
 import subprocess
@@ -259,6 +260,67 @@ def _encode_video(frames: Path, output: Path) -> None:
         raise RuntimeError("ffmpeg failed: " + result.stderr[-1500:])
 
 
+def _upload_to_youtube(video_path: Path, animal: dict, dry_run: bool) -> str | None:
+    if dry_run:
+        print("  [Dry run — skipping YouTube upload]")
+        return None
+
+    token_json = os.environ.get("TOKEN_JSON", "").lstrip("\ufeff").strip()
+    client_json = os.environ.get("CLIENT_SECRETS_JSON", "").lstrip("\ufeff").strip()
+
+    token_file = TMP_DIR / "token.json"
+    client_file = TMP_DIR / "client_secrets.json"
+
+    if token_json and client_json:
+        TMP_DIR.mkdir(parents=True, exist_ok=True)
+        token_file.write_text(token_json, encoding="utf-8")
+        client_file.write_text(client_json, encoding="utf-8")
+    elif not (token_file.exists() and client_file.exists()):
+        print("  [No YouTube credentials found in env/files — skipping upload]")
+        return None
+
+    try:
+        sys.path.insert(0, str(ROOT))
+        from src.uploader import YouTubeUploader
+        uploader = YouTubeUploader(str(token_file), str(client_file))
+
+        name = animal["name"]
+        clean_tag = name.replace(" ", "")
+        title = f"{name} Facts You Didn't Know! 🐾 #Shorts #Animals"[:100]
+
+        facts_text = "\n".join(f"• {f}" for f in animal.get("facts", []))
+        description = (
+            f"🐾 Quick Facts about the {name}!\n\n"
+            f"{facts_text}\n\n"
+            f"Comment \"{name.upper()}\" if you love wildlife! 🦁\n"
+            f"Subscribe for daily real animal Shorts! 🔔\n\n"
+            f"#Shorts #Animals #{clean_tag} #Wildlife #Nature #AnimalFacts #DidYouKnow"
+        )
+        tags = [
+            "shorts", "animals", "wildlife", "animal facts", "nature",
+            name.lower(), f"{name.lower()} facts", "did you know", "animals of the world", "cute animals"
+        ]
+
+        print(f"Uploading to YouTube: {title}")
+        video_id = uploader.upload(
+            video_path=str(video_path),
+            title=title,
+            description=description,
+            tags=tags,
+            category_id="15",  # Pets & Animals
+            made_for_kids=False,
+        )
+        if video_id:
+            print(f"✅ Successfully uploaded to YouTube: https://youtu.be/{video_id}")
+            return video_id
+        else:
+            print("❌ Upload returned no video ID")
+            return None
+    except Exception as exc:
+        print(f"❌ YouTube upload error: {exc}")
+        return None
+
+
 def generate(animal_id: int | None, duration: float, dry_run: bool) -> Path:
     DATA_DIR.mkdir(exist_ok=True)
     progress = _load_json(PROGRESS_FILE, {"current_id": 0})
@@ -278,15 +340,25 @@ def generate(animal_id: int | None, duration: float, dry_run: bool) -> Path:
     _encode_video(frames, output)
     print(f"Created: {output}")
 
+    video_id = None
+    if not dry_run:
+        video_id = _upload_to_youtube(output, animal, dry_run)
+
     # A failed render never advances the rotation.  Dry runs also remain pure.
     if not dry_run and animal_id is None:
         progress["current_id"] = current_id + 1
         PROGRESS_FILE.write_text(json.dumps(progress, indent=2), encoding="utf-8")
         history = _load_json(HISTORY_FILE, [])
-        history.append({
-            "id": current_id, "animal": animal["name"], "file": str(output.relative_to(ROOT)),
+        history_entry = {
+            "id": current_id,
+            "animal": animal["name"],
+            "file": str(output.relative_to(ROOT)),
             "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+        }
+        if video_id:
+            history_entry["video_id"] = video_id
+            history_entry["uploaded"] = True
+        history.append(history_entry)
         HISTORY_FILE.write_text(json.dumps(history[-500:], indent=2), encoding="utf-8")
     return output
 

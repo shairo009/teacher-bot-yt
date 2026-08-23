@@ -359,7 +359,7 @@ class YouTubeUploader:
                 'title': title,
                 'description': description,
                 'tags': tags,
-                'categoryId': '27',  # Education
+                'categoryId': str(metadata.get('categoryId', metadata.get('category_id', '15'))),
                 'defaultLanguage': 'en',
                 'defaultAudioLanguage': 'en',
             },

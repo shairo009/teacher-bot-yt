@@ -10,7 +10,7 @@ python src/animal_short_generator.py --dry-run  # preview without advancing it
 python src/animal_short_generator.py --animal-id 0  # Tiger preview
 ```
 
-Videos are saved under `tmp/animal_####/`. The GitHub Action uploads an MP4 artifact for each successful run. YouTube uploading is intentionally disabled because this version has no OAuth/API-key dependency.
+Videos are saved under `tmp/animal_####/`. The GitHub Action uploads the Short directly to YouTube when `TOKEN_JSON` and `CLIENT_SECRETS_JSON` secrets are configured, and also saves an MP4 artifact for each run.
 
 ---
 

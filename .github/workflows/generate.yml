@@ -46,10 +46,12 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Generate a real animal Short
+      - name: Generate and upload animal Short
         env:
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
           ANIMAL_ID: ${{ inputs.animal_id || '' }}
+          TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
+          CLIENT_SECRETS_JSON: ${{ secrets.CLIENT_SECRETS_JSON }}
         run: |
           command=(python src/animal_short_generator.py)
           if [ "$DRY_RUN" = "true" ]; then command+=(--dry-run); fi

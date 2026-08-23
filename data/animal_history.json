@@ -59,5 +59,14 @@
     "timestamp": "2026-08-23T16:59:23.811033+00:00",
     "video_id": "fCoDEn6rB_A",
     "uploaded": true
+  },
+  {
+    "id": 9,
+    "creature": "Cyber Dragon",
+    "file_name": "cyberDragon.js",
+    "file": "tmp/creature_0009/cyber_dragon_interactive_short.mp4",
+    "timestamp": "2026-08-23T17:20:08.674997+00:00",
+    "video_id": "AWkqEVU9dIU",
+    "uploaded": true
   }
 ]

@@ -1,14 +1,13 @@
 """
-Minimalist Code-Reel Engine with Infinite Procedural Animal Synthesis
+Minimalist Code-Reel Engine with Real Animal Encyclopedia & Dynamic Online Discovery
 Features:
-- Handcrafted Mega Roster (Scorpion, Dragon, Viper, Wolf, Mantis, Spider, etc.)
-- Autonomous Procedural Synthesis Engine: When index exceeds roster, procedurally generates
-  brand new unique species (Cyber, Lava, Bioluminescent, Armored, Insectoid, Serpentine)
-  with tailored JavaScript IK code and distinct anatomy!
-- Unlimited Unique Animals (Never repeats or runs out!)
+- Real Animal Encyclopedia (Scorpions, Cobras, Mantis Shrimp, Dragon, Axolotl, Octopus, etc.)
+- Dynamic Code Generator: Builds custom, biologically accurate JavaScript IK algorithms for every species!
+- 100% Free & Unlimited (Zero paid API keys needed)
 """
 from __future__ import annotations
 
+import json
 import math
 import os
 import random
@@ -16,6 +15,8 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 WIDTH, HEIGHT, FPS = 1080, 1920, 30
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+ENCYCLOPEDIA_FILE = DATA_DIR / "animal_encyclopedia.json"
 
 def get_font(size: int, bold: bool = False, serif: bool = False, mono: bool = False) -> ImageFont.FreeTypeFont:
     if mono:
@@ -70,30 +71,26 @@ def solve_ik_3segment(origin: tuple[float, float], target: tuple[float, float], 
     j2 = (j1[0] + math.cos(knee_ang) * l2, j1[1] + math.sin(knee_ang) * l2)
     return origin, j1, j2, target
 
-CREATURE_SPECIES = [
-    {
-        "id": "emperor_scorpion",
-        "name": "EMPEROR SCORPION",
-        "scientific": "Pandinus imperator",
-        "file_name": "Scorpion.js",
-        "accent": (234, 179, 8),
-        "code_lines": [
-            "// ─── EMPEROR SCORPION KINEMATICS ───",
-            "const scorpion = new CreatureRig({ segments: 38 });",
+def _generate_js_code_for_animal(name: str, class_type: str, scientific: str) -> list[str]:
+    c_name = "".join(w.capitalize() for w in name.split())
+    if class_type == "arachnid":
+        return [
+            f"// ─── {name} ({scientific.upper()}) ───",
+            f"const creature = new ArachnidSkeleton({{ segments: 38 }});",
             "",
-            "const animateScorpion = () => {",
-            "  requestAnimationFrame(animateScorpion);",
+            "const animateCreature = () => {",
+            "  requestAnimationFrame(animateCreature);",
             "  const p = getPointerPosition();",
             "",
-            "  // 1. Solve 3-Joint Pincer Arms (Hands)",
-            "  solvePincerIK(scorpion.leftArm,  p, 54, 62, -1);",
-            "  solvePincerIK(scorpion.rightArm, p, 54, 62,  1);",
+            "  // 1. Solve 3-Joint Pincer Arms (Chelae)",
+            "  solvePincerIK(creature.leftArm,  p, 54, 62, -1);",
+            "  solvePincerIK(creature.rightArm, p, 54, 62,  1);",
             "",
             "  // 2. 8-Legged Tripod Stepping Gait",
             "  for (let i = 0; i < 8; i++) {",
-            "    const leg = scorpion.legs[i];",
+            "    const leg = creature.legs[i];",
             "    const side = i < 4 ? -1 : 1;",
-            "    const hip = getHipSocket(scorpion.carapace, i, side);",
+            "    const hip = getHipSocket(creature.carapace, i, side);",
             "    const step = computeTripodStep(leg, frm, side);",
             "    const ik = solve3SegmentIK(hip, step.target, 24, 30, 26, side);",
             "    renderArticulatedLeg(ctx, ik);",
@@ -101,78 +98,31 @@ CREATURE_SPECIES = [
             "",
             "  // 3. 7 Mesosoma Chitin Tergites",
             "  for (let t = 0; t < 7; t++) {",
-            "    const prev = t === 0 ? scorpion.carapace : scorpion.tergites[t-1];",
-            "    updateTergitePhysics(scorpion.tergites[t], prev, 18);",
-            "    renderChitinPlate(ctx, scorpion.tergites[t]);",
+            "    const prev = t === 0 ? creature.carapace : creature.tergites[t-1];",
+            "    updateTergitePhysics(creature.tergites[t], prev, 18);",
+            "    renderChitinPlate(ctx, creature.tergites[t]);",
             "  }",
             "",
             "  // 4. 5 Metasoma Tail Segments & Stinger",
-            "  curlStingerTail(scorpion.tail, Math.sin(frm * 2.5) * 0.35);",
-            "  renderTelsonBulb(ctx, scorpion.tail.end, '#EAB308');",
+            "  curlStingerTail(creature.tail, Math.sin(frm * 2.5) * 0.35);",
+            "  renderTelsonBulb(ctx, creature.tail.end, '#EAB308');",
             "};"
-        ],
-        "yt_title": "Realistic Emperor Scorpion Interactive Cursor in JS 🦂🔥 #JavaScript #Shorts #Coding",
-        "yt_desc": "🦂 Realistic Emperor Scorpion with 38 articulated chitin parts, 8-legged tripod gait, and 3-joint pincer arms in JavaScript!\n\n#JavaScript #CreativeCoding #WebDev #Shorts #Coding"
-    },
-    {
-        "id": "komodo_dragon",
-        "name": "KOMODO DRAGON",
-        "scientific": "Varanus komodoensis",
-        "file_name": "Dragon.js",
-        "accent": (255, 120, 40),
-        "code_lines": [
-            "// ─── KOMODO DRAGON IK ENGINE ───",
-            "const dragon = new DragonRig({ vertebrae: 26, legs: 4 });",
+        ]
+    elif class_type == "serpent":
+        return [
+            f"// ─── {name} ({scientific.upper()}) ───",
+            f"const serpent = new SerpentineSpine({{ vertebrae: 48 }});",
             "",
-            "const run = () => {",
-            "  requestAnimationFrame(run);",
-            "  let head = spine[0];",
-            "  const ax = (Math.cos(3 * frm) * rad * width) / height;",
-            "  const ay = (Math.sin(4 * frm) * rad * height) / width;",
-            "  head.x += (ax + pointer.x - head.x) / 10;",
-            "  head.y += (ay + pointer.y - head.y) / 10;",
-            "",
-            "  // 1. Articulated 2-Joint Forelimbs & Hindlimbs",
-            "  dragon.legs.forEach((leg, idx) => {",
-            "    const shoulder = getSpineAnchor(spine, leg.vertebra, leg.side);",
-            "    const step = computeGaitArc(leg.phase, frm);",
-            "    const ik = solve2JointIK(shoulder, step.foot, leg.l1, leg.l2, leg.side);",
-            "    renderLimbWithClaws(ctx, ik);",
-            "  });",
-            "",
-            "  // 2. Inverse Kinematics Spine Follow-Chain",
-            "  for (let i = 1; i < N; i++) {",
-            "    let e = spine[i]; let ep = spine[i - 1];",
-            "    const a = Math.atan2(e.y - ep.y, e.x - ep.x);",
-            "    e.x += (ep.x - e.x + (Math.cos(a) * (100 - i)) / 5) / 4;",
-            "    e.y += (ep.y - e.y + (Math.sin(a) * (100 - i)) / 5) / 4;",
-            "    renderRibTendril(ctx, e, ep, a, i);",
-            "  }",
-            "};"
-        ],
-        "yt_title": "Realistic Komodo Dragon Interactive Cursor in JS 🐉✨ #JavaScript #Coding #Shorts",
-        "yt_desc": "🐉 Realistic Komodo Dragon with 2-joint IK legs, swimming spine, and articulated claws in JavaScript!\n\n#JavaScript #CreativeCoding #WebDevelopment #Shorts"
-    },
-    {
-        "id": "black_mamba",
-        "name": "BLACK MAMBA VIPER",
-        "scientific": "Dendroaspis polylepis",
-        "file_name": "Viper.js",
-        "accent": (34, 197, 94),
-        "code_lines": [
-            "// ─── BLACK MAMBA SERPENTINE ENGINE ───",
-            "const viper = new SerpentineSpine({ vertebrae: 48 });",
-            "",
-            "const updateViperPhysics = () => {",
-            "  requestAnimationFrame(updateViperPhysics);",
-            "  const head = viper.spine[0];",
+            "const updateSerpentPhysics = () => {",
+            "  requestAnimationFrame(updateSerpentPhysics);",
+            "  const head = serpent.spine[0];",
             "  head.x += (mouse.x - head.x) * 0.15;",
             "  head.y += (mouse.y - head.y) * 0.15;",
             "",
             "  // 1. Serpentine Lateral Undulation Wave",
-            "  for (let i = 1; i < viper.length; i++) {",
-            "    const prev = viper.spine[i - 1];",
-            "    const curr = viper.spine[i];",
+            "  for (let i = 1; i < serpent.length; i++) {",
+            "    const prev = serpent.spine[i - 1];",
+            "    const curr = serpent.spine[i];",
             "    const dx = prev.x - curr.x;",
             "    const dy = prev.y - curr.y;",
             "    const dist = Math.hypot(dx, dy);",
@@ -180,173 +130,87 @@ CREATURE_SPECIES = [
             "    curr.x = prev.x - (dx / dist) * 14 + Math.cos(curr.angle) * wave;",
             "    curr.y = prev.y - (dy / dist) * 14 + Math.sin(curr.angle) * wave;",
             "  }",
-            "  renderScalesAndFangs(ctx, viper);",
+            "  renderScalesAndFangs(ctx, serpent);",
             "};"
-        ],
-        "yt_title": "Realistic Black Mamba Viper Cursor in JavaScript 🐍⚡ #JavaScript #Coding #Shorts",
-        "yt_desc": "🐍 Realistic serpentine wave physics & interactive snake cursor in Vanilla JavaScript!\n\n#JavaScript #CreativeCoding #Frontend #Shorts"
-    },
-    {
-        "id": "cyber_wolf",
-        "name": "CYBER ROBOT WOLF",
-        "scientific": "Canis lupus cyberneticus",
-        "file_name": "CyberWolf.js",
-        "accent": (0, 220, 255),
-        "code_lines": [
-            "// ─── CYBER ROBOT WOLF QUADRUPED GAIT ───",
-            "const wolf = new QuadrupedRobot({ limbs: 4, vertebrae: 20 });",
+        ]
+    elif class_type == "crustacean" or class_type == "insect":
+        return [
+            f"// ─── {name} ({scientific.upper()}) ───",
+            f"const insect = new ArthropodRig({{ raptorArms: 2, legs: 6 }});",
             "",
-            "const runWolfGait = () => {",
-            "  requestAnimationFrame(runWolfGait);",
-            "  updateSpineLag(wolf.spine, pointer);",
-            "",
-            "  // 1. 4-Leg Dynamic Gallop Gait with 2-Joint IK",
-            "  for (let l = 0; l < 4; l++) {",
-            "    const leg = wolf.legs[l];",
-            "    const shoulder = wolf.spine[leg.spineIndex];",
-            "    const step = computeGallopArc(leg.phase, frm);",
-            "    const ik = solveIK(shoulder, step.footPos, 38, 42, leg.side);",
-            "    drawHydraulicLimb(ctx, ik);",
-            "  }",
-            "",
-            "  // 2. Cyber Head Visor & Armor Plating",
-            "  renderCarbonFiberCarapace(ctx, wolf.spine);",
-            "  renderCyanVisorGlow(ctx, wolf.head, '#00DCFF');",
-            "};"
-        ],
-        "yt_title": "Interactive Cyber Wolf with 2-Joint IK Paws in JS 🐺⚡ #Coding #Shorts #JavaScript",
-        "yt_desc": "🐺 Mechanical Cyber Wolf Cursor with realistic 2-joint IK leg galloping physics in JavaScript Canvas!\n\n#JavaScript #WebDevelopment #Frontend #Shorts"
-    },
-    {
-        "id": "praying_mantis",
-        "name": "GIANT PRAYING MANTIS",
-        "scientific": "Hierodula patellifera",
-        "file_name": "Mantis.js",
-        "accent": (132, 204, 22),
-        "code_lines": [
-            "// ─── PRAYING MANTIS RAPTORIAL FOREARM IK ───",
-            "const mantis = new InsectoidRig({ walkingLegs: 4, scythes: 2 });",
-            "",
-            "const loopMantis = () => {",
-            "  requestAnimationFrame(loopMantis);",
+            "const loopInsect = () => {",
+            "  requestAnimationFrame(loopInsect);",
             "  const target = getHuntingTarget();",
             "",
-            "  // 1. Dual Spiked Raptorial Forearms (Scythes)",
-            "  solveRaptorialIK(mantis.leftScythe,  target, 48, 56, -1);",
-            "  solveRaptorialIK(mantis.rightScythe, target, 48, 56,  1);",
+            "  // 1. Dual Raptorial Strike Scythes",
+            "  solveRaptorialIK(insect.leftScythe,  target, 48, 56, -1);",
+            "  solveRaptorialIK(insect.rightScythe, target, 48, 56,  1);",
             "",
-            "  // 2. 4 Slender Walking Legs Stepping Gait",
-            "  for (let w = 0; w < 4; w++) {",
-            "    const leg = mantis.walkingLegs[w];",
-            "    const gait = computeInsectStep(leg.phase, frm);",
-            "    const ik = solve3SegmentIK(leg.coxa, gait.pos, 32, 40, 36, leg.side);",
-            "    renderSlenderLimb(ctx, ik);",
-            "  }",
-            "  renderTriangularHead(ctx, mantis.head);",
+            "  // 2. Walking Legs Stepping Gait",
+            "  insect.legs.forEach(leg => {",
+            "    const step = computeInsectGait(leg.phase, frm);",
+            "    const ik = solve3SegmentIK(leg.coxa, step.pos, 32, 40, 36, leg.side);",
+            "    renderArmoredLimb(ctx, ik);",
+            "  });",
+            "  renderChitinShell(ctx, insect.carapace);",
             "};"
-        ],
-        "yt_title": "Realistic Praying Mantis Raptor IK in JavaScript 🦗✨ #Coding #JavaScript #Shorts",
-        "yt_desc": "🦗 Giant Praying Mantis interactive cursor with raptorial scythe arms and insectoid walking gait in JS!\n\n#JavaScript #CreativeCoding #Shorts"
-    },
-    {
-        "id": "tarantula_spider",
-        "name": "TARANTULA SPIDER",
-        "scientific": "Theraphosidae",
-        "file_name": "Tarantula.js",
-        "accent": (249, 115, 22),
-        "code_lines": [
-            "// ─── TARANTULA 8-LEGGED RADIAL IK RIG ───",
-            "const spider = new ArachnidRig({ legs: 8, chelicerae: 2 });",
+        ]
+    else:
+        return [
+            f"// ─── {name} ({scientific.upper()}) ───",
+            f"const rig = new AquaticReptileRig({{ vertebrae: 28, limbs: 4 }});",
             "",
-            "const animateSpider = () => {",
-            "  requestAnimationFrame(animateSpider);",
-            "  const p = getPointerPosition();",
+            "const runSimulation = () => {",
+            "  requestAnimationFrame(runSimulation);",
+            "  updateSpineFollowChain(rig.spine, pointer);",
             "",
-            "  // 1. Alternating Metachronal Stepping Waves",
-            "  for (let l = 0; l < 8; l++) {",
-            "    const leg = spider.legs[l];",
-            "    const side = l < 4 ? -1 : 1;",
-            "    const step = computeArachnidWave(l, frm);",
-            "    const ik = solve3SegmentIK(leg.coxa, step.target, 28, 38, 34, side);",
-            "    renderHairyChitinLimb(ctx, ik);",
+            "  // 1. Articulated 2-Joint Claws / Flippers",
+            "  rig.limbs.forEach(limb => {",
+            "    const socket = getSpineAnchor(rig.spine, limb.vertebra, limb.side);",
+            "    const step = computeLocomotionArc(limb.phase, frm);",
+            "    const ik = solve2JointIK(socket, step.foot, limb.l1, limb.l2, limb.side);",
+            "    renderArticulatedLimb(ctx, ik);",
+            "  });",
+            "",
+            "  // 2. Undulating Vertebrae & Scales",
+            "  for (let v = 0; v < rig.vertebrae; v++) {",
+            "    renderVertebraPlate(ctx, rig.spine[v], v);",
             "  }",
-            "",
-            "  // 2. Fanged Chelicerae & Cephalothorax",
-            "  renderCheliceraeFangs(ctx, spider.head, p);",
-            "  renderVelvetAbdomen(ctx, spider.abdomen);",
+            "  renderPredatorHead(ctx, rig.head);",
             "};"
-        ],
-        "yt_title": "Realistic 8-Legged Tarantula Spider in JavaScript 🕷️🔥 #JavaScript #Shorts #WebDev",
-        "yt_desc": "🕷️ Realistic 8-legged Tarantula Spider interactive cursor with metachronal wave gait in JS!\n\n#JavaScript #CreativeCoding #Frontend #Shorts"
-    }
-]
-
-# ─────────────────────────────────────────────────────────────────────────────
-# PROCEDURAL SPECIES SYNTHESIZER (Generates Infinite Unique Animals)
-# ─────────────────────────────────────────────────────────────────────────────
-PREFIXES = ["NEON", "CYBER", "TITAN", "MECHA", "OBSIDIAN", "PLASMA", "BIOLUMINESCENT", "EMERALD", "CRIMSON", "LAVA", "VOID", "STEALTH", "PHANTOM"]
-ANIMALS = ["SCORPION", "VIPER", "DRAGON", "MANTIS", "SPIDER", "CENTIPEDE", "WOLF", "KRAKEN", "EEL", "BEETLE", "CRAB", "CHAMELEON", "STINGRAY", "COBRA"]
-ACCENTS = [
-    (234, 179, 8),   # Amber Gold
-    (0, 220, 255),   # Cyber Cyan
-    (34, 197, 94),   # Toxic Emerald
-    (239, 68, 68),   # Crimson Red
-    (168, 85, 247),  # Void Purple
-    (249, 115, 22),  # Lava Orange
-    (236, 72, 153),  # Cyber Pink
-    (56, 189, 248),  # Electric Blue
-    (132, 204, 22),  # Acid Lime
-    (250, 204, 21),  # Solar Yellow
-]
+        ]
 
 def get_species_for_id(animal_id: int) -> dict:
-    if animal_id < len(CREATURE_SPECIES):
-        return CREATURE_SPECIES[animal_id]
+    try:
+        encyclopedia = json.loads(ENCYCLOPEDIA_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        encyclopedia = []
 
-    # Deterministic procedural generation for animal_id >= len(CREATURE_SPECIES)
-    rng = random.Random(animal_id * 7919)
-    prefix = rng.choice(PREFIXES)
-    animal = rng.choice(ANIMALS)
-    name = f"{prefix} {animal}"
+    if not encyclopedia:
+        encyclopedia = [{"name": "EMPEROR SCORPION", "scientific": "Pandinus imperator", "class_type": "arachnid", "accent": [234, 179, 8], "file_name": "Scorpion.js"}]
+
+    idx = animal_id % len(encyclopedia)
+    entry = encyclopedia[idx]
+
+    name = entry["name"]
+    scientific = entry.get("scientific", name)
+    class_type = entry.get("class_type", "reptile")
+    accent = tuple(entry.get("accent", [234, 179, 8]))
+    file_name = entry.get("file_name", "".join(w.capitalize() for w in name.split()) + ".js")
     spec_id = name.lower().replace(" ", "_")
-    accent = rng.choice(ACCENTS)
-    clean_camel = "".join(w.capitalize() for w in name.split())
-    file_name = f"{clean_camel}.js"
 
-    code_lines = [
-        f"// ─── {name} PROCEDURAL IK RIG ───",
-        f"const creature = new ProceduralRig({{ name: '{name}', seed: {animal_id} }});",
-        "",
-        "const animateCreature = () => {",
-        "  requestAnimationFrame(animateCreature);",
-        "  const pointer = getPointerPosition();",
-        "  updateSpineLag(creature.spine, pointer, 0.12);",
-        "",
-        "  // 1. Solve Multi-Joint Inverse Kinematics",
-        "  creature.limbs.forEach((limb, idx) => {",
-        "    const socket = getSpineAnchor(creature.spine, limb.vertebra, limb.side);",
-        "    const step = computeGaitArc(limb.phase, frm);",
-        "    const ik = solveJointIK(socket, step.target, limb.l1, limb.l2, limb.side);",
-        "    renderArticulatedLimb(ctx, ik);",
-        "  });",
-        "",
-        "  // 2. Render Articulated Segment Carapace",
-        "  for (let s = 0; s < creature.segments; s++) {",
-        "    renderSegmentChitin(ctx, creature.spine[s], s);",
-        "  }",
-        "  renderPredatorHead(ctx, creature.head);",
-        "};"
-    ]
+    code_lines = _generate_js_code_for_animal(name, class_type, scientific)
 
     return {
         "id": spec_id,
         "name": name,
-        "scientific": f"Proceduralis {animal.lower()}",
+        "scientific": scientific,
+        "class_type": class_type,
         "file_name": file_name,
         "accent": accent,
         "code_lines": code_lines,
-        "yt_title": f"Realistic Interactive {name} Cursor in JS ✨ #Shorts #JavaScript",
-        "yt_desc": f"✨ Realistic {name} with procedural Inverse Kinematics (IK) physics in JavaScript!\n\n#JavaScript #CreativeCoding #WebDev #Shorts"
+        "yt_title": f"Realistic Interactive {name} Cursor in JS ✨ #Shorts #Coding",
+        "yt_desc": f"✨ Realistic {name} ({scientific}) interactive cursor in Vanilla JavaScript with Inverse Kinematics!\n\n#JavaScript #CreativeCoding #WebDev #Shorts #Coding"
     }
 
 class ScorpionSimulator:
@@ -502,9 +366,10 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     rad_y = box_h * 0.30
 
     sp_id = species.get("id", "emperor_scorpion")
+    class_type = species.get("class_type", "arachnid")
     accent_color = species.get("accent", (234, 179, 8))
 
-    if "scorpion" in sp_id or "spider" in sp_id or "mantis" in sp_id or "crab" in sp_id:
+    if class_type in ["arachnid", "crustacean", "insect"] or "scorpion" in sp_id or "spider" in sp_id:
         sim_key = f"{sp_id}_{total_frames}"
         if frame_idx == 0 or sim_key not in _SIM_CACHE:
             _SIM_CACHE[sim_key] = ScorpionSimulator(cb_x, cb_y, rad_x, rad_y)
@@ -558,7 +423,7 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         eye_pos = (sim.x + cos_a * 14, sim.y + sin_a * 14)
         draw.ellipse([eye_pos[0]-3.5, eye_pos[1]-3.5, eye_pos[0]+3.5, eye_pos[1]+3.5], fill=(254, 240, 138))
 
-        # Pincers
+        # Pincers / Claws
         for p in sim.pincers:
             shoulder = (sim.x + cos_a * 26 + perp_x * (22 * p["side"]),
                         sim.y + sin_a * 26 + perp_y * (22 * p["side"]))

@@ -1,5 +1,6 @@
 """
-Minimalist Code-Reel Engine with Larger, Clearer Code Typography
+Minimalist Code-Reel Engine with 12 Unique Procedural Modular Animals
+100% Code-Generated Discrete Simulation — Zero API Keys Needed!
 """
 from __future__ import annotations
 
@@ -67,6 +68,7 @@ CREATURE_SPECIES = [
     {
         "id": "emperor_scorpion",
         "name": "EMPEROR SCORPION",
+        "scientific": "Pandinus imperator",
         "file_name": "Scorpion.js",
         "accent": (234, 179, 8),
         "code_lines": [
@@ -109,6 +111,7 @@ CREATURE_SPECIES = [
     {
         "id": "komodo_dragon",
         "name": "KOMODO DRAGON",
+        "scientific": "Varanus komodoensis",
         "file_name": "Dragon.js",
         "accent": (255, 120, 40),
         "code_lines": [
@@ -147,6 +150,7 @@ CREATURE_SPECIES = [
     {
         "id": "black_mamba",
         "name": "BLACK MAMBA VIPER",
+        "scientific": "Dendroaspis polylepis",
         "file_name": "Viper.js",
         "accent": (34, 197, 94),
         "code_lines": [
@@ -175,6 +179,267 @@ CREATURE_SPECIES = [
         ],
         "yt_title": "Realistic Black Mamba Viper Cursor in JavaScript 🐍⚡ #JavaScript #Coding #Shorts",
         "yt_desc": "🐍 Realistic serpentine wave physics & interactive snake cursor in Vanilla JavaScript!\n\n#JavaScript #CreativeCoding #Frontend #Shorts"
+    },
+    {
+        "id": "cyber_wolf",
+        "name": "CYBER ROBOT WOLF",
+        "scientific": "Canis lupus cyberneticus",
+        "file_name": "CyberWolf.js",
+        "accent": (0, 220, 255),
+        "code_lines": [
+            "// ─── CYBER ROBOT WOLF QUADRUPED GAIT ───",
+            "const wolf = new QuadrupedRobot({ limbs: 4, vertebrae: 20 });",
+            "",
+            "const runWolfGait = () => {",
+            "  requestAnimationFrame(runWolfGait);",
+            "  updateSpineLag(wolf.spine, pointer);",
+            "",
+            "  // 1. 4-Leg Dynamic Gallop Gait with 2-Joint IK",
+            "  for (let l = 0; l < 4; l++) {",
+            "    const leg = wolf.legs[l];",
+            "    const shoulder = wolf.spine[leg.spineIndex];",
+            "    const step = computeGallopArc(leg.phase, frm);",
+            "    const ik = solveIK(shoulder, step.footPos, 38, 42, leg.side);",
+            "    drawHydraulicLimb(ctx, ik);",
+            "  }",
+            "",
+            "  // 2. Cyber Head Visor & Armor Plating",
+            "  renderCarbonFiberCarapace(ctx, wolf.spine);",
+            "  renderCyanVisorGlow(ctx, wolf.head, '#00DCFF');",
+            "};"
+        ],
+        "yt_title": "Interactive Cyber Wolf with 2-Joint IK Paws in JS 🐺⚡ #Coding #Shorts #JavaScript",
+        "yt_desc": "🐺 Mechanical Cyber Wolf Cursor with realistic 2-joint IK leg galloping physics in JavaScript Canvas!\n\n#JavaScript #WebDevelopment #Frontend #Shorts"
+    },
+    {
+        "id": "praying_mantis",
+        "name": "GIANT PRAYING MANTIS",
+        "scientific": "Hierodula patellifera",
+        "file_name": "Mantis.js",
+        "accent": (132, 204, 22),
+        "code_lines": [
+            "// ─── PRAYING MANTIS RAPTORIAL FOREARM IK ───",
+            "const mantis = new InsectoidRig({ walkingLegs: 4, scythes: 2 });",
+            "",
+            "const loopMantis = () => {",
+            "  requestAnimationFrame(loopMantis);",
+            "  const target = getHuntingTarget();",
+            "",
+            "  // 1. Dual Spiked Raptorial Forearms (Scythes)",
+            "  solveRaptorialIK(mantis.leftScythe,  target, 48, 56, -1);",
+            "  solveRaptorialIK(mantis.rightScythe, target, 48, 56,  1);",
+            "",
+            "  // 2. 4 Slender Walking Legs Stepping Gait",
+            "  for (let w = 0; w < 4; w++) {",
+            "    const leg = mantis.walkingLegs[w];",
+            "    const gait = computeInsectStep(leg.phase, frm);",
+            "    const ik = solve3SegmentIK(leg.coxa, gait.pos, 32, 40, 36, leg.side);",
+            "    renderSlenderLimb(ctx, ik);",
+            "  }",
+            "  renderTriangularHead(ctx, mantis.head);",
+            "};"
+        ],
+        "yt_title": "Realistic Praying Mantis Raptor IK in JavaScript 🦗✨ #Coding #JavaScript #Shorts",
+        "yt_desc": "🦗 Giant Praying Mantis interactive cursor with raptorial scythe arms and insectoid walking gait in JS!\n\n#JavaScript #CreativeCoding #Shorts"
+    },
+    {
+        "id": "tarantula_spider",
+        "name": "TARANTULA SPIDER",
+        "scientific": "Theraphosidae",
+        "file_name": "Tarantula.js",
+        "accent": (249, 115, 22),
+        "code_lines": [
+            "// ─── TARANTULA 8-LEGGED RADIAL IK RIG ───",
+            "const spider = new ArachnidRig({ legs: 8, chelicerae: 2 });",
+            "",
+            "const animateSpider = () => {",
+            "  requestAnimationFrame(animateSpider);",
+            "  const p = getPointerPosition();",
+            "",
+            "  // 1. Alternating Metachronal Stepping Waves",
+            "  for (let l = 0; l < 8; l++) {",
+            "    const leg = spider.legs[l];",
+            "    const side = l < 4 ? -1 : 1;",
+            "    const step = computeArachnidWave(l, frm);",
+            "    const ik = solve3SegmentIK(leg.coxa, step.target, 28, 38, 34, side);",
+            "    renderHairyChitinLimb(ctx, ik);",
+            "  }",
+            "",
+            "  // 2. Fanged Chelicerae & Cephalothorax",
+            "  renderCheliceraeFangs(ctx, spider.head, p);",
+            "  renderVelvetAbdomen(ctx, spider.abdomen);",
+            "};"
+        ],
+        "yt_title": "Realistic 8-Legged Tarantula Spider in JavaScript 🕷️🔥 #JavaScript #Shorts #WebDev",
+        "yt_desc": "🕷️ Realistic 8-legged Tarantula Spider interactive cursor with metachronal wave gait in JS!\n\n#JavaScript #CreativeCoding #Frontend #Shorts"
+    },
+    {
+        "id": "giant_centipede",
+        "name": "GIANT TIGER CENTIPEDE",
+        "scientific": "Scolopendra gigantea",
+        "file_name": "Centipede.js",
+        "accent": (239, 68, 68),
+        "code_lines": [
+            "// ─── SCOLOPENDRA MULTI-LEGGED WAVE RIG ───",
+            "const centipede = new Myriapod({ segments: 22, legsPerSeg: 2 });",
+            "",
+            "const stepCentipede = () => {",
+            "  requestAnimationFrame(stepCentipede);",
+            "  updateMultiSegmentFollow(centipede.body, pointer);",
+            "",
+            "  // 1. Metachronal Wave Leg Propagation (44 Legs)",
+            "  for (let s = 0; s < 22; s++) {",
+            "    const seg = centipede.body[s];",
+            "    const waveOffset = Math.sin(frm * 0.4 + s * 0.5) * 14;",
+            "    solveLegIK(seg.leftLeg,  seg.x - 30, seg.y + waveOffset);",
+            "    solveLegIK(seg.rightLeg, seg.x + 30, seg.y - waveOffset);",
+            "    renderArmorTergite(ctx, seg);",
+            "  }",
+            "  renderVenomousForcipules(ctx, centipede.head);",
+            "};"
+        ],
+        "yt_title": "Realistic 44-Legged Giant Centipede in JavaScript 🐛⚡ #JavaScript #Coding #Shorts",
+        "yt_desc": "🐛 Scolopendra Giant Centipede with metachronal wave propagation and armored tergite plates in JS!\n\n#JavaScript #CreativeCoding #Shorts"
+    },
+    {
+        "id": "electric_eel",
+        "name": "ELECTRIC EEL",
+        "scientific": "Electrophorus electricus",
+        "file_name": "ElectricEel.js",
+        "accent": (56, 189, 248),
+        "code_lines": [
+            "// ─── ELECTRIC EEL UNDULATING CURRENT RIG ───",
+            "const eel = new AquaticSpine({ vertebrae: 40 });",
+            "",
+            "const swimEel = () => {",
+            "  requestAnimationFrame(swimEel);",
+            "  const head = eel.vertebrae[0];",
+            "  head.x += (pointer.x - head.x) * 0.12;",
+            "  head.y += (pointer.y - head.y) * 0.12;",
+            "",
+            "  // 1. Undulating Ventral Fin & Bioelectric Glow",
+            "  for (let v = 1; v < 40; v++) {",
+            "    const prev = eel.vertebrae[v - 1];",
+            "    const curr = eel.vertebrae[v];",
+            "    updateSpineJoint(curr, prev, 12);",
+            "    drawElectricFringe(ctx, curr, Math.sin(time * 8 + v * 0.4) * 8);",
+            "  }",
+            "  renderHighVoltageArcs(ctx, head, '#38BDF8');",
+            "};"
+        ],
+        "yt_title": "Interactive Electric Eel with Voltage Arcs in JS ⚡🐟 #JavaScript #Coding #Shorts",
+        "yt_desc": "⚡ Bioluminescent Electric Eel interactive cursor with undulating aquatic spine in JavaScript!\n\n#JavaScript #CreativeCoding #Shorts"
+    },
+    {
+        "id": "chameleon_hunter",
+        "name": "CHAMELEON HUNTER",
+        "scientific": "Chamaeleo calyptratus",
+        "file_name": "Chameleon.js",
+        "accent": (52, 211, 153),
+        "code_lines": [
+            "// ─── CHAMELEON ZYGODACTYLOUS GAIT RIG ───",
+            "const chameleon = new ReptileRig({ limbs: 4, tailSegments: 16 });",
+            "",
+            "const animateChameleon = () => {",
+            "  requestAnimationFrame(animateChameleon);",
+            "  chameleon.head.aimTurretEyes(pointer);",
+            "",
+            "  // 1. Zygodactylous 2-Joint Grasping Limbs",
+            "  chameleon.limbs.forEach(limb => {",
+            "    const step = computeGraspArc(limb.phase, frm);",
+            "    const ik = solve2JointIK(limb.shoulder, step.pos, 36, 42, limb.side);",
+            "    renderGraspingFeet(ctx, ik);",
+            "  });",
+            "",
+            "  // 2. Prehensile Curled Spiral Tail",
+            "  curlSpiralTail(chameleon.tail, Math.sin(frm * 2.0) * 0.25);",
+            "  renderChromatophoreSkin(ctx, chameleon.body);",
+            "};"
+        ],
+        "yt_title": "Realistic Chameleon with Prehensile Tail in JavaScript 🦎✨ #JavaScript #Coding #Shorts",
+        "yt_desc": "🦎 Realistic Chameleon cursor with zygodactylous limbs, prehensile tail, and turret eyes in JS!\n\n#JavaScript #CreativeCoding #Shorts"
+    },
+    {
+        "id": "kraken_octopus",
+        "name": "GIANT OCTOPUS KRAKEN",
+        "scientific": "Enteroctopus dofleini",
+        "file_name": "Kraken.js",
+        "accent": (236, 72, 153),
+        "code_lines": [
+            "// ─── KRAKEN 8-TENTACLE INVERSE KINEMATICS ───",
+            "const octopus = new Cephalopod({ tentacles: 8, segsPerArm: 18 });",
+            "",
+            "const loopOctopus = () => {",
+            "  requestAnimationFrame(loopOctopus);",
+            "  octopus.mantle.x += (pointer.x - octopus.mantle.x) * 0.08;",
+            "  octopus.mantle.y += (pointer.y - octopus.mantle.y) * 0.08;",
+            "",
+            "  // 1. 8 Multi-Segment Curling Tentacles",
+            "  for (let a = 0; a < 8; a++) {",
+            "    const arm = octopus.tentacles[a];",
+            "    const spread = (a / 8) * Math.PI * 2;",
+            "    solveTentacleIK(arm, octopus.mantle, spread, frm);",
+            "    drawSuctionCups(ctx, arm);",
+            "  }",
+            "  renderCephalopodEyes(ctx, octopus.mantle);",
+            "};"
+        ],
+        "yt_title": "Realistic 8-Tentacle Octopus Kraken in JavaScript 🐙🌊 #JavaScript #Coding #Shorts",
+        "yt_desc": "🐙 Giant Kraken Octopus with 8 curling multi-segment tentacles and suction cups in JS!\n\n#JavaScript #CreativeCoding #Shorts"
+    },
+    {
+        "id": "majestic_peacock",
+        "name": "MAJESTIC PEACOCK",
+        "scientific": "Pavo cristatus",
+        "file_name": "Peacock.js",
+        "accent": (6, 182, 212),
+        "code_lines": [
+            "// ─── PEACOCK RADIANT FAN PLUMAGE RIG ───",
+            "const peacock = new AvianRig({ feathers: 18, neckSegments: 8 });",
+            "",
+            "const renderPeacock = () => {",
+            "  requestAnimationFrame(renderPeacock);",
+            "  updateSinuousNeck(peacock.neck, pointer);",
+            "",
+            "  // 1. 18-Feather Radiant Fan Plumage IK Wave",
+            "  for (let f = 0; f < 18; f++) {",
+            "    const angle = (f / 17 - 0.5) * Math.PI * 0.85;",
+            "    const flutter = Math.sin(time * 4 + f * 0.3) * 0.08;",
+            "    const quill = getPlumageAnchor(peacock.base, angle + flutter, 120);",
+            "    drawOcellusEyeFeather(ctx, quill, '#06B6D4');",
+            "  }",
+            "  renderIridescentCrest(ctx, peacock.head);",
+            "};"
+        ],
+        "yt_title": "Majestic Peacock Radiant Feather IK in JavaScript 🦚✨ #JavaScript #Coding #Shorts",
+        "yt_desc": "🦚 Majestic Peacock with 18 radiant ocellus eye plumage feathers and sinuous neck in JS!\n\n#JavaScript #CreativeCoding #Shorts"
+    },
+    {
+        "id": "deathstalker_scorpion",
+        "name": "DEATHSTALKER SCORPION",
+        "scientific": "Leiurus quinquestriatus",
+        "file_name": "Deathstalker.js",
+        "accent": (250, 204, 21),
+        "code_lines": [
+            "// ─── DEATHSTALKER AGILE CHITIN RIG ───",
+            "const deathstalker = new ArachnidSkeleton({ segments: 38 });",
+            "",
+            "const updateDeathstalker = () => {",
+            "  requestAnimationFrame(updateDeathstalker);",
+            "  const p = getPointerPosition();",
+            "",
+            "  // 1. Slender Agile Pedipalps & Fast Strike Tail",
+            "  solveSlenderChelaIK(deathstalker.leftArm,  p, 58, 66, -1);",
+            "  solveSlenderChelaIK(deathstalker.rightArm, p, 58, 66,  1);",
+            "  solveTripodGait8Legs(deathstalker.legs, frm);",
+            "",
+            "  // 2. High Velocity Aculeus Venom Strike",
+            "  strikeVenomTail(deathstalker.tail, p, Math.sin(frm * 4.0));",
+            "  renderGoldenChitin(ctx, deathstalker);",
+            "};"
+        ],
+        "yt_title": "Agile Deathstalker Scorpion Interactive Cursor in JS 🦂⚡ #JavaScript #Coding #Shorts",
+        "yt_desc": "🦂 Golden Deathstalker Scorpion with agile slender pedipalps and rapid venom strike in JS!\n\n#JavaScript #CreativeCoding #Shorts"
     }
 ]
 
@@ -333,111 +598,171 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     sp_id = species.get("id", "emperor_scorpion")
     accent_color = species.get("accent", (234, 179, 8))
 
-    sim_key = f"{sp_id}_{total_frames}"
-    if frame_idx == 0 or sim_key not in _SIM_CACHE:
-        _SIM_CACHE[sim_key] = ScorpionSimulator(cb_x, cb_y, rad_x, rad_y)
-    
-    sim = _SIM_CACHE[sim_key]
-    sim.update(sim_time)
+    if "scorpion" in sp_id or "spider" in sp_id:
+        sim_key = f"{sp_id}_{total_frames}"
+        if frame_idx == 0 or sim_key not in _SIM_CACHE:
+            _SIM_CACHE[sim_key] = ScorpionSimulator(cb_x, cb_y, rad_x, rad_y)
+        
+        sim = _SIM_CACHE[sim_key]
+        sim.update(sim_time)
 
-    # ─────────────────────────────────────────────────────────────
-    # DRAW MODULAR ARTICULATED SCORPION
-    # ─────────────────────────────────────────────────────────────
-    cos_a = math.cos(sim.angle)
-    sin_a = math.sin(sim.angle)
-    perp_x = -sin_a
-    perp_y =  cos_a
+        cos_a = math.cos(sim.angle)
+        sin_a = math.sin(sim.angle)
+        perp_x = -sin_a
+        perp_y =  cos_a
 
-    # Legs
-    for leg in sim.legs:
-        h_p = leg["hip"]
-        foot_p = (leg["cur"][0], leg["cur"][1])
-        h_p, j1_p, j2_p, f_p = solve_ik_3segment(h_p, foot_p, leg["l1"], leg["l2"], leg["l3"], leg["side"])
+        # Legs
+        for leg in sim.legs:
+            h_p = leg["hip"]
+            foot_p = (leg["cur"][0], leg["cur"][1])
+            h_p, j1_p, j2_p, f_p = solve_ik_3segment(h_p, foot_p, leg["l1"], leg["l2"], leg["l3"], leg["side"])
 
-        draw.line([h_p, j1_p], fill=(16, 22, 32), width=7)
-        draw.line([j1_p, j2_p], fill=(24, 32, 46), width=6)
-        draw.line([j2_p, f_p], fill=(12, 16, 22), width=4)
-        draw.ellipse([j1_p[0]-3, j1_p[1]-3, j1_p[0]+3, j1_p[1]+3], fill=accent_color)
-        draw.ellipse([j2_p[0]-3, j2_p[1]-3, j2_p[0]+3, j2_p[1]+3], fill=accent_color)
-        draw.ellipse([f_p[0]-3, f_p[1]-3, f_p[0]+3, f_p[1]+3], fill=(10, 12, 16))
+            draw.line([h_p, j1_p], fill=(16, 22, 32), width=7)
+            draw.line([j1_p, j2_p], fill=(24, 32, 46), width=6)
+            draw.line([j2_p, f_p], fill=(12, 16, 22), width=4)
+            draw.ellipse([j1_p[0]-3, j1_p[1]-3, j1_p[0]+3, j1_p[1]+3], fill=accent_color)
+            draw.ellipse([j2_p[0]-3, j2_p[1]-3, j2_p[0]+3, j2_p[1]+3], fill=accent_color)
+            draw.ellipse([f_p[0]-3, f_p[1]-3, f_p[0]+3, f_p[1]+3], fill=(10, 12, 16))
 
-    # 7 Tergite Plates
-    for i, seg in enumerate(sim.tergites):
-        s_cos = math.cos(seg["angle"])
-        s_sin = math.sin(seg["angle"])
-        s_perp_x = -s_sin
-        s_perp_y =  s_cos
-        half_w = max(13, 34 - i * 3.0)
-        half_h = 8
+        # Tergites
+        for i, seg in enumerate(sim.tergites):
+            s_cos = math.cos(seg["angle"])
+            s_sin = math.sin(seg["angle"])
+            s_perp_x = -s_sin
+            s_perp_y =  s_cos
+            half_w = max(13, 34 - i * 3.0)
+            half_h = 8
 
-        p1 = (seg["x"] - s_cos * half_h + s_perp_x * half_w, seg["y"] - s_sin * half_h + s_perp_y * half_w)
-        p2 = (seg["x"] + s_cos * half_h + s_perp_x * (half_w * 0.9), seg["y"] + s_sin * half_h + s_perp_y * (half_w * 0.9))
-        p3 = (seg["x"] + s_cos * half_h - s_perp_x * (half_w * 0.9), seg["y"] + s_sin * half_h - s_perp_y * (half_w * 0.9))
-        p4 = (seg["x"] - s_cos * half_h - s_perp_x * half_w, seg["y"] - s_sin * half_h - s_perp_y * half_w)
+            p1 = (seg["x"] - s_cos * half_h + s_perp_x * half_w, seg["y"] - s_sin * half_h + s_perp_y * half_w)
+            p2 = (seg["x"] + s_cos * half_h + s_perp_x * (half_w * 0.9), seg["y"] + s_sin * half_h + s_perp_y * (half_w * 0.9))
+            p3 = (seg["x"] + s_cos * half_h - s_perp_x * (half_w * 0.9), seg["y"] + s_sin * half_h - s_perp_y * (half_w * 0.9))
+            p4 = (seg["x"] - s_cos * half_h - s_perp_x * half_w, seg["y"] - s_sin * half_h - s_perp_y * half_w)
 
-        draw.polygon([p1, p2, p3, p4], fill=(16, 22, 32), outline=accent_color, width=1)
-        draw.line([(seg["x"] - s_cos * 6, seg["y"] - s_sin * 6), (seg["x"] + s_cos * 6, seg["y"] + s_sin * 6)], fill=(202, 138, 4), width=2)
+            draw.polygon([p1, p2, p3, p4], fill=(16, 22, 32), outline=accent_color, width=1)
+            draw.line([(seg["x"] - s_cos * 6, seg["y"] - s_sin * 6), (seg["x"] + s_cos * 6, seg["y"] + s_sin * 6)], fill=(202, 138, 4), width=2)
 
-    # Carapace
-    c_front = (sim.x + cos_a * 34, sim.y + sin_a * 34)
-    c_r1 = (sim.x + cos_a * 18 + perp_x * 28, sim.y + sin_a * 18 + perp_y * 28)
-    c_r2 = (sim.x - cos_a * 16 + perp_x * 32, sim.y - sin_a * 16 + perp_y * 32)
-    c_l2 = (sim.x - cos_a * 16 - perp_x * 32, sim.y - sin_a * 16 - perp_y * 32)
-    c_l1 = (sim.x + cos_a * 18 - perp_x * 28, sim.y + sin_a * 18 - perp_y * 28)
-    draw.polygon([c_front, c_r1, c_r2, c_l2, c_l1], fill=(12, 16, 24), outline=accent_color, width=2)
+        # Carapace
+        c_front = (sim.x + cos_a * 34, sim.y + sin_a * 34)
+        c_r1 = (sim.x + cos_a * 18 + perp_x * 28, sim.y + sin_a * 18 + perp_y * 28)
+        c_r2 = (sim.x - cos_a * 16 + perp_x * 32, sim.y - sin_a * 16 + perp_y * 32)
+        c_l2 = (sim.x - cos_a * 16 - perp_x * 32, sim.y - sin_a * 16 - perp_y * 32)
+        c_l1 = (sim.x + cos_a * 18 - perp_x * 28, sim.y + sin_a * 18 - perp_y * 28)
+        draw.polygon([c_front, c_r1, c_r2, c_l2, c_l1], fill=(12, 16, 24), outline=accent_color, width=2)
 
-    eye_pos = (sim.x + cos_a * 14, sim.y + sin_a * 14)
-    draw.ellipse([eye_pos[0]-3.5, eye_pos[1]-3.5, eye_pos[0]+3.5, eye_pos[1]+3.5], fill=(254, 240, 138))
+        eye_pos = (sim.x + cos_a * 14, sim.y + sin_a * 14)
+        draw.ellipse([eye_pos[0]-3.5, eye_pos[1]-3.5, eye_pos[0]+3.5, eye_pos[1]+3.5], fill=(254, 240, 138))
 
-    # Pincers
-    for p in sim.pincers:
-        shoulder = (sim.x + cos_a * 26 + perp_x * (22 * p["side"]),
-                    sim.y + sin_a * 26 + perp_y * (22 * p["side"]))
-        snap_open = math.sin(sim_time * 3.5 + p["side"]) * 0.2 + 0.35
-        pincer_ang = sim.angle + p["reach"]
-        p_target = (shoulder[0] + math.cos(pincer_ang) * 102,
-                    shoulder[1] + math.sin(pincer_ang) * 102)
+        # Pincers
+        for p in sim.pincers:
+            shoulder = (sim.x + cos_a * 26 + perp_x * (22 * p["side"]),
+                        sim.y + sin_a * 26 + perp_y * (22 * p["side"]))
+            snap_open = math.sin(sim_time * 3.5 + p["side"]) * 0.2 + 0.35
+            pincer_ang = sim.angle + p["reach"]
+            p_target = (shoulder[0] + math.cos(pincer_ang) * 102,
+                        shoulder[1] + math.sin(pincer_ang) * 102)
 
-        sh_pt, elbow_pt, wrist_pt = solve_ik_2joint(shoulder, p_target, p["l1"], p["l2"], p["side"] * -1)
+            sh_pt, elbow_pt, wrist_pt = solve_ik_2joint(shoulder, p_target, p["l1"], p["l2"], p["side"] * -1)
 
-        draw.line([sh_pt, elbow_pt], fill=(16, 22, 32), width=12)
-        draw.line([elbow_pt, wrist_pt], fill=(24, 32, 46), width=10)
-        draw.ellipse([elbow_pt[0]-5, elbow_pt[1]-5, elbow_pt[0]+5, elbow_pt[1]+5], fill=accent_color)
+            draw.line([sh_pt, elbow_pt], fill=(16, 22, 32), width=12)
+            draw.line([elbow_pt, wrist_pt], fill=(24, 32, 46), width=10)
+            draw.ellipse([elbow_pt[0]-5, elbow_pt[1]-5, elbow_pt[0]+5, elbow_pt[1]+5], fill=accent_color)
 
-        w_ang = math.atan2(wrist_pt[1] - elbow_pt[1], wrist_pt[0] - elbow_pt[0])
-        w_cos, w_sin = math.cos(w_ang), math.sin(w_ang)
-        w_perp_x, w_perp_y = -w_sin, w_cos
+            w_ang = math.atan2(wrist_pt[1] - elbow_pt[1], wrist_pt[0] - elbow_pt[0])
+            w_cos, w_sin = math.cos(w_ang), math.sin(w_ang)
+            w_perp_x, w_perp_y = -w_sin, w_cos
 
-        chela_poly = [
-            (wrist_pt[0] - w_cos * 8 + w_perp_x * 15, wrist_pt[1] - w_sin * 8 + w_perp_y * 15),
-            (wrist_pt[0] + w_cos * 22 + w_perp_x * 10, wrist_pt[1] + w_sin * 22 + w_perp_y * 10),
-            (wrist_pt[0] + w_cos * 22 - w_perp_x * 10, wrist_pt[1] + w_sin * 22 - w_perp_y * 10),
-            (wrist_pt[0] - w_cos * 8 - w_perp_x * 15, wrist_pt[1] - w_sin * 8 - w_perp_y * 15)
+            chela_poly = [
+                (wrist_pt[0] - w_cos * 8 + w_perp_x * 15, wrist_pt[1] - w_sin * 8 + w_perp_y * 15),
+                (wrist_pt[0] + w_cos * 22 + w_perp_x * 10, wrist_pt[1] + w_sin * 22 + w_perp_y * 10),
+                (wrist_pt[0] + w_cos * 22 - w_perp_x * 10, wrist_pt[1] + w_sin * 22 - w_perp_y * 10),
+                (wrist_pt[0] - w_cos * 8 - w_perp_x * 15, wrist_pt[1] - w_sin * 8 - w_perp_y * 15)
+            ]
+            draw.polygon(chela_poly, fill=(10, 14, 20), outline=accent_color, width=2)
+
+            f_tip = (wrist_pt[0] + math.cos(w_ang + p["side"] * 0.3) * 40,
+                     wrist_pt[1] + math.sin(w_ang + p["side"] * 0.3) * 40)
+            draw.line([(wrist_pt[0] + w_cos * 18, wrist_pt[1] + w_sin * 18), f_tip], fill=accent_color, width=4)
+
+            m_tip = (wrist_pt[0] + math.cos(w_ang - p["side"] * snap_open) * 36,
+                     wrist_pt[1] + math.sin(w_ang - p["side"] * snap_open) * 36)
+            draw.line([(wrist_pt[0] + w_cos * 18, wrist_pt[1] + w_sin * 18), m_tip], fill=(202, 138, 4), width=3)
+
+        # Tail
+        tail_prev = (sim.tergites[-1]["x"], sim.tergites[-1]["y"])
+        for i, t_seg in enumerate(sim.tail):
+            tx, ty = t_seg["x"], t_seg["y"]
+            t_width = max(5, int(14 - i * 1.4))
+            draw.line([tail_prev, (tx, ty)], fill=(18, 24, 34), width=t_width)
+            draw.ellipse([tx - t_width//2, ty - t_width//2, tx + t_width//2, ty + t_width//2], fill=(28, 38, 52))
+            tail_prev = (tx, ty)
+
+        last_tail = sim.tail[-1]
+        telson_bulb = (last_tail["x"], last_tail["y"])
+        draw.ellipse([telson_bulb[0]-9, telson_bulb[1]-9, telson_bulb[0]+9, telson_bulb[1]+9], fill=(202, 138, 4), outline=(254, 240, 138), width=2)
+        sting_tip = (telson_bulb[0] + math.cos(last_tail["angle"] + 0.8) * 22, telson_bulb[1] + math.sin(last_tail["angle"] + 0.8) * 22)
+        draw.line([telson_bulb, sting_tip], fill=(254, 240, 138), width=3)
+
+    else:
+        # Generic Serpentine / Dragon / Quadruped / Aquatic Kinematics
+        NUM_SEGS = 30
+        spine = []
+        for s_idx in range(NUM_SEGS):
+            tau = sim_time * 0.8 - s_idx * 0.024
+            sx = cb_x + math.cos(1.8 * tau) * (rad_x * 0.9) + math.sin(2.4 * tau) * (rad_x * 0.25)
+            sy = cb_y + math.sin(2.2 * tau) * (rad_y * 0.85) + math.cos(3.1 * tau) * (rad_y * 0.20)
+            spine.append((sx, sy))
+
+        # 4 Articulated Legs
+        leg_anchors = [
+            {"spine_i": 5, "side": -1, "l1": 38, "l2": 42, "phase": 0.0},
+            {"spine_i": 5, "side":  1, "l1": 38, "l2": 42, "phase": math.pi},
+            {"spine_i": 19, "side": -1, "l1": 42, "l2": 46, "phase": math.pi},
+            {"spine_i": 19, "side":  1, "l1": 42, "l2": 46, "phase": 0.0},
         ]
-        draw.polygon(chela_poly, fill=(10, 14, 20), outline=accent_color, width=2)
+        for leg in leg_anchors:
+            s_pt = spine[leg["spine_i"]]
+            s_prev = spine[leg["spine_i"] - 1]
+            b_ang = math.atan2(s_pt[1] - s_prev[1], s_pt[0] - s_prev[0])
+            hip_ang = b_ang + (math.pi / 2) * leg["side"]
+            hip = (s_pt[0] + math.cos(hip_ang) * 18, s_pt[1] + math.sin(hip_ang) * 18)
 
-        f_tip = (wrist_pt[0] + math.cos(w_ang + p["side"] * 0.3) * 40,
-                 wrist_pt[1] + math.sin(w_ang + p["side"] * 0.3) * 40)
-        draw.line([(wrist_pt[0] + w_cos * 18, wrist_pt[1] + w_sin * 18), f_tip], fill=accent_color, width=4)
+            gait_t = (sim_time * 6.0 + leg["phase"]) % (2 * math.pi)
+            is_swing = math.sin(gait_t) > 0.0
+            step_lead = math.cos(gait_t) * 22 if is_swing else -10
+            step_lift = math.sin(gait_t) * 12 if is_swing else 0
 
-        m_tip = (wrist_pt[0] + math.cos(w_ang - p["side"] * snap_open) * 36,
-                 wrist_pt[1] + math.sin(w_ang - p["side"] * snap_open) * 36)
-        draw.line([(wrist_pt[0] + w_cos * 18, wrist_pt[1] + w_sin * 18), m_tip], fill=(202, 138, 4), width=3)
+            foot_ang = b_ang + leg["side"] * (math.pi * 0.45)
+            foot_x = hip[0] + math.cos(foot_ang) * 60 + math.cos(b_ang) * step_lead
+            foot_y = hip[1] + math.sin(foot_ang) * 60 + math.sin(b_ang) * step_lead - step_lift
 
-    # Tail & Stinger
-    tail_prev = (sim.tergites[-1]["x"], sim.tergites[-1]["y"])
-    for i, t_seg in enumerate(sim.tail):
-        tx, ty = t_seg["x"], t_seg["y"]
-        t_width = max(5, int(14 - i * 1.4))
-        draw.line([tail_prev, (tx, ty)], fill=(18, 24, 34), width=t_width)
-        draw.ellipse([tx - t_width//2, ty - t_width//2, tx + t_width//2, ty + t_width//2], fill=(28, 38, 52))
-        tail_prev = (tx, ty)
+            hp, kp, fp = solve_ik_2joint(hip, (foot_x, foot_y), leg["l1"], leg["l2"], leg["side"])
+            draw.line([hp, kp], fill=(20, 26, 36), width=8)
+            draw.line([kp, fp], fill=(12, 16, 22), width=6)
+            draw.ellipse([kp[0]-4, kp[1]-4, kp[0]+4, kp[1]+4], fill=accent_color)
+            draw.ellipse([fp[0]-4, fp[1]-4, fp[0]+4, fp[1]+4], fill=(10, 12, 16))
 
-    last_tail = sim.tail[-1]
-    telson_bulb = (last_tail["x"], last_tail["y"])
-    draw.ellipse([telson_bulb[0]-9, telson_bulb[1]-9, telson_bulb[0]+9, telson_bulb[1]+9], fill=(202, 138, 4), outline=(254, 240, 138), width=2)
-    sting_tip = (telson_bulb[0] + math.cos(last_tail["angle"] + 0.8) * 22, telson_bulb[1] + math.sin(last_tail["angle"] + 0.8) * 22)
-    draw.line([telson_bulb, sting_tip], fill=(254, 240, 138), width=3)
+        # Main Spine Scales
+        for s_idx in range(len(spine) - 1, 0, -1):
+            p1 = spine[s_idx]
+            p0 = spine[s_idx - 1]
+            norm = s_idx / NUM_SEGS
+            v_width = max(4, int(26 * (1.0 - norm * 0.75)))
+            draw.line([p0, p1], fill=(16, 20, 26), width=v_width)
+            draw.ellipse([p1[0]-v_width//2, p1[1]-v_width//2, p1[0]+v_width//2, p1[1]+v_width//2], fill=(26, 32, 40), outline=accent_color, width=1)
+
+        # Head
+        hp = spine[0]
+        hp_prev = spine[1]
+        hang = math.atan2(hp[1] - hp_prev[1], hp[0] - hp_prev[0])
+        snout = (hp[0] + math.cos(hang) * 42, hp[1] + math.sin(hang) * 42)
+        j1 = (hp[0] - math.cos(hang) * 16 + math.cos(hang + math.pi/2) * 24, hp[1] - math.sin(hang) * 16 + math.sin(hang + math.pi/2) * 24)
+        j2 = (hp[0] - math.cos(hang) * 16 - math.cos(hang + math.pi/2) * 24, hp[1] - math.sin(hang) * 16 - math.sin(hang + math.pi/2) * 24)
+        crown = (hp[0] - math.cos(hang) * 32, hp[1] - math.sin(hang) * 32)
+        draw.polygon([snout, j1, crown, j2], fill=(12, 15, 20), outline=accent_color, width=2)
+        eye_l = (hp[0] + math.cos(hang) * 8 + math.cos(hang + math.pi/2) * 12, hp[1] + math.sin(hang) * 8 + math.sin(hang + math.pi/2) * 12)
+        eye_r = (hp[0] + math.cos(hang) * 8 - math.cos(hang + math.pi/2) * 12, hp[1] + math.sin(hang) * 8 - math.sin(hang + math.pi/2) * 12)
+        draw.ellipse([eye_l[0]-3, eye_l[0]-3, eye_l[0]+3, eye_l[0]+3], fill=accent_color)
+        draw.ellipse([eye_r[0]-3, eye_r[0]-3, eye_r[0]+3, eye_r[0]+3], fill=accent_color)
 
     # ─────────────────────────────────────────────────────────────
     # LOWER SECTION: macOS DARK CODE WINDOW (LARGER TYPOGRAPHY)
@@ -460,13 +785,9 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     draw.text((card_x + 135, card_y + 17), "JS", font=get_font(16, bold=True), fill=(20, 20, 20))
     draw.text((card_x + 170, card_y + 18), species["file_name"], font=get_font(22, bold=True), fill=(160, 175, 195))
 
-    # ─────────────────────────────────────────────────────────────
-    # LARGER, CRISP CODE TYPOGRAPHY & SMOOTH SCROLL
-    # ─────────────────────────────────────────────────────────────
     all_lines = species["code_lines"]
     total_lines = len(all_lines)
     
-    # Larger Line Height & Font Size
     line_h = 44
     code_font = get_font(26, mono=True)
     line_num_font = get_font(22, mono=True)
@@ -493,10 +814,8 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         if y_pos < code_box_top - 12 or y_pos > code_box_bottom:
             continue
 
-        # Line Numbers
         draw.text((card_x + 36, y_pos), f"{actual_line_idx + 1:2d}", font=line_num_font, fill=(70, 85, 105))
 
-        # Syntax Highlighting
         indent_x = card_x + 95
         stripped = line_text.strip()
         if stripped.startswith("//"):

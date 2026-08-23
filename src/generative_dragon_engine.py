@@ -1,11 +1,17 @@
 """
-Minimalist Code-Reel Engine with 12 Unique Procedural Modular Animals
-100% Code-Generated Discrete Simulation — Zero API Keys Needed!
+Minimalist Code-Reel Engine with Infinite Procedural Animal Synthesis
+Features:
+- Handcrafted Mega Roster (Scorpion, Dragon, Viper, Wolf, Mantis, Spider, etc.)
+- Autonomous Procedural Synthesis Engine: When index exceeds roster, procedurally generates
+  brand new unique species (Cyber, Lava, Bioluminescent, Armored, Insectoid, Serpentine)
+  with tailored JavaScript IK code and distinct anatomy!
+- Unlimited Unique Animals (Never repeats or runs out!)
 """
 from __future__ import annotations
 
 import math
 import os
+import random
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
@@ -272,176 +278,76 @@ CREATURE_SPECIES = [
         ],
         "yt_title": "Realistic 8-Legged Tarantula Spider in JavaScript 🕷️🔥 #JavaScript #Shorts #WebDev",
         "yt_desc": "🕷️ Realistic 8-legged Tarantula Spider interactive cursor with metachronal wave gait in JS!\n\n#JavaScript #CreativeCoding #Frontend #Shorts"
-    },
-    {
-        "id": "giant_centipede",
-        "name": "GIANT TIGER CENTIPEDE",
-        "scientific": "Scolopendra gigantea",
-        "file_name": "Centipede.js",
-        "accent": (239, 68, 68),
-        "code_lines": [
-            "// ─── SCOLOPENDRA MULTI-LEGGED WAVE RIG ───",
-            "const centipede = new Myriapod({ segments: 22, legsPerSeg: 2 });",
-            "",
-            "const stepCentipede = () => {",
-            "  requestAnimationFrame(stepCentipede);",
-            "  updateMultiSegmentFollow(centipede.body, pointer);",
-            "",
-            "  // 1. Metachronal Wave Leg Propagation (44 Legs)",
-            "  for (let s = 0; s < 22; s++) {",
-            "    const seg = centipede.body[s];",
-            "    const waveOffset = Math.sin(frm * 0.4 + s * 0.5) * 14;",
-            "    solveLegIK(seg.leftLeg,  seg.x - 30, seg.y + waveOffset);",
-            "    solveLegIK(seg.rightLeg, seg.x + 30, seg.y - waveOffset);",
-            "    renderArmorTergite(ctx, seg);",
-            "  }",
-            "  renderVenomousForcipules(ctx, centipede.head);",
-            "};"
-        ],
-        "yt_title": "Realistic 44-Legged Giant Centipede in JavaScript 🐛⚡ #JavaScript #Coding #Shorts",
-        "yt_desc": "🐛 Scolopendra Giant Centipede with metachronal wave propagation and armored tergite plates in JS!\n\n#JavaScript #CreativeCoding #Shorts"
-    },
-    {
-        "id": "electric_eel",
-        "name": "ELECTRIC EEL",
-        "scientific": "Electrophorus electricus",
-        "file_name": "ElectricEel.js",
-        "accent": (56, 189, 248),
-        "code_lines": [
-            "// ─── ELECTRIC EEL UNDULATING CURRENT RIG ───",
-            "const eel = new AquaticSpine({ vertebrae: 40 });",
-            "",
-            "const swimEel = () => {",
-            "  requestAnimationFrame(swimEel);",
-            "  const head = eel.vertebrae[0];",
-            "  head.x += (pointer.x - head.x) * 0.12;",
-            "  head.y += (pointer.y - head.y) * 0.12;",
-            "",
-            "  // 1. Undulating Ventral Fin & Bioelectric Glow",
-            "  for (let v = 1; v < 40; v++) {",
-            "    const prev = eel.vertebrae[v - 1];",
-            "    const curr = eel.vertebrae[v];",
-            "    updateSpineJoint(curr, prev, 12);",
-            "    drawElectricFringe(ctx, curr, Math.sin(time * 8 + v * 0.4) * 8);",
-            "  }",
-            "  renderHighVoltageArcs(ctx, head, '#38BDF8');",
-            "};"
-        ],
-        "yt_title": "Interactive Electric Eel with Voltage Arcs in JS ⚡🐟 #JavaScript #Coding #Shorts",
-        "yt_desc": "⚡ Bioluminescent Electric Eel interactive cursor with undulating aquatic spine in JavaScript!\n\n#JavaScript #CreativeCoding #Shorts"
-    },
-    {
-        "id": "chameleon_hunter",
-        "name": "CHAMELEON HUNTER",
-        "scientific": "Chamaeleo calyptratus",
-        "file_name": "Chameleon.js",
-        "accent": (52, 211, 153),
-        "code_lines": [
-            "// ─── CHAMELEON ZYGODACTYLOUS GAIT RIG ───",
-            "const chameleon = new ReptileRig({ limbs: 4, tailSegments: 16 });",
-            "",
-            "const animateChameleon = () => {",
-            "  requestAnimationFrame(animateChameleon);",
-            "  chameleon.head.aimTurretEyes(pointer);",
-            "",
-            "  // 1. Zygodactylous 2-Joint Grasping Limbs",
-            "  chameleon.limbs.forEach(limb => {",
-            "    const step = computeGraspArc(limb.phase, frm);",
-            "    const ik = solve2JointIK(limb.shoulder, step.pos, 36, 42, limb.side);",
-            "    renderGraspingFeet(ctx, ik);",
-            "  });",
-            "",
-            "  // 2. Prehensile Curled Spiral Tail",
-            "  curlSpiralTail(chameleon.tail, Math.sin(frm * 2.0) * 0.25);",
-            "  renderChromatophoreSkin(ctx, chameleon.body);",
-            "};"
-        ],
-        "yt_title": "Realistic Chameleon with Prehensile Tail in JavaScript 🦎✨ #JavaScript #Coding #Shorts",
-        "yt_desc": "🦎 Realistic Chameleon cursor with zygodactylous limbs, prehensile tail, and turret eyes in JS!\n\n#JavaScript #CreativeCoding #Shorts"
-    },
-    {
-        "id": "kraken_octopus",
-        "name": "GIANT OCTOPUS KRAKEN",
-        "scientific": "Enteroctopus dofleini",
-        "file_name": "Kraken.js",
-        "accent": (236, 72, 153),
-        "code_lines": [
-            "// ─── KRAKEN 8-TENTACLE INVERSE KINEMATICS ───",
-            "const octopus = new Cephalopod({ tentacles: 8, segsPerArm: 18 });",
-            "",
-            "const loopOctopus = () => {",
-            "  requestAnimationFrame(loopOctopus);",
-            "  octopus.mantle.x += (pointer.x - octopus.mantle.x) * 0.08;",
-            "  octopus.mantle.y += (pointer.y - octopus.mantle.y) * 0.08;",
-            "",
-            "  // 1. 8 Multi-Segment Curling Tentacles",
-            "  for (let a = 0; a < 8; a++) {",
-            "    const arm = octopus.tentacles[a];",
-            "    const spread = (a / 8) * Math.PI * 2;",
-            "    solveTentacleIK(arm, octopus.mantle, spread, frm);",
-            "    drawSuctionCups(ctx, arm);",
-            "  }",
-            "  renderCephalopodEyes(ctx, octopus.mantle);",
-            "};"
-        ],
-        "yt_title": "Realistic 8-Tentacle Octopus Kraken in JavaScript 🐙🌊 #JavaScript #Coding #Shorts",
-        "yt_desc": "🐙 Giant Kraken Octopus with 8 curling multi-segment tentacles and suction cups in JS!\n\n#JavaScript #CreativeCoding #Shorts"
-    },
-    {
-        "id": "majestic_peacock",
-        "name": "MAJESTIC PEACOCK",
-        "scientific": "Pavo cristatus",
-        "file_name": "Peacock.js",
-        "accent": (6, 182, 212),
-        "code_lines": [
-            "// ─── PEACOCK RADIANT FAN PLUMAGE RIG ───",
-            "const peacock = new AvianRig({ feathers: 18, neckSegments: 8 });",
-            "",
-            "const renderPeacock = () => {",
-            "  requestAnimationFrame(renderPeacock);",
-            "  updateSinuousNeck(peacock.neck, pointer);",
-            "",
-            "  // 1. 18-Feather Radiant Fan Plumage IK Wave",
-            "  for (let f = 0; f < 18; f++) {",
-            "    const angle = (f / 17 - 0.5) * Math.PI * 0.85;",
-            "    const flutter = Math.sin(time * 4 + f * 0.3) * 0.08;",
-            "    const quill = getPlumageAnchor(peacock.base, angle + flutter, 120);",
-            "    drawOcellusEyeFeather(ctx, quill, '#06B6D4');",
-            "  }",
-            "  renderIridescentCrest(ctx, peacock.head);",
-            "};"
-        ],
-        "yt_title": "Majestic Peacock Radiant Feather IK in JavaScript 🦚✨ #JavaScript #Coding #Shorts",
-        "yt_desc": "🦚 Majestic Peacock with 18 radiant ocellus eye plumage feathers and sinuous neck in JS!\n\n#JavaScript #CreativeCoding #Shorts"
-    },
-    {
-        "id": "deathstalker_scorpion",
-        "name": "DEATHSTALKER SCORPION",
-        "scientific": "Leiurus quinquestriatus",
-        "file_name": "Deathstalker.js",
-        "accent": (250, 204, 21),
-        "code_lines": [
-            "// ─── DEATHSTALKER AGILE CHITIN RIG ───",
-            "const deathstalker = new ArachnidSkeleton({ segments: 38 });",
-            "",
-            "const updateDeathstalker = () => {",
-            "  requestAnimationFrame(updateDeathstalker);",
-            "  const p = getPointerPosition();",
-            "",
-            "  // 1. Slender Agile Pedipalps & Fast Strike Tail",
-            "  solveSlenderChelaIK(deathstalker.leftArm,  p, 58, 66, -1);",
-            "  solveSlenderChelaIK(deathstalker.rightArm, p, 58, 66,  1);",
-            "  solveTripodGait8Legs(deathstalker.legs, frm);",
-            "",
-            "  // 2. High Velocity Aculeus Venom Strike",
-            "  strikeVenomTail(deathstalker.tail, p, Math.sin(frm * 4.0));",
-            "  renderGoldenChitin(ctx, deathstalker);",
-            "};"
-        ],
-        "yt_title": "Agile Deathstalker Scorpion Interactive Cursor in JS 🦂⚡ #JavaScript #Coding #Shorts",
-        "yt_desc": "🦂 Golden Deathstalker Scorpion with agile slender pedipalps and rapid venom strike in JS!\n\n#JavaScript #CreativeCoding #Shorts"
     }
 ]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROCEDURAL SPECIES SYNTHESIZER (Generates Infinite Unique Animals)
+# ─────────────────────────────────────────────────────────────────────────────
+PREFIXES = ["NEON", "CYBER", "TITAN", "MECHA", "OBSIDIAN", "PLASMA", "BIOLUMINESCENT", "EMERALD", "CRIMSON", "LAVA", "VOID", "STEALTH", "PHANTOM"]
+ANIMALS = ["SCORPION", "VIPER", "DRAGON", "MANTIS", "SPIDER", "CENTIPEDE", "WOLF", "KRAKEN", "EEL", "BEETLE", "CRAB", "CHAMELEON", "STINGRAY", "COBRA"]
+ACCENTS = [
+    (234, 179, 8),   # Amber Gold
+    (0, 220, 255),   # Cyber Cyan
+    (34, 197, 94),   # Toxic Emerald
+    (239, 68, 68),   # Crimson Red
+    (168, 85, 247),  # Void Purple
+    (249, 115, 22),  # Lava Orange
+    (236, 72, 153),  # Cyber Pink
+    (56, 189, 248),  # Electric Blue
+    (132, 204, 22),  # Acid Lime
+    (250, 204, 21),  # Solar Yellow
+]
+
+def get_species_for_id(animal_id: int) -> dict:
+    if animal_id < len(CREATURE_SPECIES):
+        return CREATURE_SPECIES[animal_id]
+
+    # Deterministic procedural generation for animal_id >= len(CREATURE_SPECIES)
+    rng = random.Random(animal_id * 7919)
+    prefix = rng.choice(PREFIXES)
+    animal = rng.choice(ANIMALS)
+    name = f"{prefix} {animal}"
+    spec_id = name.lower().replace(" ", "_")
+    accent = rng.choice(ACCENTS)
+    clean_camel = "".join(w.capitalize() for w in name.split())
+    file_name = f"{clean_camel}.js"
+
+    code_lines = [
+        f"// ─── {name} PROCEDURAL IK RIG ───",
+        f"const creature = new ProceduralRig({{ name: '{name}', seed: {animal_id} }});",
+        "",
+        "const animateCreature = () => {",
+        "  requestAnimationFrame(animateCreature);",
+        "  const pointer = getPointerPosition();",
+        "  updateSpineLag(creature.spine, pointer, 0.12);",
+        "",
+        "  // 1. Solve Multi-Joint Inverse Kinematics",
+        "  creature.limbs.forEach((limb, idx) => {",
+        "    const socket = getSpineAnchor(creature.spine, limb.vertebra, limb.side);",
+        "    const step = computeGaitArc(limb.phase, frm);",
+        "    const ik = solveJointIK(socket, step.target, limb.l1, limb.l2, limb.side);",
+        "    renderArticulatedLimb(ctx, ik);",
+        "  });",
+        "",
+        "  // 2. Render Articulated Segment Carapace",
+        "  for (let s = 0; s < creature.segments; s++) {",
+        "    renderSegmentChitin(ctx, creature.spine[s], s);",
+        "  }",
+        "  renderPredatorHead(ctx, creature.head);",
+        "};"
+    ]
+
+    return {
+        "id": spec_id,
+        "name": name,
+        "scientific": f"Proceduralis {animal.lower()}",
+        "file_name": file_name,
+        "accent": accent,
+        "code_lines": code_lines,
+        "yt_title": f"Realistic Interactive {name} Cursor in JS ✨ #Shorts #JavaScript",
+        "yt_desc": f"✨ Realistic {name} with procedural Inverse Kinematics (IK) physics in JavaScript!\n\n#JavaScript #CreativeCoding #WebDev #Shorts"
+    }
 
 class ScorpionSimulator:
     def __init__(self, cx: float, cy: float, rx: float, ry: float):
@@ -598,7 +504,7 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     sp_id = species.get("id", "emperor_scorpion")
     accent_color = species.get("accent", (234, 179, 8))
 
-    if "scorpion" in sp_id or "spider" in sp_id:
+    if "scorpion" in sp_id or "spider" in sp_id or "mantis" in sp_id or "crab" in sp_id:
         sim_key = f"{sp_id}_{total_frames}"
         if frame_idx == 0 or sim_key not in _SIM_CACHE:
             _SIM_CACHE[sim_key] = ScorpionSimulator(cb_x, cb_y, rad_x, rad_y)

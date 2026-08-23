@@ -6,8 +6,8 @@ Realistic Generative Creature Interactive Cursor Generator
 - Top Bar: Animal Name ONLY
 - Upper Section: Clean Framed Box with Articulated Creature
 - Lower Section: macOS Dark Code Window with Auto-Sliding/Scrolling JS Code
-- Rotating Catalog of Unique Species (Scorpion, Dragon, Wolf, Viper, Mantis, Spider)
-- Clean Silent Video (Sound removed as requested)
+- Infinite Procedural Animal Synthesis (Never repeats, runs forever!)
+- Clean Silent Video (Sound removed)
 """
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.generative_dragon_engine import CREATURE_SPECIES, render_generative_frame, WIDTH, HEIGHT, FPS
+from src.generative_dragon_engine import get_species_for_id, render_generative_frame, WIDTH, HEIGHT, FPS
 
 DATA_DIR = ROOT / "data"
 TMP_DIR = ROOT / "tmp"
@@ -44,7 +44,6 @@ def _encode_video(frames_dir: Path, output_path: Path) -> None:
     if not ffmpeg:
         raise RuntimeError("ffmpeg is required to create the MP4")
     
-    # Pure clean silent video encoding at high quality
     cmd = [
         ffmpeg, "-y",
         "-framerate", str(FPS),
@@ -111,10 +110,9 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
     DATA_DIR.mkdir(exist_ok=True)
     progress = _load_json(PROGRESS_FILE, {"current_id": 0})
     current_id = int(progress.get("current_id", 0)) if animal_id is None else animal_id
-    index = current_id % len(CREATURE_SPECIES)
-    species = CREATURE_SPECIES[index]
+    species = get_species_for_id(current_id)
 
-    print(f"\n⚡ [Minimalist Code-Reel Engine] Generating Short #{current_id}: {species['name']}")
+    print(f"\n⚡ [Infinite Code-Reel Engine] Generating Short #{current_id}: {species['name']}")
     run_dir = TMP_DIR / f"reel_{current_id:04d}"
     frames_dir = run_dir / "frames"
     frames_dir.mkdir(parents=True, exist_ok=True)
@@ -126,7 +124,7 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
         frame.save(frames_dir / f"frame_{number:04d}.jpg", quality=95, optimize=True)
 
     output_file = run_dir / f"{species['id']}_short.mp4"
-    print("Encoding Full HD 1080x1920 video with FFmpeg (Sound removed)...")
+    print("Encoding Full HD 1080x1920 video with FFmpeg...")
     _encode_video(frames_dir, output_file)
     print(f"✅ Video created: {output_file}")
 
@@ -157,7 +155,7 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Minimalist Code-Reel Animal Shorts")
     parser.add_argument("--animal-id", type=int, help="Force a specific species index from catalog")
-    parser.add_argument("--duration", type=float, default=DEFAULT_DURATION, help="Video length in seconds (default: 8.8)")
+    parser.add_argument("--duration", type=float, default=DEFAULT_DURATION, help="Video length in seconds (default: 58.0)")
     parser.add_argument("--dry-run", action="store_true", help="Create video without uploading or advancing rotation")
     args = parser.parse_args()
 

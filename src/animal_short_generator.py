@@ -29,7 +29,7 @@ DATA_DIR = ROOT / "data"
 TMP_DIR = ROOT / "tmp"
 PROGRESS_FILE = DATA_DIR / "animal_progress.json"
 HISTORY_FILE = DATA_DIR / "animal_history.json"
-DEFAULT_DURATION = 8.8
+DEFAULT_DURATION = 58.0
 
 
 def _load_json(path: Path, default):

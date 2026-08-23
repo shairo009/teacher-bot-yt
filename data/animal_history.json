@@ -95,5 +95,14 @@
     "timestamp": "2026-08-23T19:55:12.860604+00:00",
     "video_id": "EMg-JNZjYfU",
     "uploaded": true
+  },
+  {
+    "id": 13,
+    "species": "KOMODO DRAGON",
+    "scientific": "KOMODO DRAGON",
+    "file": "tmp/reel_0013/komodo_dragon_short.mp4",
+    "timestamp": "2026-08-23T20:01:04.554812+00:00",
+    "video_id": "CA7h_4ighl0",
+    "uploaded": true
   }
 ]

@@ -1,10 +1,11 @@
 """
-Interactive Cyber Creature Cursor Code Reel Generator (Enhanced Audio-Visual Edition)
-100% Code-Generated Animation + Procedural Sound Design:
-- Minimalist canvas with tech badges ([JS] Vanilla JavaScript, [CSS] CSS3)
-- Mechanical / Cyber robotic animal tracking mouse pointer with ghost motion trails
-- macOS Dark VS Code card with real syntax-highlighted JavaScript physics code
-- Procedural Audio: Key typing clicks, swoosh/whoosh SFX, ambient cyber drone
+Realistic Generative Creature Interactive Cursor Generator
+100% Code-Generated Animation matching realistic_komodo_dragon_cursor_demo.mp4:
+- Resolution: 1080 x 1920 Full HD Vertical
+- Deep Midnight Navy Background with framed warm canvas
+- Mathematical Generative Creature with Inverse Kinematics & undulating rib tendrils
+- Real JavaScript Canvas / SVG transform syntax code in macOS VS Code card
+- Procedural Audio: Key typing clicks, cyber swooshes, tech drone
 - Automatic YouTube Shorts upload with optimized tags & titles
 """
 from __future__ import annotations
@@ -23,7 +24,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.cyber_creature_engine import CYBER_CREATURES, render_cyber_reel_frame, WIDTH, HEIGHT, FPS
+from src.generative_dragon_engine import CREATURE_SPECIES, render_generative_frame, WIDTH, HEIGHT, FPS
 from src.sound_engine import generate_reel_audio
 
 DATA_DIR = ROOT / "data"
@@ -53,14 +54,14 @@ def _encode_video(frames_dir: Path, audio_wav: Path, output_path: Path) -> None:
     if audio_wav.exists():
         cmd.extend([
             "-i", str(audio_wav),
-            "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
             "-c:a", "aac", "-b:a", "192k",
             "-shortest",
             "-movflags", "+faststart", str(output_path)
         ])
     else:
         cmd.extend([
-            "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
             "-movflags", "+faststart", str(output_path)
         ])
         
@@ -69,13 +70,13 @@ def _encode_video(frames_dir: Path, audio_wav: Path, output_path: Path) -> None:
         raise RuntimeError("ffmpeg failed: " + result.stderr[-1500:])
 
 
-def _upload_to_youtube(video_path: Path, creature: dict, dry_run: bool) -> str | None:
+def _upload_to_youtube(video_path: Path, species: dict, dry_run: bool) -> str | None:
     if dry_run:
         print("  [Dry run — skipping YouTube upload]")
         return None
 
-    token_json = os.environ.get("TOKEN_JSON", "").lstrip("﻿").strip()
-    client_json = os.environ.get("CLIENT_SECRETS_JSON", "").lstrip("﻿").strip()
+    token_json = os.environ.get("TOKEN_JSON", "").lstrip("\ufeff").strip()
+    client_json = os.environ.get("CLIENT_SECRETS_JSON", "").lstrip("\ufeff").strip()
 
     token_file = TMP_DIR / "token.json"
     client_file = TMP_DIR / "client_secrets.json"
@@ -92,11 +93,11 @@ def _upload_to_youtube(video_path: Path, creature: dict, dry_run: bool) -> str |
         from src.uploader import YouTubeUploader
         uploader = YouTubeUploader(str(token_file), str(client_file))
 
-        title = creature.get("yt_title", f"Interactive {creature['name']} Cursor in Vanilla JS ⚡ #Shorts")[:100]
-        description = creature.get("yt_desc", "Interactive JavaScript Canvas Animation Short!")
+        title = species.get("yt_title", f"Realistic Interactive {species['name']} Cursor in JavaScript 🐉✨ #Shorts")[:100]
+        description = species.get("yt_desc", "Realistic Interactive JavaScript Canvas Animation Short!")
         tags = [
             "javascript", "web development", "creative coding", "coding", "shorts",
-            "canvas", "frontend", "programming", creature["name"].lower(), "interactive cursor"
+            "canvas", "frontend", "programming", species["name"].lower(), "interactive cursor"
         ]
 
         print(f"Uploading to YouTube: {title}")
@@ -123,33 +124,33 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
     DATA_DIR.mkdir(exist_ok=True)
     progress = _load_json(PROGRESS_FILE, {"current_id": 0})
     current_id = int(progress.get("current_id", 0)) if animal_id is None else animal_id
-    index = current_id % len(CYBER_CREATURES)
-    creature = CYBER_CREATURES[index]
+    index = current_id % len(CREATURE_SPECIES)
+    species = CREATURE_SPECIES[index]
 
-    print(f"\n⚡ [Interactive Code Reel Engine] Generating Short #{current_id}: {creature['name']}")
-    run_dir = TMP_DIR / f"creature_{current_id:04d}"
+    print(f"\n⚡ [Realistic Generative Engine] Generating Short #{current_id}: {species['name']} ({species['scientific']})")
+    run_dir = TMP_DIR / f"realistic_{current_id:04d}"
     frames_dir = run_dir / "frames"
     frames_dir.mkdir(parents=True, exist_ok=True)
 
     total_frames = max(1, round(duration * FPS))
-    print(f"Rendering {total_frames} interactive code-reel animation frames @ {FPS} FPS...")
+    print(f"Rendering {total_frames} Full HD (1080x1920) frames @ {FPS} FPS...")
     for number in range(total_frames):
-        frame = render_cyber_reel_frame(creature, number, total_frames)
-        frame.save(frames_dir / f"frame_{number:04d}.jpg", quality=93, optimize=True)
+        frame = render_generative_frame(species, number, total_frames)
+        frame.save(frames_dir / f"frame_{number:04d}.jpg", quality=95, optimize=True)
 
     # Generate procedural audio
     audio_wav = run_dir / "audio.wav"
     print("Synthesizing procedural audio (mechanical typing + cyber swooshes + drone)...")
-    generate_reel_audio(audio_wav, duration=duration, typing_events=len(creature.get("code_lines", [])))
+    generate_reel_audio(audio_wav, duration=duration, typing_events=len(species.get("code_lines", [])))
 
-    output_file = run_dir / f"{creature['id']}_interactive_short.mp4"
-    print("Encoding video & audio with FFmpeg...")
+    output_file = run_dir / f"{species['id']}_realistic_short.mp4"
+    print("Encoding Full HD 1080x1920 video & audio with FFmpeg...")
     _encode_video(frames_dir, audio_wav, output_file)
     print(f"✅ Video created: {output_file}")
 
     video_id = None
     if not dry_run:
-        video_id = _upload_to_youtube(output_file, creature, dry_run)
+        video_id = _upload_to_youtube(output_file, species, dry_run)
 
     # Advance rotation if not dry-run
     if not dry_run and animal_id is None:
@@ -158,8 +159,8 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
         history = _load_json(HISTORY_FILE, [])
         history_entry = {
             "id": current_id,
-            "creature": creature["name"],
-            "file_name": creature["file_name"],
+            "species": species["name"],
+            "scientific": species["scientific"],
             "file": str(output_file.relative_to(ROOT)),
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
@@ -173,8 +174,8 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate Interactive Cyber Creature Cursor Code Reels")
-    parser.add_argument("--animal-id", type=int, help="Force a specific creature index from catalog")
+    parser = argparse.ArgumentParser(description="Generate Realistic Interactive Creature Cursor Code Reels")
+    parser.add_argument("--animal-id", type=int, help="Force a specific species index from catalog")
     parser.add_argument("--duration", type=float, default=DEFAULT_DURATION, help="Video length in seconds (default: 8.8)")
     parser.add_argument("--dry-run", action="store_true", help="Create video without uploading or advancing rotation")
     args = parser.parse_args()

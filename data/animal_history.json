@@ -86,5 +86,14 @@
     "timestamp": "2026-08-23T19:19:36.540055+00:00",
     "video_id": "G-skBIvPLfs",
     "uploaded": true
+  },
+  {
+    "id": 12,
+    "species": "EMPEROR SCORPION",
+    "scientific": "EMPEROR SCORPION",
+    "file": "tmp/reel_0012/emperor_scorpion_short.mp4",
+    "timestamp": "2026-08-23T19:55:12.860604+00:00",
+    "video_id": "EMg-JNZjYfU",
+    "uploaded": true
   }
 ]

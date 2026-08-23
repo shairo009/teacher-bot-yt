@@ -10,5 +10,11 @@
     "animal": "Red Panda",
     "file": "tmp/animal_0001/red_panda_short.mp4",
     "timestamp": "2026-08-22T20:45:43.646425+00:00"
+  },
+  {
+    "id": 2,
+    "animal": "African Elephant",
+    "file": "tmp/animal_0002/african_elephant_short.mp4",
+    "timestamp": "2026-08-23T02:07:35.623830+00:00"
   }
 ]

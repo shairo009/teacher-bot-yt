@@ -1,12 +1,12 @@
 """
 Generative Realistic Interactive Creature Cursor Engine
-Recreates the exact visual layout from realistic_komodo_dragon_cursor_demo.mp4:
+Recreates the exact visual layout from realistic_komodo_dragon_cursor_demo.mp4 with full 2-Joint IK Legs & Hands Gait:
 - Resolution: 1080 x 1920 Full HD Vertical
 - Deep Midnight Navy Background (#0B1B26 / #0E2331)
 - Top Header: [SPECIES NAME] / Realistic interactive cursor • [Scientific Name]
 - Serif Title: Interactive Dragon Cursor
 - Framed Canvas Window with warm parchment background
-- Organic Generative Creature with fluid inverse kinematics & undulating rib tendrils
+- Organic Generative Creature with 2-Joint IK Articulated Legs, Reaching Claws, and Stepping Gait
 - Viral Call to Action: Comment :- "Dragon" 📩
 - macOS Dark VS Code Card (Dragon.js) with real transform math
 - Bottom Pill: Interactive motion • fluid trail follows the pointer / Species: ...
@@ -48,6 +48,18 @@ def get_font(size: int, bold: bool = False, serif: bool = False, mono: bool = Fa
                 pass
     return ImageFont.load_default()
 
+def solve_ik_2joint(origin: tuple[float, float], target: tuple[float, float], l1: float, l2: float, bend_side: float):
+    dx = target[0] - origin[0]
+    dy = target[1] - origin[1]
+    dist = math.hypot(dx, dy)
+    clamped_dist = min(dist, l1 + l2 - 0.001)
+    base_angle = math.atan2(dy, dx)
+    cos_a = (l1 * l1 + clamped_dist * clamped_dist - l2 * l2) / (2 * l1 * clamped_dist)
+    angle_a = math.acos(max(-1.0, min(1.0, cos_a)))
+    knee_angle = base_angle + angle_a * bend_side
+    knee = (origin[0] + math.cos(knee_angle) * l1, origin[1] + math.sin(knee_angle) * l1)
+    return origin, knee, target
+
 CREATURE_SPECIES = [
     {
         "id": "komodo_dragon",
@@ -65,20 +77,22 @@ CREATURE_SPECIES = [
             "  const ay = (Math.sin(4 * frm) * rad * height) / width;",
             "  e.x += (ax + pointer.x - e.x) / 10;",
             "  e.y += (ay + pointer.y - e.y) / 10;",
+            "  // 2-Joint Inverse Kinematics Leg Solver",
+            "  legs.forEach(leg => {",
+            "    const hip = getSpineAnchor(leg.spineIdx, leg.side);",
+            "    const ik = solve2JointIK(hip, leg.foot, leg.l1, leg.l2, leg.bend);",
+            "    renderArticulatedLimb(ctx, ik);",
+            "  });",
             "  for (let i = 1; i < N; i++) {",
-            "    let e = elems[i];",
-            "    let ep = elems[i - 1];",
+            "    let e = elems[i]; let ep = elems[i - 1];",
             "    const a = Math.atan2(e.y - ep.y, e.x - ep.x);",
             "    e.x += (ep.x - e.x + (Math.cos(a) * (100 - i)) / 5) / 4;",
             "    e.y += (ep.y - e.y + (Math.sin(a) * (100 - i)) / 5) / 4;",
-            "    const s = (162 + 4 * (1 - i)) / 50;",
-            "    e.use.setAttributeNS(null, 'transform',",
-            "      `translate(${(ep.x+e.x)/2},${(ep.y+e.y)/2}) rotate(${180/Math.PI*a}) scale(${s},${s})`);",
             "  }",
             "};"
         ],
-        "yt_title": "Realistic Interactive Dragon Cursor in JavaScript 🐉✨ #JavaScript #Coding #Shorts",
-        "yt_desc": "🐉 Build a Realistic Interactive Dragon Cursor with fluid inverse kinematics & mathematical tendril physics in Vanilla JavaScript!\n\nSpecies: Varanus komodoensis (Komodo Dragon)\nComment 'Dragon' to get the full source code!\n\n#JavaScript #CreativeCoding #WebDevelopment #Frontend #Shorts #Coding"
+        "yt_title": "Realistic Interactive Dragon Cursor with 2-Joint IK Legs in JS 🐉✨ #JavaScript #Coding #Shorts",
+        "yt_desc": "🐉 Realistic Interactive Dragon Cursor with 2-joint Inverse Kinematics legs & reaching claws in Vanilla JavaScript!\n\nSpecies: Varanus komodoensis (Komodo Dragon)\nComment 'Dragon' to get full source code!\n\n#JavaScript #CreativeCoding #WebDevelopment #Frontend #Shorts #Coding"
     },
     {
         "id": "emperor_scorpion",
@@ -92,49 +106,39 @@ CREATURE_SPECIES = [
             "const animateScorpion = () => {",
             "  requestAnimationFrame(animateScorpion);",
             "  const p = getPointerPosition();",
-            "  scorpion.head.x += (p.x - scorpion.head.x) * 0.12;",
-            "  scorpion.head.y += (p.y - scorpion.head.y) * 0.12;",
-            "  // Procedural sting strike calculation",
-            "  for (let s = 0; s < tail.segments.length; s++) {",
-            "    const seg = tail.segments[s];",
-            "    const angle = Math.atan2(p.y - seg.y, p.x - seg.x) + Math.sin(frm*0.1+s)*0.2;",
-            "    seg.x = p.x - Math.cos(angle) * (s * 18);",
-            "    seg.y = p.y - Math.sin(angle) * (s * 18);",
-            "  }",
+            "  // Pincer arms IK & 6-legged tripod gait",
+            "  solvePincerIK(leftClaw, p);",
+            "  solvePincerIK(rightClaw, p);",
+            "  stepTripodGait(walkingLegs);",
             "  renderClawsAndStinger(ctx, scorpion);",
             "};"
         ],
-        "yt_title": "Realistic Emperor Scorpion Interactive Cursor in JS 🦂🔥 #JavaScript #Shorts #WebDev",
-        "yt_desc": "🦂 Build an Emperor Scorpion interactive cursor in HTML5 Canvas with procedural stinger & claw tracking!\n\nSpecies: Pandinus imperator\nComment 'Scorpion' for code!\n\n#JavaScript #CreativeCoding #WebDev #Shorts"
+        "yt_title": "Realistic Emperor Scorpion IK Cursor in JS 🦂🔥 #JavaScript #Shorts #WebDev",
+        "yt_desc": "🦂 Build an Emperor Scorpion interactive cursor with articulated pincer claws & walking leg gait in Vanilla JavaScript!\n\nSpecies: Pandinus imperator\nComment 'Scorpion' for code!\n\n#JavaScript #CreativeCoding #WebDev #Shorts"
     },
     {
-        "id": "cyber_viper",
-        "name": "BLACK MAMBA VIPER",
-        "title": "Interactive Viper Cursor",
-        "scientific": "Dendroaspis polylepis",
-        "comment_keyword": "Viper",
-        "file_name": "Viper.js",
-        "accent": (50, 220, 120),
+        "id": "cyber_wolf",
+        "name": "CYBER ROBOT WOLF",
+        "title": "Interactive Cyber Wolf Cursor",
+        "scientific": "Canis lupus cyberneticus",
+        "comment_keyword": "Wolf",
+        "file_name": "CyberWolf.js",
+        "accent": (0, 220, 255),
         "code_lines": [
-            "const updateViperPhysics = () => {",
-            "  requestAnimationFrame(updateViperPhysics);",
-            "  const head = spine[0];",
-            "  head.x += (mouse.x - head.x) * 0.15;",
-            "  head.y += (mouse.y - head.y) * 0.15;",
-            "  // Wave propagation along serpentine vertebrae",
-            "  for (let i = 1; i < spine.length; i++) {",
-            "    const prev = spine[i - 1];",
-            "    const curr = spine[i];",
-            "    const dx = prev.x - curr.x;",
-            "    const dy = prev.y - curr.y;",
-            "    const dist = Math.hypot(dx, dy);",
-            "    curr.x = prev.x - (dx / dist) * 12 + Math.sin(time * 8 + i * 0.4) * 4;",
-            "    curr.y = prev.y - (dy / dist) * 12 + Math.cos(time * 8 + i * 0.4) * 4;",
+            "const runWolfGait = () => {",
+            "  requestAnimationFrame(runWolfGait);",
+            "  updateSpineLag(wolf.spine, pointer);",
+            "  // 4-Leg Gallop Gait with 2-Joint IK",
+            "  for (let l = 0; l < 4; l++) {",
+            "    const leg = wolf.legs[l];",
+            "    const step = computeGallopArc(leg.phase, time);",
+            "    const ik = solveIK(leg.shoulder, step.footPos, 38, 42);",
+            "    drawHydraulicLimb(ctx, ik);",
             "  }",
             "};"
         ],
-        "yt_title": "Realistic Viper Snake Cursor in JavaScript 🐍⚡ #Coding #JavaScript #Shorts",
-        "yt_desc": "🐍 Realistic serpentine wave physics & interactive snake cursor in Vanilla JavaScript!\n\nSpecies: Dendroaspis polylepis\nComment 'Viper' for code!\n\n#JavaScript #WebDevelopment #Frontend #Shorts"
+        "yt_title": "Interactive Cyber Wolf with 2-Joint IK Paws in JS 🐺⚡ #Coding #Shorts #JavaScript",
+        "yt_desc": "🐺 Mechanical Cyber Wolf Cursor with realistic 2-joint IK leg galloping physics in JavaScript Canvas!\n\nComment 'Wolf' for code!\n\n#JavaScript #WebDevelopment #Frontend #Shorts"
     }
 ]
 
@@ -194,14 +198,62 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     rad_x = box_w * 0.32
     rad_y = box_h * 0.28
 
-    NUM_SEGS = 24
+    NUM_SEGS = 26
     spine = []
-    # Compact dragon body length (only current swimming position!)
     for s_idx in range(NUM_SEGS):
         tau = t - s_idx * 0.018
         sx = cb_x + math.cos(3 * tau) * rad_x
         sy = cb_y + math.sin(4 * tau) * rad_y
         spine.append((sx, sy))
+
+    # ─────────────────────────────────────────────────────────────
+    # ARTICULATED 2-JOINT IK LEGS & HANDS
+    # ─────────────────────────────────────────────────────────────
+    # Front Hands/Paws attached at spine[5]
+    # Hind Feet/Paws attached at spine[16]
+    leg_configs = [
+        {"name": "Front-L", "spine_idx": 4,  "side": -1, "l1": 34, "l2": 36, "bend": -1, "phase": 0.0, "reach_f": 52},
+        {"name": "Front-R", "spine_idx": 4,  "side":  1, "l1": 34, "l2": 36, "bend":  1, "phase": math.pi, "reach_f": 52},
+        {"name": "Rear-L",  "spine_idx": 15, "side": -1, "l1": 36, "l2": 38, "bend": -1, "phase": math.pi, "reach_f": 48},
+        {"name": "Rear-R",  "spine_idx": 15, "side":  1, "l1": 36, "l2": 38, "bend":  1, "phase": 0.0, "reach_f": 48},
+    ]
+
+    for leg in leg_configs:
+        s_pos = spine[leg["spine_idx"]]
+        s_prev = spine[leg["spine_idx"] - 1]
+        b_angle = math.atan2(s_pos[1] - s_prev[1], s_pos[0] - s_prev[0])
+        
+        # Shoulder / Hip joint on side of spine
+        hip_ang = b_angle + (math.pi / 2) * leg["side"]
+        hip = (s_pos[0] + math.cos(hip_ang) * 16, s_pos[1] + math.sin(hip_ang) * 16)
+
+        # Gait Stepping Cycle (Alternating Lift & Plant)
+        gait_t = (t * 8.0 + leg["phase"]) % (2 * math.pi)
+        step_is_swinging = math.sin(gait_t) > 0.0
+        step_lead = math.cos(gait_t) * 20 if step_is_swinging else -10
+        step_lift = math.sin(gait_t) * 12 if step_is_swinging else 0
+
+        # Foot Target Position
+        reach_ang = b_angle + leg["side"] * (math.pi * 0.42)
+        foot_x = hip[0] + math.cos(reach_ang) * leg["reach_f"] + math.cos(b_angle) * step_lead
+        foot_y = hip[1] + math.sin(reach_ang) * leg["reach_f"] + math.sin(b_angle) * step_lead - step_lift
+        foot = (foot_x, foot_y)
+
+        # Solve 2-Joint Analytical Inverse Kinematics
+        hip_pt, knee_pt, foot_pt = solve_ik_2joint(hip, foot, leg["l1"], leg["l2"], leg["bend"])
+
+        # Draw Articulated Limb: Upper Arm/Thigh + Forearm/Shin + Joints + Claws
+        # Thigh / Upper Arm
+        draw.line([hip_pt, knee_pt], fill=(30, 36, 46), width=7)
+        # Shin / Forearm
+        draw.line([knee_pt, foot_pt], fill=(16, 20, 26), width=5)
+        # Knee/Elbow Joint Chrome Circle
+        draw.ellipse([knee_pt[0]-4, knee_pt[1]-4, knee_pt[0]+4, knee_pt[1]+4], fill=(225, 235, 245), outline=(15, 20, 28), width=1)
+        # Foot/Hand Claws
+        draw.ellipse([foot_pt[0]-4, foot_pt[1]-4, foot_pt[0]+4, foot_pt[1]+4], fill=(12, 16, 22))
+        for c in [-1, 0, 1]:
+            claw_tip = (foot_pt[0] + math.cos(b_angle + c * 0.35) * 8, foot_pt[1] + math.sin(b_angle + c * 0.35) * 8)
+            draw.line([foot_pt, claw_tip], fill=(20, 24, 30), width=2)
 
     # Helper for smooth quadratic bezier curve
     def draw_bezier(p0, p1, p2, color, width=1):
@@ -223,11 +275,11 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         seg_angle = math.atan2(p1[1] - p0[1], p1[0] - p0[0])
 
         envelope = math.sin(norm * math.pi) ** 0.55
-        max_len = envelope * 150
+        max_len = envelope * 140
 
         for side in [-1, 1]:
-            for layer in range(3):
-                l_factor = (layer + 1) / 3.0
+            for layer in range(2):
+                l_factor = (layer + 1) / 2.0
                 t_len = max_len * l_factor
                 
                 wave_offset = math.sin(t * 8 - s_idx * 0.45 + layer * 0.6) * 0.25
@@ -241,8 +293,8 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
                 tip_x = ctrl_x + math.cos(sweep_angle) * (t_len * 0.7)
                 tip_y = ctrl_y + math.sin(sweep_angle) * (t_len * 0.7)
 
-                ink_color = (25, 30, 38) if layer == 2 else (80, 90, 105)
-                line_w = 2 if (layer == 2 and s_idx < 12) else 1
+                ink_color = (25, 30, 38) if layer == 1 else (90, 100, 115)
+                line_w = 2 if (layer == 1 and s_idx < 12) else 1
                 draw_bezier(p1, (ctrl_x, ctrl_y), (tip_x, tip_y), ink_color, width=line_w)
 
     # Draw Main Spine Vertebrae (Articulated Armor Scales)

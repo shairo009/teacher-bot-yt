@@ -77,5 +77,14 @@
     "timestamp": "2026-08-23T18:25:10.363603+00:00",
     "video_id": "5SSFqAIytq0",
     "uploaded": true
+  },
+  {
+    "id": 11,
+    "species": "BLACK MAMBA VIPER",
+    "scientific": "Dendroaspis polylepis",
+    "file": "tmp/realistic_0011/cyber_viper_realistic_short.mp4",
+    "timestamp": "2026-08-23T19:19:36.540055+00:00",
+    "video_id": "G-skBIvPLfs",
+    "uploaded": true
   }
 ]

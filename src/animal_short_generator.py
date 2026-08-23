@@ -1,10 +1,10 @@
 """
-Interactive Cyber Creature Cursor Code Reel Generator
-100% Code-Generated Animation matching the reference 'Interactive Cyber Creature / Cursor' style.
-Features:
+Interactive Cyber Creature Cursor Code Reel Generator (Enhanced Audio-Visual Edition)
+100% Code-Generated Animation + Procedural Sound Design:
 - Minimalist canvas with tech badges ([JS] Vanilla JavaScript, [CSS] CSS3)
-- Mechanical / Cyber robotic animal tracking the mouse pointer with ghost motion trails
+- Mechanical / Cyber robotic animal tracking mouse pointer with ghost motion trails
 - macOS Dark VS Code card with real syntax-highlighted JavaScript physics code
+- Procedural Audio: Key typing clicks, swoosh/whoosh SFX, ambient cyber drone
 - Automatic YouTube Shorts upload with optimized tags & titles
 """
 from __future__ import annotations
@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from src.cyber_creature_engine import CYBER_CREATURES, render_cyber_reel_frame, WIDTH, HEIGHT, FPS
+from src.sound_engine import generate_reel_audio
 
 DATA_DIR = ROOT / "data"
 TMP_DIR = ROOT / "tmp"
@@ -39,16 +40,31 @@ def _load_json(path: Path, default):
         return default
 
 
-def _encode_video(frames_dir: Path, output_path: Path) -> None:
+def _encode_video(frames_dir: Path, audio_wav: Path, output_path: Path) -> None:
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
         raise RuntimeError("ffmpeg is required to create the MP4")
-    result = subprocess.run([
-        ffmpeg, "-y", "-framerate", str(FPS),
+    
+    cmd = [
+        ffmpeg, "-y",
+        "-framerate", str(FPS),
         "-i", str(frames_dir / "frame_%04d.jpg"),
-        "-c:v", "libx264", "-pix_fmt", "yuv420p",
-        "-movflags", "+faststart", str(output_path),
-    ], text=True, capture_output=True)
+    ]
+    if audio_wav.exists():
+        cmd.extend([
+            "-i", str(audio_wav),
+            "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-b:a", "192k",
+            "-shortest",
+            "-movflags", "+faststart", str(output_path)
+        ])
+    else:
+        cmd.extend([
+            "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            "-movflags", "+faststart", str(output_path)
+        ])
+        
+    result = subprocess.run(cmd, text=True, capture_output=True)
     if result.returncode:
         raise RuntimeError("ffmpeg failed: " + result.stderr[-1500:])
 
@@ -58,8 +74,8 @@ def _upload_to_youtube(video_path: Path, creature: dict, dry_run: bool) -> str |
         print("  [Dry run — skipping YouTube upload]")
         return None
 
-    token_json = os.environ.get("TOKEN_JSON", "").lstrip("\ufeff").strip()
-    client_json = os.environ.get("CLIENT_SECRETS_JSON", "").lstrip("\ufeff").strip()
+    token_json = os.environ.get("TOKEN_JSON", "").lstrip("﻿").strip()
+    client_json = os.environ.get("CLIENT_SECRETS_JSON", "").lstrip("﻿").strip()
 
     token_file = TMP_DIR / "token.json"
     client_file = TMP_DIR / "client_secrets.json"
@@ -121,9 +137,14 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
         frame = render_cyber_reel_frame(creature, number, total_frames)
         frame.save(frames_dir / f"frame_{number:04d}.jpg", quality=93, optimize=True)
 
+    # Generate procedural audio
+    audio_wav = run_dir / "audio.wav"
+    print("Synthesizing procedural audio (mechanical typing + cyber swooshes + drone)...")
+    generate_reel_audio(audio_wav, duration=duration, typing_events=len(creature.get("code_lines", [])))
+
     output_file = run_dir / f"{creature['id']}_interactive_short.mp4"
-    print("Encoding video with FFmpeg...")
-    _encode_video(frames_dir, output_file)
+    print("Encoding video & audio with FFmpeg...")
+    _encode_video(frames_dir, audio_wav, output_file)
     print(f"✅ Video created: {output_file}")
 
     video_id = None

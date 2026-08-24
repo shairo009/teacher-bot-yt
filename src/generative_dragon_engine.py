@@ -1,11 +1,10 @@
 """
-Minimalist Code-Reel Engine with Biological Modular Rigging & Large Mobile Typography
+Minimalist Code-Reel Engine with Guaranteed Cross-Platform Fonts & Biological Kinematics
 Features:
-- Calm, smooth, natural real-world crawl & trot speed
-- Large 34px Bold Monospace Code Font with 56px Line Spacing (Crisp on Phone Screens)
-- True Canine, Arachnid, Serpent, Reptile biological kinematics
-- Clean Minimalist Header (Animal Name ONLY)
-- macOS Dark Editor with Auto-Sliding/Scrolling JS Code
+- Bundled TrueType Fonts (DejaVuSansMono-Bold, Montserrat-Bold)
+- High Contrast Vibrant macOS Dark Code Editor with Auto-Sliding JS Code
+- Calm, Smooth, Natural Trot/Crawl Speed (0.4x Real-Life)
+- Biologically Accurate Quadruped Canine, Arachnid, Serpent & Reptile Kinematics
 - 100% Free & Unlimited
 """
 from __future__ import annotations
@@ -17,34 +16,49 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 WIDTH, HEIGHT, FPS = 1080, 1920, 30
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+ROOT_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT_DIR / "data"
+FONTS_DIR = ROOT_DIR / "assets" / "fonts"
 ENCYCLOPEDIA_FILE = DATA_DIR / "animal_encyclopedia.json"
 
 def get_font(size: int, bold: bool = False, serif: bool = False, mono: bool = False) -> ImageFont.FreeTypeFont:
+    candidates = []
     if mono:
         candidates = [
+            str(FONTS_DIR / "DejaVuSansMono-Bold.ttf"),
+            str(FONTS_DIR / "CodeMono.ttf"),
+            str(FONTS_DIR / "Montserrat-Bold.ttf" if bold else FONTS_DIR / "Montserrat-Regular.ttf"),
+            "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
             "/system/fonts/DroidSansMono.ttf",
-            "/data/data/com.termux/files/home/teacher-bot-repo/assets/fonts/Montserrat-Bold.ttf" if bold else "/data/data/com.termux/files/home/teacher-bot-repo/assets/fonts/Montserrat-Regular.ttf"
+            "/system/fonts/CutiveMono.ttf"
         ]
     elif serif:
         candidates = [
+            str(FONTS_DIR / "Montserrat-Bold.ttf"),
+            "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
             "/system/fonts/NotoSerif-Bold.ttf" if bold else "/system/fonts/NotoSerif-Regular.ttf",
-            "/system/fonts/DroidSerif-Bold.ttf" if bold else "/system/fonts/DroidSerif-Regular.ttf",
-            "/data/data/com.termux/files/home/teacher-bot-repo/assets/fonts/PlayfairDisplay-Bold.ttf"
+            "/system/fonts/DroidSerif-Bold.ttf"
         ]
     else:
         candidates = [
-            "/data/data/com.termux/files/home/teacher-bot-repo/assets/fonts/Montserrat-Bold.ttf" if bold else "/data/data/com.termux/files/home/teacher-bot-repo/assets/fonts/Montserrat-Regular.ttf",
+            str(FONTS_DIR / "Montserrat-Bold.ttf" if bold else FONTS_DIR / "Montserrat-Regular.ttf"),
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
             "/system/fonts/Roboto-Bold.ttf" if bold else "/system/fonts/Roboto-Regular.ttf",
-            "/system/fonts/DroidSans.ttf",
+            "/system/fonts/DroidSans.ttf"
         ]
+
     for p in candidates:
         if os.path.exists(p):
             try:
                 return ImageFont.truetype(p, size=size)
             except Exception:
                 pass
-    return ImageFont.load_default()
+    try:
+        return ImageFont.load_default(size=size)
+    except Exception:
+        return ImageFont.load_default()
 
 def solve_ik_2joint(origin: tuple[float, float], target: tuple[float, float], l1: float, l2: float, bend_side: float):
     dx = target[0] - origin[0]
@@ -107,7 +121,7 @@ def _generate_js_code_for_animal(name: str, class_type: str, scientific: str) ->
             f"  render4ToePaw({c_name}.leftArm.target);",
             f"  render4ToePaw({c_name}.rightArm.target);",
             "",
-            "  // 4. Organic Torso, Saddle & Harmonic Wagging Tail",
+            "  // 4. Organic Torso, Saddle & Wagging Tail",
             f"  renderCanineTorso(ctx, {c_name}.spine);",
             f"  wagPlumeTail({c_name}.tail, Math.sin(time * 6.5) * 0.45);",
             f"  renderCanineHeadWithEars(ctx, {c_name}.head);",
@@ -149,7 +163,7 @@ def _generate_js_code_for_animal(name: str, class_type: str, scientific: str) ->
             "",
             f"const update{c_name} = () => {{",
             f"  requestAnimationFrame(update{c_name});",
-            f"  const head = {c_name}.spine[0];",
+            "  const head = {c_name}.spine[0];",
             "  head.x += (pointer.x - head.x) * 0.08;",
             "  head.y += (pointer.y - head.y) * 0.08;",
             "",
@@ -174,7 +188,7 @@ def _generate_js_code_for_animal(name: str, class_type: str, scientific: str) ->
             "",
             f"const run{c_name} = () => {{",
             f"  requestAnimationFrame(run{c_name});",
-            f"  updateSpineHead({c_name}.spine[0], pointer);",
+            "  updateSpineHead({c_name}.spine[0], pointer);",
             "",
             "  // 1. Articulated 2-Joint Claws",
             f"  {c_name}.limbs.forEach(limb => {{",
@@ -252,7 +266,6 @@ class MasterSimulator:
         ]
 
     def update(self, sim_time: float):
-        # Calm, smooth trajectory
         target_x = self.cx + math.cos(sim_time * 0.75) * (self.rx * 0.9) + math.sin(sim_time * 1.5) * (self.rx * 0.22)
         target_y = self.cy + math.sin(sim_time * 1.05) * (self.ry * 0.85) + math.cos(sim_time * 2.1) * (self.ry * 0.20)
 
@@ -264,7 +277,7 @@ class MasterSimulator:
         diff = target_ang - self.angle
         while diff < -math.pi: diff += math.pi * 2
         while diff > math.pi: diff -= math.pi * 2
-        self.angle += diff * 0.04  # Calm, graceful turning
+        self.angle += diff * 0.04
 
         if dist > 25:
             target_spd = min(2.4, dist * 0.035)
@@ -327,7 +340,7 @@ class MasterSimulator:
                 ]
 
             if leg["prog"] < 1.0:
-                leg["prog"] += 0.10  # Smooth, calm foot swing
+                leg["prog"] += 0.10
                 p = min(1.0, leg["prog"])
                 ease_p = 0.5 - math.cos(p * math.pi) / 2
                 lift = math.sin(p * math.pi) * 14
@@ -339,7 +352,7 @@ _SIM_CACHE = {}
 
 def render_generative_frame(species: dict, frame_idx: int, total_frames: int) -> Image.Image:
     progress = frame_idx / total_frames
-    sim_time = (frame_idx / FPS) * 0.4  # Calm, natural real-life speed
+    sim_time = (frame_idx / FPS) * 0.4
 
     img = Image.new("RGBA", (WIDTH, HEIGHT), (11, 27, 38, 255))
     draw = ImageDraw.Draw(img)
@@ -398,19 +411,16 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     # QUADRUPED DOG ANATOMY (True Elbow Backwards & Knee Forward)
     # ─────────────────────────────────────────────────────────────
     if class_type == "quadruped" or "dog" in sp_id or "wolf" in sp_id:
-        # 1. Limbs Layer
         for leg in sim.legs4:
             paw_pos = (leg["cur"][0], leg["cur"][1])
             sock = leg["socket"]
 
             if leg["is_front"]:
-                # Elbow bends BACKWARD
                 _, elbow, _ = solve_forelimb_ik(sock, paw_pos, leg["l1"], leg["l2"], leg["side"])
                 draw.line([sock, elbow], fill=(217, 119, 6), width=13)
                 draw.line([elbow, paw_pos], fill=(251, 164, 68), width=9)
                 draw.ellipse([elbow[0]-4, elbow[1]-4, elbow[0]+4, elbow[1]+4], fill=(245, 158, 11))
             else:
-                # Stifle Knee bends FORWARD, Hock bends BACKWARD
                 knee = (sock[0] + cos_a * (32 * 0.75) + perp_x * (32 * 0.65 * leg["side"]),
                         sock[1] + sin_a * (32 * 0.75) + perp_y * (32 * 0.65 * leg["side"]))
                 hock = (knee[0] - cos_a * (32 * 0.65) + perp_x * (32 * 0.2 * leg["side"]),
@@ -421,10 +431,8 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
                 draw.ellipse([knee[0]-5, knee[1]-5, knee[0]+5, knee[1]+5], fill=(245, 158, 11))
                 draw.ellipse([hock[0]-4, hock[1]-4, hock[0]+4, hock[1]+4], fill=(120, 53, 15))
 
-            # 4-Toe Digitigrade Paw Pad
             draw.ellipse([paw_pos[0]-7, paw_pos[1]-6, paw_pos[0]+7, paw_pos[1]+6], fill=(30, 41, 59))
 
-        # 2. Torso (Organic Golden Coat + Dark Saddle)
         left_prof, right_prof = [], []
         spine_pts = []
         for i in range(16):
@@ -442,7 +450,6 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         saddle_r = [((right_prof[i][0]*0.7 + spine_pts[i][0]*0.3), (right_prof[i][1]*0.7 + spine_pts[i][1]*0.3)) for i in range(2, 13)]
         draw.polygon(saddle_l + list(reversed(saddle_r)), fill=(28, 17, 8))
 
-        # 3. Wagging Tail
         tail_prev = spine_pts[-1]
         wag = math.sin(sim_time * 6.5) * 0.52
         for i in range(9):
@@ -452,7 +459,6 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
             draw.line([tail_prev, (tx, ty)], fill=(245, 158, 11), width=max(4, int(15 - i * 1.2)))
             tail_prev = (tx, ty)
 
-        # 4. Sculpted Canine Head
         hx = sim.x + cos_a * 26
         hy = sim.y + sin_a * 26
         snout = (hx + cos_a * 36, hy + sin_a * 36)
@@ -488,7 +494,6 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         draw.ellipse([eye_r[0]+1, eye_r[1]-1, eye_r[0]+2.5, eye_r[1]+0.5], fill=(255, 255, 255))
 
     elif class_type == "arachnid":
-        # Arachnid Scorpion
         for leg in sim.legs8:
             h_p = leg["hip"]
             foot_p = (leg["cur"][0], leg["cur"][1])
@@ -520,7 +525,6 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         draw.polygon([c_front, c_r1, c_r2, c_l2, c_l1], fill=(12, 16, 24), outline=accent_color, width=2)
 
     else:
-        # Serpent / Dragon
         for i in range(len(sim.spine) - 1, 0, -1):
             p1 = (sim.spine[i]["x"], sim.spine[i]["y"])
             p0 = (sim.spine[i - 1]["x"], sim.spine[i - 1]["y"])
@@ -585,10 +589,8 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         if y_pos < code_box_top - 16 or y_pos > code_box_bottom:
             continue
 
-        # Line Number in Gutter
-        draw.text((card_x + 36, y_pos), f"{actual_line_idx + 1:2d}", font=line_num_font, fill=(75, 92, 115))
+        draw.text((card_x + 36, y_pos), f"{actual_line_idx + 1:2d}", font=line_num_font, fill=(80, 100, 125))
 
-        # Syntax Highlighting
         indent_x = card_x + 105
         stripped = line_text.strip()
         if stripped.startswith("//"):

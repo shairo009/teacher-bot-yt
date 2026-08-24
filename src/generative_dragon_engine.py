@@ -1,9 +1,8 @@
 """
 Ultra-Realistic Organic Biological Creature Engine (HTML/SVG & Code-Reel Generator)
 Features:
-- Large Prominent Animal Scaling (Fills Upper Display Box with Rich Fur & Muscle Detail)
-- Multi-Layer Organic Shading (Undercoat, Dark Saddle, Flank Highlights, 4-Toe Paws)
-- Biologically Accurate Quadruped (Canine), Arachnid (Scorpion), Serpent (Cobra), Reptile (Dragon)
+- Full support for all animal species (Quadruped, Arachnid, Serpent, Reptile, Crustacean, Aquatic)
+- Large Prominent Animal Scaling
 - Large 34px Bold Monospace Code Font with 56px Line Spacing (Mobile Optimized)
 - Calm, Smooth, Natural Trotting/Crawling Speed (0.4x Real-Life)
 - Bundled Cross-Platform TrueType Fonts
@@ -247,21 +246,21 @@ class MasterSimulator:
         
         # 8 Arachnid Legs
         self.legs8 = [
-            {"id": "L1", "side": -1, "spread": -0.85, "rest_d": 110, "l1": 34, "l2": 48, "l3": 42, "group": 0, "cur": [cx - 110, cy + 40], "tgt": [cx - 110, cy + 40], "start": [cx - 110, cy + 40], "prog": 1.0},
-            {"id": "L2", "side": -1, "spread": -1.30, "rest_d": 130, "l1": 40, "l2": 56, "l3": 48, "group": 1, "cur": [cx - 125, cy + 40], "tgt": [cx - 125, cy + 40], "start": [cx - 125, cy + 40], "prog": 1.0},
-            {"id": "L3", "side": -1, "spread": -1.75, "rest_d": 136, "l1": 42, "l2": 58, "l3": 50, "group": 0, "cur": [cx - 130, cy + 40], "tgt": [cx - 130, cy + 40], "start": [cx - 130, cy + 40], "prog": 1.0},
-            {"id": "L4", "side": -1, "spread": -2.20, "rest_d": 120, "l1": 36, "l2": 50, "l3": 44, "group": 1, "cur": [cx - 115, cy + 40], "tgt": [cx - 115, cy + 40], "start": [cx - 115, cy + 40], "prog": 1.0},
-            {"id": "R1", "side":  1, "spread":  0.85, "rest_d": 110, "l1": 34, "l2": 48, "l3": 42, "group": 1, "cur": [cx + 110, cy + 40], "tgt": [cx + 110, cy + 40], "start": [cx + 110, cy + 40], "prog": 1.0},
-            {"id": "R2", "side":  1, "spread":  1.30, "rest_d": 130, "l1": 40, "l2": 56, "l3": 48, "group": 0, "cur": [cx + 125, cy + 40], "tgt": [cx + 125, cy + 40], "start": [cx + 125, cy + 40], "prog": 1.0},
-            {"id": "R3", "side":  1, "spread":  1.75, "rest_d": 136, "l1": 42, "l2": 58, "l3": 50, "group": 1, "cur": [cx + 130, cy + 40], "tgt": [cx + 130, cy + 40], "start": [cx + 130, cy + 40], "prog": 1.0},
-            {"id": "R4", "side":  1, "spread":  2.20, "rest_d": 120, "l1": 36, "l2": 50, "l3": 44, "group": 0, "cur": [cx + 115, cy + 40], "tgt": [cx + 115, cy + 40], "start": [cx + 115, cy + 40], "prog": 1.0},
+            {"id": "L1", "side": -1, "spread": -0.85, "rest_d": 110, "l1": 34, "l2": 48, "l3": 42, "group": 0, "cur": [cx - 110, cy + 40], "tgt": [cx - 110, cy + 40], "start": [cx - 110, cy + 40], "prog": 1.0, "hip": (cx - 110, cy + 40)},
+            {"id": "L2", "side": -1, "spread": -1.30, "rest_d": 130, "l1": 40, "l2": 56, "l3": 48, "group": 1, "cur": [cx - 125, cy + 40], "tgt": [cx - 125, cy + 40], "start": [cx - 125, cy + 40], "prog": 1.0, "hip": (cx - 125, cy + 40)},
+            {"id": "L3", "side": -1, "spread": -1.75, "rest_d": 136, "l1": 42, "l2": 58, "l3": 50, "group": 0, "cur": [cx - 130, cy + 40], "tgt": [cx - 130, cy + 40], "start": [cx - 130, cy + 40], "prog": 1.0, "hip": (cx - 130, cy + 40)},
+            {"id": "L4", "side": -1, "spread": -2.20, "rest_d": 120, "l1": 36, "l2": 50, "l3": 44, "group": 1, "cur": [cx - 115, cy + 40], "tgt": [cx - 115, cy + 40], "start": [cx - 115, cy + 40], "prog": 1.0, "hip": (cx - 115, cy + 40)},
+            {"id": "R1", "side":  1, "spread":  0.85, "rest_d": 110, "l1": 34, "l2": 48, "l3": 42, "group": 1, "cur": [cx + 110, cy + 40], "tgt": [cx + 110, cy + 40], "start": [cx + 110, cy + 40], "prog": 1.0, "hip": (cx + 110, cy + 40)},
+            {"id": "R2", "side":  1, "spread":  1.30, "rest_d": 130, "l1": 40, "l2": 56, "l3": 48, "group": 0, "cur": [cx + 125, cy + 40], "tgt": [cx + 125, cy + 40], "start": [cx + 125, cy + 40], "prog": 1.0, "hip": (cx + 125, cy + 40)},
+            {"id": "R3", "side":  1, "spread":  1.75, "rest_d": 136, "l1": 42, "l2": 58, "l3": 50, "group": 1, "cur": [cx + 130, cy + 40], "tgt": [cx + 130, cy + 40], "start": [cx + 130, cy + 40], "prog": 1.0, "hip": (cx + 130, cy + 40)},
+            {"id": "R4", "side":  1, "spread":  2.20, "rest_d": 120, "l1": 36, "l2": 50, "l3": 44, "group": 0, "cur": [cx + 115, cy + 40], "tgt": [cx + 115, cy + 40], "start": [cx + 115, cy + 40], "prog": 1.0, "hip": (cx + 115, cy + 40)},
         ]
-        # 4 Quadruped Legs (Scaled up proportionally)
+        # 4 Quadruped Legs
         self.legs4 = [
-            {"id": "FL", "spine_i": 3, "side": -1, "is_front": True,  "l1": 52, "l2": 58, "phase": 0.0,     "cur": [cx + 20, cy - 45], "tgt": [cx + 20, cy - 45], "start": [cx + 20, cy - 45], "prog": 1.0},
-            {"id": "FR", "spine_i": 3, "side":  1, "is_front": True,  "l1": 52, "l2": 58, "phase": math.pi, "cur": [cx + 20, cy + 45], "tgt": [cx + 20, cy + 45], "start": [cx + 20, cy + 45], "prog": 1.0},
-            {"id": "HL", "spine_i": 11, "side": -1, "is_front": False, "l1": 48, "l2": 48, "l3": 32, "phase": math.pi, "cur": [cx - 60, cy - 45], "tgt": [cx - 60, cy - 45], "start": [cx - 60, cy - 45], "prog": 1.0},
-            {"id": "HR", "spine_i": 11, "side":  1, "is_front": False, "l1": 48, "l2": 48, "l3": 32, "phase": 0.0,     "cur": [cx - 60, cy + 45], "tgt": [cx - 60, cy + 45], "start": [cx - 60, cy + 45], "prog": 1.0},
+            {"id": "FL", "spine_i": 3, "side": -1, "is_front": True,  "l1": 52, "l2": 58, "phase": 0.0,     "cur": [cx + 20, cy - 45], "tgt": [cx + 20, cy - 45], "start": [cx + 20, cy - 45], "prog": 1.0, "socket": (cx + 20, cy - 45)},
+            {"id": "FR", "spine_i": 3, "side":  1, "is_front": True,  "l1": 52, "l2": 58, "phase": math.pi, "cur": [cx + 20, cy + 45], "tgt": [cx + 20, cy + 45], "start": [cx + 20, cy + 45], "prog": 1.0, "socket": (cx + 20, cy + 45)},
+            {"id": "HL", "spine_i": 11, "side": -1, "is_front": False, "l1": 48, "l2": 48, "l3": 32, "phase": math.pi, "cur": [cx - 60, cy - 45], "tgt": [cx - 60, cy - 45], "start": [cx - 60, cy - 45], "prog": 1.0, "socket": (cx - 60, cy - 45)},
+            {"id": "HR", "spine_i": 11, "side":  1, "is_front": False, "l1": 48, "l2": 48, "l3": 32, "phase": 0.0,     "cur": [cx - 60, cy + 45], "tgt": [cx - 60, cy + 45], "start": [cx - 60, cy + 45], "prog": 1.0, "socket": (cx - 60, cy + 45)},
         ]
 
     def update(self, sim_time: float):
@@ -345,6 +344,37 @@ class MasterSimulator:
                 lift = math.sin(p * math.pi) * 20
                 leg["cur"][0] = leg["start"][0] + (leg["tgt"][0] - leg["start"][0]) * ease_p
                 leg["cur"][1] = leg["start"][1] + (leg["tgt"][1] - leg["start"][1]) * ease_p - lift * 0.2
+
+        # 8 Arachnid Legs Gait
+        gait_clock = sim_time * 6.5
+        for idx, leg in enumerate(self.legs8):
+            leg_i = idx % 4
+            hip_along = 18 - leg_i * 14
+            hip_x = self.x + cos_a * hip_along + perp_x * (32 * leg["side"])
+            hip_y = self.y + sin_a * hip_along + perp_y * (32 * leg["side"])
+            leg["hip"] = (hip_x, hip_y)
+
+            leg_spread = self.angle + leg["spread"]
+            ideal_x = hip_x + math.cos(leg_spread) * leg["rest_d"]
+            ideal_y = hip_y + math.sin(leg_spread) * leg["rest_d"]
+
+            dist_ideal = math.hypot(ideal_x - leg["cur"][0], ideal_y - leg["cur"][1])
+            group_phase = math.sin(gait_clock) if leg["group"] == 0 else -math.sin(gait_clock)
+
+            if dist_ideal > 36 and leg["prog"] >= 1.0 and group_phase > 0.1:
+                leg["prog"] = 0.0
+                leg["start"] = [leg["cur"][0], leg["cur"][1]]
+                leg["tgt"] = [
+                    ideal_x + math.cos(self.angle) * 32,
+                    ideal_y + math.sin(self.angle) * 32
+                ]
+
+            if leg["prog"] < 1.0:
+                leg["prog"] += 0.10
+                p = min(1.0, leg["prog"])
+                ease_p = 0.5 - math.cos(p * math.pi) / 2
+                leg["cur"][0] = leg["start"][0] + (leg["tgt"][0] - leg["start"][0]) * ease_p
+                leg["cur"][1] = leg["start"][1] + (leg["tgt"][1] - leg["start"][1]) * ease_p
 
 
 _SIM_CACHE = {}
@@ -432,14 +462,12 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
                 draw.ellipse([knee[0]-7, knee[1]-7, knee[0]+7, knee[1]+7], fill=(245, 158, 11))
                 draw.ellipse([hock[0]-6, hock[1]-6, hock[0]+6, hock[1]+6], fill=(120, 53, 15))
 
-            # 4-Toe Digitigrade Paw Pad
             draw.ellipse([paw_pos[0]-10, paw_pos[1]-9, paw_pos[0]+10, paw_pos[1]+9], fill=(30, 41, 59))
             for t_off in [-5, -1.8, 1.8, 5]:
                 bx = paw_pos[0] + cos_a * 8 + perp_x * t_off
                 by = paw_pos[1] + sin_a * 8 + perp_y * t_off
                 draw.ellipse([bx-3, by-3, bx+3, by+3], fill=(15, 23, 42))
 
-        # Organic Torso Silhouette (Broad Chest to Athletic Waist Tuck)
         left_prof, right_prof = [], []
         spine_pts = []
         for i in range(16):
@@ -452,15 +480,12 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
             right_prof.append((seg["x"] - s_perp_x * half_w, seg["y"] - s_perp_y * half_w))
             spine_pts.append((seg["x"], seg["y"]))
 
-        # Outer Golden Fur Coat
         draw.polygon(left_prof + list(reversed(right_prof)), fill=(245, 158, 11), outline=(180, 83, 9), width=3)
         
-        # German Shepherd Dark Saddle Pattern
         saddle_l = [((left_prof[i][0]*0.72 + spine_pts[i][0]*0.28), (left_prof[i][1]*0.72 + spine_pts[i][1]*0.28)) for i in range(2, 13)]
-        saddle_r = [((right_prof[i][0]*0.72 + spine_pts[i][0]*0.28), (right_prof[i][1]*0.72 + spine_pts[i][1]*0.28)) for i in range(2, 13)]
+        saddle_r = [((right_prof[i][0]*0.72 + spine_pts[i][0]*0.28), (right_prof[i][0]*0.72 + spine_pts[i][0]*0.28)) for i in range(2, 13)]
         draw.polygon(saddle_l + list(reversed(saddle_r)), fill=(28, 17, 8))
 
-        # Flowing Bushy Plume Tail
         tail_prev = spine_pts[-1]
         wag = math.sin(sim_time * 6.5) * 0.52
         for i in range(9):
@@ -471,7 +496,6 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
             draw.line([tail_prev, (tx, ty)], fill=(254, 243, 199), width=max(3, int(12 - i * 0.9)))
             tail_prev = (tx, ty)
 
-        # Sculpted Canine Skull & Head
         hx = sim.x + cos_a * 38
         hy = sim.y + sin_a * 38
         snout = (hx + cos_a * 52, hy + sin_a * 52)
@@ -498,11 +522,9 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         tongue_tip = (snout[0] + cos_a * 22, snout[1] + sin_a * 22)
         draw.ellipse([tongue_tip[0]-5, tongue_tip[1]-5, tongue_tip[0]+5, tongue_tip[1]+5], fill=(251, 113, 133))
         
-        # Wet Black Nose Button with Nostrils
         draw.ellipse([snout[0]-8, snout[1]-6.5, snout[0]+8, snout[1]+6.5], fill=(0, 0, 0))
         draw.ellipse([snout[0]+cos_a*2-2.5, snout[1]+sin_a*2-1.5, snout[0]+cos_a*2+2.5, snout[1]+sin_a*2+1.5], fill=(148, 163, 184))
 
-        # Glossy Canine Eyes
         eye_l = (hx + cos_a * 12 + perp_x * 18, hy + sin_a * 12 + perp_y * 18)
         eye_r = (hx + cos_a * 12 - perp_x * 18, hy + sin_a * 12 - perp_y * 18)
         draw.ellipse([eye_l[0]-6, eye_l[1]-5.5, eye_l[0]+6, eye_l[1]+5.5], fill=(69, 26, 3))

@@ -122,5 +122,14 @@
     "timestamp": "2026-08-23T20:52:13.237090+00:00",
     "video_id": "GmQtSj7LnBc",
     "uploaded": true
+  },
+  {
+    "id": 1,
+    "species": "EMPEROR SCORPION",
+    "scientific": "Pandinus imperator",
+    "file": "tmp/reel_0001/emperor_scorpion_short.mp4",
+    "timestamp": "2026-08-24T06:31:56.414011+00:00",
+    "video_id": "bJm-Khj6qbY",
+    "uploaded": true
   }
 ]

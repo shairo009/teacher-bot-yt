@@ -1,6 +1,7 @@
 """
 Ultra-Realistic Organic Biological Creature Engine (HTML/SVG & Code-Reel Generator)
 Features:
+- Pure IK Spine Kinematics with Zero Angle Inversion / Polygon Spikes
 - Full support for all animal species (Quadruped, Arachnid, Serpent, Reptile, Crustacean, Aquatic)
 - Large Prominent Animal Scaling
 - Large 34px Bold Monospace Code Font with 56px Line Spacing (Mobile Optimized)
@@ -291,7 +292,7 @@ class MasterSimulator:
         perp_x = -sin_a
         perp_y =  cos_a
 
-        # Spine Follow-Chain
+        # Pure Inverse Kinematics Spine Follow-Chain
         self.spine[0]["x"] = self.x
         self.spine[0]["y"] = self.y
         self.spine[0]["angle"] = self.angle
@@ -299,12 +300,15 @@ class MasterSimulator:
             prev = self.spine[i - 1]
             curr = self.spine[i]
             s_dist = 22 - (i / len(self.spine)) * 4
-            wave = math.sin(sim_time * 4.5 + i * 0.35) * (2.5 if i > 2 else 0.8)
-            p_dx = prev["x"] - curr["x"]
-            p_dy = prev["y"] - curr["y"]
-            curr["angle"] = math.atan2(p_dy, p_dx)
-            curr["x"] = prev["x"] - math.cos(curr["angle"]) * s_dist + math.cos(curr["angle"] + math.pi/2) * wave
-            curr["y"] = prev["y"] - math.sin(curr["angle"]) * s_dist + math.sin(curr["angle"] + math.pi/2) * wave
+            p_dx = curr["x"] - prev["x"]
+            p_dy = curr["y"] - prev["y"]
+            d = math.hypot(p_dx, p_dy)
+            if d > 0.0001:
+                curr["x"] = prev["x"] + (p_dx / d) * s_dist
+                curr["y"] = prev["y"] + (p_dy / d) * s_dist
+                curr["angle"] = math.atan2(prev["y"] - curr["y"], prev["x"] - curr["x"])
+            else:
+                curr["angle"] = prev["angle"]
 
         # 4 Quadruped Legs Gait
         trot_clock = sim_time * 6.5
@@ -474,16 +478,16 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
             seg = sim.spine[i]
             s_cos, s_sin = math.cos(seg["angle"]), math.sin(seg["angle"])
             s_perp_x, s_perp_y = -s_sin, s_cos
-            half_w = 40 - i * 1.0 if i < 6 else 30 - (i-6)*1.6 if i < 11 else 36 - (i-11)*0.9
-            half_w = max(18, half_w)
+            half_w = 38 - i * 0.9 if i < 6 else 28 - (i-6)*1.4 if i < 11 else 34 - (i-11)*0.8
+            half_w = max(16, half_w)
             left_prof.append((seg["x"] + s_perp_x * half_w, seg["y"] + s_perp_y * half_w))
             right_prof.append((seg["x"] - s_perp_x * half_w, seg["y"] - s_perp_y * half_w))
             spine_pts.append((seg["x"], seg["y"]))
 
         draw.polygon(left_prof + list(reversed(right_prof)), fill=(245, 158, 11), outline=(180, 83, 9), width=3)
         
-        saddle_l = [((left_prof[i][0]*0.72 + spine_pts[i][0]*0.28), (left_prof[i][1]*0.72 + spine_pts[i][1]*0.28)) for i in range(2, 13)]
-        saddle_r = [((right_prof[i][0]*0.72 + spine_pts[i][0]*0.28), (right_prof[i][0]*0.72 + spine_pts[i][0]*0.28)) for i in range(2, 13)]
+        saddle_l = [((left_prof[i][0]*0.70 + spine_pts[i][0]*0.30), (left_prof[i][1]*0.70 + spine_pts[i][1]*0.30)) for i in range(2, 12)]
+        saddle_r = [((right_prof[i][0]*0.70 + spine_pts[i][0]*0.30), (right_prof[i][0]*0.70 + spine_pts[i][0]*0.30)) for i in range(2, 12)]
         draw.polygon(saddle_l + list(reversed(saddle_r)), fill=(28, 17, 8))
 
         tail_prev = spine_pts[-1]

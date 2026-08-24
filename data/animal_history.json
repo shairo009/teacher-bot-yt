@@ -149,5 +149,14 @@
     "timestamp": "2026-08-24T13:34:49.823051+00:00",
     "video_id": "saffpB6OVEA",
     "uploaded": true
+  },
+  {
+    "id": 4,
+    "species": "PEACOCK MANTIS SHRIMP",
+    "scientific": "Odontodactylus scyllarus",
+    "file": "tmp/reel_0004/peacock_mantis_shrimp_short.mp4",
+    "timestamp": "2026-08-24T17:09:18.331353+00:00",
+    "video_id": "IpcSNjXpw0M",
+    "uploaded": true
   }
 ]

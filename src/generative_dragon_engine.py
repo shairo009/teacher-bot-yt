@@ -1,10 +1,12 @@
 """
-Minimalist Code-Reel Engine with Guaranteed Cross-Platform Fonts & Biological Kinematics
+Ultra-Realistic Organic Biological Creature Engine (HTML/SVG & Code-Reel Generator)
 Features:
-- Bundled TrueType Fonts (DejaVuSansMono-Bold, Montserrat-Bold)
-- High Contrast Vibrant macOS Dark Code Editor with Auto-Sliding JS Code
-- Calm, Smooth, Natural Trot/Crawl Speed (0.4x Real-Life)
-- Biologically Accurate Quadruped Canine, Arachnid, Serpent & Reptile Kinematics
+- Large Prominent Animal Scaling (Fills Upper Display Box with Rich Fur & Muscle Detail)
+- Multi-Layer Organic Shading (Undercoat, Dark Saddle, Flank Highlights, 4-Toe Paws)
+- Biologically Accurate Quadruped (Canine), Arachnid (Scorpion), Serpent (Cobra), Reptile (Dragon)
+- Large 34px Bold Monospace Code Font with 56px Line Spacing (Mobile Optimized)
+- Calm, Smooth, Natural Trotting/Crawling Speed (0.4x Real-Life)
+- Bundled Cross-Platform TrueType Fonts
 - 100% Free & Unlimited
 """
 from __future__ import annotations
@@ -31,20 +33,17 @@ def get_font(size: int, bold: bool = False, serif: bool = False, mono: bool = Fa
             "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
             "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
             "/system/fonts/DroidSansMono.ttf",
-            "/system/fonts/CutiveMono.ttf"
         ]
     elif serif:
         candidates = [
             str(FONTS_DIR / "Montserrat-Bold.ttf"),
             "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
-            "/system/fonts/NotoSerif-Bold.ttf" if bold else "/system/fonts/NotoSerif-Regular.ttf",
-            "/system/fonts/DroidSerif-Bold.ttf"
+            "/system/fonts/NotoSerif-Bold.ttf",
         ]
     else:
         candidates = [
             str(FONTS_DIR / "Montserrat-Bold.ttf" if bold else FONTS_DIR / "Montserrat-Regular.ttf"),
             "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
             "/system/fonts/Roboto-Bold.ttf" if bold else "/system/fonts/Roboto-Regular.ttf",
             "/system/fonts/DroidSans.ttf"
         ]
@@ -60,6 +59,17 @@ def get_font(size: int, bold: bool = False, serif: bool = False, mono: bool = Fa
     except Exception:
         return ImageFont.load_default()
 
+def solve_forelimb_ik(shoulder: tuple[float, float], paw: tuple[float, float], l1: float, l2: float, side: float):
+    dx = paw[0] - shoulder[0]
+    dy = paw[1] - shoulder[1]
+    dist = math.hypot(dx, dy)
+    clamped = min(dist, l1 + l2 - 0.001)
+    base = math.atan2(dy, dx)
+    cos_a = (l1 * l1 + clamped * clamped - l2 * l2) / (2 * l1 * clamped)
+    ang = base - math.acos(max(-1.0, min(1.0, cos_a))) * side * 0.92
+    elbow = (shoulder[0] + math.cos(ang) * l1, shoulder[1] + math.sin(ang) * l1)
+    return shoulder, elbow, paw
+
 def solve_ik_2joint(origin: tuple[float, float], target: tuple[float, float], l1: float, l2: float, bend_side: float):
     dx = target[0] - origin[0]
     dy = target[1] - origin[1]
@@ -71,17 +81,6 @@ def solve_ik_2joint(origin: tuple[float, float], target: tuple[float, float], l1
     knee_angle = base_angle + angle_a * bend_side
     knee = (origin[0] + math.cos(knee_angle) * l1, origin[1] + math.sin(knee_angle) * l1)
     return origin, knee, target
-
-def solve_forelimb_ik(shoulder: tuple[float, float], paw: tuple[float, float], l1: float, l2: float, side: float):
-    dx = paw[0] - shoulder[0]
-    dy = paw[1] - shoulder[1]
-    dist = math.hypot(dx, dy)
-    clamped = min(dist, l1 + l2 - 0.001)
-    base = math.atan2(dy, dx)
-    cos_a = (l1 * l1 + clamped * clamped - l2 * l2) / (2 * l1 * clamped)
-    ang = base - math.acos(max(-1.0, min(1.0, cos_a))) * side * 0.9
-    elbow = (shoulder[0] + math.cos(ang) * l1, shoulder[1] + math.sin(ang) * l1)
-    return shoulder, elbow, paw
 
 def solve_ik_3segment(origin: tuple[float, float], target: tuple[float, float], l1: float, l2: float, l3: float, side: float):
     dx = target[0] - origin[0]
@@ -110,12 +109,12 @@ def _generate_js_code_for_animal(name: str, class_type: str, scientific: str) ->
             "  const p = getPointerPosition();",
             "",
             "  // 1. Forelimbs: Elbow Bends BACKWARD",
-            f"  solveForelimbIK({c_name}.leftArm,  p.fl, 34, 38, -1);",
-            f"  solveForelimbIK({c_name}.rightArm, p.fr, 34, 38,  1);",
+            f"  solveForelimbIK({c_name}.leftArm,  p.fl, 52, 58, -1);",
+            f"  solveForelimbIK({c_name}.rightArm, p.fr, 52, 58,  1);",
             "",
             "  // 2. Hindlimbs: Stifle Knee FORWARD, Hock BACKWARD",
-            f"  solveHindlimbIK({c_name}.leftLeg,  p.hl, 32, 32, 20, -1);",
-            f"  solveHindlimbIK({c_name}.rightLeg, p.hr, 32, 32, 20,  1);",
+            f"  solveHindlimbIK({c_name}.leftLeg,  p.hl, 48, 48, 32, -1);",
+            f"  solveHindlimbIK({c_name}.rightLeg, p.hr, 48, 48, 32,  1);",
             "",
             "  // 3. 4-Toe Digitigrade Paw Pads with Claws",
             f"  render4ToePaw({c_name}.leftArm.target);",
@@ -244,30 +243,30 @@ class MasterSimulator:
         self.y = cy
         self.angle = 0.0
         self.speed = 0.0
-        self.spine = [{"x": cx - i * 14, "y": cy, "angle": 0.0} for i in range(24)]
+        self.spine = [{"x": cx - i * 22, "y": cy, "angle": 0.0} for i in range(20)]
         
         # 8 Arachnid Legs
         self.legs8 = [
-            {"id": "L1", "side": -1, "spread": -0.85, "rest_d": 88, "l1": 26, "l2": 36, "l3": 32, "group": 0, "cur": [cx - 85, cy + 40], "tgt": [cx - 85, cy + 40], "start": [cx - 85, cy + 40], "prog": 1.0},
-            {"id": "L2", "side": -1, "spread": -1.30, "rest_d": 102, "l1": 30, "l2": 42, "l3": 36, "group": 1, "cur": [cx - 95, cy + 40], "tgt": [cx - 95, cy + 40], "start": [cx - 95, cy + 40], "prog": 1.0},
-            {"id": "L3", "side": -1, "spread": -1.75, "rest_d": 106, "l1": 32, "l2": 44, "l3": 38, "group": 0, "cur": [cx - 100, cy + 40], "tgt": [cx - 100, cy + 40], "start": [cx - 100, cy + 40], "prog": 1.0},
-            {"id": "L4", "side": -1, "spread": -2.20, "rest_d": 94, "l1": 28, "l2": 38, "l3": 34, "group": 1, "cur": [cx - 90, cy + 40], "tgt": [cx - 90, cy + 40], "start": [cx - 90, cy + 40], "prog": 1.0},
-            {"id": "R1", "side":  1, "spread":  0.85, "rest_d": 88, "l1": 26, "l2": 36, "l3": 32, "group": 1, "cur": [cx + 85, cy + 40], "tgt": [cx + 85, cy + 40], "start": [cx + 85, cy + 40], "prog": 1.0},
-            {"id": "R2", "side":  1, "spread":  1.30, "rest_d": 102, "l1": 30, "l2": 42, "l3": 36, "group": 0, "cur": [cx + 95, cy + 40], "tgt": [cx + 95, cy + 40], "start": [cx + 95, cy + 40], "prog": 1.0},
-            {"id": "R3", "side":  1, "spread":  1.75, "rest_d": 106, "l1": 32, "l2": 44, "l3": 38, "group": 1, "cur": [cx + 100, cy + 40], "tgt": [cx + 100, cy + 40], "start": [cx + 100, cy + 40], "prog": 1.0},
-            {"id": "R4", "side":  1, "spread":  2.20, "rest_d": 94, "l1": 28, "l2": 38, "l3": 34, "group": 0, "cur": [cx + 90, cy + 40], "tgt": [cx + 90, cy + 40], "start": [cx + 90, cy + 40], "prog": 1.0},
+            {"id": "L1", "side": -1, "spread": -0.85, "rest_d": 110, "l1": 34, "l2": 48, "l3": 42, "group": 0, "cur": [cx - 110, cy + 40], "tgt": [cx - 110, cy + 40], "start": [cx - 110, cy + 40], "prog": 1.0},
+            {"id": "L2", "side": -1, "spread": -1.30, "rest_d": 130, "l1": 40, "l2": 56, "l3": 48, "group": 1, "cur": [cx - 125, cy + 40], "tgt": [cx - 125, cy + 40], "start": [cx - 125, cy + 40], "prog": 1.0},
+            {"id": "L3", "side": -1, "spread": -1.75, "rest_d": 136, "l1": 42, "l2": 58, "l3": 50, "group": 0, "cur": [cx - 130, cy + 40], "tgt": [cx - 130, cy + 40], "start": [cx - 130, cy + 40], "prog": 1.0},
+            {"id": "L4", "side": -1, "spread": -2.20, "rest_d": 120, "l1": 36, "l2": 50, "l3": 44, "group": 1, "cur": [cx - 115, cy + 40], "tgt": [cx - 115, cy + 40], "start": [cx - 115, cy + 40], "prog": 1.0},
+            {"id": "R1", "side":  1, "spread":  0.85, "rest_d": 110, "l1": 34, "l2": 48, "l3": 42, "group": 1, "cur": [cx + 110, cy + 40], "tgt": [cx + 110, cy + 40], "start": [cx + 110, cy + 40], "prog": 1.0},
+            {"id": "R2", "side":  1, "spread":  1.30, "rest_d": 130, "l1": 40, "l2": 56, "l3": 48, "group": 0, "cur": [cx + 125, cy + 40], "tgt": [cx + 125, cy + 40], "start": [cx + 125, cy + 40], "prog": 1.0},
+            {"id": "R3", "side":  1, "spread":  1.75, "rest_d": 136, "l1": 42, "l2": 58, "l3": 50, "group": 1, "cur": [cx + 130, cy + 40], "tgt": [cx + 130, cy + 40], "start": [cx + 130, cy + 40], "prog": 1.0},
+            {"id": "R4", "side":  1, "spread":  2.20, "rest_d": 120, "l1": 36, "l2": 50, "l3": 44, "group": 0, "cur": [cx + 115, cy + 40], "tgt": [cx + 115, cy + 40], "start": [cx + 115, cy + 40], "prog": 1.0},
         ]
-        # 4 Quadruped Legs
+        # 4 Quadruped Legs (Scaled up proportionally)
         self.legs4 = [
-            {"id": "FL", "spine_i": 3, "side": -1, "is_front": True,  "l1": 34, "l2": 38, "phase": 0.0,     "cur": [cx + 10, cy - 25], "tgt": [cx + 10, cy - 25], "start": [cx + 10, cy - 25], "prog": 1.0},
-            {"id": "FR", "spine_i": 3, "side":  1, "is_front": True,  "l1": 34, "l2": 38, "phase": math.pi, "cur": [cx + 10, cy + 25], "tgt": [cx + 10, cy + 25], "start": [cx + 10, cy + 25], "prog": 1.0},
-            {"id": "HL", "spine_i": 12, "side": -1, "is_front": False, "l1": 32, "l2": 32, "l3": 20, "phase": math.pi, "cur": [cx - 40, cy - 25], "tgt": [cx - 40, cy - 25], "start": [cx - 40, cy - 25], "prog": 1.0},
-            {"id": "HR", "spine_i": 12, "side":  1, "is_front": False, "l1": 32, "l2": 32, "l3": 20, "phase": 0.0,     "cur": [cx - 40, cy + 25], "tgt": [cx - 40, cy + 25], "start": [cx - 40, cy + 25], "prog": 1.0},
+            {"id": "FL", "spine_i": 3, "side": -1, "is_front": True,  "l1": 52, "l2": 58, "phase": 0.0,     "cur": [cx + 20, cy - 45], "tgt": [cx + 20, cy - 45], "start": [cx + 20, cy - 45], "prog": 1.0},
+            {"id": "FR", "spine_i": 3, "side":  1, "is_front": True,  "l1": 52, "l2": 58, "phase": math.pi, "cur": [cx + 20, cy + 45], "tgt": [cx + 20, cy + 45], "start": [cx + 20, cy + 45], "prog": 1.0},
+            {"id": "HL", "spine_i": 11, "side": -1, "is_front": False, "l1": 48, "l2": 48, "l3": 32, "phase": math.pi, "cur": [cx - 60, cy - 45], "tgt": [cx - 60, cy - 45], "start": [cx - 60, cy - 45], "prog": 1.0},
+            {"id": "HR", "spine_i": 11, "side":  1, "is_front": False, "l1": 48, "l2": 48, "l3": 32, "phase": 0.0,     "cur": [cx - 60, cy + 45], "tgt": [cx - 60, cy + 45], "start": [cx - 60, cy + 45], "prog": 1.0},
         ]
 
     def update(self, sim_time: float):
-        target_x = self.cx + math.cos(sim_time * 0.75) * (self.rx * 0.9) + math.sin(sim_time * 1.5) * (self.rx * 0.22)
-        target_y = self.cy + math.sin(sim_time * 1.05) * (self.ry * 0.85) + math.cos(sim_time * 2.1) * (self.ry * 0.20)
+        target_x = self.cx + math.cos(sim_time * 0.75) * (self.rx * 0.85) + math.sin(sim_time * 1.5) * (self.rx * 0.20)
+        target_y = self.cy + math.sin(sim_time * 1.05) * (self.ry * 0.80) + math.cos(sim_time * 2.1) * (self.ry * 0.18)
 
         dx = target_x - self.x
         dy = target_y - self.y
@@ -300,8 +299,8 @@ class MasterSimulator:
         for i in range(1, len(self.spine)):
             prev = self.spine[i - 1]
             curr = self.spine[i]
-            s_dist = 14 - (i / len(self.spine)) * 3
-            wave = math.sin(sim_time * 4.5 + i * 0.35) * (2.0 if i > 2 else 0.5)
+            s_dist = 22 - (i / len(self.spine)) * 4
+            wave = math.sin(sim_time * 4.5 + i * 0.35) * (2.5 if i > 2 else 0.8)
             p_dx = prev["x"] - curr["x"]
             p_dy = prev["y"] - curr["y"]
             curr["angle"] = math.atan2(p_dy, p_dx)
@@ -318,32 +317,32 @@ class MasterSimulator:
             s_perp_x = -s_sin
             s_perp_y =  s_cos
 
-            sock_dist = 18 if leg["is_front"] else 16
+            sock_dist = 28 if leg["is_front"] else 24
             sock = (s_pt["x"] + s_perp_x * (sock_dist * leg["side"]),
                     s_pt["y"] + s_perp_y * (sock_dist * leg["side"]))
             leg["socket"] = sock
 
-            f_reach = 22 if leg["is_front"] else -6
-            l_spread = 20 if leg["is_front"] else 18
+            f_reach = 36 if leg["is_front"] else -10
+            l_spread = 32 if leg["is_front"] else 28
             ideal_x = sock[0] + s_cos * f_reach + s_perp_x * (l_spread * leg["side"])
             ideal_y = sock[1] + s_sin * f_reach + s_perp_y * (l_spread * leg["side"])
 
             d_ideal = math.hypot(ideal_x - leg["cur"][0], ideal_y - leg["cur"][1])
             phase_v = math.sin(trot_clock + leg["phase"])
 
-            if d_ideal > 24 and leg["prog"] >= 1.0 and phase_v > 0.1:
+            if d_ideal > 36 and leg["prog"] >= 1.0 and phase_v > 0.1:
                 leg["prog"] = 0.0
                 leg["start"] = [leg["cur"][0], leg["cur"][1]]
                 leg["tgt"] = [
-                    ideal_x + cos_a * (self.speed * 8 + 14),
-                    ideal_y + sin_a * (self.speed * 8 + 14)
+                    ideal_x + cos_a * (self.speed * 10 + 20),
+                    ideal_y + sin_a * (self.speed * 10 + 20)
                 ]
 
             if leg["prog"] < 1.0:
                 leg["prog"] += 0.10
                 p = min(1.0, leg["prog"])
                 ease_p = 0.5 - math.cos(p * math.pi) / 2
-                lift = math.sin(p * math.pi) * 14
+                lift = math.sin(p * math.pi) * 20
                 leg["cur"][0] = leg["start"][0] + (leg["tgt"][0] - leg["start"][0]) * ease_p
                 leg["cur"][1] = leg["start"][1] + (leg["tgt"][1] - leg["start"][1]) * ease_p - lift * 0.2
 
@@ -408,7 +407,7 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     perp_y =  cos_a
 
     # ─────────────────────────────────────────────────────────────
-    # QUADRUPED DOG ANATOMY (True Elbow Backwards & Knee Forward)
+    # ULTRA-REALISTIC PROPORTIONS: CANINE ANATOMY
     # ─────────────────────────────────────────────────────────────
     if class_type == "quadruped" or "dog" in sp_id or "wolf" in sp_id:
         for leg in sim.legs4:
@@ -417,127 +416,145 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
 
             if leg["is_front"]:
                 _, elbow, _ = solve_forelimb_ik(sock, paw_pos, leg["l1"], leg["l2"], leg["side"])
-                draw.line([sock, elbow], fill=(217, 119, 6), width=13)
-                draw.line([elbow, paw_pos], fill=(251, 164, 68), width=9)
-                draw.ellipse([elbow[0]-4, elbow[1]-4, elbow[0]+4, elbow[1]+4], fill=(245, 158, 11))
+                draw.line([sock, elbow], fill=(180, 83, 9), width=20)
+                draw.line([sock, elbow], fill=(245, 158, 11), width=15)
+                draw.line([elbow, paw_pos], fill=(251, 191, 36), width=12)
+                draw.ellipse([elbow[0]-6, elbow[1]-6, elbow[0]+6, elbow[1]+6], fill=(245, 158, 11))
             else:
-                knee = (sock[0] + cos_a * (32 * 0.75) + perp_x * (32 * 0.65 * leg["side"]),
-                        sock[1] + sin_a * (32 * 0.75) + perp_y * (32 * 0.65 * leg["side"]))
-                hock = (knee[0] - cos_a * (32 * 0.65) + perp_x * (32 * 0.2 * leg["side"]),
-                        knee[1] - sin_a * (32 * 0.65) + perp_y * (32 * 0.2 * leg["side"]))
-                draw.line([sock, knee], fill=(217, 119, 6), width=16)
-                draw.line([knee, hock], fill=(217, 119, 6), width=12)
-                draw.line([hock, paw_pos], fill=(251, 164, 68), width=8)
-                draw.ellipse([knee[0]-5, knee[1]-5, knee[0]+5, knee[1]+5], fill=(245, 158, 11))
-                draw.ellipse([hock[0]-4, hock[1]-4, hock[0]+4, hock[1]+4], fill=(120, 53, 15))
+                knee = (sock[0] + cos_a * (leg["l1"] * 0.75) + perp_x * (leg["l1"] * 0.65 * leg["side"]),
+                        sock[1] + sin_a * (leg["l1"] * 0.75) + perp_y * (leg["l1"] * 0.65 * leg["side"]))
+                hock = (knee[0] - cos_a * (leg["l2"] * 0.65) + perp_x * (leg["l2"] * 0.2 * leg["side"]),
+                        knee[1] - sin_a * (leg["l2"] * 0.65) + perp_y * (leg["l2"] * 0.2 * leg["side"]))
+                draw.line([sock, knee], fill=(146, 64, 14), width=24)
+                draw.line([sock, knee], fill=(217, 119, 6), width=18)
+                draw.line([knee, hock], fill=(217, 119, 6), width=15)
+                draw.line([hock, paw_pos], fill=(251, 191, 36), width=11)
+                draw.ellipse([knee[0]-7, knee[1]-7, knee[0]+7, knee[1]+7], fill=(245, 158, 11))
+                draw.ellipse([hock[0]-6, hock[1]-6, hock[0]+6, hock[1]+6], fill=(120, 53, 15))
 
-            draw.ellipse([paw_pos[0]-7, paw_pos[1]-6, paw_pos[0]+7, paw_pos[1]+6], fill=(30, 41, 59))
+            # 4-Toe Digitigrade Paw Pad
+            draw.ellipse([paw_pos[0]-10, paw_pos[1]-9, paw_pos[0]+10, paw_pos[1]+9], fill=(30, 41, 59))
+            for t_off in [-5, -1.8, 1.8, 5]:
+                bx = paw_pos[0] + cos_a * 8 + perp_x * t_off
+                by = paw_pos[1] + sin_a * 8 + perp_y * t_off
+                draw.ellipse([bx-3, by-3, bx+3, by+3], fill=(15, 23, 42))
 
+        # Organic Torso Silhouette (Broad Chest to Athletic Waist Tuck)
         left_prof, right_prof = [], []
         spine_pts = []
         for i in range(16):
             seg = sim.spine[i]
             s_cos, s_sin = math.cos(seg["angle"]), math.sin(seg["angle"])
             s_perp_x, s_perp_y = -s_sin, s_cos
-            half_w = 26 - i * 0.7 if i < 6 else 19 - (i-6)*1.1 if i < 11 else 23 - (i-11)*0.6
-            half_w = max(11, half_w)
+            half_w = 40 - i * 1.0 if i < 6 else 30 - (i-6)*1.6 if i < 11 else 36 - (i-11)*0.9
+            half_w = max(18, half_w)
             left_prof.append((seg["x"] + s_perp_x * half_w, seg["y"] + s_perp_y * half_w))
             right_prof.append((seg["x"] - s_perp_x * half_w, seg["y"] - s_perp_y * half_w))
             spine_pts.append((seg["x"], seg["y"]))
 
-        draw.polygon(left_prof + list(reversed(right_prof)), fill=(245, 158, 11), outline=(180, 83, 9), width=2)
-        saddle_l = [((left_prof[i][0]*0.7 + spine_pts[i][0]*0.3), (left_prof[i][1]*0.7 + spine_pts[i][1]*0.3)) for i in range(2, 13)]
-        saddle_r = [((right_prof[i][0]*0.7 + spine_pts[i][0]*0.3), (right_prof[i][1]*0.7 + spine_pts[i][1]*0.3)) for i in range(2, 13)]
+        # Outer Golden Fur Coat
+        draw.polygon(left_prof + list(reversed(right_prof)), fill=(245, 158, 11), outline=(180, 83, 9), width=3)
+        
+        # German Shepherd Dark Saddle Pattern
+        saddle_l = [((left_prof[i][0]*0.72 + spine_pts[i][0]*0.28), (left_prof[i][1]*0.72 + spine_pts[i][1]*0.28)) for i in range(2, 13)]
+        saddle_r = [((right_prof[i][0]*0.72 + spine_pts[i][0]*0.28), (right_prof[i][1]*0.72 + spine_pts[i][1]*0.28)) for i in range(2, 13)]
         draw.polygon(saddle_l + list(reversed(saddle_r)), fill=(28, 17, 8))
 
+        # Flowing Bushy Plume Tail
         tail_prev = spine_pts[-1]
         wag = math.sin(sim_time * 6.5) * 0.52
         for i in range(9):
             t_ang = sim.angle + math.pi + wag * ((i+1)/9)
-            tx = tail_prev[0] + math.cos(t_ang) * (14 - i * 0.8)
-            ty = tail_prev[1] + math.sin(t_ang) * (14 - i * 0.8)
-            draw.line([tail_prev, (tx, ty)], fill=(245, 158, 11), width=max(4, int(15 - i * 1.2)))
+            tx = tail_prev[0] + math.cos(t_ang) * (20 - i * 1.0)
+            ty = tail_prev[1] + math.sin(t_ang) * (20 - i * 1.0)
+            draw.line([tail_prev, (tx, ty)], fill=(245, 158, 11), width=max(6, int(24 - i * 1.8)))
+            draw.line([tail_prev, (tx, ty)], fill=(254, 243, 199), width=max(3, int(12 - i * 0.9)))
             tail_prev = (tx, ty)
 
-        hx = sim.x + cos_a * 26
-        hy = sim.y + sin_a * 26
-        snout = (hx + cos_a * 36, hy + sin_a * 36)
+        # Sculpted Canine Skull & Head
+        hx = sim.x + cos_a * 38
+        hy = sim.y + sin_a * 38
+        snout = (hx + cos_a * 52, hy + sin_a * 52)
 
-        ear_l = (hx - cos_a * 8 + perp_x * 22, hy - sin_a * 8 + perp_y * 22)
-        ear_tip_l = (ear_l[0] - cos_a * 24 + perp_x * 14, ear_l[1] - sin_a * 24 + perp_y * 14)
-        ear_r = (hx - cos_a * 8 - perp_x * 22, hy - sin_a * 8 - perp_y * 22)
-        ear_tip_r = (ear_r[0] - cos_a * 24 - perp_x * 14, ear_r[1] - sin_a * 24 - perp_y * 14)
-        draw.polygon([(hx, hy), ear_l, ear_tip_l], fill=(28, 17, 8), outline=(180, 83, 9), width=2)
-        draw.polygon([(hx, hy), ear_r, ear_tip_r], fill=(28, 17, 8), outline=(180, 83, 9), width=2)
-        draw.polygon([ear_l, ear_tip_l, (hx - cos_a * 6 + perp_x * 12, hy - sin_a * 6 + perp_y * 12)], fill=(253, 164, 175))
-        draw.polygon([ear_r, ear_tip_r, (hx - cos_a * 6 - perp_x * 12, hy - sin_a * 6 - perp_y * 12)], fill=(253, 164, 175))
+        ear_l = (hx - cos_a * 12 + perp_x * 32, hy - sin_a * 12 + perp_y * 32)
+        ear_tip_l = (ear_l[0] - cos_a * 34 + perp_x * 20, ear_l[1] - sin_a * 34 + perp_y * 20)
+        ear_r = (hx - cos_a * 12 - perp_x * 32, hy - sin_a * 12 - perp_y * 32)
+        ear_tip_r = (ear_r[0] - cos_a * 34 - perp_x * 20, ear_r[1] - sin_a * 34 - perp_y * 20)
+        draw.polygon([(hx, hy), ear_l, ear_tip_l], fill=(28, 17, 8), outline=(180, 83, 9), width=3)
+        draw.polygon([(hx, hy), ear_r, ear_tip_r], fill=(28, 17, 8), outline=(180, 83, 9), width=3)
+        draw.polygon([ear_l, ear_tip_l, (hx - cos_a * 8 + perp_x * 18, hy - sin_a * 8 + perp_y * 18)], fill=(253, 164, 175))
+        draw.polygon([ear_r, ear_tip_r, (hx - cos_a * 8 - perp_x * 18, hy - sin_a * 8 - perp_y * 18)], fill=(253, 164, 175))
 
-        c1 = (hx + cos_a * 16 + perp_x * 22, hy + sin_a * 16 + perp_y * 22)
-        c2 = (hx - cos_a * 16 + perp_x * 24, hy - sin_a * 16 + perp_y * 24)
-        c3 = (hx - cos_a * 16 - perp_x * 24, hy - sin_a * 16 - perp_y * 24)
-        c4 = (hx + cos_a * 16 - perp_x * 22, hy + sin_a * 16 - perp_y * 22)
-        draw.polygon([snout, c1, c2, c3, c4], fill=(245, 158, 11), outline=(180, 83, 9), width=2)
+        c1 = (hx + cos_a * 24 + perp_x * 32, hy + sin_a * 24 + perp_y * 32)
+        c2 = (hx - cos_a * 24 + perp_x * 36, hy - sin_a * 24 + perp_y * 36)
+        c3 = (hx - cos_a * 24 - perp_x * 36, hy - sin_a * 24 - perp_y * 36)
+        c4 = (hx + cos_a * 24 - perp_x * 32, hy + sin_a * 24 - perp_y * 32)
+        draw.polygon([snout, c1, c2, c3, c4], fill=(245, 158, 11), outline=(180, 83, 9), width=3)
 
-        m1 = (hx + cos_a * 14 + perp_x * 14, hy + sin_a * 14 + perp_y * 14)
-        m2 = (hx + cos_a * 14 - perp_x * 14, hy + sin_a * 14 - perp_y * 14)
+        m1 = (hx + cos_a * 20 + perp_x * 20, hy + sin_a * 20 + perp_y * 20)
+        m2 = (hx + cos_a * 20 - perp_x * 20, hy + sin_a * 20 - perp_y * 20)
         draw.polygon([snout, m1, m2], fill=(28, 17, 8))
 
-        tongue_tip = (snout[0] + cos_a * 16, snout[1] + sin_a * 16)
-        draw.ellipse([tongue_tip[0]-3, tongue_tip[1]-3, tongue_tip[0]+3, tongue_tip[1]+3], fill=(251, 113, 133))
-        draw.ellipse([snout[0]-5, snout[1]-4, snout[0]+5, snout[1]+4], fill=(0, 0, 0))
+        tongue_tip = (snout[0] + cos_a * 22, snout[1] + sin_a * 22)
+        draw.ellipse([tongue_tip[0]-5, tongue_tip[1]-5, tongue_tip[0]+5, tongue_tip[1]+5], fill=(251, 113, 133))
+        
+        # Wet Black Nose Button with Nostrils
+        draw.ellipse([snout[0]-8, snout[1]-6.5, snout[0]+8, snout[1]+6.5], fill=(0, 0, 0))
+        draw.ellipse([snout[0]+cos_a*2-2.5, snout[1]+sin_a*2-1.5, snout[0]+cos_a*2+2.5, snout[1]+sin_a*2+1.5], fill=(148, 163, 184))
 
-        eye_l = (hx + cos_a * 8 + perp_x * 12, hy + sin_a * 8 + perp_y * 12)
-        eye_r = (hx + cos_a * 8 - perp_x * 12, hy + sin_a * 8 - perp_y * 12)
-        draw.ellipse([eye_l[0]-4, eye_l[1]-3.5, eye_l[0]+4, eye_l[1]+3.5], fill=(69, 26, 3))
-        draw.ellipse([eye_r[0]-4, eye_r[1]-3.5, eye_r[0]+4, eye_r[1]+3.5], fill=(69, 26, 3))
-        draw.ellipse([eye_l[0]+1, eye_l[1]-1, eye_l[0]+2.5, eye_l[1]+0.5], fill=(255, 255, 255))
-        draw.ellipse([eye_r[0]+1, eye_r[1]-1, eye_r[0]+2.5, eye_r[1]+0.5], fill=(255, 255, 255))
+        # Glossy Canine Eyes
+        eye_l = (hx + cos_a * 12 + perp_x * 18, hy + sin_a * 12 + perp_y * 18)
+        eye_r = (hx + cos_a * 12 - perp_x * 18, hy + sin_a * 12 - perp_y * 18)
+        draw.ellipse([eye_l[0]-6, eye_l[1]-5.5, eye_l[0]+6, eye_l[1]+5.5], fill=(69, 26, 3))
+        draw.ellipse([eye_r[0]-6, eye_r[1]-5.5, eye_r[0]+6, eye_r[1]+5.5], fill=(69, 26, 3))
+        draw.ellipse([eye_l[0]+1.8, eye_l[1]-1.8, eye_l[0]+4, eye_l[1]+0.6], fill=(255, 255, 255))
+        draw.ellipse([eye_r[0]+1.8, eye_r[1]-1.8, eye_r[0]+4, eye_r[1]+0.6], fill=(255, 255, 255))
 
     elif class_type == "arachnid":
         for leg in sim.legs8:
             h_p = leg["hip"]
             foot_p = (leg["cur"][0], leg["cur"][1])
             h_p, j1_p, j2_p, f_p = solve_ik_3segment(h_p, foot_p, leg["l1"], leg["l2"], leg["l3"], leg["side"])
-            draw.line([h_p, j1_p], fill=(16, 22, 32), width=7)
-            draw.line([j1_p, j2_p], fill=(24, 32, 46), width=6)
-            draw.line([j2_p, f_p], fill=(12, 16, 22), width=4)
-            draw.ellipse([j1_p[0]-3, j1_p[1]-3, j1_p[0]+3, j1_p[1]+3], fill=accent_color)
-            draw.ellipse([j2_p[0]-3, j2_p[1]-3, j2_p[0]+3, j2_p[1]+3], fill=accent_color)
-            draw.ellipse([f_p[0]-3, f_p[1]-3, f_p[0]+3, f_p[1]+3], fill=(10, 12, 16))
+            draw.line([h_p, j1_p], fill=(16, 22, 32), width=10)
+            draw.line([j1_p, j2_p], fill=(24, 32, 46), width=8)
+            draw.line([j2_p, f_p], fill=(12, 16, 22), width=6)
+            draw.ellipse([j1_p[0]-4, j1_p[1]-4, j1_p[0]+4, j1_p[1]+4], fill=accent_color)
+            draw.ellipse([j2_p[0]-4, j2_p[1]-4, j2_p[0]+4, j2_p[1]+4], fill=accent_color)
+            draw.ellipse([f_p[0]-4, f_p[1]-4, f_p[0]+4, f_p[1]+4], fill=(10, 12, 16))
 
         for i in range(1, 8):
             seg = sim.spine[i]
             s_cos, s_sin = math.cos(seg["angle"]), math.sin(seg["angle"])
             s_perp_x, s_perp_y = -s_sin, s_cos
-            half_w = max(13, 34 - i * 3.0)
-            half_h = 8
+            half_w = max(18, 48 - i * 4.2)
+            half_h = 11
             p1 = (seg["x"] - s_cos * half_h + s_perp_x * half_w, seg["y"] - s_sin * half_h + s_perp_y * half_w)
             p2 = (seg["x"] + s_cos * half_h + s_perp_x * (half_w * 0.9), seg["y"] + s_sin * half_h + s_perp_y * (half_w * 0.9))
             p3 = (seg["x"] + s_cos * half_h - s_perp_x * (half_w * 0.9), seg["y"] + s_sin * half_h - s_perp_y * (half_w * 0.9))
             p4 = (seg["x"] - s_cos * half_h - s_perp_x * half_w, seg["y"] - s_sin * half_h - s_perp_y * half_w)
-            draw.polygon([p1, p2, p3, p4], fill=(16, 22, 32), outline=accent_color, width=1)
+            draw.polygon([p1, p2, p3, p4], fill=(16, 22, 32), outline=accent_color, width=2)
 
-        c_front = (sim.x + cos_a * 34, sim.y + sin_a * 34)
-        c_r1 = (sim.x + cos_a * 18 + perp_x * 28, sim.y + sin_a * 18 + perp_y * 28)
-        c_r2 = (sim.x - cos_a * 16 + perp_x * 32, sim.y - sin_a * 16 + perp_y * 32)
-        c_l2 = (sim.x - cos_a * 16 - perp_x * 32, sim.y - sin_a * 16 - perp_y * 32)
-        c_l1 = (sim.x + cos_a * 18 - perp_x * 28, sim.y + sin_a * 18 - perp_y * 28)
-        draw.polygon([c_front, c_r1, c_r2, c_l2, c_l1], fill=(12, 16, 24), outline=accent_color, width=2)
+        c_front = (sim.x + cos_a * 48, sim.y + sin_a * 48)
+        c_r1 = (sim.x + cos_a * 26 + perp_x * 40, sim.y + sin_a * 26 + perp_y * 40)
+        c_r2 = (sim.x - cos_a * 24 + perp_x * 44, sim.y - sin_a * 24 + perp_y * 44)
+        c_l2 = (sim.x - cos_a * 24 - perp_x * 44, sim.y - sin_a * 24 - perp_y * 44)
+        c_l1 = (sim.x + cos_a * 26 - perp_x * 40, sim.y + sin_a * 26 - perp_y * 40)
+        draw.polygon([c_front, c_r1, c_r2, c_l2, c_l1], fill=(12, 16, 24), outline=accent_color, width=3)
 
     else:
         for i in range(len(sim.spine) - 1, 0, -1):
             p1 = (sim.spine[i]["x"], sim.spine[i]["y"])
             p0 = (sim.spine[i - 1]["x"], sim.spine[i - 1]["y"])
             norm = i / len(sim.spine)
-            v_width = max(4, int(28 * (1.0 - norm * 0.75)))
+            v_width = max(6, int(36 * (1.0 - norm * 0.75)))
             draw.line([p0, p1], fill=(16, 26, 20), width=v_width)
-            draw.ellipse([p1[0]-v_width//2, p1[1]-v_width//2, p1[0]+v_width//2, p1[1]+v_width//2], fill=(24, 40, 30), outline=accent_color, width=1)
+            draw.ellipse([p1[0]-v_width//2, p1[1]-v_width//2, p1[0]+v_width//2, p1[1]+v_width//2], fill=(24, 40, 30), outline=accent_color, width=2)
 
-        snout = (sim.x + cos_a * 38, sim.y + sin_a * 38)
-        j1 = (sim.x - cos_a * 12 + perp_x * 20, sim.y - sin_a * 12 + perp_y * 20)
-        j2 = (sim.x - cos_a * 12 - perp_x * 20, sim.y - sin_a * 12 - perp_y * 20)
-        crown = (sim.x - cos_a * 26, sim.y - sin_a * 26)
-        draw.polygon([snout, j1, crown, j2], fill=(10, 18, 14), outline=accent_color, width=2)
+        snout = (sim.x + cos_a * 52, sim.y + sin_a * 52)
+        j1 = (sim.x - cos_a * 16 + perp_x * 28, sim.y - sin_a * 16 + perp_y * 28)
+        j2 = (sim.x - cos_a * 16 - perp_x * 28, sim.y - sin_a * 16 - perp_y * 28)
+        crown = (sim.x - cos_a * 36, sim.y - sin_a * 36)
+        draw.polygon([snout, j1, crown, j2], fill=(10, 18, 14), outline=accent_color, width=3)
 
     # ─────────────────────────────────────────────────────────────
     # LOWER SECTION: macOS DARK CODE WINDOW (LARGE 34PX BOLD FONT)
@@ -563,9 +580,9 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     all_lines = species["code_lines"]
     total_lines = len(all_lines)
     
-    line_h = 56          # Large line height for high legibility
-    code_font = get_font(34, mono=True, bold=True)      # 34px BOLD font
-    line_num_font = get_font(28, mono=True)             # 28px line numbers
+    line_h = 56
+    code_font = get_font(34, mono=True, bold=True)
+    line_num_font = get_font(28, mono=True)
     
     visible_lines = int((card_h - title_h - 40) / line_h)
     max_scroll_lines = max(0, total_lines - visible_lines)

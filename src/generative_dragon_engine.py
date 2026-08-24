@@ -97,106 +97,285 @@ def solve_ik_3segment(origin: tuple[float, float], target: tuple[float, float], 
     j2 = (j1[0] + math.cos(knee_ang) * l2, j1[1] + math.sin(knee_ang) * l2)
     return origin, j1, j2, target
 
+def _draw_highlighted_js_line(draw: ImageDraw.ImageDraw, x: int, y: int, line: str, font: ImageFont.FreeTypeFont) -> None:
+    stripped = line.strip()
+    if stripped.startswith("//"):
+        draw.text((x, y), line, font=font, fill=(100, 116, 139))
+        return
+
+    import re
+    token_spec = [
+        ('COMMENT',  r'//.*'),
+        ('KEYWORD',  r'\b(const|let|var|for|new|function|return|if|else|class)\b'),
+        ('TYPE',     r'\b([A-Z][a-zA-Z0-9]+)\b'),
+        ('BUILTIN',  r'\b(Math\.sin|Math\.PI|Math|ctx|window|document)\b'),
+        ('NUMBER',   r'\b(-?\d+(\.\d+)?)\b'),
+        ('STRING',   r'[\'\"][^\'\"]*[\'\"]'),
+        ('FUNC',     r'\b([a-zA-Z0-9_]+)(?=\s*\()'),
+        ('IDENT',    r'\b([a-zA-Z0-9_]+)\b'),
+        ('PUNCT',    r'[\(\)\{\}\[\]\:\,\;\=\>\+\-\*\/]'),
+        ('WS',       r'\s+'),
+        ('OTHER',    r'.'),
+    ]
+    tok_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in token_spec)
+
+    curr_x = x
+    for match in re.finditer(tok_regex, line):
+        kind = match.lastgroup
+        val = match.group()
+
+        if kind == 'KEYWORD':
+            color = (224, 108, 117)
+        elif kind == 'TYPE':
+            color = (229, 192, 123)
+        elif kind == 'FUNC':
+            color = (97, 175, 239)
+        elif kind == 'BUILTIN':
+            color = (86, 182, 194)
+        elif kind == 'NUMBER':
+            color = (209, 154, 102)
+        elif kind == 'STRING':
+            color = (152, 195, 121)
+        elif kind == 'COMMENT':
+            color = (100, 116, 139)
+        else:
+            color = (226, 232, 240)
+
+        draw.text((curr_x, y), val, font=font, fill=color)
+        bbox = draw.textbbox((curr_x, y), val, font=font)
+        curr_x = bbox[2]
+
+
 def _generate_js_code_for_animal(name: str, class_type: str, scientific: str) -> list[str]:
-    c_name = "".join(w.capitalize() for w in name.split())
+    import re
+    c_name = "".join(re.sub(r'[^a-zA-Z0-9]', '', w).capitalize() for w in name.split())
     if class_type == "quadruped":
         return [
-            f"// ─── {name} ({scientific.upper()}) ───",
-            f"const {c_name} = new CanineRig({{ spineSegs: 18 }});",
+            f"// ─── {name} ───",
+            f"const rig = new CanineRig({{",
+            "  spineSegs: 18,",
+            "  limbs: 4",
+            "});",
             "",
-            f"const update{c_name} = () => {{",
-            f"  requestAnimationFrame(update{c_name});",
-            "  const p = getPointerPosition();",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  const p = getPointer();",
             "",
-            "  // 1. Forelimbs: Elbow Bends BACKWARD",
-            f"  solveForelimbIK({c_name}.leftArm,  p.fl, 52, 58, -1);",
-            f"  solveForelimbIK({c_name}.rightArm, p.fr, 52, 58,  1);",
+            "  // Forelimbs: Elbow IK",
+            "  solveForelimbIK(",
+            "    rig.lArm, p.fl, 52, -1",
+            "  );",
+            "  solveForelimbIK(",
+            "    rig.rArm, p.fr, 52,  1",
+            "  );",
             "",
-            "  // 2. Hindlimbs: Stifle Knee FORWARD, Hock BACKWARD",
-            f"  solveHindlimbIK({c_name}.leftLeg,  p.hl, 48, 48, 32, -1);",
-            f"  solveHindlimbIK({c_name}.rightLeg, p.hr, 48, 48, 32,  1);",
+            "  // Hindlimbs: Hock IK",
+            "  solveHindlimbIK(",
+            "    rig.lLeg, p.hl, 48, -1",
+            "  );",
+            "  solveHindlimbIK(",
+            "    rig.rLeg, p.hr, 48,  1",
+            "  );",
             "",
-            "  // 3. 4-Toe Digitigrade Paw Pads with Claws",
-            f"  render4ToePaw({c_name}.leftArm.target);",
-            f"  render4ToePaw({c_name}.rightArm.target);",
-            "",
-            "  // 4. Organic Torso, Saddle & Wagging Tail",
-            f"  renderCanineTorso(ctx, {c_name}.spine);",
-            f"  wagPlumeTail({c_name}.tail, Math.sin(time * 6.5) * 0.45);",
-            f"  renderCanineHeadWithEars(ctx, {c_name}.head);",
+            "  // Paws, Torso & Tail",
+            "  render4ToePaws(ctx, rig);",
+            "  renderTorso(ctx, rig.spine);",
+            "  wagTail(rig.tail, time * 6);",
+            "  renderCanineHead(ctx, rig);",
             "};"
         ]
     elif class_type == "arachnid":
         return [
-            f"// ─── {name} ({scientific.upper()}) ───",
-            f"const {c_name} = new ArachnidSkeleton({{ segments: 38 }});",
+            f"// ─── {name} ───",
+            f"const rig = new ArachnidRig({{",
+            "  segments: 38,",
+            "  legs: 8",
+            "});",
             "",
-            f"const animate{c_name} = () => {{",
-            f"  requestAnimationFrame(animate{c_name});",
-            "  const p = getPointerPosition();",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  const p = getPointer();",
             "",
-            "  // 1. Solve 3-Joint Pincer Arms (Chelae)",
-            f"  solvePincerIK({c_name}.leftArm,  p, 54, 62, -1);",
-            f"  solvePincerIK({c_name}.rightArm, p, 54, 62,  1);",
+            "  // 3-Joint Pincer Arms",
+            "  solvePincerIK(",
+            "    rig.lArm, p, 54, -1",
+            "  );",
+            "  solvePincerIK(",
+            "    rig.rArm, p, 54,  1",
+            "  );",
             "",
-            "  // 2. 8-Legged Tripod Stepping Gait",
+            "  // 8-Leg Tripod Stepping",
             "  for (let i = 0; i < 8; i++) {",
-            f"    const leg = {c_name}.legs[i];",
-            "    const side = i < 4 ? -1 : 1;",
-            f"    const hip = getHipSocket({c_name}.carapace, i, side);",
-            "    const step = computeTripodStep(leg, frm, side);",
-            "    const ik = solve3SegmentIK(hip, step.target, 24, 30, 26, side);",
-            "    renderArticulatedLeg(ctx, ik);",
+            "    const s = i < 4 ? -1 : 1;",
+            "    const hip = getSocket(i, s);",
+            "    const step = tripodStep(i);",
+            "    solve3SegIK(hip, step, s);",
+            "    renderLeg(ctx, rig.legs[i]);",
             "  }",
             "",
-            "  // 3. 7 Mesosoma Plates & 5-Segment Tail",
-            f"  updateTergiteFollowChain(ctx, {c_name}.tergites);",
-            f"  curlStingerTail({c_name}.tail, Math.sin(frm * 2.5) * 0.35);",
-            f"  renderTelsonBulb(ctx, {c_name}.tail.end, '#EAB308');",
+            "  // Segmented Tail & Stinger",
+            "  curlTail(rig.tail, time * 2);",
+            "  renderTelson(ctx, rig.tail);",
             "};"
         ]
     elif class_type == "serpent":
         return [
-            f"// ─── {name} ({scientific.upper()}) ───",
-            f"const {c_name} = new SerpentineSpine({{ vertebrae: 48 }});",
+            f"// ─── {name} ───",
+            f"const spine = new SnakeSpine({{",
+            "  vertebrae: 48,",
+            "  spacing: 14",
+            "});",
             "",
-            f"const update{c_name} = () => {{",
-            f"  requestAnimationFrame(update{c_name});",
-            "  const head = {c_name}.spine[0];",
-            "  head.x += (pointer.x - head.x) * 0.08;",
-            "  head.y += (pointer.y - head.y) * 0.08;",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  const head = spine.head;",
+            "  head.follow(pointer, 0.08);",
             "",
-            "  // 1. Serpentine Lateral Undulation Wave",
-            f"  for (let i = 1; i < {c_name}.length; i++) {{",
-            f"    const prev = {c_name}.spine[i - 1];",
-            f"    const curr = {c_name}.spine[i];",
-            "    const wave = Math.sin(time * 4.5 + i * 0.35) * 6;",
-            "    updateVertebra(curr, prev, 14, wave);",
-            "    renderScalesAndScutes(ctx, curr, i);",
+            "  // Undulation Wave",
+            "  for (let i = 1; i < 48; i++) {",
+            "    const prev = spine.get(i-1);",
+            "    const curr = spine.get(i);",
+            "    const wave = Math.sin(",
+            "      time * 4.5 + i * 0.35",
+            "    ) * 6;",
+            "    curr.update(prev, 14, wave);",
+            "    renderScales(ctx, curr, i);",
             "  }",
             "",
-            "  // 2. Fanged Diamond Head & Flaring Hood",
-            f"  renderCobraHood(ctx, head, {c_name}.spine[2]);",
-            f"  renderForkedTongueAndEyes(ctx, head);",
+            "  // Fanged Head & Tongue",
+            "  renderViperHead(ctx, head);",
+            "  flickTongue(ctx, head, time);",
             "};"
         ]
-    else:
+    elif class_type == "reptile":
         return [
-            f"// ─── {name} ({scientific.upper()}) ───",
-            f"const {c_name} = new ReptileRig({{ vertebrae: 26, limbs: 4 }});",
+            f"// ─── {name} ───",
+            f"const rig = new ReptileRig({{",
+            "  vertebrae: 26,",
+            "  limbs: 4",
+            "});",
             "",
-            f"const run{c_name} = () => {{",
-            f"  requestAnimationFrame(run{c_name});",
-            "  updateSpineHead({c_name}.spine[0], pointer);",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  rig.head.follow(pointer);",
             "",
-            "  // 1. Articulated 2-Joint Claws",
-            f"  {c_name}.limbs.forEach(limb => {{",
-            f"    const socket = getSpineAnchor({c_name}.spine, limb.vertebra, limb.side);",
-            "    const step = computeGaitArc(limb.phase, frm);",
-            "    const ik = solve2JointIK(socket, step.foot, limb.l1, limb.l2, limb.side);",
-            "    renderLimbWithSpreadClaws(ctx, ik);",
+            "  // 2-Joint Claws IK",
+            "  rig.limbs.forEach(l => {",
+            "    const socket = getSocket(l);",
+            "    const step = gaitArc(l.phase);",
+            "    const ik = solve2JointIK(",
+            "      socket, step.foot, l.side",
+            "    );",
+            "    renderClaw(ctx, ik);",
             "  });",
-            f"  renderReptilianHeadWithNostrils(ctx, {c_name}.spine[0]);",
+            "",
+            "  // Heavy Armored Scales",
+            "  renderScales(ctx, rig.spine);",
+            "  renderReptileHead(ctx, rig);",
+            "};"
+        ]
+    elif class_type == "crustacean":
+        return [
+            f"// ─── {name} ───",
+            f"const rig = new CrustaceanRig({{",
+            "  segments: 24,",
+            "  dactylClubs: 2",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  rig.update(pointer);",
+            "",
+            "  // Springloaded Punch IK",
+            "  solveClubIK(",
+            "    rig.leftClub, pointer, -1",
+            "  );",
+            "  solveClubIK(",
+            "    rig.rightClub, pointer, 1",
+            "  );",
+            "",
+            "  // Pleopods & Carapace",
+            "  ripplePleopods(rig, time);",
+            "  renderCarapace(ctx, rig);",
+            "  renderCompoundEyes(ctx, rig);",
+            "};"
+        ]
+    elif class_type == "insect":
+        return [
+            f"// ─── {name} ───",
+            f"const rig = new InsectRig({{",
+            "  thorax: 14,",
+            "  raptorialArms: 2",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  rig.head.track(pointer);",
+            "",
+            "  // Folded Raptorial Claws",
+            "  solveRaptorialIK(",
+            "    rig.lArm, pointer, -1",
+            "  );",
+            "  solveRaptorialIK(",
+            "    rig.rArm, pointer, 1",
+            "  );",
+            "",
+            "  // Walking Legs & Wings",
+            "  stepInsectLegs(rig, time);",
+            "  renderThorax(ctx, rig);",
+            "  renderTriangularHead(ctx, rig);",
+            "};"
+        ]
+    elif class_type == "cephalopod":
+        return [
+            f"// ─── {name} ───",
+            f"const rig = new OctopusRig({{",
+            "  tentacles: 8,",
+            "  jointsPerArm: 16",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  rig.mantle.follow(pointer);",
+            "",
+            "  // Multi-Joint Tentacle IK",
+            "  for (let i = 0; i < 8; i++) {",
+            "    const arm = rig.arms[i];",
+            "    const a = (i / 8) * Math.PI * 2;",
+            "    undulateArm(arm, a, time);",
+            "    renderGlowingRings(ctx, arm);",
+            "  }",
+            "",
+            "  // Chromatophore Mantle",
+            "  renderMantle(ctx, rig.mantle);",
+            "  pulseBlueRings(ctx, rig, time);",
+            "};"
+        ]
+    else:  # aquatic
+        return [
+            f"// ─── {name} ───",
+            f"const rig = new AquaticRig({{",
+            "  wingspan: 36,",
+            "  ribCount: 22",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  rig.head.follow(pointer, 0.05);",
+            "",
+            "  // Sinusoidal Wing Flap",
+            "  const flap = Math.sin(time*3)*0.4;",
+            "  undulatePectoralFin(",
+            "    rig.lWing, flap, -1",
+            "  );",
+            "  undulatePectoralFin(",
+            "    rig.rWing, flap,  1",
+            "  );",
+            "",
+            "  // Trailing Whip Tail",
+            "  followSpineChain(rig.tail);",
+            "  renderAquaticBody(ctx, rig);",
+            "  renderCephalicLobes(ctx, rig);",
             "};"
         ]
 
@@ -583,7 +762,7 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         draw.polygon([snout, j1, crown, j2], fill=(10, 18, 14), outline=accent_color, width=3)
 
     # ─────────────────────────────────────────────────────────────
-    # LOWER SECTION: macOS DARK CODE WINDOW (LARGE 34PX BOLD FONT)
+    # LOWER SECTION: macOS DARK CODE WINDOW (MOBILE OPTIMIZED)
     # ─────────────────────────────────────────────────────────────
     card_w, card_h = 920, 980
     card_x = (WIDTH - card_w) // 2
@@ -606,9 +785,9 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     all_lines = species["code_lines"]
     total_lines = len(all_lines)
     
-    line_h = 56
-    code_font = get_font(34, mono=True, bold=True)
-    line_num_font = get_font(28, mono=True)
+    line_h = 52
+    code_font = get_font(28, mono=True, bold=True)
+    line_num_font = get_font(24, mono=True)
     
     visible_lines = int((card_h - title_h - 40) / line_h)
     max_scroll_lines = max(0, total_lines - visible_lines)
@@ -634,18 +813,8 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
 
         draw.text((card_x + 36, y_pos), f"{actual_line_idx + 1:2d}", font=line_num_font, fill=(80, 100, 125))
 
-        indent_x = card_x + 105
-        stripped = line_text.strip()
-        if stripped.startswith("//"):
-            draw.text((indent_x, y_pos), line_text, font=code_font, fill=(100, 116, 139))
-        elif any(k in line_text for k in ["const ", "let ", "for ", "new ", "return "]):
-            draw.text((indent_x, y_pos), line_text, font=code_font, fill=(224, 108, 117))
-        elif any(f in line_text for f in ["Math.", "solve", "render", "update", "compute", "wag", "curl"]):
-            draw.text((indent_x, y_pos), line_text, font=code_font, fill=(97, 175, 239))
-        elif any(cls in line_text for cls in ["CanineRig", "ArachnidSkeleton", "SerpentineSpine"]):
-            draw.text((indent_x, y_pos), line_text, font=code_font, fill=(229, 192, 123))
-        else:
-            draw.text((indent_x, y_pos), line_text, font=code_font, fill=(226, 232, 240))
+        indent_x = card_x + 98
+        _draw_highlighted_js_line(draw, indent_x, y_pos, line_text, code_font)
 
     # Bottom Progress Bar
     bar_w = 920

@@ -284,5 +284,14 @@
     "timestamp": "2026-08-27T10:06:26.984105+00:00",
     "video_id": "mYpy9wAkqjw",
     "uploaded": true
+  },
+  {
+    "id": 19,
+    "species": "OCEANIC MANTA RAY",
+    "scientific": "Mobula birostris",
+    "file": "tmp/reel_0019/oceanic_manta_ray_short.mp4",
+    "timestamp": "2026-08-27T22:34:03.929045+00:00",
+    "video_id": "sLHJML4lbJ4",
+    "uploaded": true
   }
 ]

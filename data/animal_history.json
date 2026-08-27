@@ -275,5 +275,14 @@
     "timestamp": "2026-08-26T23:54:36.778393+00:00",
     "video_id": "x3c1CcBMWjo",
     "uploaded": true
+  },
+  {
+    "id": 18,
+    "species": "BLUE-RINGED OCTOPUS",
+    "scientific": "Hapalochlaena maculosa",
+    "file": "tmp/reel_0018/blue-ringed_octopus_short.mp4",
+    "timestamp": "2026-08-27T10:06:26.984105+00:00",
+    "video_id": "mYpy9wAkqjw",
+    "uploaded": true
   }
 ]

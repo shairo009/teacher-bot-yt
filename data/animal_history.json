@@ -293,5 +293,14 @@
     "timestamp": "2026-08-27T22:34:03.929045+00:00",
     "video_id": "sLHJML4lbJ4",
     "uploaded": true
+  },
+  {
+    "id": 20,
+    "species": "GOLDEN SHEPHERD DOG",
+    "scientific": "Canis lupus familiaris",
+    "file": "tmp/reel_0020/golden_shepherd_dog_short.mp4",
+    "timestamp": "2026-08-28T11:40:10.905462+00:00",
+    "video_id": "razuYhOcwQo",
+    "uploaded": true
   }
 ]

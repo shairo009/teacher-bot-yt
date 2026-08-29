@@ -320,5 +320,14 @@
     "timestamp": "2026-08-29T07:19:08.048829+00:00",
     "video_id": "ZseCqvDTXt8",
     "uploaded": true
+  },
+  {
+    "id": 23,
+    "species": "KOMODO DRAGON",
+    "scientific": "Varanus komodoensis",
+    "file": "tmp/reel_0023/komodo_dragon_short.mp4",
+    "timestamp": "2026-08-29T14:00:26.712000+00:00",
+    "video_id": "nKfUHFLbhEQ",
+    "uploaded": true
   }
 ]

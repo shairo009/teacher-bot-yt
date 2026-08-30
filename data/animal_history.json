@@ -365,5 +365,14 @@
     "timestamp": "2026-08-30T13:55:48.317545+00:00",
     "video_id": "GIZb6x0vEVY",
     "uploaded": true
+  },
+  {
+    "id": 28,
+    "species": "SERVAL",
+    "scientific": "Leptailurus serval",
+    "file": "tmp/reel_0028/serval_short.mp4",
+    "timestamp": "2026-08-30T19:27:07.573598+00:00",
+    "video_id": "piJn6dZqXtE",
+    "uploaded": true
   }
 ]

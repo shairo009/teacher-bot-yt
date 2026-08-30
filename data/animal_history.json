@@ -347,5 +347,14 @@
     "timestamp": "2026-08-29T22:49:12.493424+00:00",
     "video_id": "NphGqpVKeZs",
     "uploaded": true
+  },
+  {
+    "id": 26,
+    "species": "GIANT PRAYING MANTIS",
+    "scientific": "Hierodula patellifera",
+    "file": "tmp/reel_0026/giant_praying_mantis_short.mp4",
+    "timestamp": "2026-08-30T05:40:50.595728+00:00",
+    "video_id": "VIxFBxJSiDI",
+    "uploaded": true
   }
 ]

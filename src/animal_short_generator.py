@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from src.generative_dragon_engine import get_species_for_id, render_generative_frame, WIDTH, HEIGHT, FPS
+from src.sound_engine import generate_reel_audio
 
 DATA_DIR = ROOT / "data"
 TMP_DIR = ROOT / "tmp"
@@ -39,7 +40,7 @@ def _load_json(path: Path, default):
         return default
 
 
-def _encode_video(frames_dir: Path, output_path: Path) -> None:
+def _encode_video(frames_dir: Path, output_path: Path, audio_path: Path | None = None) -> None:
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
         raise RuntimeError("ffmpeg is required to create the MP4")
@@ -48,12 +49,21 @@ def _encode_video(frames_dir: Path, output_path: Path) -> None:
         ffmpeg, "-y",
         "-framerate", str(FPS),
         "-i", str(frames_dir / "frame_%04d.jpg"),
+    ]
+    if audio_path and audio_path.exists():
+        cmd.extend([
+            "-i", str(audio_path),
+            "-c:a", "aac", "-b:a", "192k",
+            "-shortest"
+        ])
+    cmd.extend([
         "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
         "-movflags", "+faststart", str(output_path)
-    ]
+    ])
     result = subprocess.run(cmd, text=True, capture_output=True)
     if result.returncode:
         raise RuntimeError("ffmpeg failed: " + result.stderr[-1500:])
+
 
 
 def _upload_to_youtube(video_path: Path, species: dict, dry_run: bool) -> str | None:
@@ -123,10 +133,16 @@ def generate(animal_id: int | None = None, duration: float = DEFAULT_DURATION, d
         frame = render_generative_frame(species, number, total_frames)
         frame.save(frames_dir / f"frame_{number:04d}.jpg", quality=95, optimize=True)
 
+    audio_file = run_dir / "audio.wav"
+    print("Synthesizing ASMR mechanical typing clicks & cursor SFX...")
+    generate_reel_audio(audio_file, duration=duration, typing_events=int(duration * 0.7), seed=current_id)
+
     output_file = run_dir / f"{species['id']}_short.mp4"
     print("Encoding Full HD 1080x1920 video with FFmpeg...")
-    _encode_video(frames_dir, output_file)
+    _encode_video(frames_dir, output_file, audio_file)
     print(f"✅ Video created: {output_file}")
+
+
 
     video_id = None
     if not dry_run:

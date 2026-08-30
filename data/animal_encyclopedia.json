@@ -3,70 +3,6270 @@
     "name": "GOLDEN SHEPHERD DOG",
     "scientific": "Canis lupus familiaris",
     "class_type": "quadruped",
-    "accent": [245, 158, 11],
-    "file_name": "GoldenShepherd.js"
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "GoldenShepherdDog.js"
+  },
+  {
+    "name": "BENGAL TIGER",
+    "scientific": "Panthera tigris tigris",
+    "class_type": "quadruped",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "BengalTiger.js"
+  },
+  {
+    "name": "ARCTIC WOLF",
+    "scientific": "Canis lupus arctos",
+    "class_type": "quadruped",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "ArcticWolf.js"
+  },
+  {
+    "name": "AFRICAN LION",
+    "scientific": "Panthera leo",
+    "class_type": "quadruped",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "AfricanLion.js"
+  },
+  {
+    "name": "SNOW LEOPARD",
+    "scientific": "Panthera uncia",
+    "class_type": "quadruped",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "SnowLeopard.js"
+  },
+  {
+    "name": "BLACK PANTHER",
+    "scientific": "Panthera pardus",
+    "class_type": "quadruped",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "BlackPanther.js"
+  },
+  {
+    "name": "CHEETAH",
+    "scientific": "Acinonyx jubatus",
+    "class_type": "quadruped",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "Cheetah.js"
+  },
+  {
+    "name": "JAGUAR",
+    "scientific": "Panthera onca",
+    "class_type": "quadruped",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "Jaguar.js"
+  },
+  {
+    "name": "GRIZZLY BEAR",
+    "scientific": "Ursus arctos horribilis",
+    "class_type": "quadruped",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "GrizzlyBear.js"
+  },
+  {
+    "name": "POLAR BEAR",
+    "scientific": "Ursus maritimus",
+    "class_type": "quadruped",
+    "accent": [
+      224,
+      242,
+      254
+    ],
+    "file_name": "PolarBear.js"
+  },
+  {
+    "name": "SIBERIAN HUSKY",
+    "scientific": "Canis lupus familiaris",
+    "class_type": "quadruped",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "SiberianHusky.js"
+  },
+  {
+    "name": "RED FOX",
+    "scientific": "Vulpes vulpes",
+    "class_type": "quadruped",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "RedFox.js"
+  },
+  {
+    "name": "FENNEC FOX",
+    "scientific": "Vulpes zerda",
+    "class_type": "quadruped",
+    "accent": [
+      251,
+      191,
+      36
+    ],
+    "file_name": "FennecFox.js"
+  },
+  {
+    "name": "SPOTTED HYENA",
+    "scientific": "Crocuta crocuta",
+    "class_type": "quadruped",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "SpottedHyena.js"
+  },
+  {
+    "name": "GREY WOLF",
+    "scientific": "Canis lupus",
+    "class_type": "quadruped",
+    "accent": [
+      156,
+      163,
+      175
+    ],
+    "file_name": "GreyWolf.js"
+  },
+  {
+    "name": "COUGAR",
+    "scientific": "Puma concolor",
+    "class_type": "quadruped",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "Cougar.js"
+  },
+  {
+    "name": "LEOPARD",
+    "scientific": "Panthera pardus",
+    "class_type": "quadruped",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "Leopard.js"
+  },
+  {
+    "name": "GIANT PANDA",
+    "scientific": "Ailuropoda melanoleuca",
+    "class_type": "quadruped",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "GiantPanda.js"
+  },
+  {
+    "name": "RED PANDA",
+    "scientific": "Ailurus fulgens",
+    "class_type": "quadruped",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "RedPanda.js"
+  },
+  {
+    "name": "DOBERMAN PINSCHER",
+    "scientific": "Canis lupus familiaris",
+    "class_type": "quadruped",
+    "accent": [
+      185,
+      28,
+      28
+    ],
+    "file_name": "DobermanPinscher.js"
+  },
+  {
+    "name": "ROTTWEILER",
+    "scientific": "Canis lupus familiaris",
+    "class_type": "quadruped",
+    "accent": [
+      194,
+      65,
+      12
+    ],
+    "file_name": "Rottweiler.js"
+  },
+  {
+    "name": "BLACK BEAR",
+    "scientific": "Ursus americanus",
+    "class_type": "quadruped",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "BlackBear.js"
+  },
+  {
+    "name": "SUN BEAR",
+    "scientific": "Helarctos malayanus",
+    "class_type": "quadruped",
+    "accent": [
+      251,
+      146,
+      60
+    ],
+    "file_name": "SunBear.js"
+  },
+  {
+    "name": "KODIAK BEAR",
+    "scientific": "Ursus arctos middendorffi",
+    "class_type": "quadruped",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "KodiakBear.js"
+  },
+  {
+    "name": "AFRICAN WILD DOG",
+    "scientific": "Lycaon pictus",
+    "class_type": "quadruped",
+    "accent": [
+      234,
+      88,
+      12
+    ],
+    "file_name": "AfricanWildDog.js"
+  },
+  {
+    "name": "DINGO",
+    "scientific": "Canis dingo",
+    "class_type": "quadruped",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "Dingo.js"
+  },
+  {
+    "name": "COYOTE",
+    "scientific": "Canis latrans",
+    "class_type": "quadruped",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "Coyote.js"
+  },
+  {
+    "name": "JACKAL",
+    "scientific": "Canis aureus",
+    "class_type": "quadruped",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "Jackal.js"
+  },
+  {
+    "name": "SERVAL",
+    "scientific": "Leptailurus serval",
+    "class_type": "quadruped",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "Serval.js"
+  },
+  {
+    "name": "OCELOT",
+    "scientific": "Leopardus pardalis",
+    "class_type": "quadruped",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "Ocelot.js"
+  },
+  {
+    "name": "CARACAL",
+    "scientific": "Caracal caracal",
+    "class_type": "quadruped",
+    "accent": [
+      234,
+      88,
+      12
+    ],
+    "file_name": "Caracal.js"
+  },
+  {
+    "name": "LYNX",
+    "scientific": "Lynx lynx",
+    "class_type": "quadruped",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "Lynx.js"
+  },
+  {
+    "name": "BOBCAT",
+    "scientific": "Lynx rufus",
+    "class_type": "quadruped",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "Bobcat.js"
+  },
+  {
+    "name": "CLOUDED LEOPARD",
+    "scientific": "Neofelis nebulosa",
+    "class_type": "quadruped",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "CloudedLeopard.js"
+  },
+  {
+    "name": "HONEY BADGER",
+    "scientific": "Mellivora capensis",
+    "class_type": "quadruped",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "HoneyBadger.js"
+  },
+  {
+    "name": "WOLVERINE",
+    "scientific": "Gulo gulo",
+    "class_type": "quadruped",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "Wolverine.js"
+  },
+  {
+    "name": "MEERKAT",
+    "scientific": "Suricata suricatta",
+    "class_type": "quadruped",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "Meerkat.js"
+  },
+  {
+    "name": "MONGOOSE",
+    "scientific": "Herpestes ichneumon",
+    "class_type": "quadruped",
+    "accent": [
+      161,
+      98,
+      7
+    ],
+    "file_name": "Mongoose.js"
+  },
+  {
+    "name": "TASMANIAN DEVIL",
+    "scientific": "Sarcophilus harrisii",
+    "class_type": "quadruped",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "TasmanianDevil.js"
+  },
+  {
+    "name": "THYLACINE",
+    "scientific": "Thylacinus cynocephalus",
+    "class_type": "quadruped",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "Thylacine.js"
+  },
+  {
+    "name": "RED KANGAROO",
+    "scientific": "Macropus rufus",
+    "class_type": "quadruped",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "RedKangaroo.js"
+  },
+  {
+    "name": "TREE KANGAROO",
+    "scientific": "Dendrolagus lumholtzi",
+    "class_type": "quadruped",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "TreeKangaroo.js"
+  },
+  {
+    "name": "WALLABY",
+    "scientific": "Notamacropus rufogriseus",
+    "class_type": "quadruped",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "Wallaby.js"
+  },
+  {
+    "name": "WOMBAT",
+    "scientific": "Vombatus ursinus",
+    "class_type": "quadruped",
+    "accent": [
+      161,
+      98,
+      7
+    ],
+    "file_name": "Wombat.js"
+  },
+  {
+    "name": "KOALA",
+    "scientific": "Phascolarctos cinereus",
+    "class_type": "quadruped",
+    "accent": [
+      156,
+      163,
+      175
+    ],
+    "file_name": "Koala.js"
+  },
+  {
+    "name": "PLATYPUS",
+    "scientific": "Ornithorhynchus anatinus",
+    "class_type": "quadruped",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "Platypus.js"
+  },
+  {
+    "name": "SHORT-BEAKED ECHIDNA",
+    "scientific": "Tachyglossus aculeatus",
+    "class_type": "quadruped",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "ShortBeakedEchidna.js"
+  },
+  {
+    "name": "GIANT ANTEATER",
+    "scientific": "Myrmecophaga tridactyla",
+    "class_type": "quadruped",
+    "accent": [
+      156,
+      163,
+      175
+    ],
+    "file_name": "GiantAnteater.js"
+  },
+  {
+    "name": "AARDVARK",
+    "scientific": "Orycteropus afer",
+    "class_type": "quadruped",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "Aardvark.js"
+  },
+  {
+    "name": "SUNDA PANGOLIN",
+    "scientific": "Manis javanica",
+    "class_type": "quadruped",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "SundaPangolin.js"
+  },
+  {
+    "name": "NINE-BANDED ARMADILLO",
+    "scientific": "Dasypus novemcinctus",
+    "class_type": "quadruped",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "NineBandedArmadillo.js"
+  },
+  {
+    "name": "CAPYBARA",
+    "scientific": "Hydrochoerus hydrochaeris",
+    "class_type": "quadruped",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "Capybara.js"
+  },
+  {
+    "name": "NORTH AMERICAN BEAVER",
+    "scientific": "Castor canadensis",
+    "class_type": "quadruped",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "NorthAmericanBeaver.js"
+  },
+  {
+    "name": "NORTH AMERICAN RIVER OTTER",
+    "scientific": "Lontra canadensis",
+    "class_type": "quadruped",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "NorthAmericanRiverOtter.js"
+  },
+  {
+    "name": "GIANT OTTER",
+    "scientific": "Pteronura brasiliensis",
+    "class_type": "quadruped",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "GiantOtter.js"
+  },
+  {
+    "name": "SEA OTTER",
+    "scientific": "Enhydra lutris",
+    "class_type": "quadruped",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "SeaOtter.js"
+  },
+  {
+    "name": "RACCOON",
+    "scientific": "Procyon lotor",
+    "class_type": "quadruped",
+    "accent": [
+      156,
+      163,
+      175
+    ],
+    "file_name": "Raccoon.js"
+  },
+  {
+    "name": "STRIPED SKUNK",
+    "scientific": "Mephitis mephitis",
+    "class_type": "quadruped",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "StripedSkunk.js"
+  },
+  {
+    "name": "EUROPEAN BADGER",
+    "scientific": "Meles meles",
+    "class_type": "quadruped",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "EuropeanBadger.js"
+  },
+  {
+    "name": "THREE-TOED SLOTH",
+    "scientific": "Bradypus tridactylus",
+    "class_type": "quadruped",
+    "accent": [
+      161,
+      98,
+      7
+    ],
+    "file_name": "ThreeToedSloth.js"
+  },
+  {
+    "name": "MOUNTAIN GORILLA",
+    "scientific": "Gorilla beringei beringei",
+    "class_type": "quadruped",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "MountainGorilla.js"
+  },
+  {
+    "name": "CHIMPANZEE",
+    "scientific": "Pan troglodytes",
+    "class_type": "quadruped",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "Chimpanzee.js"
+  },
+  {
+    "name": "BORNEAN ORANGUTAN",
+    "scientific": "Pongo pygmaeus",
+    "class_type": "quadruped",
+    "accent": [
+      234,
+      88,
+      12
+    ],
+    "file_name": "BorneanOrangutan.js"
+  },
+  {
+    "name": "MANDRILL",
+    "scientific": "Mandrillus sphinx",
+    "class_type": "quadruped",
+    "accent": [
+      59,
+      130,
+      246
+    ],
+    "file_name": "Mandrill.js"
+  },
+  {
+    "name": "OLIVE BABOON",
+    "scientific": "Papio anubis",
+    "class_type": "quadruped",
+    "accent": [
+      161,
+      98,
+      7
+    ],
+    "file_name": "OliveBaboon.js"
+  },
+  {
+    "name": "RING-TAILED LEMUR",
+    "scientific": "Lemur catta",
+    "class_type": "quadruped",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "RingTailedLemur.js"
+  },
+  {
+    "name": "AFRICAN SAVANNA ELEPHANT",
+    "scientific": "Loxodonta africana",
+    "class_type": "quadruped",
+    "accent": [
+      156,
+      163,
+      175
+    ],
+    "file_name": "AfricanSavannaElephant.js"
+  },
+  {
+    "name": "ASIAN ELEPHANT",
+    "scientific": "Elephas maximus",
+    "class_type": "quadruped",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "AsianElephant.js"
+  },
+  {
+    "name": "WHITE RHINOCEROS",
+    "scientific": "Ceratotherium simum",
+    "class_type": "quadruped",
+    "accent": [
+      156,
+      163,
+      175
+    ],
+    "file_name": "WhiteRhinoceros.js"
+  },
+  {
+    "name": "BLACK RHINOCEROS",
+    "scientific": "Diceros bicornis",
+    "class_type": "quadruped",
+    "accent": [
+      107,
+      114,
+      128
+    ],
+    "file_name": "BlackRhinoceros.js"
+  },
+  {
+    "name": "INDIAN RHINOCEROS",
+    "scientific": "Rhinoceros unicornis",
+    "class_type": "quadruped",
+    "accent": [
+      156,
+      163,
+      175
+    ],
+    "file_name": "IndianRhinoceros.js"
+  },
+  {
+    "name": "HIPPOPOTAMUS",
+    "scientific": "Hippopotamus amphibius",
+    "class_type": "quadruped",
+    "accent": [
+      107,
+      114,
+      128
+    ],
+    "file_name": "Hippopotamus.js"
+  },
+  {
+    "name": "PYGMY HIPPO",
+    "scientific": "Choeropsis liberiensis",
+    "class_type": "quadruped",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "PygmyHippo.js"
+  },
+  {
+    "name": "GIRAFFE",
+    "scientific": "Giraffa camelopardalis",
+    "class_type": "quadruped",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "Giraffe.js"
+  },
+  {
+    "name": "OKAPI",
+    "scientific": "Okapia johnstoni",
+    "class_type": "quadruped",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "Okapi.js"
+  },
+  {
+    "name": "PLAINS ZEBRA",
+    "scientific": "Equus quagga",
+    "class_type": "quadruped",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "PlainsZebra.js"
+  },
+  {
+    "name": "GREVYS ZEBRA",
+    "scientific": "Equus grevyi",
+    "class_type": "quadruped",
+    "accent": [
+      245,
+      245,
+      245
+    ],
+    "file_name": "GrevysZebra.js"
+  },
+  {
+    "name": "WILD MUSTANG",
+    "scientific": "Equus caballus",
+    "class_type": "quadruped",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "WildMustang.js"
+  },
+  {
+    "name": "ARABIAN STALLION",
+    "scientific": "Equus caballus",
+    "class_type": "quadruped",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "ArabianStallion.js"
+  },
+  {
+    "name": "BLACK FRIESIAN STALLION",
+    "scientific": "Equus caballus",
+    "class_type": "quadruped",
+    "accent": [
+      30,
+      41,
+      59
+    ],
+    "file_name": "BlackFriesianStallion.js"
+  },
+  {
+    "name": "AMERICAN BISON",
+    "scientific": "Bison bison",
+    "class_type": "quadruped",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "AmericanBison.js"
+  },
+  {
+    "name": "CAPE BUFFALO",
+    "scientific": "Syncerus caffer",
+    "class_type": "quadruped",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "CapeBuffalo.js"
+  },
+  {
+    "name": "WILD YAK",
+    "scientific": "Bos mutus",
+    "class_type": "quadruped",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "WildYak.js"
+  },
+  {
+    "name": "ALASKAN MOOSE",
+    "scientific": "Alces alces gigas",
+    "class_type": "quadruped",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "AlaskanMoose.js"
+  },
+  {
+    "name": "ROCKY MOUNTAIN ELK",
+    "scientific": "Cervus canadensis",
+    "class_type": "quadruped",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "RockyMountainElk.js"
+  },
+  {
+    "name": "TUNDRA REINDEER",
+    "scientific": "Rangifer tarandus",
+    "class_type": "quadruped",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "TundraReindeer.js"
+  },
+  {
+    "name": "RED DEER",
+    "scientific": "Cervus elaphus",
+    "class_type": "quadruped",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "RedDeer.js"
+  },
+  {
+    "name": "AFRICAN IMPALA",
+    "scientific": "Aepyceros melampus",
+    "class_type": "quadruped",
+    "accent": [
+      234,
+      88,
+      12
+    ],
+    "file_name": "AfricanImpala.js"
+  },
+  {
+    "name": "THOMSONS GAZELLE",
+    "scientific": "Eudorcas thomsonii",
+    "class_type": "quadruped",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "ThomsonsGazelle.js"
+  },
+  {
+    "name": "SPRINGBOK",
+    "scientific": "Antidorcas marsupialis",
+    "class_type": "quadruped",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "Springbok.js"
+  },
+  {
+    "name": "ALPINE IBEX",
+    "scientific": "Capra ibex",
+    "class_type": "quadruped",
+    "accent": [
+      161,
+      98,
+      7
+    ],
+    "file_name": "AlpineIbex.js"
+  },
+  {
+    "name": "BIGHORN SHEEP",
+    "scientific": "Ovis canadensis",
+    "class_type": "quadruped",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "BighornSheep.js"
+  },
+  {
+    "name": "SNOW LEOPARD MECH",
+    "scientific": "Panthera cybernetica",
+    "class_type": "quadruped",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "SnowLeopardMech.js"
+  },
+  {
+    "name": "CYBER TIGER",
+    "scientific": "Panthera cyber-tigris",
+    "class_type": "quadruped",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "CyberTiger.js"
+  },
+  {
+    "name": "CYBER ARCTIC WOLF",
+    "scientific": "Canis cyber-lupus",
+    "class_type": "quadruped",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "CyberArcticWolf.js"
+  },
+  {
+    "name": "MECH PANTHER",
+    "scientific": "Panthera syntheticus",
+    "class_type": "quadruped",
+    "accent": [
+      168,
+      85,
+      247
+    ],
+    "file_name": "MechPanther.js"
+  },
+  {
+    "name": "CYBER LION",
+    "scientific": "Panthera cyber-leo",
+    "class_type": "quadruped",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "CyberLion.js"
+  },
+  {
+    "name": "NEON FOX",
+    "scientific": "Vulpes neon-cyber",
+    "class_type": "quadruped",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "NeonFox.js"
+  },
+  {
+    "name": "STEEL HOUND",
+    "scientific": "Canis metallicus",
+    "class_type": "quadruped",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "SteelHound.js"
+  },
+  {
+    "name": "TITAN BEAR",
+    "scientific": "Ursus titanium",
+    "class_type": "quadruped",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "TitanBear.js"
+  },
+  {
+    "name": "QUANTUM JAGUAR",
+    "scientific": "Panthera quantum",
+    "class_type": "quadruped",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "QuantumJaguar.js"
+  },
+  {
+    "name": "PLASMA CHEETAH",
+    "scientific": "Acinonyx plasma",
+    "class_type": "quadruped",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "PlasmaCheetah.js"
+  },
+  {
+    "name": "SOLAR HYENA",
+    "scientific": "Crocuta solaris",
+    "class_type": "quadruped",
+    "accent": [
+      251,
+      146,
+      60
+    ],
+    "file_name": "SolarHyena.js"
+  },
+  {
+    "name": "CYBER BISON",
+    "scientific": "Bison cybernetica",
+    "class_type": "quadruped",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "CyberBison.js"
+  },
+  {
+    "name": "NEBULA STALLION",
+    "scientific": "Equus nebula",
+    "class_type": "quadruped",
+    "accent": [
+      192,
+      132,
+      252
+    ],
+    "file_name": "NebulaStallion.js"
+  },
+  {
+    "name": "SYNTHETIC GORILLA",
+    "scientific": "Gorilla cybernetica",
+    "class_type": "quadruped",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "SyntheticGorilla.js"
+  },
+  {
+    "name": "TITAN RHINOCEROS",
+    "scientific": "Ceratotherium titan",
+    "class_type": "quadruped",
+    "accent": [
+      168,
+      85,
+      247
+    ],
+    "file_name": "TitanRhinoceros.js"
+  },
+  {
+    "name": "IRON ELEPHANT",
+    "scientific": "Loxodonta ferrea",
+    "class_type": "quadruped",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "IronElephant.js"
+  },
+  {
+    "name": "CYBER CARACAL",
+    "scientific": "Caracal syntheticus",
+    "class_type": "quadruped",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "CyberCaracal.js"
+  },
+  {
+    "name": "AERO LEOPARD",
+    "scientific": "Panthera aero",
+    "class_type": "quadruped",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "AeroLeopard.js"
   },
   {
     "name": "EMPEROR SCORPION",
     "scientific": "Pandinus imperator",
     "class_type": "arachnid",
-    "accent": [234, 179, 8],
-    "file_name": "Scorpion.js"
-  },
-  {
-    "name": "BLACK MAMBA VIPER",
-    "scientific": "Dendroaspis polylepis",
-    "class_type": "serpent",
-    "accent": [34, 197, 94],
-    "file_name": "BlackMamba.js"
-  },
-  {
-    "name": "KOMODO DRAGON",
-    "scientific": "Varanus komodoensis",
-    "class_type": "reptile",
-    "accent": [255, 120, 40],
-    "file_name": "Dragon.js"
-  },
-  {
-    "name": "PEACOCK MANTIS SHRIMP",
-    "scientific": "Odontodactylus scyllarus",
-    "class_type": "crustacean",
-    "accent": [6, 182, 212],
-    "file_name": "MantisShrimp.js"
-  },
-  {
-    "name": "KING COBRA",
-    "scientific": "Ophiophagus hannah",
-    "class_type": "serpent",
-    "accent": [234, 179, 8],
-    "file_name": "KingCobra.js"
-  },
-  {
-    "name": "GIANT PRAYING MANTIS",
-    "scientific": "Hierodula patellifera",
-    "class_type": "insect",
-    "accent": [132, 204, 22],
-    "file_name": "Mantis.js"
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "EmperorScorpion.js"
   },
   {
     "name": "GOLIATH TARANTULA",
     "scientific": "Theraphosa blondi",
     "class_type": "arachnid",
-    "accent": [249, 115, 22],
-    "file_name": "Tarantula.js"
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "GoliathTarantula.js"
+  },
+  {
+    "name": "DEATHSTALKER SCORPION",
+    "scientific": "Leiurus quinquestriatus",
+    "class_type": "arachnid",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "DeathstalkerScorpion.js"
+  },
+  {
+    "name": "BLACK WIDOW SPIDER",
+    "scientific": "Latrodectus mactans",
+    "class_type": "arachnid",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "BlackWidowSpider.js"
+  },
+  {
+    "name": "SYDNEY FUNNEL-WEB SPIDER",
+    "scientific": "Atrax robustus",
+    "class_type": "arachnid",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "SydneyFunnelWebSpider.js"
+  },
+  {
+    "name": "BRAZILIAN WANDERING SPIDER",
+    "scientific": "Phoneutria nigriventer",
+    "class_type": "arachnid",
+    "accent": [
+      234,
+      88,
+      12
+    ],
+    "file_name": "BrazilianWanderingSpider.js"
+  },
+  {
+    "name": "COBALT BLUE TARANTULA",
+    "scientific": "Cyriopagopus lividus",
+    "class_type": "arachnid",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "CobaltBlueTarantula.js"
+  },
+  {
+    "name": "METALLIC BLUE ORNAMENTAL TARANTULA",
+    "scientific": "Poecilotheria metallica",
+    "class_type": "arachnid",
+    "accent": [
+      59,
+      130,
+      246
+    ],
+    "file_name": "MetallicBlueOrnamentalTarantula.js"
+  },
+  {
+    "name": "RED KNEE TARANTULA",
+    "scientific": "Brachypelma hamorii",
+    "class_type": "arachnid",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "RedKneeTarantula.js"
+  },
+  {
+    "name": "GREENBOTTLE BLUE TARANTULA",
+    "scientific": "Chromatopelma cyaneopubescens",
+    "class_type": "arachnid",
+    "accent": [
+      16,
+      185,
+      129
+    ],
+    "file_name": "GreenbottleBlueTarantula.js"
+  },
+  {
+    "name": "CAMEL SPIDER",
+    "scientific": "Solifugae titan",
+    "class_type": "arachnid",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "CamelSpider.js"
+  },
+  {
+    "name": "TAILLESS WHIP SCORPION",
+    "scientific": "Amblypygi phrynus",
+    "class_type": "arachnid",
+    "accent": [
+      156,
+      163,
+      175
+    ],
+    "file_name": "TaillessWhipScorpion.js"
+  },
+  {
+    "name": "GIANT VINEGAROON",
+    "scientific": "Mastigoproctus giganteus",
+    "class_type": "arachnid",
+    "accent": [
+      185,
+      28,
+      28
+    ],
+    "file_name": "GiantVinegaroon.js"
+  },
+  {
+    "name": "BARK SCORPION",
+    "scientific": "Centruroides sculpturatus",
+    "class_type": "arachnid",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "BarkScorpion.js"
+  },
+  {
+    "name": "ASIAN FOREST SCORPION",
+    "scientific": "Heterometrus spinifer",
+    "class_type": "arachnid",
+    "accent": [
+      168,
+      85,
+      247
+    ],
+    "file_name": "AsianForestScorpion.js"
+  },
+  {
+    "name": "BLUE FAT-TAILED SCORPION",
+    "scientific": "Androctonus crassicauda",
+    "class_type": "arachnid",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "BlueFatTailedScorpion.js"
+  },
+  {
+    "name": "RED BARK SCORPION",
+    "scientific": "Hottentotta tamulus",
+    "class_type": "arachnid",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "RedBarkScorpion.js"
+  },
+  {
+    "name": "YELLOW FAT-TAIL SCORPION",
+    "scientific": "Androctonus australis",
+    "class_type": "arachnid",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "YellowFatTailScorpion.js"
+  },
+  {
+    "name": "TRAPDOOR SPIDER",
+    "scientific": "Ctenizidae trapdoor",
+    "class_type": "arachnid",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "TrapdoorSpider.js"
+  },
+  {
+    "name": "GOLDEN SILK ORB-WEAVER",
+    "scientific": "Trichonephila clavipes",
+    "class_type": "arachnid",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "GoldenSilkOrbWeaver.js"
+  },
+  {
+    "name": "SPITTING SPIDER",
+    "scientific": "Scytodes thoracica",
+    "class_type": "arachnid",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "SpittingSpider.js"
+  },
+  {
+    "name": "OGRE-FACED NET-CASTING SPIDER",
+    "scientific": "Deinopis spinosa",
+    "class_type": "arachnid",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "OgreFacedNetCastingSpider.js"
+  },
+  {
+    "name": "DIVING BELL WATER SPIDER",
+    "scientific": "Argyroneta aquatica",
+    "class_type": "arachnid",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "DivingBellWaterSpider.js"
+  },
+  {
+    "name": "BROWN RECLUSE SPIDER",
+    "scientific": "Loxosceles reclusa",
+    "class_type": "arachnid",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "BrownRecluseSpider.js"
+  },
+  {
+    "name": "REDBACK SPIDER",
+    "scientific": "Latrodectus hasselti",
+    "class_type": "arachnid",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "RedbackSpider.js"
+  },
+  {
+    "name": "BOLAS SPIDER",
+    "scientific": "Mastophora bisaccata",
+    "class_type": "arachnid",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "BolasSpider.js"
+  },
+  {
+    "name": "PEACOCK JUMPING SPIDER",
+    "scientific": "Maratus volans",
+    "class_type": "arachnid",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "PeacockJumpingSpider.js"
+  },
+  {
+    "name": "ZEBRA JUMPING SPIDER",
+    "scientific": "Salticus scenicus",
+    "class_type": "arachnid",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "ZebraJumpingSpider.js"
+  },
+  {
+    "name": "PORTIA HUNTING SPIDER",
+    "scientific": "Portia fimbriata",
+    "class_type": "arachnid",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "PortiaHuntingSpider.js"
+  },
+  {
+    "name": "WOLF SPIDER",
+    "scientific": "Lycosidae tigrina",
+    "class_type": "arachnid",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "WolfSpider.js"
+  },
+  {
+    "name": "CRAB SPIDER",
+    "scientific": "Thomisidae flos",
+    "class_type": "arachnid",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "CrabSpider.js"
+  },
+  {
+    "name": "HUNTSMAN SPIDER",
+    "scientific": "Sparassidae velocis",
+    "class_type": "arachnid",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "HuntsmanSpider.js"
+  },
+  {
+    "name": "GIANT BANDED HUNTSMAN",
+    "scientific": "Holconia insignis",
+    "class_type": "arachnid",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "GiantBandedHuntsman.js"
+  },
+  {
+    "name": "CAVE BLIND HARVESTMAN",
+    "scientific": "Opiliones cavernus",
+    "class_type": "arachnid",
+    "accent": [
+      168,
+      85,
+      247
+    ],
+    "file_name": "CaveBlindHarvestman.js"
+  },
+  {
+    "name": "MICRO WHIP SCORPION",
+    "scientific": "Palpigradi micro",
+    "class_type": "arachnid",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "MicroWhipScorpion.js"
+  },
+  {
+    "name": "CYBER SCORPION",
+    "scientific": "Pandinus cybernetica",
+    "class_type": "arachnid",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "CyberScorpion.js"
+  },
+  {
+    "name": "NEON TARANTULA",
+    "scientific": "Theraphosa neon",
+    "class_type": "arachnid",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "NeonTarantula.js"
+  },
+  {
+    "name": "QUANTUM BLACK WIDOW",
+    "scientific": "Latrodectus quantum",
+    "class_type": "arachnid",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "QuantumBlackWidow.js"
+  },
+  {
+    "name": "MECH FUNNEL-WEB",
+    "scientific": "Atrax cyber-robustus",
+    "class_type": "arachnid",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "MechFunnelWeb.js"
+  },
+  {
+    "name": "PLASMA STINGER",
+    "scientific": "Scorpio plasma",
+    "class_type": "arachnid",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "PlasmaStinger.js"
+  },
+  {
+    "name": "CYBER CAMEL SPIDER",
+    "scientific": "Solifugae syntheticus",
+    "class_type": "arachnid",
+    "accent": [
+      251,
+      191,
+      36
+    ],
+    "file_name": "CyberCamelSpider.js"
+  },
+  {
+    "name": "STEEL ORB-WEAVER",
+    "scientific": "Trichonephila ferrea",
+    "class_type": "arachnid",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "SteelOrbWeaver.js"
+  },
+  {
+    "name": "VOLT SCORPION",
+    "scientific": "Heterometrus volt",
+    "class_type": "arachnid",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "VoltScorpion.js"
+  },
+  {
+    "name": "CHRONO TARANTULA",
+    "scientific": "Poecilotheria chrono",
+    "class_type": "arachnid",
+    "accent": [
+      168,
+      85,
+      247
+    ],
+    "file_name": "ChronoTarantula.js"
+  },
+  {
+    "name": "BIO-LUMINESCENT SPIDER",
+    "scientific": "Arachne bio-lux",
+    "class_type": "arachnid",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "BioLuminescentSpider.js"
+  },
+  {
+    "name": "TITAN ARACHNID",
+    "scientific": "Arachnida colossus",
+    "class_type": "arachnid",
+    "accent": [
+      234,
+      88,
+      12
+    ],
+    "file_name": "TitanArachnid.js"
+  },
+  {
+    "name": "CYBER JUMPING SPIDER",
+    "scientific": "Maratus cyber-volans",
+    "class_type": "arachnid",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "CyberJumpingSpider.js"
+  },
+  {
+    "name": "SHADOW SCORPION",
+    "scientific": "Androctonus umbra",
+    "class_type": "arachnid",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "ShadowScorpion.js"
+  },
+  {
+    "name": "NEBULA ARACHNID",
+    "scientific": "Arachne nebula",
+    "class_type": "arachnid",
+    "accent": [
+      192,
+      132,
+      252
+    ],
+    "file_name": "NebulaArachnid.js"
+  },
+  {
+    "name": "IRON TELSON SCORPION",
+    "scientific": "Scorpio ferreus",
+    "class_type": "arachnid",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "IronTelsonScorpion.js"
+  },
+  {
+    "name": "SOLAR BARK SCORPION",
+    "scientific": "Centruroides sol",
+    "class_type": "arachnid",
+    "accent": [
+      251,
+      146,
+      60
+    ],
+    "file_name": "SolarBarkScorpion.js"
+  },
+  {
+    "name": "AERO TARANTULA",
+    "scientific": "Theraphosa aero",
+    "class_type": "arachnid",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "AeroTarantula.js"
+  },
+  {
+    "name": "CRYPTO SPIDER",
+    "scientific": "Aranea cryptica",
+    "class_type": "arachnid",
+    "accent": [
+      16,
+      185,
+      129
+    ],
+    "file_name": "CryptoSpider.js"
+  },
+  {
+    "name": "LASER SCORPION",
+    "scientific": "Pandinus laser",
+    "class_type": "arachnid",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "LaserScorpion.js"
+  },
+  {
+    "name": "HYPER TRAPDOOR",
+    "scientific": "Ctenizidae hyper",
+    "class_type": "arachnid",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "HyperTrapdoor.js"
+  },
+  {
+    "name": "CYBER HUNTSMAN",
+    "scientific": "Sparassidae cyber",
+    "class_type": "arachnid",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "CyberHuntsman.js"
+  },
+  {
+    "name": "NANO ARACHNID",
+    "scientific": "Micro-arachne nano",
+    "class_type": "arachnid",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "NanoArachnid.js"
+  },
+  {
+    "name": "PULSE SCORPION",
+    "scientific": "Scorpio pulsaris",
+    "class_type": "arachnid",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "PulseScorpion.js"
+  },
+  {
+    "name": "DARK MATTER SPIDER",
+    "scientific": "Arachne tenebris",
+    "class_type": "arachnid",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "DarkMatterSpider.js"
+  },
+  {
+    "name": "SPECTRAL TARANTULA",
+    "scientific": "Avicularia spectralis",
+    "class_type": "arachnid",
+    "accent": [
+      168,
+      85,
+      247
+    ],
+    "file_name": "SpectralTarantula.js"
+  },
+  {
+    "name": "GOLDEN STINGER",
+    "scientific": "Leiurus aureus",
+    "class_type": "arachnid",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "GoldenStinger.js"
+  },
+  {
+    "name": "MAGMA SCORPION",
+    "scientific": "Scorpio magma",
+    "class_type": "arachnid",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "MagmaScorpion.js"
+  },
+  {
+    "name": "FROST TARANTULA",
+    "scientific": "Theraphosa glacialis",
+    "class_type": "arachnid",
+    "accent": [
+      224,
+      242,
+      254
+    ],
+    "file_name": "FrostTarantula.js"
+  },
+  {
+    "name": "VOID SCORPION",
+    "scientific": "Pandinus abyssus",
+    "class_type": "arachnid",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "VoidScorpion.js"
+  },
+  {
+    "name": "ELECTRON SPIDER",
+    "scientific": "Aranea electronica",
+    "class_type": "arachnid",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "ElectronSpider.js"
+  },
+  {
+    "name": "SYNTHETIC REDBACK",
+    "scientific": "Latrodectus syntheticus",
+    "class_type": "arachnid",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "SyntheticRedback.js"
+  },
+  {
+    "name": "CYBER VINEGAROON",
+    "scientific": "Thelyphonida cyber",
+    "class_type": "arachnid",
+    "accent": [
+      185,
+      28,
+      28
+    ],
+    "file_name": "CyberVinegaroon.js"
+  },
+  {
+    "name": "HEXA SCORPION",
+    "scientific": "Scorpio hexapod",
+    "class_type": "arachnid",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "HexaScorpion.js"
+  },
+  {
+    "name": "TITANIUM ARACHNID",
+    "scientific": "Titanium arachne",
+    "class_type": "arachnid",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "TitaniumArachnid.js"
+  },
+  {
+    "name": "CYBER CRAB SPIDER",
+    "scientific": "Thomisidae cyber",
+    "class_type": "arachnid",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "CyberCrabSpider.js"
+  },
+  {
+    "name": "BLACK MAMBA VIPER",
+    "scientific": "Dendroaspis polylepis",
+    "class_type": "serpent",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "BlackMambaViper.js"
+  },
+  {
+    "name": "KING COBRA",
+    "scientific": "Ophiophagus hannah",
+    "class_type": "serpent",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "KingCobra.js"
+  },
+  {
+    "name": "GREEN ANACONDA",
+    "scientific": "Eunectes murinus",
+    "class_type": "serpent",
+    "accent": [
+      22,
+      101,
+      52
+    ],
+    "file_name": "GreenAnaconda.js"
+  },
+  {
+    "name": "RETICULATED PYTHON",
+    "scientific": "Malayopython reticulatus",
+    "class_type": "serpent",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "ReticulatedPython.js"
+  },
+  {
+    "name": "GABOON VIPER",
+    "scientific": "Bitis gabonica",
+    "class_type": "serpent",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "GaboonViper.js"
+  },
+  {
+    "name": "EASTERN DIAMONDBACK RATTLESNAKE",
+    "scientific": "Crotalus adamanteus",
+    "class_type": "serpent",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "EasternDiamondbackRattlesnake.js"
+  },
+  {
+    "name": "INLAND TAIPAN",
+    "scientific": "Oxyuranus microlepidotus",
+    "class_type": "serpent",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "InlandTaipan.js"
+  },
+  {
+    "name": "BOOMSLANG",
+    "scientific": "Dispholidus typus",
+    "class_type": "serpent",
+    "accent": [
+      132,
+      204,
+      22
+    ],
+    "file_name": "Boomslang.js"
+  },
+  {
+    "name": "SAW-SCALED VIPER",
+    "scientific": "Echis carinatus",
+    "class_type": "serpent",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "SawScaledViper.js"
+  },
+  {
+    "name": "BLUE PIT VIPER",
+    "scientific": "Trimeresurus insularis",
+    "class_type": "serpent",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "BluePitViper.js"
+  },
+  {
+    "name": "EMERALD TREE BOA",
+    "scientific": "Corallus caninus",
+    "class_type": "serpent",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "EmeraldTreeBoa.js"
+  },
+  {
+    "name": "TITANOBOA",
+    "scientific": "Titanoboa cerrejonensis",
+    "class_type": "serpent",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "Titanoboa.js"
+  },
+  {
+    "name": "MOJAVE RATTLESNAKE",
+    "scientific": "Crotalus scutulatus",
+    "class_type": "serpent",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "MojaveRattlesnake.js"
+  },
+  {
+    "name": "SIDEWINDER RATTLESNAKE",
+    "scientific": "Crotalus cerastes",
+    "class_type": "serpent",
+    "accent": [
+      251,
+      191,
+      36
+    ],
+    "file_name": "SidewinderRattlesnake.js"
+  },
+  {
+    "name": "YELLOW-BELLIED SEA SNAKE",
+    "scientific": "Hydrophis platurus",
+    "class_type": "serpent",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "YellowBelliedSeaSnake.js"
+  },
+  {
+    "name": "BANDED SEA KRAIT",
+    "scientific": "Laticauda colubrina",
+    "class_type": "serpent",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "BandedSeaKrait.js"
+  },
+  {
+    "name": "TEXAS CORAL SNAKE",
+    "scientific": "Micrurus tener",
+    "class_type": "serpent",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "TexasCoralSnake.js"
+  },
+  {
+    "name": "FER-DE-LANCE VIPER",
+    "scientific": "Bothrops atrox",
+    "class_type": "serpent",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "FerDeLanceViper.js"
+  },
+  {
+    "name": "BUSHDWELLER BUSHMASTER",
+    "scientific": "Lachesis muta",
+    "class_type": "serpent",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "BushdwellerBushmaster.js"
+  },
+  {
+    "name": "GREEN MAMBA",
+    "scientific": "Dendroaspis angusticeps",
+    "class_type": "serpent",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "GreenMamba.js"
+  },
+  {
+    "name": "RED SPITTING COBRA",
+    "scientific": "Naja pallida",
+    "class_type": "serpent",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "RedSpittingCobra.js"
+  },
+  {
+    "name": "INDIAN COBRA",
+    "scientific": "Naja naja",
+    "class_type": "serpent",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "IndianCobra.js"
+  },
+  {
+    "name": "SAMAR COBRA",
+    "scientific": "Naja samarensis",
+    "class_type": "serpent",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "SamarCobra.js"
+  },
+  {
+    "name": "MONOCLED COBRA",
+    "scientific": "Naja kaouthia",
+    "class_type": "serpent",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "MonocledCobra.js"
+  },
+  {
+    "name": "CAPE COBRA",
+    "scientific": "Naja nivea",
+    "class_type": "serpent",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "CapeCobra.js"
+  },
+  {
+    "name": "FOREST COBRA",
+    "scientific": "Naja melanoleuca",
+    "class_type": "serpent",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "ForestCobra.js"
+  },
+  {
+    "name": "CASPIAN COBRA",
+    "scientific": "Naja oxiana",
+    "class_type": "serpent",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "CaspianCobra.js"
+  },
+  {
+    "name": "DEATH ADDER",
+    "scientific": "Acanthophis antarcticus",
+    "class_type": "serpent",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "DeathAdder.js"
+  },
+  {
+    "name": "TIGER SNAKE",
+    "scientific": "Notechis scutatus",
+    "class_type": "serpent",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "TigerSnake.js"
+  },
+  {
+    "name": "BLACK-NECKED SPITTING COBRA",
+    "scientific": "Naja nigricollis",
+    "class_type": "serpent",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "BlackNeckedSpittingCobra.js"
+  },
+  {
+    "name": "EYELASH VIPER",
+    "scientific": "Bothriechis schlegelii",
+    "class_type": "serpent",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "EyelashViper.js"
+  },
+  {
+    "name": "RHINOCEROS VIPER",
+    "scientific": "Bitis nasicornis",
+    "class_type": "serpent",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "RhinocerosViper.js"
+  },
+  {
+    "name": "PUFF ADDER",
+    "scientific": "Bitis arietans",
+    "class_type": "serpent",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "PuffAdder.js"
+  },
+  {
+    "name": "TEMPLE PIT VIPER",
+    "scientific": "Tropidolaemus wagleri",
+    "class_type": "serpent",
+    "accent": [
+      16,
+      185,
+      129
+    ],
+    "file_name": "TemplePitViper.js"
+  },
+  {
+    "name": "WHITE-LIPPED PIT VIPER",
+    "scientific": "Trimeresurus albolabris",
+    "class_type": "serpent",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "WhiteLippedPitViper.js"
+  },
+  {
+    "name": "MALAYAN PIT VIPER",
+    "scientific": "Calloselasma rhodostoma",
+    "class_type": "serpent",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "MalayanPitViper.js"
+  },
+  {
+    "name": "RUSSELLS VIPER",
+    "scientific": "Daboia russelii",
+    "class_type": "serpent",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "RussellsViper.js"
+  },
+  {
+    "name": "BURMESE PYTHON",
+    "scientific": "Python bivittatus",
+    "class_type": "serpent",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "BurmesePython.js"
+  },
+  {
+    "name": "BALL PYTHON",
+    "scientific": "Python regius",
+    "class_type": "serpent",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "BallPython.js"
+  },
+  {
+    "name": "GREEN TREE PYTHON",
+    "scientific": "Morelia viridis",
+    "class_type": "serpent",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "GreenTreePython.js"
+  },
+  {
+    "name": "CARPET PYTHON",
+    "scientific": "Morelia spilota",
+    "class_type": "serpent",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "CarpetPython.js"
+  },
+  {
+    "name": "AMETHYSTINE PYTHON",
+    "scientific": "Simalia amethistina",
+    "class_type": "serpent",
+    "accent": [
+      168,
+      85,
+      247
+    ],
+    "file_name": "AmethystinePython.js"
+  },
+  {
+    "name": "BOA CONSTRICTOR",
+    "scientific": "Boa constrictor",
+    "class_type": "serpent",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "BoaConstrictor.js"
+  },
+  {
+    "name": "RAINBOW BOA",
+    "scientific": "Epicrates cenchria",
+    "class_type": "serpent",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "RainbowBoa.js"
+  },
+  {
+    "name": "YELLOW ANACONDA",
+    "scientific": "Eunectes notaeus",
+    "class_type": "serpent",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "YellowAnaconda.js"
+  },
+  {
+    "name": "EASTERN HOGNOSE SNAKE",
+    "scientific": "Heterodon platirhinos",
+    "class_type": "serpent",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "EasternHognoseSnake.js"
+  },
+  {
+    "name": "CALIFORNIA KINGSNAKE",
+    "scientific": "Lampropeltis californiae",
+    "class_type": "serpent",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "CaliforniaKingsnake.js"
+  },
+  {
+    "name": "SCARLET KINGSNAKE",
+    "scientific": "Lampropeltis elapsoides",
+    "class_type": "serpent",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "ScarletKingsnake.js"
+  },
+  {
+    "name": "MILK SNAKE",
+    "scientific": "Lampropeltis triangulum",
+    "class_type": "serpent",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "MilkSnake.js"
+  },
+  {
+    "name": "CORN SNAKE",
+    "scientific": "Pantherophis guttatus",
+    "class_type": "serpent",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "CornSnake.js"
+  },
+  {
+    "name": "BLACK RAT SNAKE",
+    "scientific": "Pantherophis obsoletus",
+    "class_type": "serpent",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "BlackRatSnake.js"
+  },
+  {
+    "name": "BULLSNAKE",
+    "scientific": "Pituophis catenifer",
+    "class_type": "serpent",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "Bullsnake.js"
+  },
+  {
+    "name": "COACHWHIP SNAKE",
+    "scientific": "Masticophis flagellum",
+    "class_type": "serpent",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "CoachwhipSnake.js"
+  },
+  {
+    "name": "INDIGO SNAKE",
+    "scientific": "Drymarchon couperi",
+    "class_type": "serpent",
+    "accent": [
+      30,
+      41,
+      59
+    ],
+    "file_name": "IndigoSnake.js"
+  },
+  {
+    "name": "ROUGH GREEN SNAKE",
+    "scientific": "Opheodrys aestivus",
+    "class_type": "serpent",
+    "accent": [
+      132,
+      204,
+      22
+    ],
+    "file_name": "RoughGreenSnake.js"
+  },
+  {
+    "name": "RING-NECKED SNAKE",
+    "scientific": "Diadophis punctatus",
+    "class_type": "serpent",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "RingNeckedSnake.js"
+  },
+  {
+    "name": "GARTER SNAKE",
+    "scientific": "Thamnophis sirtalis",
+    "class_type": "serpent",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "GarterSnake.js"
+  },
+  {
+    "name": "RIBBON SNAKE",
+    "scientific": "Thamnophis saurita",
+    "class_type": "serpent",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "RibbonSnake.js"
+  },
+  {
+    "name": "MUD SNAKE",
+    "scientific": "Farancia abacura",
+    "class_type": "serpent",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "MudSnake.js"
+  },
+  {
+    "name": "CYBER COBRA",
+    "scientific": "Ophiophagus cybernetica",
+    "class_type": "serpent",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "CyberCobra.js"
+  },
+  {
+    "name": "NEON MAMBA",
+    "scientific": "Dendroaspis neon",
+    "class_type": "serpent",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "NeonMamba.js"
+  },
+  {
+    "name": "QUANTUM VIPER",
+    "scientific": "Bitis quantum",
+    "class_type": "serpent",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "QuantumViper.js"
+  },
+  {
+    "name": "PLASMA PYTHON",
+    "scientific": "Python plasma",
+    "class_type": "serpent",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "PlasmaPython.js"
+  },
+  {
+    "name": "CYBER ANACONDA",
+    "scientific": "Eunectes syntheticus",
+    "class_type": "serpent",
+    "accent": [
+      16,
+      185,
+      129
+    ],
+    "file_name": "CyberAnaconda.js"
+  },
+  {
+    "name": "MECH RATTLESNAKE",
+    "scientific": "Crotalus ferreus",
+    "class_type": "serpent",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "MechRattlesnake.js"
+  },
+  {
+    "name": "VOLT SEA KRAIT",
+    "scientific": "Laticauda volt",
+    "class_type": "serpent",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "VoltSeaKrait.js"
+  },
+  {
+    "name": "LASER TAIPAN",
+    "scientific": "Oxyuranus laser",
+    "class_type": "serpent",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "LaserTaipan.js"
+  },
+  {
+    "name": "BIO-LUMINESCENT BOA",
+    "scientific": "Boa bio-lux",
+    "class_type": "serpent",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "BioLuminescentBoa.js"
+  },
+  {
+    "name": "TITAN CYBER PYTHON",
+    "scientific": "Python colossus",
+    "class_type": "serpent",
+    "accent": [
+      168,
+      85,
+      247
+    ],
+    "file_name": "TitanCyberPython.js"
+  },
+  {
+    "name": "SHADOW VIPER",
+    "scientific": "Vipera umbra",
+    "class_type": "serpent",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "ShadowViper.js"
+  },
+  {
+    "name": "SOLAR COBRA",
+    "scientific": "Naja solaris",
+    "class_type": "serpent",
+    "accent": [
+      251,
+      146,
+      60
+    ],
+    "file_name": "SolarCobra.js"
+  },
+  {
+    "name": "AERO TREE BOA",
+    "scientific": "Corallus aero",
+    "class_type": "serpent",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "AeroTreeBoa.js"
+  },
+  {
+    "name": "CHRONO SERPENT",
+    "scientific": "Serpens chronos",
+    "class_type": "serpent",
+    "accent": [
+      192,
+      132,
+      252
+    ],
+    "file_name": "ChronoSerpent.js"
+  },
+  {
+    "name": "FROST VIPER",
+    "scientific": "Trimeresurus glacialis",
+    "class_type": "serpent",
+    "accent": [
+      224,
+      242,
+      254
+    ],
+    "file_name": "FrostViper.js"
+  },
+  {
+    "name": "MAGMA MAMBA",
+    "scientific": "Dendroaspis magma",
+    "class_type": "serpent",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "MagmaMamba.js"
+  },
+  {
+    "name": "VOID PYTHON",
+    "scientific": "Python abyssus",
+    "class_type": "serpent",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "VoidPython.js"
+  },
+  {
+    "name": "DARK MATTER VIPER",
+    "scientific": "Bothrops tenebris",
+    "class_type": "serpent",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "DarkMatterViper.js"
+  },
+  {
+    "name": "SYNTHETIC CORAL SNAKE",
+    "scientific": "Micrurus syntheticus",
+    "class_type": "serpent",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "SyntheticCoralSnake.js"
+  },
+  {
+    "name": "ELECTRON COBRA",
+    "scientific": "Naja electronica",
+    "class_type": "serpent",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "ElectronCobra.js"
+  },
+  {
+    "name": "STEEL ANACONDA",
+    "scientific": "Eunectes metallicus",
+    "class_type": "serpent",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "SteelAnaconda.js"
+  },
+  {
+    "name": "KOMODO DRAGON",
+    "scientific": "Varanus komodoensis",
+    "class_type": "reptile",
+    "accent": [
+      255,
+      120,
+      40
+    ],
+    "file_name": "KomodoDragon.js"
+  },
+  {
+    "name": "NILE CROCODILE",
+    "scientific": "Crocodylus niloticus",
+    "class_type": "reptile",
+    "accent": [
+      22,
+      101,
+      52
+    ],
+    "file_name": "NileCrocodile.js"
+  },
+  {
+    "name": "SALTWATER CROCODILE",
+    "scientific": "Crocodylus porosus",
+    "class_type": "reptile",
+    "accent": [
+      30,
+      41,
+      59
+    ],
+    "file_name": "SaltwaterCrocodile.js"
+  },
+  {
+    "name": "AMERICAN ALLIGATOR",
+    "scientific": "Alligator mississippiensis",
+    "class_type": "reptile",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "AmericanAlligator.js"
+  },
+  {
+    "name": "BLACK CAIMAN",
+    "scientific": "Melanosuchus niger",
+    "class_type": "reptile",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "BlackCaiman.js"
+  },
+  {
+    "name": "GHARIAL",
+    "scientific": "Gavialis gangeticus",
+    "class_type": "reptile",
+    "accent": [
+      16,
+      185,
+      129
+    ],
+    "file_name": "Gharial.js"
+  },
+  {
+    "name": "PANTHER CHAMELEON",
+    "scientific": "Furcifer pardalis",
+    "class_type": "reptile",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "PantherChameleon.js"
+  },
+  {
+    "name": "VEILED CHAMELEON",
+    "scientific": "Chamaeleo calyptratus",
+    "class_type": "reptile",
+    "accent": [
+      132,
+      204,
+      22
+    ],
+    "file_name": "VeiledChameleon.js"
+  },
+  {
+    "name": "PARSONS CHAMELEON",
+    "scientific": "Calumma parsonii",
+    "class_type": "reptile",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "ParsonsChameleon.js"
+  },
+  {
+    "name": "TOKAY GECKO",
+    "scientific": "Gekko gecko",
+    "class_type": "reptile",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "TokayGecko.js"
+  },
+  {
+    "name": "LEOPARD GECKO",
+    "scientific": "Eublepharis macularius",
+    "class_type": "reptile",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "LeopardGecko.js"
+  },
+  {
+    "name": "CRESTED GECKO",
+    "scientific": "Correlophus ciliatus",
+    "class_type": "reptile",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "CrestedGecko.js"
+  },
+  {
+    "name": "SATANIC LEAF-TAILED GECKO",
+    "scientific": "Uroplatus phantasticus",
+    "class_type": "reptile",
+    "accent": [
+      185,
+      28,
+      28
+    ],
+    "file_name": "SatanicLeafTailedGecko.js"
+  },
+  {
+    "name": "THORNY DEVIL",
+    "scientific": "Moloch horridus",
+    "class_type": "reptile",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "ThornyDevil.js"
+  },
+  {
+    "name": "GALAPAGOS MARINE IGUANA",
+    "scientific": "Amblyrhynchus cristatus",
+    "class_type": "reptile",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "GalapagosMarineIguana.js"
+  },
+  {
+    "name": "GREEN IGUANA",
+    "scientific": "Iguana iguana",
+    "class_type": "reptile",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "GreenIguana.js"
+  },
+  {
+    "name": "RHINOCEROS IGUANA",
+    "scientific": "Cyclura cornuta",
+    "class_type": "reptile",
+    "accent": [
+      107,
+      114,
+      128
+    ],
+    "file_name": "RhinocerosIguana.js"
+  },
+  {
+    "name": "FRILLED LIZARD",
+    "scientific": "Chlamydosaurus kingii",
+    "class_type": "reptile",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "FrilledLizard.js"
+  },
+  {
+    "name": "GILA MONSTER",
+    "scientific": "Heloderma suspectum",
+    "class_type": "reptile",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "GilaMonster.js"
+  },
+  {
+    "name": "MEXICAN BEADED LIZARD",
+    "scientific": "Heloderma horridum",
+    "class_type": "reptile",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "MexicanBeadedLizard.js"
+  },
+  {
+    "name": "CENTRAL BEARDED DRAGON",
+    "scientific": "Pogona vitticeps",
+    "class_type": "reptile",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "CentralBeardedDragon.js"
+  },
+  {
+    "name": "ASIAN WATER MONITOR",
+    "scientific": "Varanus salvator",
+    "class_type": "reptile",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "AsianWaterMonitor.js"
+  },
+  {
+    "name": "PERENTIE MONITOR",
+    "scientific": "Varanus giganteus",
+    "class_type": "reptile",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "PerentieMonitor.js"
+  },
+  {
+    "name": "LACE MONITOR",
+    "scientific": "Varanus varius",
+    "class_type": "reptile",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "LaceMonitor.js"
+  },
+  {
+    "name": "CROCODILE MONITOR",
+    "scientific": "Varanus salvadorii",
+    "class_type": "reptile",
+    "accent": [
+      22,
+      101,
+      52
+    ],
+    "file_name": "CrocodileMonitor.js"
+  },
+  {
+    "name": "EMERALD TREE MONITOR",
+    "scientific": "Varanus prasinus",
+    "class_type": "reptile",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "EmeraldTreeMonitor.js"
+  },
+  {
+    "name": "BLUE-TAILED MONITOR",
+    "scientific": "Varanus doreanus",
+    "class_type": "reptile",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "BlueTailedMonitor.js"
+  },
+  {
+    "name": "CHINESE WATER DRAGON",
+    "scientific": "Physignathus cocincinus",
+    "class_type": "reptile",
+    "accent": [
+      16,
+      185,
+      129
+    ],
+    "file_name": "ChineseWaterDragon.js"
+  },
+  {
+    "name": "AUSTRALIAN WATER DRAGON",
+    "scientific": "Intellagama lesueurii",
+    "class_type": "reptile",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "AustralianWaterDragon.js"
+  },
+  {
+    "name": "FLYING DRAGON DRACO",
+    "scientific": "Draco volans",
+    "class_type": "reptile",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "FlyingDragonDraco.js"
+  },
+  {
+    "name": "TUATARA",
+    "scientific": "Sphenodon punctatus",
+    "class_type": "reptile",
+    "accent": [
+      107,
+      114,
+      128
+    ],
+    "file_name": "Tuatara.js"
+  },
+  {
+    "name": "ARMOURED SAILFIN LIZARD",
+    "scientific": "Hydrosaurus pustulatus",
+    "class_type": "reptile",
+    "accent": [
+      59,
+      130,
+      246
+    ],
+    "file_name": "ArmouredSailfinLizard.js"
+  },
+  {
+    "name": "BLUE-TONGUED SKINK",
+    "scientific": "Tiliqua scincoides",
+    "class_type": "reptile",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "BlueTonguedSkink.js"
+  },
+  {
+    "name": "SHINGLEBACK SKINK",
+    "scientific": "Tiliqua rugosa",
+    "class_type": "reptile",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "ShinglebackSkink.js"
+  },
+  {
+    "name": "FIRE SKINK",
+    "scientific": "Lepidothyris fernandi",
+    "class_type": "reptile",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "FireSkink.js"
+  },
+  {
+    "name": "RED-EYED CROCODILE SKINK",
+    "scientific": "Tribolonotus gracilis",
+    "class_type": "reptile",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "RedEyedCrocodileSkink.js"
+  },
+  {
+    "name": "CUBAN KNIGHT ANOLE",
+    "scientific": "Anolis equestris",
+    "class_type": "reptile",
+    "accent": [
+      132,
+      204,
+      22
+    ],
+    "file_name": "CubanKnightAnole.js"
+  },
+  {
+    "name": "GREEN ANOLE",
+    "scientific": "Anolis carolinensis",
+    "class_type": "reptile",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "GreenAnole.js"
+  },
+  {
+    "name": "COLLARED LIZARD",
+    "scientific": "Crotaphytus collaris",
+    "class_type": "reptile",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "CollaredLizard.js"
+  },
+  {
+    "name": "DESERT HORNED LIZARD",
+    "scientific": "Phrynosoma platyrhinos",
+    "class_type": "reptile",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "DesertHornedLizard.js"
+  },
+  {
+    "name": "TEXAS HORNED LIZARD",
+    "scientific": "Phrynosoma cornutum",
+    "class_type": "reptile",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "TexasHornedLizard.js"
+  },
+  {
+    "name": "COMMON BASILISK",
+    "scientific": "Basiliscus basiliscus",
+    "class_type": "reptile",
+    "accent": [
+      16,
+      185,
+      129
+    ],
+    "file_name": "CommonBasilisk.js"
+  },
+  {
+    "name": "PLUMED BASILISK",
+    "scientific": "Basiliscus plumifrons",
+    "class_type": "reptile",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "PlumedBasilisk.js"
+  },
+  {
+    "name": "LEATHERBACK SEA TURTLE",
+    "scientific": "Dermochelys coriacea",
+    "class_type": "reptile",
+    "accent": [
+      30,
+      41,
+      59
+    ],
+    "file_name": "LeatherbackSeaTurtle.js"
+  },
+  {
+    "name": "LOGGERHEAD SEA TURTLE",
+    "scientific": "Caretta caretta",
+    "class_type": "reptile",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "LoggerheadSeaTurtle.js"
+  },
+  {
+    "name": "GREEN SEA TURTLE",
+    "scientific": "Chelonia mydas",
+    "class_type": "reptile",
+    "accent": [
+      16,
+      185,
+      129
+    ],
+    "file_name": "GreenSeaTurtle.js"
+  },
+  {
+    "name": "HAWKSBILL SEA TURTLE",
+    "scientific": "Eretmochelys imbricata",
+    "class_type": "reptile",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "HawksbillSeaTurtle.js"
+  },
+  {
+    "name": "ALLIGATOR SNAPPING TURTLE",
+    "scientific": "Macrochelys temminckii",
+    "class_type": "reptile",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "AlligatorSnappingTurtle.js"
+  },
+  {
+    "name": "COMMON SNAPPING TURTLE",
+    "scientific": "Chelydra serpentina",
+    "class_type": "reptile",
+    "accent": [
+      107,
+      114,
+      128
+    ],
+    "file_name": "CommonSnappingTurtle.js"
+  },
+  {
+    "name": "GALAPAGOS GIANT TORTOISE",
+    "scientific": "Chelonoidis niger",
+    "class_type": "reptile",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "GalapagosGiantTortoise.js"
+  },
+  {
+    "name": "ALDABRA GIANT TORTOISE",
+    "scientific": "Aldabrachelys gigantea",
+    "class_type": "reptile",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "AldabraGiantTortoise.js"
+  },
+  {
+    "name": "AFRICAN SULCATA TORTOISE",
+    "scientific": "Centrochelys sulcata",
+    "class_type": "reptile",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "AfricanSulcataTortoise.js"
+  },
+  {
+    "name": "RADIATED TORTOISE",
+    "scientific": "Astrochelys radiata",
+    "class_type": "reptile",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "RadiatedTortoise.js"
+  },
+  {
+    "name": "INDIAN STAR TORTOISE",
+    "scientific": "Geochelone elegans",
+    "class_type": "reptile",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "IndianStarTortoise.js"
+  },
+  {
+    "name": "LEOPARD TORTOISE",
+    "scientific": "Stigmochelys pardalis",
+    "class_type": "reptile",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "LeopardTortoise.js"
+  },
+  {
+    "name": "MATAMATA TURTLE",
+    "scientific": "Chelus fimbriata",
+    "class_type": "reptile",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "MatamataTurtle.js"
+  },
+  {
+    "name": "PIG-NOSED TURTLE",
+    "scientific": "Carettochelys insculpta",
+    "class_type": "reptile",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "PigNosedTurtle.js"
+  },
+  {
+    "name": "SPOTTED TURTLE",
+    "scientific": "Clemmys guttata",
+    "class_type": "reptile",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "SpottedTurtle.js"
+  },
+  {
+    "name": "EASTERN BOX TURTLE",
+    "scientific": "Terrapene carolina",
+    "class_type": "reptile",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "EasternBoxTurtle.js"
+  },
+  {
+    "name": "CYBER KOMODO DRAGON",
+    "scientific": "Varanus cybernetica",
+    "class_type": "reptile",
+    "accent": [
+      255,
+      120,
+      40
+    ],
+    "file_name": "CyberKomodoDragon.js"
+  },
+  {
+    "name": "NEON CHAMELEON",
+    "scientific": "Chamaeleo neon",
+    "class_type": "reptile",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "NeonChameleon.js"
+  },
+  {
+    "name": "QUANTUM CROCODILE",
+    "scientific": "Crocodylus quantum",
+    "class_type": "reptile",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "QuantumCrocodile.js"
+  },
+  {
+    "name": "MECH ALLIGATOR",
+    "scientific": "Alligator ferreus",
+    "class_type": "reptile",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "MechAlligator.js"
+  },
+  {
+    "name": "PLASMA GECKO",
+    "scientific": "Gekko plasma",
+    "class_type": "reptile",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "PlasmaGecko.js"
+  },
+  {
+    "name": "CYBER IGUANA",
+    "scientific": "Iguana cyber-viridis",
+    "class_type": "reptile",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "CyberIguana.js"
+  },
+  {
+    "name": "VOLT FRILLED DRAGON",
+    "scientific": "Chlamydosaurus volt",
+    "class_type": "reptile",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "VoltFrilledDragon.js"
+  },
+  {
+    "name": "TITAN DRACO",
+    "scientific": "Draco colossus",
+    "class_type": "reptile",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "TitanDraco.js"
+  },
+  {
+    "name": "SHADOW CAIMAN",
+    "scientific": "Melanosuchus umbra",
+    "class_type": "reptile",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "ShadowCaiman.js"
+  },
+  {
+    "name": "SOLAR BEARDED DRAGON",
+    "scientific": "Pogona solaris",
+    "class_type": "reptile",
+    "accent": [
+      251,
+      146,
+      60
+    ],
+    "file_name": "SolarBeardedDragon.js"
+  },
+  {
+    "name": "AERO GECKO",
+    "scientific": "Gekko aero",
+    "class_type": "reptile",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "AeroGecko.js"
+  },
+  {
+    "name": "CHRONO MONITOR",
+    "scientific": "Varanus chronos",
+    "class_type": "reptile",
+    "accent": [
+      168,
+      85,
+      247
+    ],
+    "file_name": "ChronoMonitor.js"
+  },
+  {
+    "name": "FROST CROCODILE",
+    "scientific": "Crocodylus glacialis",
+    "class_type": "reptile",
+    "accent": [
+      224,
+      242,
+      254
+    ],
+    "file_name": "FrostCrocodile.js"
+  },
+  {
+    "name": "MAGMA GILA MONSTER",
+    "scientific": "Heloderma magma",
+    "class_type": "reptile",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "MagmaGilaMonster.js"
+  },
+  {
+    "name": "VOID MONITOR",
+    "scientific": "Varanus abyssus",
+    "class_type": "reptile",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "VoidMonitor.js"
+  },
+  {
+    "name": "STEEL GHARIAL",
+    "scientific": "Gavialis metallicus",
+    "class_type": "reptile",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "SteelGharial.js"
+  },
+  {
+    "name": "BIO-LUMINESCENT SKINK",
+    "scientific": "Scincidae bio-lux",
+    "class_type": "reptile",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "BioLuminescentSkink.js"
+  },
+  {
+    "name": "LASER BASILISK",
+    "scientific": "Basiliscus laser",
+    "class_type": "reptile",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "LaserBasilisk.js"
+  },
+  {
+    "name": "DARK MATTER TURTLE",
+    "scientific": "Chelonia tenebris",
+    "class_type": "reptile",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "DarkMatterTurtle.js"
+  },
+  {
+    "name": "SYNTHETIC MATAMATA",
+    "scientific": "Chelus syntheticus",
+    "class_type": "reptile",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "SyntheticMatamata.js"
+  },
+  {
+    "name": "QUANTUM THORNY DEVIL",
+    "scientific": "Moloch quantum",
+    "class_type": "reptile",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "QuantumThornyDevil.js"
+  },
+  {
+    "name": "PEACOCK MANTIS SHRIMP",
+    "scientific": "Odontodactylus scyllarus",
+    "class_type": "crustacean",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "PeacockMantisShrimp.js"
+  },
+  {
+    "name": "TASMANIAN GIANT CRAB",
+    "scientific": "Pseudocarcinus gigas",
+    "class_type": "crustacean",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "TasmanianGiantCrab.js"
+  },
+  {
+    "name": "JAPANESE SPIDER CRAB",
+    "scientific": "Macrocheira kaempferi",
+    "class_type": "crustacean",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "JapaneseSpiderCrab.js"
+  },
+  {
+    "name": "COCONUT CRAB",
+    "scientific": "Birgus latro",
+    "class_type": "crustacean",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "CoconutCrab.js"
+  },
+  {
+    "name": "AMERICAN LOBSTER",
+    "scientific": "Homarus americanus",
+    "class_type": "crustacean",
+    "accent": [
+      185,
+      28,
+      28
+    ],
+    "file_name": "AmericanLobster.js"
+  },
+  {
+    "name": "BLUE CRAB",
+    "scientific": "Callinectes sapidus",
+    "class_type": "crustacean",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "BlueCrab.js"
+  },
+  {
+    "name": "ATLANTIC GHOST CRAB",
+    "scientific": "Ocypode quadrata",
+    "class_type": "crustacean",
+    "accent": [
+      251,
+      191,
+      36
+    ],
+    "file_name": "AtlanticGhostCrab.js"
+  },
+  {
+    "name": "CARIBBEAN HERMIT CRAB",
+    "scientific": "Coenobita clypeatus",
+    "class_type": "crustacean",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "CaribbeanHermitCrab.js"
+  },
+  {
+    "name": "HORSESHOE CRAB",
+    "scientific": "Limulus polyphemus",
+    "class_type": "crustacean",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "HorseshoeCrab.js"
+  },
+  {
+    "name": "PISTOL SHRIMP",
+    "scientific": "Alpheus heterochaelis",
+    "class_type": "crustacean",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "PistolShrimp.js"
+  },
+  {
+    "name": "HARLEQUIN SHRIMP",
+    "scientific": "Hymenocera picta",
+    "class_type": "crustacean",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "HarlequinShrimp.js"
+  },
+  {
+    "name": "RED KING CRAB",
+    "scientific": "Paralithodes camtschaticus",
+    "class_type": "crustacean",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "RedKingCrab.js"
+  },
+  {
+    "name": "FIDDLER CRAB",
+    "scientific": "Uca pugilator",
+    "class_type": "crustacean",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "FiddlerCrab.js"
+  },
+  {
+    "name": "PORCELAIN CRAB",
+    "scientific": "Petrolisthes galathinus",
+    "class_type": "crustacean",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "PorcelainCrab.js"
+  },
+  {
+    "name": "YETI CRAB",
+    "scientific": "Kiwa hirsuta",
+    "class_type": "crustacean",
+    "accent": [
+      245,
+      245,
+      245
+    ],
+    "file_name": "YetiCrab.js"
+  },
+  {
+    "name": "SPINY LOBSTER",
+    "scientific": "Panulirus argus",
+    "class_type": "crustacean",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "SpinyLobster.js"
+  },
+  {
+    "name": "SLIPPER LOBSTER",
+    "scientific": "Scyllarides latus",
+    "class_type": "crustacean",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "SlipperLobster.js"
+  },
+  {
+    "name": "SQUAT LOBSTER",
+    "scientific": "Galatheidae splendens",
+    "class_type": "crustacean",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "SquatLobster.js"
+  },
+  {
+    "name": "CLEANER SHRIMP",
+    "scientific": "Lysmata amboinensis",
+    "class_type": "crustacean",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "CleanerShrimp.js"
+  },
+  {
+    "name": "BANDED CORAL SHRIMP",
+    "scientific": "Stenopus hispidus",
+    "class_type": "crustacean",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "BandedCoralShrimp.js"
+  },
+  {
+    "name": "GHOST SHRIMP",
+    "scientific": "Palaemonetes paludosus",
+    "class_type": "crustacean",
+    "accent": [
+      224,
+      242,
+      254
+    ],
+    "file_name": "GhostShrimp.js"
+  },
+  {
+    "name": "CHERRY SHRIMP",
+    "scientific": "Neocaridina davidi",
+    "class_type": "crustacean",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "CherryShrimp.js"
+  },
+  {
+    "name": "VAMPIRE CRAB",
+    "scientific": "Geosesarma dennerle",
+    "class_type": "crustacean",
+    "accent": [
+      168,
+      85,
+      247
+    ],
+    "file_name": "VampireCrab.js"
+  },
+  {
+    "name": "RED CLAW CRAB",
+    "scientific": "Perisesarma bidens",
+    "class_type": "crustacean",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "RedClawCrab.js"
+  },
+  {
+    "name": "MUD CRAB",
+    "scientific": "Scylla serrata",
+    "class_type": "crustacean",
+    "accent": [
+      22,
+      101,
+      52
+    ],
+    "file_name": "MudCrab.js"
+  },
+  {
+    "name": "DUNGENESS CRAB",
+    "scientific": "Metacarcinus magister",
+    "class_type": "crustacean",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "DungenessCrab.js"
+  },
+  {
+    "name": "SNOW CRAB",
+    "scientific": "Chionoecetes opilio",
+    "class_type": "crustacean",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "SnowCrab.js"
+  },
+  {
+    "name": "JONAH CRAB",
+    "scientific": "Cancer borealis",
+    "class_type": "crustacean",
+    "accent": [
+      185,
+      28,
+      28
+    ],
+    "file_name": "JonahCrab.js"
+  },
+  {
+    "name": "STONE CRAB",
+    "scientific": "Menippe mercenaria",
+    "class_type": "crustacean",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "StoneCrab.js"
+  },
+  {
+    "name": "ARROW CRAB",
+    "scientific": "Stenorhynchus seticornis",
+    "class_type": "crustacean",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "ArrowCrab.js"
+  },
+  {
+    "name": "DECORATOR CRAB",
+    "scientific": "Camposcia retusa",
+    "class_type": "crustacean",
+    "accent": [
+      161,
+      98,
+      7
+    ],
+    "file_name": "DecoratorCrab.js"
+  },
+  {
+    "name": "BOXER CRAB",
+    "scientific": "Lybia tessellata",
+    "class_type": "crustacean",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "BoxerCrab.js"
+  },
+  {
+    "name": "ZEBRA MANTIS SHRIMP",
+    "scientific": "Lysiosquillina maculata",
+    "class_type": "crustacean",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "ZebraMantisShrimp.js"
+  },
+  {
+    "name": "SPEARING MANTIS SHRIMP",
+    "scientific": "Lysiosquilla scabricauda",
+    "class_type": "crustacean",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "SpearingMantisShrimp.js"
+  },
+  {
+    "name": "CYBER MANTIS SHRIMP",
+    "scientific": "Odontodactylus cyber",
+    "class_type": "crustacean",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "CyberMantisShrimp.js"
+  },
+  {
+    "name": "NEON KING CRAB",
+    "scientific": "Paralithodes neon",
+    "class_type": "crustacean",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "NeonKingCrab.js"
+  },
+  {
+    "name": "QUANTUM LOBSTER",
+    "scientific": "Homarus quantum",
+    "class_type": "crustacean",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "QuantumLobster.js"
+  },
+  {
+    "name": "MECH SPIDER CRAB",
+    "scientific": "Macrocheira ferrea",
+    "class_type": "crustacean",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "MechSpiderCrab.js"
+  },
+  {
+    "name": "PLASMA PISTOL SHRIMP",
+    "scientific": "Alpheus plasma",
+    "class_type": "crustacean",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "PlasmaPistolShrimp.js"
+  },
+  {
+    "name": "CYBER COCONUT CRAB",
+    "scientific": "Birgus cybernetica",
+    "class_type": "crustacean",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "CyberCoconutCrab.js"
+  },
+  {
+    "name": "VOLT FIDDLER CRAB",
+    "scientific": "Uca volt",
+    "class_type": "crustacean",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "VoltFiddlerCrab.js"
+  },
+  {
+    "name": "TITAN CRUSTACEAN",
+    "scientific": "Crustacea colossus",
+    "class_type": "crustacean",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "TitanCrustacean.js"
+  },
+  {
+    "name": "SHADOW LOBSTER",
+    "scientific": "Panulirus umbra",
+    "class_type": "crustacean",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "ShadowLobster.js"
+  },
+  {
+    "name": "SOLAR HARLEQUIN SHRIMP",
+    "scientific": "Hymenocera solaris",
+    "class_type": "crustacean",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "SolarHarlequinShrimp.js"
+  },
+  {
+    "name": "AERO GHOST CRAB",
+    "scientific": "Ocypode aero",
+    "class_type": "crustacean",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "AeroGhostCrab.js"
+  },
+  {
+    "name": "CHRONO YETI CRAB",
+    "scientific": "Kiwa chronos",
+    "class_type": "crustacean",
+    "accent": [
+      192,
+      132,
+      252
+    ],
+    "file_name": "ChronoYetiCrab.js"
+  },
+  {
+    "name": "FROST LOBSTER",
+    "scientific": "Homarus glacialis",
+    "class_type": "crustacean",
+    "accent": [
+      224,
+      242,
+      254
+    ],
+    "file_name": "FrostLobster.js"
+  },
+  {
+    "name": "MAGMA CRAB",
+    "scientific": "Cancer magma",
+    "class_type": "crustacean",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "MagmaCrab.js"
+  },
+  {
+    "name": "VOID SHRIMP",
+    "scientific": "Alpheus abyssus",
+    "class_type": "crustacean",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "VoidShrimp.js"
+  },
+  {
+    "name": "STEEL HORSESHOE CRAB",
+    "scientific": "Limulus metallicus",
+    "class_type": "crustacean",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "SteelHorseshoeCrab.js"
+  },
+  {
+    "name": "BIO-LUMINESCENT SQUAT LOBSTER",
+    "scientific": "Galatheidae bio-lux",
+    "class_type": "crustacean",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "BioLuminescentSquatLobster.js"
+  },
+  {
+    "name": "LASER MANTIS SHRIMP",
+    "scientific": "Odontodactylus laser",
+    "class_type": "crustacean",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "LaserMantisShrimp.js"
+  },
+  {
+    "name": "DARK MATTER CRAB",
+    "scientific": "Brachyura tenebris",
+    "class_type": "crustacean",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "DarkMatterCrab.js"
+  },
+  {
+    "name": "SYNTHETIC BLUE CRAB",
+    "scientific": "Callinectes syntheticus",
+    "class_type": "crustacean",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "SyntheticBlueCrab.js"
+  },
+  {
+    "name": "QUANTUM PORCELAIN CRAB",
+    "scientific": "Petrolisthes quantum",
+    "class_type": "crustacean",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "QuantumPorcelainCrab.js"
+  },
+  {
+    "name": "GIANT PRAYING MANTIS",
+    "scientific": "Hierodula patellifera",
+    "class_type": "insect",
+    "accent": [
+      132,
+      204,
+      22
+    ],
+    "file_name": "GiantPrayingMantis.js"
+  },
+  {
+    "name": "ORCHID MANTIS",
+    "scientific": "Hymenopus coronatus",
+    "class_type": "insect",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "OrchidMantis.js"
+  },
+  {
+    "name": "HERCULES BEETLE",
+    "scientific": "Dynastes hercules",
+    "class_type": "insect",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "HerculesBeetle.js"
+  },
+  {
+    "name": "ATLAS BEETLE",
+    "scientific": "Chalcosoma atlas",
+    "class_type": "insect",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "AtlasBeetle.js"
+  },
+  {
+    "name": "GOLIATH BEETLE",
+    "scientific": "Goliathus goliatus",
+    "class_type": "insect",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "GoliathBeetle.js"
+  },
+  {
+    "name": "JAPANESE GIANT HORNET",
+    "scientific": "Vespa mandarinia japonica",
+    "class_type": "insect",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "JapaneseGiantHornet.js"
+  },
+  {
+    "name": "BULLET ANT",
+    "scientific": "Paraponera clavata",
+    "class_type": "insect",
+    "accent": [
+      185,
+      28,
+      28
+    ],
+    "file_name": "BulletAnt.js"
+  },
+  {
+    "name": "AFRICAN DRIVER ANT",
+    "scientific": "Dorylus nigricans",
+    "class_type": "insect",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "AfricanDriverAnt.js"
+  },
+  {
+    "name": "EMPEROR DRAGONFLY",
+    "scientific": "Anax imperator",
+    "class_type": "insect",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "EmperorDragonfly.js"
+  },
+  {
+    "name": "EMERALD ASH BORER",
+    "scientific": "Agrilus planipennis",
+    "class_type": "insect",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "EmeraldAshBorer.js"
+  },
+  {
+    "name": "LUNA MOTH",
+    "scientific": "Actias luna",
+    "class_type": "insect",
+    "accent": [
+      132,
+      204,
+      22
+    ],
+    "file_name": "LunaMoth.js"
+  },
+  {
+    "name": "ATLAS MOTH",
+    "scientific": "Attacus atlas",
+    "class_type": "insect",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "AtlasMoth.js"
+  },
+  {
+    "name": "DEAD LEAF MANTIS",
+    "scientific": "Deroplatys desiccata",
+    "class_type": "insect",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "DeadLeafMantis.js"
+  },
+  {
+    "name": "SPINY FLOWER MANTIS",
+    "scientific": "Pseudocreobotra wahlbergii",
+    "class_type": "insect",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "SpinyFlowerMantis.js"
+  },
+  {
+    "name": "GHOST MANTIS",
+    "scientific": "Phyllocrania paradoxa",
+    "class_type": "insect",
+    "accent": [
+      107,
+      114,
+      128
+    ],
+    "file_name": "GhostMantis.js"
+  },
+  {
+    "name": "DEVILS FLOWER MANTIS",
+    "scientific": "Idolomantis diabolica",
+    "class_type": "insect",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "DevilsFlowerMantis.js"
+  },
+  {
+    "name": "RHINOCEROS BEETLE",
+    "scientific": "Oryctes nasicornis",
+    "class_type": "insect",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "RhinocerosBeetle.js"
+  },
+  {
+    "name": "STAG BEETLE",
+    "scientific": "Lucanus cervus",
+    "class_type": "insect",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "StagBeetle.js"
+  },
+  {
+    "name": "RAINBOW STAG BEETLE",
+    "scientific": "Phalacrognathus muelleri",
+    "class_type": "insect",
+    "accent": [
+      16,
+      185,
+      129
+    ],
+    "file_name": "RainbowStagBeetle.js"
+  },
+  {
+    "name": "GOLDEN JEWEL BEETLE",
+    "scientific": "Chrysina gloriosa",
+    "class_type": "insect",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "GoldenJewelBeetle.js"
+  },
+  {
+    "name": "METALLIC JEWEL BEETLE",
+    "scientific": "Chrysochroa fulgidissima",
+    "class_type": "insect",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "MetallicJewelBeetle.js"
+  },
+  {
+    "name": "BOMBARDIER BEETLE",
+    "scientific": "Brachinus crepitans",
+    "class_type": "insect",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "BombardierBeetle.js"
+  },
+  {
+    "name": "TIGER BEETLE",
+    "scientific": "Cicindela chinensis",
+    "class_type": "insect",
+    "accent": [
+      59,
+      130,
+      246
+    ],
+    "file_name": "TigerBeetle.js"
+  },
+  {
+    "name": "WHIRLIGIG BEETLE",
+    "scientific": "Gyrinidae aquaticus",
+    "class_type": "insect",
+    "accent": [
+      30,
+      41,
+      59
+    ],
+    "file_name": "WhirligigBeetle.js"
+  },
+  {
+    "name": "DIVING BEETLE",
+    "scientific": "Dytiscus marginalis",
+    "class_type": "insect",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "DivingBeetle.js"
+  },
+  {
+    "name": "FIREFLY",
+    "scientific": "Photinus pyralis",
+    "class_type": "insect",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "Firefly.js"
+  },
+  {
+    "name": "TARANTULA HAWK WASP",
+    "scientific": "Pepsis grossa",
+    "class_type": "insect",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "TarantulaHawkWasp.js"
+  },
+  {
+    "name": "VELVET ANT COW KILLER",
+    "scientific": "Dasymutilla occidentalis",
+    "class_type": "insect",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "VelvetAntCowKiller.js"
+  },
+  {
+    "name": "EXECUTIONER WASP",
+    "scientific": "Polistes carnifex",
+    "class_type": "insect",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "ExecutionerWasp.js"
+  },
+  {
+    "name": "CICADA KILLER WASP",
+    "scientific": "Sphecius speciosus",
+    "class_type": "insect",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "CicadaKillerWasp.js"
+  },
+  {
+    "name": "BLUE MUD DAUBER WASP",
+    "scientific": "Chalybion californicum",
+    "class_type": "insect",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "BlueMudDauberWasp.js"
+  },
+  {
+    "name": "GREEN METALLIC SWEAT BEE",
+    "scientific": "Agapostemon virescens",
+    "class_type": "insect",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "GreenMetallicSweatBee.js"
+  },
+  {
+    "name": "HONEY BEE QUEEN",
+    "scientific": "Apis mellifera",
+    "class_type": "insect",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "HoneyBeeQueen.js"
+  },
+  {
+    "name": "GIANT WATER BUG",
+    "scientific": "Lethocerus americanus",
+    "class_type": "insect",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "GiantWaterBug.js"
+  },
+  {
+    "name": "ASSASSIN BUG",
+    "scientific": "Reduviidae predator",
+    "class_type": "insect",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "AssassinBug.js"
+  },
+  {
+    "name": "WHEEL BUG",
+    "scientific": "Arilus cristatus",
+    "class_type": "insect",
+    "accent": [
+      107,
+      114,
+      128
+    ],
+    "file_name": "WheelBug.js"
+  },
+  {
+    "name": "PERIODICAL CICADA",
+    "scientific": "Magicicada septendecim",
+    "class_type": "insect",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "PeriodicalCicada.js"
+  },
+  {
+    "name": "LANTERNFLY",
+    "scientific": "Lycorma delicatula",
+    "class_type": "insect",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "Lanternfly.js"
+  },
+  {
+    "name": "STICK INSECT PHASMID",
+    "scientific": "Phryganistria chinensis",
+    "class_type": "insect",
+    "accent": [
+      132,
+      204,
+      22
+    ],
+    "file_name": "StickInsectPhasmid.js"
+  },
+  {
+    "name": "LEAF INSECT",
+    "scientific": "Phyllium philippinicum",
+    "class_type": "insect",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "LeafInsect.js"
+  },
+  {
+    "name": "CYBER PRAYING MANTIS",
+    "scientific": "Hierodula cybernetica",
+    "class_type": "insect",
+    "accent": [
+      132,
+      204,
+      22
+    ],
+    "file_name": "CyberPrayingMantis.js"
+  },
+  {
+    "name": "NEON HERCULES BEETLE",
+    "scientific": "Dynastes neon",
+    "class_type": "insect",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "NeonHerculesBeetle.js"
+  },
+  {
+    "name": "QUANTUM DRAGONFLY",
+    "scientific": "Anax quantum",
+    "class_type": "insect",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "QuantumDragonfly.js"
+  },
+  {
+    "name": "MECH GIANT HORNET",
+    "scientific": "Vespa ferrea",
+    "class_type": "insect",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "MechGiantHornet.js"
+  },
+  {
+    "name": "PLASMA FIREFLY",
+    "scientific": "Photinus plasma",
+    "class_type": "insect",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "PlasmaFirefly.js"
+  },
+  {
+    "name": "CYBER ORCHID MANTIS",
+    "scientific": "Hymenopus cyber",
+    "class_type": "insect",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "CyberOrchidMantis.js"
+  },
+  {
+    "name": "VOLT BULLET ANT",
+    "scientific": "Paraponera volt",
+    "class_type": "insect",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "VoltBulletAnt.js"
+  },
+  {
+    "name": "TITAN BEETLE",
+    "scientific": "Titanus giganteus",
+    "class_type": "insect",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "TitanBeetle.js"
+  },
+  {
+    "name": "SHADOW WASP",
+    "scientific": "Pepsis umbra",
+    "class_type": "insect",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "ShadowWasp.js"
+  },
+  {
+    "name": "SOLAR JEWEL BEETLE",
+    "scientific": "Chrysochroa solaris",
+    "class_type": "insect",
+    "accent": [
+      251,
+      146,
+      60
+    ],
+    "file_name": "SolarJewelBeetle.js"
+  },
+  {
+    "name": "AERO DRAGONFLY",
+    "scientific": "Anax aero",
+    "class_type": "insect",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "AeroDragonfly.js"
+  },
+  {
+    "name": "CHRONO MOTH",
+    "scientific": "Actias chronos",
+    "class_type": "insect",
+    "accent": [
+      192,
+      132,
+      252
+    ],
+    "file_name": "ChronoMoth.js"
+  },
+  {
+    "name": "FROST MANTIS",
+    "scientific": "Phyllocrania glacialis",
+    "class_type": "insect",
+    "accent": [
+      224,
+      242,
+      254
+    ],
+    "file_name": "FrostMantis.js"
+  },
+  {
+    "name": "MAGMA BEETLE",
+    "scientific": "Dynastes magma",
+    "class_type": "insect",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "MagmaBeetle.js"
+  },
+  {
+    "name": "VOID WASP",
+    "scientific": "Polistes abyssus",
+    "class_type": "insect",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "VoidWasp.js"
+  },
+  {
+    "name": "STEEL STAG BEETLE",
+    "scientific": "Lucanus metallicus",
+    "class_type": "insect",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "SteelStagBeetle.js"
+  },
+  {
+    "name": "BIO-LUMINESCENT FIREFLY",
+    "scientific": "Photinus bio-lux",
+    "class_type": "insect",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "BioLuminescentFirefly.js"
+  },
+  {
+    "name": "LASER ASSASSIN BUG",
+    "scientific": "Reduviidae laser",
+    "class_type": "insect",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "LaserAssassinBug.js"
+  },
+  {
+    "name": "DARK MATTER INSECT",
+    "scientific": "Insecta tenebris",
+    "class_type": "insect",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "DarkMatterInsect.js"
+  },
+  {
+    "name": "SYNTHETIC TIGER BEETLE",
+    "scientific": "Cicindela syntheticus",
+    "class_type": "insect",
+    "accent": [
+      59,
+      130,
+      246
+    ],
+    "file_name": "SyntheticTigerBeetle.js"
+  },
+  {
+    "name": "QUANTUM CICADA",
+    "scientific": "Magicicada quantum",
+    "class_type": "insect",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "QuantumCicada.js"
+  },
+  {
+    "name": "CYBER VELVET ANT",
+    "scientific": "Dasymutilla cyber",
+    "class_type": "insect",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "CyberVelvetAnt.js"
+  },
+  {
+    "name": "NANO WASP",
+    "scientific": "Micro-hymenoptera nano",
+    "class_type": "insect",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "NanoWasp.js"
+  },
+  {
+    "name": "CHROME BEETLE",
+    "scientific": "Coleoptera chromium",
+    "class_type": "insect",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "ChromeBeetle.js"
+  },
+  {
+    "name": "HYPER MANTIS",
+    "scientific": "Mantis hyper",
+    "class_type": "insect",
+    "accent": [
+      132,
+      204,
+      22
+    ],
+    "file_name": "HyperMantis.js"
   },
   {
     "name": "BLUE-RINGED OCTOPUS",
     "scientific": "Hapalochlaena maculosa",
     "class_type": "cephalopod",
-    "accent": [0, 220, 255],
+    "accent": [
+      0,
+      220,
+      255
+    ],
     "file_name": "BlueRingedOctopus.js"
+  },
+  {
+    "name": "GIANT PACIFIC OCTOPUS",
+    "scientific": "Enteroctopus dofleini",
+    "class_type": "cephalopod",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "GiantPacificOctopus.js"
+  },
+  {
+    "name": "VAMPIRE SQUID",
+    "scientific": "Vampyroteuthis infernalis",
+    "class_type": "cephalopod",
+    "accent": [
+      185,
+      28,
+      28
+    ],
+    "file_name": "VampireSquid.js"
+  },
+  {
+    "name": "COLOSSAL SQUID",
+    "scientific": "Mesonychoteuthis hamiltoni",
+    "class_type": "cephalopod",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "ColossalSquid.js"
+  },
+  {
+    "name": "FLAMBOYANT CUTTLEFISH",
+    "scientific": "Metasepia pfefferi",
+    "class_type": "cephalopod",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "FlamboyantCuttlefish.js"
+  },
+  {
+    "name": "MIMIC OCTOPUS",
+    "scientific": "Thaumoctopus mimicus",
+    "class_type": "cephalopod",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "MimicOctopus.js"
+  },
+  {
+    "name": "BLANKET OCTOPUS",
+    "scientific": "Tremoctopus violaceus",
+    "class_type": "cephalopod",
+    "accent": [
+      168,
+      85,
+      247
+    ],
+    "file_name": "BlanketOctopus.js"
+  },
+  {
+    "name": "COCONUT OCTOPUS",
+    "scientific": "Amphioctopus marginatus",
+    "class_type": "cephalopod",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "CoconutOctopus.js"
+  },
+  {
+    "name": "CARIBBEAN REEF OCTOPUS",
+    "scientific": "Octopus briareus",
+    "class_type": "cephalopod",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "CaribbeanReefOctopus.js"
+  },
+  {
+    "name": "DUMBO OCTOPUS",
+    "scientific": "Grimpoteuthis discovery",
+    "class_type": "cephalopod",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "DumboOctopus.js"
+  },
+  {
+    "name": "HUMBOLDT SQUID",
+    "scientific": "Dosidicus gigas",
+    "class_type": "cephalopod",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "HumboldtSquid.js"
+  },
+  {
+    "name": "COMMON CUTTLEFISH",
+    "scientific": "Sepia officinalis",
+    "class_type": "cephalopod",
+    "accent": [
+      156,
+      163,
+      175
+    ],
+    "file_name": "CommonCuttlefish.js"
+  },
+  {
+    "name": "CHAMBERED NAUTILUS",
+    "scientific": "Nautilus pompilius",
+    "class_type": "cephalopod",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "ChamberedNautilus.js"
+  },
+  {
+    "name": "BIGFIN SQUID",
+    "scientific": "Magnapinna atlantica",
+    "class_type": "cephalopod",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "BigfinSquid.js"
+  },
+  {
+    "name": "GLASS SQUID",
+    "scientific": "Cranchiidae vitreus",
+    "class_type": "cephalopod",
+    "accent": [
+      224,
+      242,
+      254
+    ],
+    "file_name": "GlassSquid.js"
+  },
+  {
+    "name": "FIREFLY SQUID",
+    "scientific": "Watasenia scintillans",
+    "class_type": "cephalopod",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "FireflySquid.js"
+  },
+  {
+    "name": "STRIPED PYJAMA SQUID",
+    "scientific": "Sepioloidea lineolata",
+    "class_type": "cephalopod",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "StripedPyjamaSquid.js"
+  },
+  {
+    "name": "DAY OCTOPUS",
+    "scientific": "Octopus cyanea",
+    "class_type": "cephalopod",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "DayOctopus.js"
+  },
+  {
+    "name": "COMMON OCTOPUS",
+    "scientific": "Octopus vulgaris",
+    "class_type": "cephalopod",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "CommonOctopus.js"
+  },
+  {
+    "name": "ATLANTIC PYGMY OCTOPUS",
+    "scientific": "Octopus joubini",
+    "class_type": "cephalopod",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "AtlanticPygmyOctopus.js"
+  },
+  {
+    "name": "SEVEN-ARM OCTOPUS",
+    "scientific": "Haliphron atlanticus",
+    "class_type": "cephalopod",
+    "accent": [
+      234,
+      88,
+      12
+    ],
+    "file_name": "SevenArmOctopus.js"
+  },
+  {
+    "name": "WUNDERPUS OCTOPUS",
+    "scientific": "Wunderpus photogenicus",
+    "class_type": "cephalopod",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "WunderpusOctopus.js"
+  },
+  {
+    "name": "SOUTHERN SAND OCTOPUS",
+    "scientific": "Octopus kaurna",
+    "class_type": "cephalopod",
+    "accent": [
+      251,
+      191,
+      36
+    ],
+    "file_name": "SouthernSandOctopus.js"
+  },
+  {
+    "name": "ALGAE OCTOPUS",
+    "scientific": "Abdopus aculeatus",
+    "class_type": "cephalopod",
+    "accent": [
+      132,
+      204,
+      22
+    ],
+    "file_name": "AlgaeOctopus.js"
+  },
+  {
+    "name": "BROADCLUB CUTTLEFISH",
+    "scientific": "Sepia latimanus",
+    "class_type": "cephalopod",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "BroadclubCuttlefish.js"
+  },
+  {
+    "name": "PHARAOH CUTTLEFISH",
+    "scientific": "Sepia pharaonis",
+    "class_type": "cephalopod",
+    "accent": [
+      217,
+      119,
+      6
+    ],
+    "file_name": "PharaohCuttlefish.js"
+  },
+  {
+    "name": "REAPER CUTTLEFISH",
+    "scientific": "Sepia mestus",
+    "class_type": "cephalopod",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "ReaperCuttlefish.js"
+  },
+  {
+    "name": "DIAMONDBACK SQUID",
+    "scientific": "Thysanoteuthis rhombus",
+    "class_type": "cephalopod",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "DiamondbackSquid.js"
+  },
+  {
+    "name": "JAPANESE FLYING SQUID",
+    "scientific": "Todarodes pacificus",
+    "class_type": "cephalopod",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "JapaneseFlyingSquid.js"
+  },
+  {
+    "name": "BOBTAIL SQUID",
+    "scientific": "Euprymna scolopes",
+    "class_type": "cephalopod",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "BobtailSquid.js"
+  },
+  {
+    "name": "CYBER BLUE-RINGED OCTOPUS",
+    "scientific": "Hapalochlaena cyber",
+    "class_type": "cephalopod",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "CyberBlueRingedOctopus.js"
+  },
+  {
+    "name": "NEON GIANT PACIFIC OCTOPUS",
+    "scientific": "Enteroctopus neon",
+    "class_type": "cephalopod",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "NeonGiantPacificOctopus.js"
+  },
+  {
+    "name": "QUANTUM VAMPIRE SQUID",
+    "scientific": "Vampyroteuthis quantum",
+    "class_type": "cephalopod",
+    "accent": [
+      185,
+      28,
+      28
+    ],
+    "file_name": "QuantumVampireSquid.js"
+  },
+  {
+    "name": "MECH COLOSSAL SQUID",
+    "scientific": "Mesonychoteuthis ferrea",
+    "class_type": "cephalopod",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "MechColossalSquid.js"
+  },
+  {
+    "name": "PLASMA FLAMBOYANT CUTTLEFISH",
+    "scientific": "Metasepia plasma",
+    "class_type": "cephalopod",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "PlasmaFlamboyantCuttlefish.js"
+  },
+  {
+    "name": "CYBER MIMIC OCTOPUS",
+    "scientific": "Thaumoctopus cyber",
+    "class_type": "cephalopod",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "CyberMimicOctopus.js"
+  },
+  {
+    "name": "VOLT BLANKET OCTOPUS",
+    "scientific": "Tremoctopus volt",
+    "class_type": "cephalopod",
+    "accent": [
+      168,
+      85,
+      247
+    ],
+    "file_name": "VoltBlanketOctopus.js"
+  },
+  {
+    "name": "TITAN KRAKEN",
+    "scientific": "Kraken colossus",
+    "class_type": "cephalopod",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "TitanKraken.js"
+  },
+  {
+    "name": "SHADOW OCTOPUS",
+    "scientific": "Octopus umbra",
+    "class_type": "cephalopod",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "ShadowOctopus.js"
+  },
+  {
+    "name": "SOLAR CUTTLEFISH",
+    "scientific": "Sepia solaris",
+    "class_type": "cephalopod",
+    "accent": [
+      251,
+      146,
+      60
+    ],
+    "file_name": "SolarCuttlefish.js"
+  },
+  {
+    "name": "AERO DUMBO OCTOPUS",
+    "scientific": "Grimpoteuthis aero",
+    "class_type": "cephalopod",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "AeroDumboOctopus.js"
+  },
+  {
+    "name": "CHRONO NAUTILUS",
+    "scientific": "Nautilus chronos",
+    "class_type": "cephalopod",
+    "accent": [
+      192,
+      132,
+      252
+    ],
+    "file_name": "ChronoNautilus.js"
+  },
+  {
+    "name": "FROST SQUID",
+    "scientific": "Cranchiidae glacialis",
+    "class_type": "cephalopod",
+    "accent": [
+      224,
+      242,
+      254
+    ],
+    "file_name": "FrostSquid.js"
+  },
+  {
+    "name": "MAGMA OCTOPUS",
+    "scientific": "Octopus magma",
+    "class_type": "cephalopod",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "MagmaOctopus.js"
+  },
+  {
+    "name": "VOID SQUID",
+    "scientific": "Dosidicus abyssus",
+    "class_type": "cephalopod",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "VoidSquid.js"
+  },
+  {
+    "name": "STEEL NAUTILUS",
+    "scientific": "Nautilus metallicus",
+    "class_type": "cephalopod",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "SteelNautilus.js"
+  },
+  {
+    "name": "BIO-LUMINESCENT FIREFLY SQUID",
+    "scientific": "Watasenia bio-lux",
+    "class_type": "cephalopod",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "BioLuminescentFireflySquid.js"
+  },
+  {
+    "name": "LASER CUTTLEFISH",
+    "scientific": "Sepia laser",
+    "class_type": "cephalopod",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "LaserCuttlefish.js"
+  },
+  {
+    "name": "DARK MATTER OCTOPUS",
+    "scientific": "Octopoda tenebris",
+    "class_type": "cephalopod",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "DarkMatterOctopus.js"
+  },
+  {
+    "name": "SYNTHETIC BIGFIN SQUID",
+    "scientific": "Magnapinna syntheticus",
+    "class_type": "cephalopod",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "SyntheticBigfinSquid.js"
   },
   {
     "name": "OCEANIC MANTA RAY",
     "scientific": "Mobula birostris",
     "class_type": "aquatic",
-    "accent": [14, 165, 233],
-    "file_name": "MantaRay.js"
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "OceanicMantaRay.js"
+  },
+  {
+    "name": "SPOTTED EAGLE RAY",
+    "scientific": "Aetobatus narinari",
+    "class_type": "aquatic",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "SpottedEagleRay.js"
+  },
+  {
+    "name": "GREAT WHITE SHARK",
+    "scientific": "Carcharodon carcharias",
+    "class_type": "aquatic",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "GreatWhiteShark.js"
+  },
+  {
+    "name": "GREAT HAMMERHEAD SHARK",
+    "scientific": "Sphyrna mokarran",
+    "class_type": "aquatic",
+    "accent": [
+      107,
+      114,
+      128
+    ],
+    "file_name": "GreatHammerheadShark.js"
+  },
+  {
+    "name": "TIGER SHARK",
+    "scientific": "Galeocerdo cuvier",
+    "class_type": "aquatic",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "TigerShark.js"
+  },
+  {
+    "name": "WHALE SHARK",
+    "scientific": "Rhincodon typus",
+    "class_type": "aquatic",
+    "accent": [
+      59,
+      130,
+      246
+    ],
+    "file_name": "WhaleShark.js"
+  },
+  {
+    "name": "BULL SHARK",
+    "scientific": "Carcharhinus leucas",
+    "class_type": "aquatic",
+    "accent": [
+      107,
+      114,
+      128
+    ],
+    "file_name": "BullShark.js"
+  },
+  {
+    "name": "MAKO SHARK",
+    "scientific": "Isurus oxyrinchus",
+    "class_type": "aquatic",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "MakoShark.js"
+  },
+  {
+    "name": "THRESHER SHARK",
+    "scientific": "Alopias vulpinus",
+    "class_type": "aquatic",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "ThresherShark.js"
+  },
+  {
+    "name": "BASKING SHARK",
+    "scientific": "Cetorhinus maximus",
+    "class_type": "aquatic",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "BaskingShark.js"
+  },
+  {
+    "name": "ORCA KILLER WHALE",
+    "scientific": "Orcinus orca",
+    "class_type": "aquatic",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "OrcaKillerWhale.js"
+  },
+  {
+    "name": "HUMPBACK WHALE",
+    "scientific": "Megaptera novaeangliae",
+    "class_type": "aquatic",
+    "accent": [
+      30,
+      41,
+      59
+    ],
+    "file_name": "HumpbackWhale.js"
+  },
+  {
+    "name": "BLUE WHALE",
+    "scientific": "Balaenoptera musculus",
+    "class_type": "aquatic",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "BlueWhale.js"
+  },
+  {
+    "name": "SPERM WHALE",
+    "scientific": "Physeter macrocephalus",
+    "class_type": "aquatic",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "SpermWhale.js"
+  },
+  {
+    "name": "BELUGA WHALE",
+    "scientific": "Delphinapterus leucas",
+    "class_type": "aquatic",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "BelugaWhale.js"
+  },
+  {
+    "name": "NARWHAL",
+    "scientific": "Monodon monoceros",
+    "class_type": "aquatic",
+    "accent": [
+      224,
+      242,
+      254
+    ],
+    "file_name": "Narwhal.js"
+  },
+  {
+    "name": "BOTTLENOSE DOLPHIN",
+    "scientific": "Tursiops truncatus",
+    "class_type": "aquatic",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "BottlenoseDolphin.js"
+  },
+  {
+    "name": "PACIFIC WHITE-SIDED DOLPHIN",
+    "scientific": "Lagenorhynchus obliquidens",
+    "class_type": "aquatic",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "PacificWhiteSidedDolphin.js"
+  },
+  {
+    "name": "AMAZON RIVER DOLPHIN",
+    "scientific": "Inia geoffrensis",
+    "class_type": "aquatic",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "AmazonRiverDolphin.js"
+  },
+  {
+    "name": "ELECTRIC EEL",
+    "scientific": "Electrophorus electricus",
+    "class_type": "aquatic",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "ElectricEel.js"
+  },
+  {
+    "name": "GREEN MORAY EEL",
+    "scientific": "Gymnothorax funebris",
+    "class_type": "aquatic",
+    "accent": [
+      34,
+      197,
+      94
+    ],
+    "file_name": "GreenMorayEel.js"
+  },
+  {
+    "name": "ZEBRA MORAY EEL",
+    "scientific": "Gymnomuraena zebra",
+    "class_type": "aquatic",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "ZebraMorayEel.js"
+  },
+  {
+    "name": "RED LIONFISH",
+    "scientific": "Pterois volitans",
+    "class_type": "aquatic",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "RedLionfish.js"
+  },
+  {
+    "name": "GREAT BARRACUDA",
+    "scientific": "Sphyraena barracuda",
+    "class_type": "aquatic",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "GreatBarracuda.js"
+  },
+  {
+    "name": "SWORDFISH",
+    "scientific": "Xiphias gladius",
+    "class_type": "aquatic",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "Swordfish.js"
+  },
+  {
+    "name": "SAILFISH",
+    "scientific": "Istiophorus platypterus",
+    "class_type": "aquatic",
+    "accent": [
+      59,
+      130,
+      246
+    ],
+    "file_name": "Sailfish.js"
+  },
+  {
+    "name": "OCEAN SUNFISH MOLA MOLA",
+    "scientific": "Mola mola",
+    "class_type": "aquatic",
+    "accent": [
+      156,
+      163,
+      175
+    ],
+    "file_name": "OceanSunfishMolaMola.js"
+  },
+  {
+    "name": "COELACANTH",
+    "scientific": "Latimeria chalumnae",
+    "class_type": "aquatic",
+    "accent": [
+      30,
+      41,
+      59
+    ],
+    "file_name": "Coelacanth.js"
+  },
+  {
+    "name": "OARFISH",
+    "scientific": "Regalecus glesne",
+    "class_type": "aquatic",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "Oarfish.js"
+  },
+  {
+    "name": "DEEP SEA ANGLERFISH",
+    "scientific": "Melanocetus johnsonii",
+    "class_type": "aquatic",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "DeepSeaAnglerfish.js"
+  },
+  {
+    "name": "PELICAN EEL GULPER",
+    "scientific": "Eurypharynx pelecanoides",
+    "class_type": "aquatic",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "PelicanEelGulper.js"
+  },
+  {
+    "name": "SAWFISH",
+    "scientific": "Pristis pectinata",
+    "class_type": "aquatic",
+    "accent": [
+      180,
+      83,
+      9
+    ],
+    "file_name": "Sawfish.js"
+  },
+  {
+    "name": "LEOPARD SHARK",
+    "scientific": "Triakis semifasciata",
+    "class_type": "aquatic",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "LeopardShark.js"
+  },
+  {
+    "name": "NURSE SHARK",
+    "scientific": "Ginglymostoma cirratum",
+    "class_type": "aquatic",
+    "accent": [
+      161,
+      98,
+      7
+    ],
+    "file_name": "NurseShark.js"
+  },
+  {
+    "name": "BLUE SHARK",
+    "scientific": "Prionace glauca",
+    "class_type": "aquatic",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "BlueShark.js"
+  },
+  {
+    "name": "GIANT STINGRAY",
+    "scientific": "Urogymnus polylepis",
+    "class_type": "aquatic",
+    "accent": [
+      146,
+      64,
+      14
+    ],
+    "file_name": "GiantStingray.js"
+  },
+  {
+    "name": "ROUND STINGRAY",
+    "scientific": "Urobatis halleri",
+    "class_type": "aquatic",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "RoundStingray.js"
+  },
+  {
+    "name": "BLUE-SPOTTED RIBBONTAIL RAY",
+    "scientific": "Taeniura lymma",
+    "class_type": "aquatic",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "BlueSpottedRibbontailRay.js"
+  },
+  {
+    "name": "ELECTRIC TORPEDO RAY",
+    "scientific": "Torpedo marmorata",
+    "class_type": "aquatic",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "ElectricTorpedoRay.js"
+  },
+  {
+    "name": "GUINEAFOWL PUFFERFISH",
+    "scientific": "Arothron meleagris",
+    "class_type": "aquatic",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "GuineafowlPufferfish.js"
+  },
+  {
+    "name": "CYBER MANTA RAY",
+    "scientific": "Mobula cybernetica",
+    "class_type": "aquatic",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "CyberMantaRay.js"
+  },
+  {
+    "name": "NEON GREAT WHITE SHARK",
+    "scientific": "Carcharodon neon",
+    "class_type": "aquatic",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "NeonGreatWhiteShark.js"
+  },
+  {
+    "name": "QUANTUM HAMMERHEAD",
+    "scientific": "Sphyrna quantum",
+    "class_type": "aquatic",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "QuantumHammerhead.js"
+  },
+  {
+    "name": "MECH ORCA",
+    "scientific": "Orcinus ferreus",
+    "class_type": "aquatic",
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "file_name": "MechOrca.js"
+  },
+  {
+    "name": "PLASMA ELECTRIC EEL",
+    "scientific": "Electrophorus plasma",
+    "class_type": "aquatic",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "PlasmaElectricEel.js"
+  },
+  {
+    "name": "CYBER DOLPHIN",
+    "scientific": "Tursiops cyber",
+    "class_type": "aquatic",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "CyberDolphin.js"
+  },
+  {
+    "name": "VOLT STINGRAY",
+    "scientific": "Taeniura volt",
+    "class_type": "aquatic",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "VoltStingray.js"
+  },
+  {
+    "name": "TITAN WHALE SHARK",
+    "scientific": "Rhincodon colossus",
+    "class_type": "aquatic",
+    "accent": [
+      59,
+      130,
+      246
+    ],
+    "file_name": "TitanWhaleShark.js"
+  },
+  {
+    "name": "SHADOW MORAY",
+    "scientific": "Gymnothorax umbra",
+    "class_type": "aquatic",
+    "accent": [
+      55,
+      65,
+      81
+    ],
+    "file_name": "ShadowMoray.js"
+  },
+  {
+    "name": "SOLAR LIONFISH",
+    "scientific": "Pterois solaris",
+    "class_type": "aquatic",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "SolarLionfish.js"
+  },
+  {
+    "name": "AERO EAGLE RAY",
+    "scientific": "Aetobatus aero",
+    "class_type": "aquatic",
+    "accent": [
+      56,
+      189,
+      248
+    ],
+    "file_name": "AeroEagleRay.js"
+  },
+  {
+    "name": "CHRONO COELACANTH",
+    "scientific": "Latimeria chronos",
+    "class_type": "aquatic",
+    "accent": [
+      192,
+      132,
+      252
+    ],
+    "file_name": "ChronoCoelacanth.js"
+  },
+  {
+    "name": "FROST BELUGA",
+    "scientific": "Delphinapterus glacialis",
+    "class_type": "aquatic",
+    "accent": [
+      224,
+      242,
+      254
+    ],
+    "file_name": "FrostBeluga.js"
+  },
+  {
+    "name": "MAGMA BARRACUDA",
+    "scientific": "Sphyraena magma",
+    "class_type": "aquatic",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "MagmaBarracuda.js"
+  },
+  {
+    "name": "VOID ANGLERFISH",
+    "scientific": "Melanocetus abyssus",
+    "class_type": "aquatic",
+    "accent": [
+      75,
+      85,
+      99
+    ],
+    "file_name": "VoidAnglerfish.js"
+  },
+  {
+    "name": "STEEL SWORDFISH",
+    "scientific": "Xiphias metallicus",
+    "class_type": "aquatic",
+    "accent": [
+      148,
+      163,
+      184
+    ],
+    "file_name": "SteelSwordfish.js"
+  },
+  {
+    "name": "BIO-LUMINESCENT OARFISH",
+    "scientific": "Regalecus bio-lux",
+    "class_type": "aquatic",
+    "accent": [
+      244,
+      63,
+      94
+    ],
+    "file_name": "BioLuminescentOarfish.js"
+  },
+  {
+    "name": "LASER SAILFISH",
+    "scientific": "Istiophorus laser",
+    "class_type": "aquatic",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "LaserSailfish.js"
+  },
+  {
+    "name": "DARK MATTER SHARK",
+    "scientific": "Selachimorpha tenebris",
+    "class_type": "aquatic",
+    "accent": [
+      99,
+      102,
+      241
+    ],
+    "file_name": "DarkMatterShark.js"
+  },
+  {
+    "name": "SYNTHETIC NARWHAL",
+    "scientific": "Monodon syntheticus",
+    "class_type": "aquatic",
+    "accent": [
+      224,
+      242,
+      254
+    ],
+    "file_name": "SyntheticNarwhal.js"
   }
 ]

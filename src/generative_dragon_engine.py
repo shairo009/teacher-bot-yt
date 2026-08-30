@@ -400,6 +400,16 @@ def get_species_for_id(animal_id: int) -> dict:
 
     code_lines = _generate_js_code_for_animal(name, class_type, scientific)
 
+    hooks = [
+        f"I Built an Interactive {name} with Vanilla JS IK Physics 🤯 #Shorts #Coding",
+        f"Realistic {name} in JavaScript Canvas (60 FPS Simulation) ✨ #Shorts #WebDev",
+        f"How to Code an Interactive {name} Cursor in JavaScript ⚡ #Shorts #Programming",
+        f"Coding an Interactive {name} with Joint Kinematics ✨ #Shorts #Coding",
+        f"I Simulated a Realistic {name} in 100% Pure JavaScript 🤯 #Shorts #Tech",
+        f"Interactive {name} Cursor in Vanilla JS ✨ #Shorts #CreativeCoding"
+    ]
+    yt_title = hooks[animal_id % len(hooks)]
+
     return {
         "id": spec_id,
         "name": name,
@@ -408,22 +418,32 @@ def get_species_for_id(animal_id: int) -> dict:
         "file_name": file_name,
         "accent": accent,
         "code_lines": code_lines,
-        "yt_title": f"Realistic Interactive {name} Cursor in JS ✨ #Shorts #Coding",
-        "yt_desc": f"✨ Realistic {name} ({scientific}) with biologically accurate joint kinematics in Vanilla JavaScript!\n\n#JavaScript #WebDev #Shorts #Coding #Tech"
+        "animal_id": animal_id,
+        "yt_title": yt_title,
+        "yt_desc": f"✨ Realistic {name} ({scientific}) with biologically accurate joint kinematics in Vanilla JavaScript!\n\n#JavaScript #WebDev #Shorts #Coding #Tech #Programming #Canvas"
     }
 
 class MasterSimulator:
-    def __init__(self, cx: float, cy: float, rx: float, ry: float):
+    def __init__(self, cx: float, cy: float, rx: float, ry: float, seed: int = 0):
         self.cx = cx
         self.cy = cy
         self.rx = rx
         self.ry = ry
+        self.seed = seed
         self.x = cx
         self.y = cy
         self.angle = 0.0
         self.speed = 0.0
         self.spine = [{"x": cx - i * 22, "y": cy, "angle": 0.0} for i in range(20)]
         
+        # Varied movement Lissajous parameters based on seed
+        self.f1 = 0.65 + ((seed % 7) - 3) * 0.035
+        self.f2 = 1.35 + (((seed >> 3) % 7) - 3) * 0.05
+        self.f3 = 0.95 + (((seed >> 6) % 7) - 3) * 0.04
+        self.f4 = 1.95 + (((seed >> 9) % 7) - 3) * 0.06
+        self.p1 = ((seed >> 2) % 10) * 0.628
+        self.p2 = ((seed >> 5) % 10) * 0.628
+
         # 8 Arachnid Legs
         self.legs8 = [
             {"id": "L1", "side": -1, "spread": -0.85, "rest_d": 110, "l1": 34, "l2": 48, "l3": 42, "group": 0, "cur": [cx - 110, cy + 40], "tgt": [cx - 110, cy + 40], "start": [cx - 110, cy + 40], "prog": 1.0, "hip": (cx - 110, cy + 40)},
@@ -444,8 +464,9 @@ class MasterSimulator:
         ]
 
     def update(self, sim_time: float):
-        target_x = self.cx + math.cos(sim_time * 0.75) * (self.rx * 0.85) + math.sin(sim_time * 1.5) * (self.rx * 0.20)
-        target_y = self.cy + math.sin(sim_time * 1.05) * (self.ry * 0.80) + math.cos(sim_time * 2.1) * (self.ry * 0.18)
+        t = sim_time
+        target_x = self.cx + math.cos(t * self.f1 + self.p1) * (self.rx * 0.85) + math.sin(t * self.f2 + self.p2) * (self.rx * 0.20)
+        target_y = self.cy + math.sin(t * self.f3 + self.p1) * (self.ry * 0.80) + math.cos(t * self.f4 + self.p2) * (self.ry * 0.18)
 
         dx = target_x - self.x
         dy = target_y - self.y
@@ -468,6 +489,7 @@ class MasterSimulator:
 
         cos_a = math.cos(self.angle)
         sin_a = math.sin(self.angle)
+
         perp_x = -sin_a
         perp_y =  cos_a
 
@@ -576,13 +598,16 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     img = Image.alpha_composite(img, grad.filter(ImageFilter.GaussianBlur(80)))
     draw = ImageDraw.Draw(img)
 
-    # 1. Top Header: ANIMAL NAME ONLY
+    # 1. Top Header: ANIMAL NAME & TECH BADGE
     header_h = 135
     draw.rectangle([0, 0, WIDTH, header_h], fill=(15, 18, 22, 255))
     draw.line([(0, header_h), (WIDTH, header_h)], fill=(30, 36, 44), width=2)
 
-    name_font = get_font(58, bold=True)
-    draw.text((WIDTH // 2, 38), species["name"], font=name_font, fill=(255, 255, 255), anchor="mt")
+    name_font = get_font(52, bold=True)
+    draw.text((WIDTH // 2, 24), species["name"], font=name_font, fill=(255, 255, 255), anchor="mt")
+
+    badge_font = get_font(20, bold=True, mono=True)
+    draw.text((WIDTH // 2, 88), "⚡ [JS] Vanilla JavaScript • HTML5 Canvas • 60 FPS IK", font=badge_font, fill=(148, 163, 184), anchor="mt")
 
     # 2. Upper Section: Framed Creature Display Window
     box_w, box_h = 920, 640
@@ -604,12 +629,14 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     rad_y = box_h * 0.30
 
     sp_id = species.get("id", "golden_shepherd_dog")
+    animal_id = species.get("animal_id", 0)
     class_type = species.get("class_type", "quadruped")
     accent_color = species.get("accent", (245, 158, 11))
+    seed = (animal_id * 10007) & 0xFFFFFF
 
-    sim_key = f"{sp_id}_{total_frames}"
+    sim_key = f"{sp_id}_{animal_id}_{total_frames}"
     if frame_idx == 0 or sim_key not in _SIM_CACHE:
-        _SIM_CACHE[sim_key] = MasterSimulator(cb_x, cb_y, rad_x, rad_y)
+        _SIM_CACHE[sim_key] = MasterSimulator(cb_x, cb_y, rad_x, rad_y, seed=seed)
     
     sim = _SIM_CACHE[sim_key]
     sim.update(sim_time)
@@ -622,17 +649,17 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     # ─────────────────────────────────────────────────────────────
     # BIOLOGICAL ANIMAL RENDERING: 8 TAXONOMIC ANIMAL CLASSES
     # ─────────────────────────────────────────────────────────────
-    # Interactive Cursor Target Indicator
-    draw.ellipse([sim.cx + math.cos(sim_time * 0.75) * (rad_x * 0.85) - 8,
-                  sim.cy + math.sin(sim_time * 1.05) * (rad_y * 0.80) - 8,
-                  sim.cx + math.cos(sim_time * 0.75) * (rad_x * 0.85) + 8,
-                  sim.cy + math.sin(sim_time * 1.05) * (rad_y * 0.80) + 8],
-                 outline=(239, 68, 68, 160), width=2)
-    draw.ellipse([sim.cx + math.cos(sim_time * 0.75) * (rad_x * 0.85) - 3,
-                  sim.cy + math.sin(sim_time * 1.05) * (rad_y * 0.80) - 3,
-                  sim.cx + math.cos(sim_time * 0.75) * (rad_x * 0.85) + 3,
-                  sim.cy + math.sin(sim_time * 1.05) * (rad_y * 0.80) + 3],
-                 fill=(239, 68, 68, 200))
+    # Glowing Interactive Cursor Target Indicator
+    t_c = sim_time
+    tgt_x = sim.cx + math.cos(t_c * sim.f1 + sim.p1) * (rad_x * 0.85) + math.sin(t_c * sim.f2 + sim.p2) * (rad_x * 0.20)
+    tgt_y = sim.cy + math.sin(t_c * sim.f3 + sim.p1) * (rad_y * 0.80) + math.cos(t_c * sim.f4 + sim.p2) * (rad_y * 0.18)
+
+    pulse_r = 10 + math.sin(sim_time * 8) * 3
+    draw.ellipse([tgt_x - pulse_r, tgt_y - pulse_r, tgt_x + pulse_r, tgt_y + pulse_r], outline=(239, 68, 68), width=2)
+    ripple_r = 14 + (frame_idx % 35) * 0.85
+    draw.ellipse([tgt_x - ripple_r, tgt_y - ripple_r, tgt_x + ripple_r, tgt_y + ripple_r], outline=(251, 113, 133), width=1)
+    draw.ellipse([tgt_x - 4, tgt_y - 4, tgt_x + 4, tgt_y + 4], fill=(239, 68, 68))
+
 
     if class_type == "quadruped" or "dog" in sp_id or "wolf" in sp_id or "tiger" in sp_id:
         # 1. 4 Articulated Legs (Elbow BACKWARD, Stifle Knee FORWARD, Hock BACKWARD)
@@ -1091,6 +1118,8 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     code_box_top = card_y + title_h + 18
     code_box_bottom = card_y + card_h - 24
 
+    active_idx = min(total_lines - 1, start_line_idx + 2)
+
     for idx in range(visible_lines + 2):
         actual_line_idx = start_line_idx + idx
         if actual_line_idx >= total_lines:
@@ -1102,16 +1131,28 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         if y_pos < code_box_top - 16 or y_pos > code_box_bottom:
             continue
 
-        draw.text((card_x + 36, y_pos), f"{actual_line_idx + 1:2d}", font=line_num_font, fill=(80, 100, 125))
+        # Soft active line background highlight
+        if actual_line_idx == active_idx:
+            draw.rounded_rectangle([card_x + 16, y_pos - 4, card_x + card_w - 16, y_pos + line_h - 8], radius=6, fill=(24, 34, 48))
+
+        draw.text((card_x + 36, y_pos), f"{actual_line_idx + 1:2d}", font=line_num_font, fill=(140, 160, 185) if actual_line_idx == active_idx else (80, 100, 125))
 
         indent_x = card_x + 98
         _draw_highlighted_js_line(draw, indent_x, y_pos, line_text, code_font)
 
-    # Bottom Progress Bar
+        # Blinking cursor on active line
+        if actual_line_idx == active_idx and (frame_idx // 10) % 2 == 0:
+            cursor_x = indent_x + int(len(line_text) * 16.5)
+            if cursor_x < card_x + card_w - 30:
+                draw.rectangle([cursor_x, y_pos + 4, cursor_x + 3, y_pos + 32], fill=accent_color)
+
+    # Bottom Progress Bar with Accent Glow
     bar_w = 920
     bar_x = (WIDTH - bar_w) // 2
     bar_y = 1855
     draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_w, bar_y + 12], radius=6, fill=(35, 46, 62))
-    draw.rounded_rectangle([bar_x, bar_y, bar_x + int(bar_w * progress), bar_y + 12], radius=6, fill=accent_color)
+    fill_w = max(12, int(bar_w * progress))
+    draw.rounded_rectangle([bar_x, bar_y, bar_x + fill_w, bar_y + 12], radius=6, fill=accent_color)
 
     return img.convert("RGB")
+

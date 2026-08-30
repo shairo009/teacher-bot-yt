@@ -61,31 +61,33 @@ def _gen_ambient_drone(duration: float) -> list[float]:
         out.append(sample)
     return out
 
-def generate_reel_audio(output_wav: Path, duration: float = 8.8, typing_events: int = 18) -> Path:
+def generate_reel_audio(output_wav: Path, duration: float = 58.0, typing_events: int = 40, seed: int = 0) -> Path:
+    rng = random.Random(seed)
     total_samples = int(SAMPLE_RATE * duration)
     master = _gen_ambient_drone(duration)
 
-    # Add whoosh sounds during cursor moves
-    whoosh1 = _gen_whoosh(0.5)
-    whoosh2 = _gen_whoosh(0.5)
-    
-    # Mix whooshes
-    for start_t in [0.8, 3.5, 6.2]:
-        start_idx = int(start_t * SAMPLE_RATE)
-        for j, s in enumerate(whoosh1):
-            if start_idx + j < len(master):
-                master[start_idx + j] = _clip(master[start_idx + j] + s * 0.4)
+    whoosh = _gen_whoosh(0.55)
 
-    # Add rhythmic mechanical typing clicks
-    t_start = 1.0
-    t_step = (duration - 2.5) / max(1, typing_events)
+    # Periodic whooshes when cursor changes trajectory
+    whoosh_interval = 4.5
+    t_w = 1.0
+    while t_w < duration - 1.0:
+        start_idx = int(t_w * SAMPLE_RATE)
+        for j, s in enumerate(whoosh):
+            if start_idx + j < len(master):
+                master[start_idx + j] = _clip(master[start_idx + j] + s * 0.35)
+        t_w += whoosh_interval + rng.uniform(-0.5, 0.8)
+
+    # Periodic mechanical typing clicks during code window scrolling
+    t_start = 0.5
+    t_step = (duration - 1.5) / max(1, typing_events)
     for k in range(typing_events):
-        k_time = t_start + k * t_step + random.uniform(-0.02, 0.02)
+        k_time = t_start + k * t_step + rng.uniform(-0.03, 0.03)
         k_idx = int(k_time * SAMPLE_RATE)
         click = _gen_key_click(0.04)
         for j, s in enumerate(click):
             if k_idx + j < len(master):
-                master[k_idx + j] = _clip(master[k_idx + j] + s * 0.35)
+                master[k_idx + j] = _clip(master[k_idx + j] + s * 0.30)
 
     # Save to 16-bit PCM WAV
     output_wav.parent.mkdir(parents=True, exist_ok=True)
@@ -98,3 +100,4 @@ def generate_reel_audio(output_wav: Path, duration: float = 8.8, typing_events: 
             for s in master
         ))
     return output_wav
+

@@ -356,5 +356,14 @@
     "timestamp": "2026-08-30T05:40:50.595728+00:00",
     "video_id": "VIxFBxJSiDI",
     "uploaded": true
+  },
+  {
+    "id": 27,
+    "species": "GOLIATH TARANTULA",
+    "scientific": "Theraphosa blondi",
+    "file": "tmp/reel_0027/goliath_tarantula_short.mp4",
+    "timestamp": "2026-08-30T13:55:48.317545+00:00",
+    "video_id": "GIZb6x0vEVY",
+    "uploaded": true
   }
 ]

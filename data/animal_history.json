@@ -374,5 +374,14 @@
     "timestamp": "2026-08-30T19:27:07.573598+00:00",
     "video_id": "piJn6dZqXtE",
     "uploaded": true
+  },
+  {
+    "id": 29,
+    "species": "OCELOT",
+    "scientific": "Leopardus pardalis",
+    "file": "tmp/reel_0029/ocelot_short.mp4",
+    "timestamp": "2026-08-30T22:56:24.036921+00:00",
+    "video_id": "BoR3UCbi6vQ",
+    "uploaded": true
   }
 ]

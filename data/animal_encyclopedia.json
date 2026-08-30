@@ -6268,5 +6268,192 @@
       254
     ],
     "file_name": "SyntheticNarwhal.js"
+  },
+  {
+    "name": "JAPANESE KOI FISH",
+    "scientific": "Cyprinus carpio",
+    "class_type": "aquatic",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "KoiFish.js"
+  },
+  {
+    "name": "BETTA SIAMESE FIGHTING FISH",
+    "scientific": "Betta splendens",
+    "class_type": "aquatic",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "BettaFish.js"
+  },
+  {
+    "name": "ORANGE CLOWNFISH",
+    "scientific": "Amphiprion ocellaris",
+    "class_type": "aquatic",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "Clownfish.js"
+  },
+  {
+    "name": "GOLDEN RYUKIN GOLDFISH",
+    "scientific": "Carassius auratus",
+    "class_type": "aquatic",
+    "accent": [
+      245,
+      158,
+      11
+    ],
+    "file_name": "Goldfish.js"
+  },
+  {
+    "name": "ASIAN AROWANA DRAGONFISH",
+    "scientific": "Scleropages formosus",
+    "class_type": "aquatic",
+    "accent": [
+      234,
+      179,
+      8
+    ],
+    "file_name": "Arowana.js"
+  },
+  {
+    "name": "PACIFIC BLUE TANG",
+    "scientific": "Paracanthurus hepatus",
+    "class_type": "aquatic",
+    "accent": [
+      59,
+      130,
+      246
+    ],
+    "file_name": "BlueTang.js"
+  },
+  {
+    "name": "RED-BELLIED PIRANHA",
+    "scientific": "Pygocentrus nattereri",
+    "class_type": "aquatic",
+    "accent": [
+      239,
+      68,
+      68
+    ],
+    "file_name": "Piranha.js"
+  },
+  {
+    "name": "NEON TETRA",
+    "scientific": "Paracheirodon innesi",
+    "class_type": "aquatic",
+    "accent": [
+      0,
+      220,
+      255
+    ],
+    "file_name": "NeonTetra.js"
+  },
+  {
+    "name": "ROYAL BLUE DISCUS FISH",
+    "scientific": "Symphysodon aequifasciatus",
+    "class_type": "aquatic",
+    "accent": [
+      14,
+      165,
+      233
+    ],
+    "file_name": "DiscusFish.js"
+  },
+  {
+    "name": "FANCY GUPPY FISH",
+    "scientific": "Poecilia reticulata",
+    "class_type": "aquatic",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "GuppyFish.js"
+  },
+  {
+    "name": "ANGELFISH",
+    "scientific": "Pterophyllum scalare",
+    "class_type": "aquatic",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "Angelfish.js"
+  },
+  {
+    "name": "ELECTRIC BLUE FLOWERHORN",
+    "scientific": "Cichlasoma cyaneum",
+    "class_type": "aquatic",
+    "accent": [
+      6,
+      182,
+      212
+    ],
+    "file_name": "Flowerhorn.js"
+  },
+  {
+    "name": "MAJESTIC SEAHORSE",
+    "scientific": "Hippocampus hippocampus",
+    "class_type": "aquatic",
+    "accent": [
+      251,
+      191,
+      36
+    ],
+    "file_name": "Seahorse.js"
+  },
+  {
+    "name": "CYBER KOI FISH",
+    "scientific": "Cyprinus cybernetica",
+    "class_type": "aquatic",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "CyberKoi.js"
+  },
+  {
+    "name": "NEON BETTA FISH",
+    "scientific": "Betta neon",
+    "class_type": "aquatic",
+    "accent": [
+      236,
+      72,
+      153
+    ],
+    "file_name": "NeonBetta.js"
+  },
+  {
+    "name": "QUANTUM AROWANA",
+    "scientific": "Scleropages quantum",
+    "class_type": "aquatic",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "file_name": "QuantumArowana.js"
+  },
+  {
+    "name": "PLASMA CLOWNFISH",
+    "scientific": "Amphiprion plasma",
+    "class_type": "aquatic",
+    "accent": [
+      249,
+      115,
+      22
+    ],
+    "file_name": "PlasmaClownfish.js"
   }
 ]

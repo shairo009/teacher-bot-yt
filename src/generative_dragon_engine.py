@@ -1051,33 +1051,104 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         draw.line([(sim.x + 14, sim.y - 13), (sim.x + 20, sim.y - 13)], fill=(0, 0, 0), width=2)
 
     else:
-        # Oceanic Manta Ray: Expansive Undulating Pectoral Wing Fins & Cephalic Lobes
-        flap_wave = math.sin(sim_time * 3.5) * 26
-        # 1. Broad Rhomboid Diamond Wing Body
-        w_nose = (sim.x + cos_a * 55, sim.y + sin_a * 55)
-        w_left = (sim.x - cos_a * 15 + perp_x * 90, sim.y - sin_a * 15 + perp_y * 90 + flap_wave)
-        w_right = (sim.x - cos_a * 15 - perp_x * 90, sim.y - sin_a * 15 - perp_y * 90 - flap_wave)
-        w_tail = (sim.x - cos_a * 50, sim.y - sin_a * 50)
-        draw.polygon([w_nose, w_left, w_tail, w_right], fill=(14, 28, 48), outline=accent_color, width=3)
-        # White dorsal shoulder markings
-        draw.polygon([(sim.x + cos_a * 10, sim.y + sin_a * 10),
-                      (sim.x - cos_a * 10 + perp_x * 45, sim.y - sin_a * 10 + perp_y * 45 + flap_wave*0.5),
-                      (sim.x - cos_a * 25, sim.y - sin_a * 25)], fill=(240, 248, 255))
-        draw.polygon([(sim.x + cos_a * 10, sim.y + sin_a * 10),
-                      (sim.x - cos_a * 10 - perp_x * 45, sim.y - sin_a * 10 - perp_y * 45 - flap_wave*0.5),
-                      (sim.x - cos_a * 25, sim.y - sin_a * 25)], fill=(240, 248, 255))
+        # Aquatic Class: Distinct Kinematics for Swimming Fish vs Expansive Wing Rays
+        is_ray = ("ray" in sp_id or "manta" in sp_id or "skate" in sp_id)
 
-        # 2. Cephalic Horns at Mouth
-        draw.ellipse([w_nose[0] + perp_x * 16 - 6, w_nose[1] + perp_y * 16 - 6, w_nose[0] + perp_x * 16 + 6, w_nose[1] + perp_y * 16 + 6], fill=(14, 28, 48), outline=accent_color, width=2)
-        draw.ellipse([w_nose[0] - perp_x * 16 - 6, w_nose[1] - perp_y * 16 - 6, w_nose[0] - perp_x * 16 + 6, w_nose[1] - perp_y * 16 + 6], fill=(14, 28, 48), outline=accent_color, width=2)
+        if is_ray:
+            # Oceanic Manta / Eagle Ray: Undulating Pectoral Wing Fins & Cephalic Lobes
+            flap_wave = math.sin(sim_time * 3.5) * 26
+            w_nose = (sim.x + cos_a * 55, sim.y + sin_a * 55)
+            w_left = (sim.x - cos_a * 15 + perp_x * 90, sim.y - sin_a * 15 + perp_y * 90 + flap_wave)
+            w_right = (sim.x - cos_a * 15 - perp_x * 90, sim.y - sin_a * 15 - perp_y * 90 - flap_wave)
+            w_tail = (sim.x - cos_a * 50, sim.y - sin_a * 50)
+            draw.polygon([w_nose, w_left, w_tail, w_right], fill=(14, 28, 48), outline=accent_color, width=3)
+            # White dorsal shoulder markings
+            draw.polygon([(sim.x + cos_a * 10, sim.y + sin_a * 10),
+                          (sim.x - cos_a * 10 + perp_x * 45, sim.y - sin_a * 10 + perp_y * 45 + flap_wave*0.5),
+                          (sim.x - cos_a * 25, sim.y - sin_a * 25)], fill=(240, 248, 255))
+            draw.polygon([(sim.x + cos_a * 10, sim.y + sin_a * 10),
+                          (sim.x - cos_a * 10 - perp_x * 45, sim.y - sin_a * 10 - perp_y * 45 - flap_wave*0.5),
+                          (sim.x - cos_a * 25, sim.y - sin_a * 25)], fill=(240, 248, 255))
 
-        # 3. Trailing Whip Tail
-        t_prev = w_tail
-        for i in range(12):
-            tx = t_prev[0] - cos_a * 14 + math.sin(sim_time * 4 + i * 0.4) * 5
-            ty = t_prev[1] - sin_a * 14 + math.cos(sim_time * 4 + i * 0.4) * 5
-            draw.line([t_prev, (tx, ty)], fill=(14, 28, 48), width=max(2, 6 - i // 2))
-            t_prev = (tx, ty)
+            # Cephalic Horns at Mouth
+            draw.ellipse([w_nose[0] + perp_x * 16 - 6, w_nose[1] + perp_y * 16 - 6, w_nose[0] + perp_x * 16 + 6, w_nose[1] + perp_y * 16 + 6], fill=(14, 28, 48), outline=accent_color, width=2)
+            draw.ellipse([w_nose[0] - perp_x * 16 - 6, w_nose[1] - perp_y * 16 - 6, w_nose[0] - perp_x * 16 + 6, w_nose[1] - perp_y * 16 + 6], fill=(14, 28, 48), outline=accent_color, width=2)
+
+            # Trailing Whip Tail
+            t_prev = w_tail
+            for i in range(12):
+                tx = t_prev[0] - cos_a * 14 + math.sin(sim_time * 4 + i * 0.4) * 5
+                ty = t_prev[1] - sin_a * 14 + math.cos(sim_time * 4 + i * 0.4) * 5
+                draw.line([t_prev, (tx, ty)], fill=(14, 28, 48), width=max(2, 6 - i // 2))
+                t_prev = (tx, ty)
+        else:
+            # Swimming Fish / Shark / Eel / Koi: Lateral Undulation, Flowing Caudal Fin & Pectoral Flippers
+            swim_wave = math.sin(sim_time * 6)
+            
+            # 1. Pectoral Side Swimming Fins (Left & Right)
+            for side in [-1, 1]:
+                f_root = (sim.x + cos_a * 10 + perp_x * (22 * side), sim.y + sin_a * 10 + perp_y * (22 * side))
+                fin_flap = math.sin(sim_time * 6 + side * 0.5) * 12
+                f_tip = (f_root[0] - cos_a * 28 + perp_x * ((38 + fin_flap) * side),
+                         f_root[1] - sin_a * 28 + perp_y * ((38 + fin_flap) * side))
+                f_mid = (f_root[0] - cos_a * 14 + perp_x * (28 * side), f_root[1] - sin_a * 14 + perp_y * (28 * side))
+                draw.polygon([f_root, f_mid, f_tip], fill=(240, 240, 245), outline=accent_color, width=2)
+
+            # 2. Streamlined Multi-Vertebrae Fuselage Body
+            body_pts_l, body_pts_r = [], []
+            spine_chain = []
+            for i in range(14):
+                seg_wave = math.sin(sim_time * 6 - i * 0.45) * (i * 2.2)
+                sx = sim.x - cos_a * (i * 15) + perp_x * seg_wave
+                sy = sim.y - sin_a * (i * 15) + perp_y * seg_wave
+                spine_chain.append((sx, sy))
+                
+                # Fish Body Profile Width
+                if i < 4:
+                    hw = 20 + i * 4
+                elif i < 9:
+                    hw = 32 - (i - 4) * 3.5
+                else:
+                    hw = max(6, 16 - (i - 9) * 2.5)
+
+                body_pts_l.append((sx + perp_x * hw, sy + perp_y * hw))
+                body_pts_r.append((sx - perp_x * hw, sy - perp_y * hw))
+
+            # Render Fish Torso
+            h_nose = (sim.x + cos_a * 35, sim.y + sin_a * 35)
+            fish_poly = [h_nose] + body_pts_l + list(reversed(body_pts_r))
+            draw.polygon(fish_poly, fill=(25, 35, 50), outline=accent_color, width=3)
+
+            # Dorsal Spine Accent Stripe
+            for i in range(len(spine_chain) - 1):
+                draw.line([spine_chain[i], spine_chain[i+1]], fill=accent_color, width=3)
+
+            # 3. Flowing 2-Lobe Caudal Tail Fin (Fish Tail)
+            tail_base = spine_chain[-1]
+            tail_wave = math.sin(sim_time * 6 - 6.0) * 24
+            t_tip_top = (tail_base[0] - cos_a * 45 + perp_x * (32 + tail_wave),
+                         tail_base[1] - sin_a * 45 + perp_y * (32 + tail_wave))
+            t_tip_bot = (tail_base[0] - cos_a * 45 - perp_x * (32 - tail_wave),
+                         tail_base[1] - sin_a * 45 - perp_y * (32 - tail_wave))
+            t_mid_notch = (tail_base[0] - cos_a * 25 + perp_x * (tail_wave * 0.5),
+                           tail_base[1] - sin_a * 25 + perp_y * (tail_wave * 0.5))
+            
+            draw.polygon([tail_base, t_tip_top, t_mid_notch, t_tip_bot], fill=(245, 245, 250), outline=accent_color, width=2)
+
+            # 4. Fish Head: Eyes & Gill Cover Arch
+            eye_l = (sim.x + cos_a * 20 + perp_x * 16, sim.y + sin_a * 20 + perp_y * 16)
+            eye_r = (sim.x + cos_a * 20 - perp_x * 16, sim.y + sin_a * 20 - perp_y * 16)
+            draw.ellipse([eye_l[0]-6, eye_l[1]-6, eye_l[0]+6, eye_l[1]+6], fill=(245, 245, 250), outline=accent_color, width=2)
+            draw.ellipse([eye_r[0]-6, eye_r[1]-6, eye_r[0]+6, eye_r[1]+6], fill=(245, 245, 250), outline=accent_color, width=2)
+            draw.ellipse([eye_l[0]-3, eye_l[1]-3, eye_l[0]+3, eye_l[1]+3], fill=(10, 15, 25))
+            draw.ellipse([eye_r[0]-3, eye_r[1]-3, eye_r[0]+3, eye_r[1]+3], fill=(10, 15, 25))
+            draw.ellipse([eye_l[0]+1, eye_l[1]-1, eye_l[0]+2.5, eye_l[1]+0.5], fill=(255, 255, 255))
+            draw.ellipse([eye_r[0]+1, eye_r[1]-1, eye_r[0]+2.5, eye_r[1]+0.5], fill=(255, 255, 255))
+
+            # Gill Operculum Arch
+            draw.arc([sim.x + cos_a * 8 - 18, sim.y + sin_a * 8 - 18, sim.x + cos_a * 8 + 18, sim.y + sin_a * 8 + 18],
+                     start=int(math.degrees(sim.angle) + 60), end=int(math.degrees(sim.angle) + 300), fill=accent_color, width=2)
+
 
     # ─────────────────────────────────────────────────────────────
     # LOWER SECTION: macOS DARK CODE WINDOW (MOBILE OPTIMIZED)

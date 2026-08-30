@@ -1,0 +1,84 @@
+name: Real Draw Shorts
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Specific subject to draw (e.g. Bengal Tiger, Bald Eagle)"
+        required: false
+        default: ""
+        type: string
+      dry_run:
+        description: "Preview without advancing rotation or uploading"
+        required: false
+        default: false
+        type: boolean
+      duration:
+        description: "Duration in seconds (default: 20.0)"
+        required: false
+        default: "20.0"
+        type: string
+
+concurrency:
+  group: real-draw-generation
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  generate-real-draw:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Generate and upload Real Draw Short
+        env:
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          TOPIC: ${{ inputs.topic || '' }}
+          DURATION: ${{ inputs.duration || '20.0' }}
+          TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
+          CLIENT_SECRETS_JSON: ${{ secrets.CLIENT_SECRETS_JSON }}
+        run: |
+          command=(python src/real_draw_short_generator.py --duration "$DURATION")
+          if [ "$DRY_RUN" = "true" ]; then command+=(--dry-run); fi
+          if [ -n "$TOPIC" ]; then command+=(--topic "$TOPIC"); fi
+          printf 'Running:'
+          printf ' %q' "${command[@]}"
+          echo
+          "${command[@]}"
+
+      - name: Upload video artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-draw-${{ github.run_number }}
+          path: tmp/*/*.mp4
+          retention-days: 2
+          if-no-files-found: error
+
+      - name: Save drawing progress
+        if: inputs.dry_run != 'true' && inputs.topic == ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/real_draw_progress.json data/real_draw_history.json
+          git diff --cached --quiet && exit 0
+          next=$(python -c "import json; print(json.load(open("data/real_draw_progress.json"))["current_idx"])")
+          git commit -m "Real Draw Short #${next} complete [skip ci]"
+          git push origin HEAD:main

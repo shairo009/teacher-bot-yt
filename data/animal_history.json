@@ -383,5 +383,14 @@
     "timestamp": "2026-08-30T22:56:24.036921+00:00",
     "video_id": "BoR3UCbi6vQ",
     "uploaded": true
+  },
+  {
+    "id": 30,
+    "species": "CARACAL",
+    "scientific": "Caracal caracal",
+    "file": "tmp/reel_0030/caracal_short.mp4",
+    "timestamp": "2026-08-31T05:56:08.205357+00:00",
+    "video_id": "ec_CbyMkED8",
+    "uploaded": true
   }
 ]

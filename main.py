@@ -749,6 +749,7 @@ async def main():
 
     # ── Upload to YouTube ──────────────────────────────────────────────────
     video_uploaded = False
+    video_id = None  # initialize before upload block
     if not args.dry_run and token_json and client_json:
         from src.uploader import YouTubeUploader
         # Write credential files (stripping any UTF-8 BOM)
@@ -821,7 +822,7 @@ async def main():
         "viz_type": scene.get("viz_type", ""),
         "game_mechanic": game_mechanic,
         "uploaded": video_uploaded,
-        "video_id": locals().get("video_id"),
+        "video_id": video_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
     with open(history_path, "w") as f:

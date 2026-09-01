@@ -79,6 +79,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/real_draw_progress.json data/real_draw_history.json
           git diff --cached --quiet && exit 0
-          next=$(python -c "import json; print(json.load(open("data/real_draw_progress.json"))["current_idx"])")
+          next=$(python -c 'import json; print(json.load(open("data/real_draw_progress.json"))["current_idx"])')
           git commit -m "Real Draw Short #${next} complete [skip ci]"
           git push origin HEAD:main

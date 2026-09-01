@@ -122,9 +122,25 @@ def generate_real_draw(topic: str | None = None, duration: float = DEFAULT_DURAT
     DATA_DIR.mkdir(exist_ok=True)
     progress = _load_json(PROGRESS_FILE, {"current_idx": 0})
     current_idx = int(progress.get("current_idx", 0))
-    
+
     if topic is None:
-        query = SUBJECT_CATALOG[current_idx % len(SUBJECT_CATALOG)]
+        # ── No-repeat check: skip already-drawn subjects ──────────────────
+        history = _load_json(HISTORY_FILE, [])
+        used_subjects = {h["subject"].lower() for h in history if "subject" in h}
+        total = len(SUBJECT_CATALOG)
+        max_search = total  # don't loop forever
+        searched = 0
+        while searched < max_search:
+            candidate = SUBJECT_CATALOG[current_idx % total]
+            if candidate.lower() not in used_subjects:
+                break
+            print(f"  ⏭ Skipping '{candidate}' — already drawn before.")
+            current_idx += 1
+            searched += 1
+        else:
+            print("⚠ All subjects already drawn! Resetting rotation.")
+            current_idx = 0
+        query = SUBJECT_CATALOG[current_idx % total]
     else:
         query = topic
 

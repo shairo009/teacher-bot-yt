@@ -455,5 +455,23 @@
     "dry_run": false,
     "video_id": "2zb94wD1rQY",
     "youtube_url": "https://youtu.be/2zb94wD1rQY"
+  },
+  {
+    "id": 36,
+    "species": "MEERKAT",
+    "scientific": "Suricata suricatta",
+    "class_type": "quadruped",
+    "accent": [
+      230,
+      200,
+      30
+    ],
+    "anatomy_notes": "The meerkat or suricate is a small mongoose found in southern Africa. It is characterised by a broad head, large eyes, a pointed snout, long legs, a thin tapering tail, and a brindled coat pattern. Th",
+    "file": "tmp/reel_0036/meerkat_short.mp4",
+    "timestamp": "2026-09-01T18:57:48.625825+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "O7H-pfKxgyc",
+    "youtube_url": "https://youtu.be/O7H-pfKxgyc"
   }
 ]

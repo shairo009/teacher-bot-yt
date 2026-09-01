@@ -410,5 +410,14 @@
     "timestamp": "2026-08-31T21:39:35.188691+00:00",
     "video_id": "IDH3lAr7HcA",
     "uploaded": true
+  },
+  {
+    "id": 33,
+    "species": "CLOUDED LEOPARD",
+    "scientific": "Neofelis nebulosa",
+    "file": "tmp/reel_0033/clouded_leopard_short.mp4",
+    "timestamp": "2026-09-01T05:29:28.868000+00:00",
+    "video_id": "0x381Et2PRA",
+    "uploaded": true
   }
 ]

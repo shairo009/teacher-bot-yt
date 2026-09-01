@@ -254,9 +254,14 @@ def _extract_colors(text: str) -> list[tuple[int, int, int]]:
         if len(found) >= 3:
             break
 
-    # Always return at least one fallback color
+    # Always return at least one fallback color (dynamically derived from text hash so animals differ)
     if not found:
-        found.append((180, 140, 60))
+        # Generate deterministic but unique fallback color based on text
+        h = sum(ord(c) for c in text[:100])
+        r = (h % 155) + 50
+        g = ((h // 155) % 155) + 50
+        b = ((h // (155*155)) % 155) + 50
+        found.append((r, g, b))
     return found[:3]
 
 

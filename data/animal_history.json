@@ -419,5 +419,23 @@
     "timestamp": "2026-09-01T05:29:28.868000+00:00",
     "video_id": "0x381Et2PRA",
     "uploaded": true
+  },
+  {
+    "id": 34,
+    "species": "HONEY BADGER",
+    "scientific": "Mellivora capensis",
+    "class_type": "quadruped",
+    "accent": [
+      180,
+      140,
+      60
+    ],
+    "anatomy_notes": "The honey badger, also known as the ratel, is a mammal widely distributed across Africa, Southwest Asia, and the Indian subcontinent. It is the sole living representative of the Mellivorinae subfamily",
+    "file": "tmp/reel_0034/honey_badger_short.mp4",
+    "timestamp": "2026-09-01T13:40:44.196767+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "Xj4l2uyypTw",
+    "youtube_url": "https://youtu.be/Xj4l2uyypTw"
   }
 ]

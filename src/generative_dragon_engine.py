@@ -512,6 +512,8 @@ class MasterSimulator:
                 curr["angle"] = prev["angle"]
 
         # 4 Quadruped Legs Gait
+        # FIX: legs spread LEFT/RIGHT of body (perp direction = body sides)
+        # then reach DOWN toward ground (body bottom = +perp when body moves horizontal)
         trot_clock = sim_time * 6.5
         for leg in self.legs4:
             s_pt = self.spine[leg["spine_i"]]
@@ -521,15 +523,18 @@ class MasterSimulator:
             s_perp_x = -s_sin
             s_perp_y =  s_cos
 
-            sock_dist = 28 if leg["is_front"] else 24
-            sock = (s_pt["x"] + s_perp_x * (sock_dist * leg["side"]),
-                    s_pt["y"] + s_perp_y * (sock_dist * leg["side"]))
+            # Socket: on body side (left or right of spine)
+            sock_offset = 22 if leg["is_front"] else 20
+            sock = (s_pt["x"] + s_perp_x * (sock_offset * leg["side"]),
+                    s_pt["y"] + s_perp_y * (sock_offset * leg["side"]))
             leg["socket"] = sock
 
-            f_reach = 36 if leg["is_front"] else -10
-            l_spread = 32 if leg["is_front"] else 28
-            ideal_x = sock[0] + s_cos * f_reach + s_perp_x * (l_spread * leg["side"])
-            ideal_y = sock[1] + s_sin * f_reach + s_perp_y * (l_spread * leg["side"])
+            # Ideal foot: forward/back along body + DOWN toward ground (pure gravity = +Y)
+            f_reach = 30 if leg["is_front"] else -8    # forward/back along spine
+            ground_drop = 70                            # how far DOWN legs reach (gravity)
+            # sock is already at body side; foot goes DOWN from sock (not further sideways)
+            ideal_x = sock[0] + s_cos * f_reach
+            ideal_y = sock[1] + s_sin * f_reach + ground_drop   # pure +Y = neeche
 
             d_ideal = math.hypot(ideal_x - leg["cur"][0], ideal_y - leg["cur"][1])
             phase_v = math.sin(trot_clock + leg["phase"])
@@ -538,17 +543,17 @@ class MasterSimulator:
                 leg["prog"] = 0.0
                 leg["start"] = [leg["cur"][0], leg["cur"][1]]
                 leg["tgt"] = [
-                    ideal_x + cos_a * (self.speed * 10 + 20),
-                    ideal_y + sin_a * (self.speed * 10 + 20)
+                    ideal_x + cos_a * (self.speed * 10 + 18),
+                    ideal_y + sin_a * (self.speed * 10 + 18)
                 ]
 
             if leg["prog"] < 1.0:
                 leg["prog"] += 0.10
                 p = min(1.0, leg["prog"])
                 ease_p = 0.5 - math.cos(p * math.pi) / 2
-                lift = math.sin(p * math.pi) * 20
+                lift = math.sin(p * math.pi) * 22
                 leg["cur"][0] = leg["start"][0] + (leg["tgt"][0] - leg["start"][0]) * ease_p
-                leg["cur"][1] = leg["start"][1] + (leg["tgt"][1] - leg["start"][1]) * ease_p - lift * 0.2
+                leg["cur"][1] = leg["start"][1] + (leg["tgt"][1] - leg["start"][1]) * ease_p - lift * 0.15
 
         # 8 Arachnid Legs Gait
         gait_clock = sim_time * 6.5
@@ -710,27 +715,30 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
             paw_pos = (leg["cur"][0], leg["cur"][1])
             sock = leg["socket"]
             side = leg["side"]
-            thigh_end = (sock[0] + cos_a * 36 + perp_x * (24 * side),
-                         sock[1] + sin_a * 36 + perp_y * (24 * side))
+            # Thigh: goes forward-down from socket
+            thigh_end = (sock[0] + cos_a * 18,
+                         sock[1] + sin_a * 18 + 38)   # +Y = down
             draw_limb(sock, thigh_end, 26, fur_dark, fur_mid)
-            shin_end = (thigh_end[0] - cos_a * 34 + perp_x * (16 * side),
-                        thigh_end[1] - sin_a * 34 + perp_y * (16 * side))
+            # Shin: bends down from thigh
+            shin_end = (thigh_end[0] - cos_a * 14,
+                        thigh_end[1] + 28)             # further down
             draw_limb(thigh_end, shin_end, 20, fur_dark, fur_gold)
             draw.ellipse([thigh_end[0]-11, thigh_end[1]-11, thigh_end[0]+11, thigh_end[1]+11],
                          fill=joint_col, outline=fur_dark, width=2)
-            hock = (shin_end[0] - cos_a * 10 + perp_x * (12 * side),
-                    shin_end[1] - sin_a * 10 + perp_y * (12 * side))
+            # Hock: slight angle toward paw
+            hock = ((shin_end[0] + paw_pos[0]) / 2,
+                    (shin_end[1] + paw_pos[1]) / 2 + 8)
             draw_limb(shin_end, hock, 16, fur_dark, fur_mid)
             draw.ellipse([hock[0]-7, hock[1]-7, hock[0]+7, hock[1]+7],
                          fill=fur_dark, outline=fur_mid, width=1)
             draw_limb(hock, paw_pos, 14, fur_dark, fur_mid)
-            draw.ellipse([paw_pos[0]-15, paw_pos[1]-10, paw_pos[0]+15, paw_pos[1]+10],
+            draw.ellipse([paw_pos[0]-15, paw_pos[1]-8, paw_pos[0]+15, paw_pos[1]+8],
                          fill=nose_black, outline=fur_dark, width=2)
             for t_off in [-6, -2, 2, 6]:
-                bx = paw_pos[0] + cos_a * 12 + perp_x * t_off
-                by = paw_pos[1] + sin_a * 12 + perp_y * t_off
+                bx = paw_pos[0] + perp_x * t_off
+                by = paw_pos[1] + perp_y * t_off
                 draw.ellipse([bx-4, by-4, bx+4, by+4], fill=(35, 25, 15))
-                draw.line([(bx, by), (bx + cos_a * 6, by + sin_a * 6)], fill=(10, 8, 5), width=2)
+                draw.line([(bx, by), (bx, by + 6)], fill=(10, 8, 5), width=2)  # claws down
 
         # ── B. ORGANIC BODY silhouette ──
         spine_pts = [(seg["x"], seg["y"]) for seg in sim.spine[:16]]
@@ -780,13 +788,13 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
             draw.ellipse([elbow[0]-11, elbow[1]-11, elbow[0]+11, elbow[1]+11],
                          fill=joint_col, outline=fur_dark, width=2)
             draw_limb(elbow, paw_pos, 18, fur_dark, fur_gold)
-            draw.ellipse([paw_pos[0]-15, paw_pos[1]-10, paw_pos[0]+15, paw_pos[1]+10],
+            draw.ellipse([paw_pos[0]-15, paw_pos[1]-8, paw_pos[0]+15, paw_pos[1]+8],
                          fill=nose_black, outline=fur_dark, width=2)
             for t_off in [-6, -2, 2, 6]:
-                bx = paw_pos[0] + cos_a * 12 + perp_x * t_off
-                by = paw_pos[1] + sin_a * 12 + perp_y * t_off
+                bx = paw_pos[0] + perp_x * t_off
+                by = paw_pos[1] + perp_y * t_off
                 draw.ellipse([bx-4, by-4, bx+4, by+4], fill=(35, 25, 15))
-                draw.line([(bx, by), (bx + cos_a * 6, by + sin_a * 6)], fill=(10, 8, 5), width=2)
+                draw.line([(bx, by), (bx, by + 6)], fill=(10, 8, 5), width=2)  # claws down
 
         # ── D. WAGGING PLUME TAIL ──
         tail_prev = spine_pts[-1]

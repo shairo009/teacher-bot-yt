@@ -473,5 +473,23 @@
     "dry_run": false,
     "video_id": "O7H-pfKxgyc",
     "youtube_url": "https://youtu.be/O7H-pfKxgyc"
+  },
+  {
+    "id": 37,
+    "species": "SALTWATER CROCODILE",
+    "scientific": "Crocodylus porosus",
+    "class_type": "reptile",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The saltwater crocodile is a crocodilian native to saltwater habitats, brackish wetlands and freshwater rivers from India's east coast across Southeast Asia and the Sundaland to northern Australia and",
+    "file": "tmp/reel_0037/saltwater_crocodile_short.mp4",
+    "timestamp": "2026-09-01T19:25:30.771267+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "B7VizrGWqiM",
+    "youtube_url": "https://youtu.be/B7VizrGWqiM"
   }
 ]

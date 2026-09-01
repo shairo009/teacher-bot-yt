@@ -491,5 +491,23 @@
     "dry_run": false,
     "video_id": "B7VizrGWqiM",
     "youtube_url": "https://youtu.be/B7VizrGWqiM"
+  },
+  {
+    "id": 38,
+    "species": "FIREFLY",
+    "scientific": "Photinus pyralis",
+    "class_type": "insect",
+    "accent": [
+      101,
+      108,
+      50
+    ],
+    "anatomy_notes": "The Lampyridae are a family of elateroid beetles with more than 2,400 described species, many of which are light-emitting. They are soft-bodied beetles commonly called fireflies, lightning bugs, or gl",
+    "file": "tmp/reel_0038/firefly_short.mp4",
+    "timestamp": "2026-09-01T23:23:46.732521+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "tT4A8Gc17LM",
+    "youtube_url": "https://youtu.be/tT4A8Gc17LM"
   }
 ]

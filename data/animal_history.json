@@ -437,5 +437,23 @@
     "dry_run": false,
     "video_id": "Xj4l2uyypTw",
     "youtube_url": "https://youtu.be/Xj4l2uyypTw"
+  },
+  {
+    "id": 35,
+    "species": "WOLVERINE",
+    "scientific": "Gulo gulo",
+    "class_type": "quadruped",
+    "accent": [
+      180,
+      140,
+      60
+    ],
+    "anatomy_notes": "The wolverine, also called the carcajou or quickhatch, is the largest land-dwelling member of the family Mustelidae. It is a muscular carnivore and a solitary animal. The wolverine has a reputation fo",
+    "file": "tmp/reel_0035/wolverine_short.mp4",
+    "timestamp": "2026-09-01T17:32:20.848628+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "2zb94wD1rQY",
+    "youtube_url": "https://youtu.be/2zb94wD1rQY"
   }
 ]

@@ -2,8 +2,8 @@ name: Animal Shorts
 
 on:
   schedule:
-    # 6 AM, 10 AM, 2 PM, 6 PM, 10 PM and 2 AM India Standard Time.
-    - cron: "30 0,4,8,12,16,20 * * *"
+    # 5 times a day (approx every 4.5 hours) at 17 past the hour to avoid GitHub Actions peak load drops
+    - cron: "17 2,7,12,17,21 * * *"
   workflow_dispatch:
     inputs:
       dry_run:

@@ -512,8 +512,6 @@ class MasterSimulator:
                 curr["angle"] = prev["angle"]
 
         # 4 Quadruped Legs Gait
-        # FIX: legs spread LEFT/RIGHT of body (perp direction = body sides)
-        # then reach DOWN toward ground (body bottom = +perp when body moves horizontal)
         trot_clock = sim_time * 6.5
         for leg in self.legs4:
             s_pt = self.spine[leg["spine_i"]]
@@ -523,18 +521,15 @@ class MasterSimulator:
             s_perp_x = -s_sin
             s_perp_y =  s_cos
 
-            # Socket: on body side (left or right of spine)
-            sock_offset = 22 if leg["is_front"] else 20
-            sock = (s_pt["x"] + s_perp_x * (sock_offset * leg["side"]),
-                    s_pt["y"] + s_perp_y * (sock_offset * leg["side"]))
+            sock_dist = 28 if leg["is_front"] else 24
+            sock = (s_pt["x"] + s_perp_x * (sock_dist * leg["side"]),
+                    s_pt["y"] + s_perp_y * (sock_dist * leg["side"]))
             leg["socket"] = sock
 
-            # Ideal foot: forward/back along body + DOWN toward ground (pure gravity = +Y)
-            f_reach = 30 if leg["is_front"] else -8    # forward/back along spine
-            ground_drop = 70                            # how far DOWN legs reach (gravity)
-            # sock is already at body side; foot goes DOWN from sock (not further sideways)
-            ideal_x = sock[0] + s_cos * f_reach
-            ideal_y = sock[1] + s_sin * f_reach + ground_drop   # pure +Y = neeche
+            f_reach = 36 if leg["is_front"] else -10
+            l_spread = 32 if leg["is_front"] else 28
+            ideal_x = sock[0] + s_cos * f_reach + s_perp_x * (l_spread * leg["side"])
+            ideal_y = sock[1] + s_sin * f_reach + s_perp_y * (l_spread * leg["side"])
 
             d_ideal = math.hypot(ideal_x - leg["cur"][0], ideal_y - leg["cur"][1])
             phase_v = math.sin(trot_clock + leg["phase"])
@@ -543,17 +538,17 @@ class MasterSimulator:
                 leg["prog"] = 0.0
                 leg["start"] = [leg["cur"][0], leg["cur"][1]]
                 leg["tgt"] = [
-                    ideal_x + cos_a * (self.speed * 10 + 18),
-                    ideal_y + sin_a * (self.speed * 10 + 18)
+                    ideal_x + cos_a * (self.speed * 10 + 20),
+                    ideal_y + sin_a * (self.speed * 10 + 20)
                 ]
 
             if leg["prog"] < 1.0:
                 leg["prog"] += 0.10
                 p = min(1.0, leg["prog"])
                 ease_p = 0.5 - math.cos(p * math.pi) / 2
-                lift = math.sin(p * math.pi) * 22
+                lift = math.sin(p * math.pi) * 20
                 leg["cur"][0] = leg["start"][0] + (leg["tgt"][0] - leg["start"][0]) * ease_p
-                leg["cur"][1] = leg["start"][1] + (leg["tgt"][1] - leg["start"][1]) * ease_p - lift * 0.15
+                leg["cur"][1] = leg["start"][1] + (leg["tgt"][1] - leg["start"][1]) * ease_p - lift * 0.2
 
         # 8 Arachnid Legs Gait
         gait_clock = sim_time * 6.5
@@ -687,12 +682,14 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         print(f"  ⚠ Bio renderer error: {_bio_err} — falling back to legacy renderer")
 
     if not _bio_rendered and (class_type == "quadruped" or "dog" in sp_id or "wolf" in sp_id or "tiger" in sp_id):
-        # ── Research-driven colors ──
+        # ── Research-driven colors (from Wikipedia/web anatomy search) ──
+        # Falls back to Golden Shepherd defaults if no research data available
         fur_dark   = tuple(species.get("fur_dark",      [120, 60,  5]))
         fur_mid    = tuple(species.get("fur_mid",       [190, 110, 20]))
         fur_gold   = tuple(species.get("fur_gold",      [230, 160, 45]))
         fur_light  = tuple(species.get("fur_light",     [255, 210, 100]))
         fur_cream  = tuple(species.get("fur_cream",     [255, 235, 170]))
+        # Eye/nose colors derived from fur_dark and accent
         nose_black = (max(10, fur_dark[0]//3), max(8, fur_dark[1]//4), max(5, fur_dark[2]//5))
         eye_amber  = tuple(min(255, int(c * 0.65)) for c in fur_mid)
         joint_col  = tuple(int((a + b) // 2) for a, b in zip(fur_mid, fur_gold))
@@ -703,133 +700,169 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
             if ln < 1: return
             nx = -dy / ln; ny = dx / ln
             draw.line([p1, p2], fill=dark_col, width=base_w + 6)
-            draw.line([p1, p2], fill=mid_col,  width=base_w)
+            draw.line([p1, p2], fill=mid_col, width=base_w)
             hi = (min(255, mid_col[0]+45), min(255, mid_col[1]+35), min(255, mid_col[2]+20))
             draw.line([(p1[0]+nx*3, p1[1]+ny*3), (p2[0]+nx*3, p2[1]+ny*3)],
                       fill=hi, width=max(2, base_w // 3))
 
-        # ══════════════════════════════════════════════════════════════
-        # FRONT-FACING VIEW — animal faces camera, walks toward viewer
-        # Body center follows sim position; lean toward cursor
-        # ══════════════════════════════════════════════════════════════
-        cx = sim.x
-        cy = sim.y
+        # ── A. HINDLEGS (behind body) ──
+        for leg in [l for l in sim.legs4 if not l["is_front"]]:
+            paw_pos = (leg["cur"][0], leg["cur"][1])
+            sock = leg["socket"]
+            side = leg["side"]
+            thigh_end = (sock[0] + cos_a * 36 + perp_x * (24 * side),
+                         sock[1] + sin_a * 36 + perp_y * (24 * side))
+            draw_limb(sock, thigh_end, 26, fur_dark, fur_mid)
+            shin_end = (thigh_end[0] - cos_a * 34 + perp_x * (16 * side),
+                        thigh_end[1] - sin_a * 34 + perp_y * (16 * side))
+            draw_limb(thigh_end, shin_end, 20, fur_dark, fur_gold)
+            draw.ellipse([thigh_end[0]-11, thigh_end[1]-11, thigh_end[0]+11, thigh_end[1]+11],
+                         fill=joint_col, outline=fur_dark, width=2)
+            hock = (shin_end[0] - cos_a * 10 + perp_x * (12 * side),
+                    shin_end[1] - sin_a * 10 + perp_y * (12 * side))
+            draw_limb(shin_end, hock, 16, fur_dark, fur_mid)
+            draw.ellipse([hock[0]-7, hock[1]-7, hock[0]+7, hock[1]+7],
+                         fill=fur_dark, outline=fur_mid, width=1)
+            draw_limb(hock, paw_pos, 14, fur_dark, fur_mid)
+            draw.ellipse([paw_pos[0]-15, paw_pos[1]-10, paw_pos[0]+15, paw_pos[1]+10],
+                         fill=nose_black, outline=fur_dark, width=2)
+            for t_off in [-6, -2, 2, 6]:
+                bx = paw_pos[0] + cos_a * 12 + perp_x * t_off
+                by = paw_pos[1] + sin_a * 12 + perp_y * t_off
+                draw.ellipse([bx-4, by-4, bx+4, by+4], fill=(35, 25, 15))
+                draw.line([(bx, by), (bx + cos_a * 6, by + sin_a * 6)], fill=(10, 8, 5), width=2)
 
-        # Walking animation clock
-        walk_clock = sim_time * 5.5
-        body_bob   = math.sin(walk_clock * 2) * 7   # body bobs up-down
+        # ── C. FORELEGS (drawn under body as well) ──
+        for leg in [l for l in sim.legs4 if l["is_front"]]:
+            paw_pos = (leg["cur"][0], leg["cur"][1])
+            sock = leg["socket"]
+            side = leg["side"]
+            _, elbow, _ = solve_forelimb_ik(sock, paw_pos, leg["l1"], leg["l2"], side)
+            draw_limb(sock, elbow, 24, fur_dark, fur_mid)
+            draw.ellipse([elbow[0]-11, elbow[1]-11, elbow[0]+11, elbow[1]+11],
+                         fill=joint_col, outline=fur_dark, width=2)
+            draw_limb(elbow, paw_pos, 18, fur_dark, fur_gold)
+            draw.ellipse([paw_pos[0]-15, paw_pos[1]-10, paw_pos[0]+15, paw_pos[1]+10],
+                         fill=nose_black, outline=fur_dark, width=2)
+            for t_off in [-6, -2, 2, 6]:
+                bx = paw_pos[0] + cos_a * 12 + perp_x * t_off
+                by = paw_pos[1] + sin_a * 12 + perp_y * t_off
+                draw.ellipse([bx-4, by-4, bx+4, by+4], fill=(35, 25, 15))
+                draw.line([(bx, by), (bx + cos_a * 6, by + sin_a * 6)], fill=(10, 8, 5), width=2)
 
-        # Lean toward cursor (tgt direction)
-        dx_lean = math.cos(sim.angle) * 18
-        dy_lean = math.sin(sim.angle) * 6
+        # ── B. ORGANIC BODY silhouette ──
+        spine_pts = [(seg["x"], seg["y"]) for seg in sim.spine[:16]]
+        left_out, right_out = [], []
+        for i, seg in enumerate(sim.spine[:16]):
+            s_px = -math.sin(seg["angle"]); s_py = math.cos(seg["angle"])
+            body_widths = [28, 36, 46, 54, 52, 50, 48, 44, 40, 44, 48, 44, 36, 28, 20, 14]
+            hw = max(10, body_widths[i] if i < len(body_widths) else 12)
+            left_out.append((seg["x"] + s_px * (hw + 4), seg["y"] + s_py * (hw + 4)))
+            right_out.append((seg["x"] - s_px * (hw + 4), seg["y"] - s_py * (hw + 4)))
 
-        # Body center (with bob)
-        bx = cx + dx_lean
-        by = cy + dy_lean + body_bob
+        # Drop shadow
+        shadow_pts = [(x+5, y+5) for x,y in left_out] + list(reversed([(x+5, y+5) for x,y in right_out]))
+        if len(shadow_pts) >= 3: draw.polygon(shadow_pts, fill=(60, 30, 5))
 
-        # ── TAIL (behind body, wags side to side) ──
-        tail_base = (bx, by + 80)
-        wag = math.sin(sim_time * 6) * 35
-        tail_mid  = (bx + wag * 0.6, by + 130)
-        tail_tip  = (bx + wag, by + 170)
-        for pts, w, col in [
-            ([tail_base, tail_mid], 18, fur_dark),
-            ([tail_mid,  tail_tip], 12, fur_gold),
-            ([tail_base, tail_mid], 12, fur_gold),
-            ([tail_mid,  tail_tip],  7, fur_cream),
-        ]:
-            draw.line(pts, fill=col, width=w)
-        draw.ellipse([tail_tip[0]-9, tail_tip[1]-9, tail_tip[0]+9, tail_tip[1]+9], fill=fur_cream)
+        # Outer fur body
+        body_poly = left_out + list(reversed(right_out))
+        if len(body_poly) >= 3:
+            draw.polygon(body_poly, fill=fur_mid, outline=fur_dark, width=3)
 
-        # ── BACK LEGS (behind body — drawn first so front legs overlap) ──
-        for side, phase_off in [(-1, math.pi), (1, 0.0)]:
-            sock_x = bx + side * 52
-            sock_y = by + 55
+        # Mid-tone inset layer
+        mid_poly = [(x*0.45 + spine_pts[min(i, len(spine_pts)-1)][0]*0.55,
+                     y*0.45 + spine_pts[min(i, len(spine_pts)-1)][1]*0.55)
+                    for i, (x, y) in enumerate(left_out[:14])] + \
+                   list(reversed([(x*0.45 + spine_pts[min(i, len(spine_pts)-1)][0]*0.55,
+                                   y*0.45 + spine_pts[min(i, len(spine_pts)-1)][1]*0.55)
+                                  for i, (x, y) in enumerate(right_out[:14])]))
+        if len(mid_poly) >= 3: draw.polygon(mid_poly, fill=fur_gold)
 
-            swing = math.sin(walk_clock + phase_off) * 22
-            lift  = max(0, math.sin(walk_clock + phase_off)) * 18
+        # Dorsal highlight stripe
+        for i in range(len(spine_pts) - 1):
+            draw.line([spine_pts[i], spine_pts[i+1]], fill=fur_light, width=4)
+            draw.line([spine_pts[i], spine_pts[i+1]], fill=fur_cream, width=2)
 
-            thigh_x = sock_x + side * 18 + swing * 0.3
-            thigh_y = sock_y + 48
-            shin_x  = thigh_x + side * 8
-            shin_y  = thigh_y + 44 - lift
-            paw_x   = shin_x + side * 5
-            paw_y   = shin_y + 28 - lift
+        # Belly cream patch
+        belly_pts = [(sim.spine[i]["x"] + math.cos(sim.spine[i]["angle"]) * 10,
+                      sim.spine[i]["y"] + math.sin(sim.spine[i]["angle"]) * 10) for i in range(4, 11)]
+        if len(belly_pts) >= 3: draw.polygon(belly_pts, fill=fur_cream)
 
-            draw_limb((sock_x, sock_y), (thigh_x, thigh_y), 22, fur_dark, fur_mid)
-            draw.ellipse([thigh_x-9, thigh_y-9, thigh_x+9, thigh_y+9], fill=joint_col, outline=fur_dark, width=2)
-            draw_limb((thigh_x, thigh_y), (shin_x, shin_y), 17, fur_dark, fur_gold)
-            draw.ellipse([shin_x-7, shin_y-7, shin_x+7, shin_y+7], fill=fur_dark, outline=fur_mid, width=1)
-            draw_limb((shin_x, shin_y), (paw_x, paw_y), 13, fur_dark, fur_mid)
-            draw.ellipse([paw_x-13, paw_y-7, paw_x+13, paw_y+7], fill=nose_black, outline=fur_dark, width=2)
-            for c_off in [-5, 0, 5]:
-                draw.line([(paw_x+c_off, paw_y+7), (paw_x+c_off, paw_y+14)], fill=(15, 10, 5), width=2)
+        # ── D. WAGGING PLUME TAIL ──
+        tail_prev = spine_pts[-1]
+        wag = math.sin(sim_time * 7.0) * 0.65
+        for i in range(12):
+            frac = (i + 1) / 12
+            t_ang = sim.angle + math.pi + wag * frac * frac
+            seg_len = 22 - i * 1.2
+            tx = tail_prev[0] + math.cos(t_ang) * seg_len
+            ty = tail_prev[1] + math.sin(t_ang) * seg_len
+            w = max(5, int(24 - i * 1.6))
+            draw.line([tail_prev, (tx, ty)], fill=fur_dark, width=w + 4)
+            draw.line([tail_prev, (tx, ty)], fill=fur_gold, width=w)
+            draw.line([tail_prev, (tx, ty)], fill=fur_cream, width=max(2, w - 6))
+            tail_prev = (tx, ty)
+        draw.ellipse([tail_prev[0]-8, tail_prev[1]-8, tail_prev[0]+8, tail_prev[1]+8], fill=fur_cream)
 
-        # ── BODY — front-facing oval (chest/belly visible) ──
-        draw.ellipse([bx-68, by-25, bx+68, by+95], fill=(40, 20, 5))
-        draw.ellipse([bx-65, by-30, bx+65, by+90], fill=fur_mid, outline=fur_dark, width=4)
-        draw.ellipse([bx-38, by-18, bx+38, by+55], fill=fur_gold)
-        draw.ellipse([bx-22, by+15, bx+22, by+72], fill=fur_cream)
-        draw.line([(bx, by-28), (bx, by+88)], fill=fur_light, width=5)
-        draw.line([(bx, by-28), (bx, by+88)], fill=fur_cream, width=2)
+        # ── E. REALISTIC CANINE HEAD ──
+        hx = sim.x + cos_a * 44
+        hy = sim.y + sin_a * 44
 
-        # ── FRONT LEGS (in front of body) ──
-        for side, phase_off in [(-1, 0.0), (1, math.pi)]:
-            sock_x = bx + side * 55
-            sock_y = by + 20
+        # Skull
+        draw.ellipse([hx-28, hy-28, hx+28, hy+28], fill=fur_mid, outline=fur_dark, width=3)
+        draw.ellipse([hx+cos_a*4-12, hy+sin_a*4-12, hx+cos_a*4+12, hy+sin_a*4+12], fill=fur_gold)
+        draw.ellipse([hx+cos_a*6-6, hy+sin_a*6-6, hx+cos_a*6+6, hy+sin_a*6+6], fill=fur_light)
 
-            swing = math.sin(walk_clock + phase_off) * 24
-            lift  = max(0, math.sin(walk_clock + phase_off)) * 24
+        # Drop ears
+        ear_l = (hx - cos_a * 16 + perp_x * 28, hy - sin_a * 16 + perp_y * 28)
+        ear_tip_l = (ear_l[0] - cos_a * 32 + perp_x * 14, ear_l[1] - sin_a * 32 + perp_y * 14)
+        ear_base_l = (hx + cos_a * 4 + perp_x * 24, hy + sin_a * 4 + perp_y * 24)
+        ear_r = (hx - cos_a * 16 - perp_x * 28, hy - sin_a * 16 - perp_y * 28)
+        ear_tip_r = (ear_r[0] - cos_a * 32 - perp_x * 14, ear_r[1] - sin_a * 32 - perp_y * 14)
+        ear_base_r = (hx + cos_a * 4 - perp_x * 24, hy + sin_a * 4 - perp_y * 24)
+        draw.polygon([ear_base_l, ear_l, ear_tip_l], fill=fur_dark, outline=fur_dark, width=2)
+        draw.polygon([ear_base_r, ear_r, ear_tip_r], fill=fur_dark, outline=fur_dark, width=2)
+        inner_l_tip = (ear_l[0] + cos_a * 8 - perp_x * 5, ear_l[1] + sin_a * 8 - perp_y * 5)
+        inner_r_tip = (ear_r[0] + cos_a * 8 + perp_x * 5, ear_r[1] + sin_a * 8 + perp_y * 5)
+        draw.polygon([(hx + perp_x * 12, hy + perp_y * 12), ear_l, inner_l_tip], fill=(210, 130, 140))
+        draw.polygon([(hx - perp_x * 12, hy - perp_y * 12), ear_r, inner_r_tip], fill=(210, 130, 140))
 
-            elbow_x = sock_x + side * 20 + swing * 0.2
-            elbow_y = sock_y + 50
-            paw_x   = elbow_x + side * 8 + swing * 0.3
-            paw_y   = elbow_y + 52 - lift
+        # Muzzle ellipse
+        snout_cx = hx + cos_a * 36; snout_cy = hy + sin_a * 36
+        draw.ellipse([snout_cx-18, snout_cy-13, snout_cx+18, snout_cy+13], fill=fur_cream, outline=fur_mid, width=2)
 
-            draw_limb((sock_x, sock_y), (elbow_x, elbow_y), 24, fur_dark, fur_mid)
-            draw.ellipse([elbow_x-10, elbow_y-10, elbow_x+10, elbow_y+10], fill=joint_col, outline=fur_dark, width=2)
-            draw_limb((elbow_x, elbow_y), (paw_x, paw_y), 18, fur_dark, fur_gold)
-            draw.ellipse([paw_x-14, paw_y-7, paw_x+14, paw_y+7], fill=nose_black, outline=fur_dark, width=2)
-            for c_off in [-5, 0, 5]:
-                draw.line([(paw_x+c_off, paw_y+7), (paw_x+c_off, paw_y+15)], fill=(15, 10, 5), width=2)
+        # Nose (wet black)
+        nose_cx = snout_cx + cos_a * 14; nose_cy = snout_cy + sin_a * 14
+        draw.ellipse([nose_cx-9, nose_cy-7, nose_cx+9, nose_cy+7], fill=nose_black, outline=(40, 35, 30), width=2)
+        draw.ellipse([nose_cx+cos_a*2-3, nose_cy+sin_a*2-2, nose_cx+cos_a*2+3, nose_cy+sin_a*2+2], fill=(80, 80, 80))
+        draw.ellipse([nose_cx+perp_x*4-2, nose_cy+perp_y*4-2, nose_cx+perp_x*4+2, nose_cy+perp_y*4+2], fill=(10, 8, 5))
+        draw.ellipse([nose_cx-perp_x*4-2, nose_cy-perp_y*4-2, nose_cx-perp_x*4+2, nose_cy-perp_y*4+2], fill=(10, 8, 5))
 
-        # ── HEAD (front-facing — eyes look at viewer) ──
-        hx = bx + dx_lean * 0.4
-        hy = by - 72 + body_bob * 0.5
-
-        draw.ellipse([hx-42, hy-38, hx+42, hy+42], fill=fur_mid, outline=fur_dark, width=4)
-        draw.ellipse([hx-28, hy-20, hx+28, hy+30], fill=fur_gold)
-        draw.ellipse([hx-20, hy+5, hx+20, hy+38], fill=fur_cream, outline=fur_mid, width=2)
-
-        for side in [-1, 1]:
-            ex = hx + side * 32
-            ey = hy - 28
-            draw.ellipse([ex-14, ey-18, ex+14, ey+14], fill=fur_dark, outline=fur_dark, width=2)
-            draw.ellipse([ex-8,  ey-12, ex+8,  ey+8 ], fill=(210, 130, 140))
-
-        draw.ellipse([hx-12, hy+12, hx+12, hy+24], fill=nose_black, outline=(40,35,30), width=2)
-        draw.ellipse([hx-7,  hy+15, hx-2,  hy+21], fill=(25, 18, 12))
-        draw.ellipse([hx+2,  hy+15, hx+7,  hy+21], fill=(25, 18, 12))
-
+        # Panting tongue
         tongue_phase = math.sin(sim_time * 1.5) * 0.3 + 0.7
         if tongue_phase > 0.4:
-            t_len = 14 * tongue_phase
-            draw.line([(hx, hy+28), (hx, hy+28+t_len)], fill=(230, 80, 100), width=9)
-            draw.ellipse([hx-5, hy+28+t_len-5, hx+5, hy+28+t_len+5], fill=(220, 70, 90))
+            t_len = 16 * tongue_phase
+            t_base = (snout_cx + cos_a * 2, snout_cy + sin_a * 2)
+            t_tip = (t_base[0] + cos_a * t_len, t_base[1] + sin_a * t_len)
+            draw.line([t_base, t_tip], fill=(230, 80, 100), width=10)
+            draw.ellipse([t_tip[0]-5, t_tip[1]-5, t_tip[0]+5, t_tip[1]+5], fill=(220, 70, 90))
+            draw.line([t_base, t_tip], fill=(200, 60, 80), width=2)
 
-        for side in [-1, 1]:
-            ex = hx + side * 18
-            ey = hy - 8
-            draw.ellipse([ex-10, ey-9, ex+10, ey+9], fill=(30, 18, 5), outline=fur_dark, width=2)
-            draw.ellipse([ex-7,  ey-6, ex+7,  ey+6], fill=eye_amber)
-            draw.ellipse([ex-3,  ey-5, ex+3,  ey+5], fill=(5, 3, 1))
-            draw.ellipse([ex+2,  ey-4, ex+5,  ey-1], fill=(255, 255, 240))
+        # Eyes with iris + pupil + highlight
+        eye_l = (hx + cos_a * 10 + perp_x * 17, hy + sin_a * 10 + perp_y * 17)
+        eye_r = (hx + cos_a * 10 - perp_x * 17, hy + sin_a * 10 - perp_y * 17)
+        for eye_pt in [eye_l, eye_r]:
+            draw.ellipse([eye_pt[0]-8, eye_pt[1]-7, eye_pt[0]+8, eye_pt[1]+7],
+                         fill=(30, 18, 5), outline=fur_dark, width=2)
+            draw.ellipse([eye_pt[0]-6, eye_pt[1]-5.5, eye_pt[0]+6, eye_pt[1]+5.5], fill=eye_amber)
+            draw.ellipse([eye_pt[0]-2.5, eye_pt[1]-4, eye_pt[0]+2.5, eye_pt[1]+4], fill=(5, 3, 1))
+            draw.ellipse([eye_pt[0]+2.5, eye_pt[1]-3.5, eye_pt[0]+5, eye_pt[1]-1], fill=(255, 255, 240))
 
-        brow_frown = math.sin(sim_time * 0.8) * 4
-        for side in [-1, 1]:
-            bx2 = hx + side * 18
-            by2 = hy - 18 + brow_frown * side
-            draw.line([(bx2-9, by2+3), (bx2+9, by2-3)], fill=fur_dark, width=3)
+        # Eyebrow spots
+        brow_l = (hx - cos_a * 4 + perp_x * 16, hy - sin_a * 4 + perp_y * 16)
+        brow_r = (hx - cos_a * 4 - perp_x * 16, hy - sin_a * 4 - perp_y * 16)
+        draw.ellipse([brow_l[0]-3, brow_l[1]-2, brow_l[0]+3, brow_l[1]+2], fill=fur_dark)
+        draw.ellipse([brow_r[0]-3, brow_r[1]-2, brow_r[0]+3, brow_r[1]+2], fill=fur_dark)
 
     elif class_type == "arachnid":
         # 1. 8 Articulated Walking Legs with 3-Segment IK & Tarsal Claws

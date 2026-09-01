@@ -434,7 +434,7 @@ class MasterSimulator:
         self.y = cy
         self.angle = 0.0
         self.speed = 0.0
-        self.spine = [{"x": cx - i * 22, "y": cy, "angle": 0.0} for i in range(20)]
+        self.spine = [{"x": cx - i * 28, "y": cy, "angle": 0.0} for i in range(20)]
         
         # Varied movement Lissajous parameters based on seed
         self.f1 = 0.65 + ((seed % 7) - 3) * 0.035
@@ -500,7 +500,7 @@ class MasterSimulator:
         for i in range(1, len(self.spine)):
             prev = self.spine[i - 1]
             curr = self.spine[i]
-            s_dist = 22 - (i / len(self.spine)) * 4
+            s_dist = 28 - (i / len(self.spine)) * 5
             p_dx = curr["x"] - prev["x"]
             p_dy = curr["y"] - prev["y"]
             d = math.hypot(p_dx, p_dy)
@@ -661,106 +661,208 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     draw.ellipse([tgt_x - 4, tgt_y - 4, tgt_x + 4, tgt_y + 4], fill=(239, 68, 68))
 
 
-    if class_type == "quadruped" or "dog" in sp_id or "wolf" in sp_id or "tiger" in sp_id:
-        # 1. 4 Articulated Legs (Elbow BACKWARD, Stifle Knee FORWARD, Hock BACKWARD)
-        for leg in sim.legs4:
+    # ── Try NEW bio bone renderer first (realistic skeleton + muscle + skin) ──
+    _bio_rendered = False
+    try:
+        from src.bio_bone_renderer import (
+            draw_bio_quadruped, draw_bio_serpent, draw_bio_arachnid
+        )
+        if class_type in ("quadruped",) or any(k in sp_id for k in ("dog","wolf","tiger","lion","cat","leopard","cheetah","bear","fox","deer","horse","rabbit","hyena","panda")):
+            draw_bio_quadruped(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
+            _bio_rendered = True
+        elif class_type == "serpent" or any(k in sp_id for k in ("snake","cobra","viper","boa","python","mamba")):
+            draw_bio_serpent(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
+            _bio_rendered = True
+        elif class_type == "arachnid" or any(k in sp_id for k in ("spider","scorpion","tarantula")):
+            draw_bio_arachnid(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
+            _bio_rendered = True
+    except ImportError:
+        pass  # bio_bone_renderer not available yet — fall through to legacy renderer
+    except Exception as _bio_err:
+        print(f"  ⚠ Bio renderer error: {_bio_err} — falling back to legacy renderer")
+
+      if class_type == "quadruped" or "dog" in sp_id or "wolf" in sp_id or "tiger" in sp_id:
+        # ── Research-driven colors (from Wikipedia/web anatomy search) ──
+        # Falls back to Golden Shepherd defaults if no research data available
+        fur_dark   = tuple(species.get("fur_dark",      [120, 60,  5]))
+        fur_mid    = tuple(species.get("fur_mid",       [190, 110, 20]))
+        fur_gold   = tuple(species.get("fur_gold",      [230, 160, 45]))
+        fur_light  = tuple(species.get("fur_light",     [255, 210, 100]))
+        fur_cream  = tuple(species.get("fur_cream",     [255, 235, 170]))
+        # Eye/nose colors derived from fur_dark and accent
+        nose_black = (max(10, fur_dark[0]//3), max(8, fur_dark[1]//4), max(5, fur_dark[2]//5))
+        eye_amber  = tuple(min(255, int(c * 0.65)) for c in fur_mid)
+        joint_col  = tuple(int((a + b) // 2) for a, b in zip(fur_mid, fur_gold))
+
+        def draw_limb(p1, p2, base_w, dark_col, mid_col):
+            dx = p2[0] - p1[0]; dy = p2[1] - p1[1]
+            ln = math.hypot(dx, dy)
+            if ln < 1: return
+            nx = -dy / ln; ny = dx / ln
+            draw.line([p1, p2], fill=dark_col, width=base_w + 6)
+            draw.line([p1, p2], fill=mid_col, width=base_w)
+            hi = (min(255, mid_col[0]+45), min(255, mid_col[1]+35), min(255, mid_col[2]+20))
+            draw.line([(p1[0]+nx*3, p1[1]+ny*3), (p2[0]+nx*3, p2[1]+ny*3)],
+                      fill=hi, width=max(2, base_w // 3))
+
+        # ── A. HINDLEGS (behind body) ──
+        for leg in [l for l in sim.legs4 if not l["is_front"]]:
             paw_pos = (leg["cur"][0], leg["cur"][1])
             sock = leg["socket"]
-
-            if leg["is_front"]:
-                _, elbow, _ = solve_forelimb_ik(sock, paw_pos, leg["l1"], leg["l2"], leg["side"])
-                draw.line([sock, elbow], fill=(180, 83, 9), width=22)
-                draw.line([sock, elbow], fill=(245, 158, 11), width=16)
-                draw.line([elbow, paw_pos], fill=(217, 119, 6), width=14)
-                draw.line([elbow, paw_pos], fill=(251, 191, 36), width=10)
-                draw.ellipse([elbow[0]-7, elbow[1]-7, elbow[0]+7, elbow[1]+7], fill=(245, 158, 11), outline=(180, 83, 9), width=2)
-            else:
-                knee = (sock[0] + cos_a * (leg["l1"] * 0.75) + perp_x * (leg["l1"] * 0.65 * leg["side"]),
-                        sock[1] + sin_a * (leg["l1"] * 0.75) + perp_y * (leg["l1"] * 0.65 * leg["side"]))
-                hock = (knee[0] - cos_a * (leg["l2"] * 0.65) + perp_x * (leg["l2"] * 0.2 * leg["side"]),
-                        knee[1] - sin_a * (leg["l2"] * 0.65) + perp_y * (leg["l2"] * 0.2 * leg["side"]))
-                draw.line([sock, knee], fill=(146, 64, 14), width=26)
-                draw.line([sock, knee], fill=(217, 119, 6), width=18)
-                draw.line([knee, hock], fill=(180, 83, 9), width=16)
-                draw.line([knee, hock], fill=(245, 158, 11), width=12)
-                draw.line([hock, paw_pos], fill=(217, 119, 6), width=13)
-                draw.line([hock, paw_pos], fill=(251, 191, 36), width=9)
-                draw.ellipse([knee[0]-8, knee[1]-8, knee[0]+8, knee[1]+8], fill=(245, 158, 11), outline=(146, 64, 14), width=2)
-                draw.ellipse([hock[0]-6, hock[1]-6, hock[0]+6, hock[1]+6], fill=(120, 53, 15), outline=(180, 83, 9), width=2)
-
-            # 4-Toe Digitigrade Paw Pads with Claws
-            draw.ellipse([paw_pos[0]-11, paw_pos[1]-10, paw_pos[0]+11, paw_pos[1]+10], fill=(40, 30, 20), outline=(20, 15, 10), width=2)
+            side = leg["side"]
+            thigh_end = (sock[0] + cos_a * 36 + perp_x * (24 * side),
+                         sock[1] + sin_a * 36 + perp_y * (24 * side))
+            draw_limb(sock, thigh_end, 26, fur_dark, fur_mid)
+            shin_end = (thigh_end[0] - cos_a * 34 + perp_x * (16 * side),
+                        thigh_end[1] - sin_a * 34 + perp_y * (16 * side))
+            draw_limb(thigh_end, shin_end, 20, fur_dark, fur_gold)
+            draw.ellipse([thigh_end[0]-11, thigh_end[1]-11, thigh_end[0]+11, thigh_end[1]+11],
+                         fill=joint_col, outline=fur_dark, width=2)
+            hock = (shin_end[0] - cos_a * 10 + perp_x * (12 * side),
+                    shin_end[1] - sin_a * 10 + perp_y * (12 * side))
+            draw_limb(shin_end, hock, 16, fur_dark, fur_mid)
+            draw.ellipse([hock[0]-7, hock[1]-7, hock[0]+7, hock[1]+7],
+                         fill=fur_dark, outline=fur_mid, width=1)
+            draw_limb(hock, paw_pos, 14, fur_dark, fur_mid)
+            draw.ellipse([paw_pos[0]-15, paw_pos[1]-10, paw_pos[0]+15, paw_pos[1]+10],
+                         fill=nose_black, outline=fur_dark, width=2)
             for t_off in [-6, -2, 2, 6]:
-                bx = paw_pos[0] + cos_a * 9 + perp_x * t_off
-                by = paw_pos[1] + sin_a * 9 + perp_y * t_off
-                draw.ellipse([bx-3.5, by-3.5, bx+3.5, by+3.5], fill=(20, 15, 10))
-                draw.line([(bx, by), (bx + cos_a * 5, by + sin_a * 5)], fill=(10, 10, 10), width=2)
+                bx = paw_pos[0] + cos_a * 12 + perp_x * t_off
+                by = paw_pos[1] + sin_a * 12 + perp_y * t_off
+                draw.ellipse([bx-4, by-4, bx+4, by+4], fill=(35, 25, 15))
+                draw.line([(bx, by), (bx + cos_a * 6, by + sin_a * 6)], fill=(10, 8, 5), width=2)
 
-        # 2. Muscular Torso & Spine Follow-Chain
-        left_prof, right_prof = [], []
-        spine_pts = []
-        for i in range(16):
-            seg = sim.spine[i]
-            s_cos, s_sin = math.cos(seg["angle"]), math.sin(seg["angle"])
-            s_perp_x, s_perp_y = -s_sin, s_cos
-            half_w = 40 - i * 0.9 if i < 6 else 30 - (i-6)*1.4 if i < 11 else 36 - (i-11)*0.8
-            half_w = max(18, half_w)
-            left_prof.append((seg["x"] + s_perp_x * half_w, seg["y"] + s_perp_y * half_w))
-            right_prof.append((seg["x"] - s_perp_x * half_w, seg["y"] - s_perp_y * half_w))
-            spine_pts.append((seg["x"], seg["y"]))
+        # ── B. ORGANIC BODY silhouette ──
+        spine_pts = [(seg["x"], seg["y"]) for seg in sim.spine[:16]]
+        left_out, right_out = [], []
+        for i, seg in enumerate(sim.spine[:16]):
+            s_px = -math.sin(seg["angle"]); s_py = math.cos(seg["angle"])
+            body_widths = [28, 36, 46, 54, 52, 50, 48, 44, 40, 44, 48, 44, 36, 28, 20, 14]
+            hw = max(10, body_widths[i] if i < len(body_widths) else 12)
+            left_out.append((seg["x"] + s_px * (hw + 4), seg["y"] + s_py * (hw + 4)))
+            right_out.append((seg["x"] - s_px * (hw + 4), seg["y"] - s_py * (hw + 4)))
 
-        draw.polygon(left_prof + list(reversed(right_prof)), fill=(245, 158, 11), outline=(180, 83, 9), width=3)
-        saddle_l = [((left_prof[i][0]*0.70 + spine_pts[i][0]*0.30), (left_prof[i][1]*0.70 + spine_pts[i][1]*0.30)) for i in range(2, 12)]
-        saddle_r = [((right_prof[i][0]*0.70 + spine_pts[i][0]*0.30), (right_prof[i][0]*0.70 + spine_pts[i][0]*0.30)) for i in range(2, 12)]
-        draw.polygon(saddle_l + list(reversed(saddle_r)), fill=(28, 17, 8))
+        # Drop shadow
+        shadow_pts = [(x+5, y+5) for x,y in left_out] + list(reversed([(x+5, y+5) for x,y in right_out]))
+        if len(shadow_pts) >= 3: draw.polygon(shadow_pts, fill=(60, 30, 5))
 
-        # 3. Harmonic Plume Tail
+        # Outer fur body
+        body_poly = left_out + list(reversed(right_out))
+        if len(body_poly) >= 3:
+            draw.polygon(body_poly, fill=fur_mid, outline=fur_dark, width=3)
+
+        # Mid-tone inset layer
+        mid_poly = [(x*0.45 + spine_pts[min(i, len(spine_pts)-1)][0]*0.55,
+                     y*0.45 + spine_pts[min(i, len(spine_pts)-1)][1]*0.55)
+                    for i, (x, y) in enumerate(left_out[:14])] + \
+                   list(reversed([(x*0.45 + spine_pts[min(i, len(spine_pts)-1)][0]*0.55,
+                                   y*0.45 + spine_pts[min(i, len(spine_pts)-1)][1]*0.55)
+                                  for i, (x, y) in enumerate(right_out[:14])]))
+        if len(mid_poly) >= 3: draw.polygon(mid_poly, fill=fur_gold)
+
+        # Dorsal highlight stripe
+        for i in range(len(spine_pts) - 1):
+            draw.line([spine_pts[i], spine_pts[i+1]], fill=fur_light, width=4)
+            draw.line([spine_pts[i], spine_pts[i+1]], fill=fur_cream, width=2)
+
+        # Belly cream patch
+        belly_pts = [(sim.spine[i]["x"] + math.cos(sim.spine[i]["angle"]) * 10,
+                      sim.spine[i]["y"] + math.sin(sim.spine[i]["angle"]) * 10) for i in range(4, 11)]
+        if len(belly_pts) >= 3: draw.polygon(belly_pts, fill=fur_cream)
+
+        # ── C. FORELEGS (on top of body) ──
+        for leg in [l for l in sim.legs4 if l["is_front"]]:
+            paw_pos = (leg["cur"][0], leg["cur"][1])
+            sock = leg["socket"]
+            side = leg["side"]
+            _, elbow, _ = solve_forelimb_ik(sock, paw_pos, leg["l1"], leg["l2"], side)
+            draw_limb(sock, elbow, 24, fur_dark, fur_mid)
+            draw.ellipse([elbow[0]-11, elbow[1]-11, elbow[0]+11, elbow[1]+11],
+                         fill=joint_col, outline=fur_dark, width=2)
+            draw_limb(elbow, paw_pos, 18, fur_dark, fur_gold)
+            draw.ellipse([paw_pos[0]-15, paw_pos[1]-10, paw_pos[0]+15, paw_pos[1]+10],
+                         fill=nose_black, outline=fur_dark, width=2)
+            for t_off in [-6, -2, 2, 6]:
+                bx = paw_pos[0] + cos_a * 12 + perp_x * t_off
+                by = paw_pos[1] + sin_a * 12 + perp_y * t_off
+                draw.ellipse([bx-4, by-4, bx+4, by+4], fill=(35, 25, 15))
+                draw.line([(bx, by), (bx + cos_a * 6, by + sin_a * 6)], fill=(10, 8, 5), width=2)
+
+        # ── D. WAGGING PLUME TAIL ──
         tail_prev = spine_pts[-1]
-        wag = math.sin(sim_time * 6.5) * 0.55
-        for i in range(10):
-            t_ang = sim.angle + math.pi + wag * ((i+1)/10)
-            tx = tail_prev[0] + math.cos(t_ang) * (22 - i * 1.1)
-            ty = tail_prev[1] + math.sin(t_ang) * (22 - i * 1.1)
-            draw.line([tail_prev, (tx, ty)], fill=(180, 83, 9), width=max(8, int(26 - i * 1.9)))
-            draw.line([tail_prev, (tx, ty)], fill=(245, 158, 11), width=max(5, int(20 - i * 1.5)))
-            draw.line([tail_prev, (tx, ty)], fill=(254, 243, 199), width=max(2, int(10 - i * 0.9)))
+        wag = math.sin(sim_time * 7.0) * 0.65
+        for i in range(12):
+            frac = (i + 1) / 12
+            t_ang = sim.angle + math.pi + wag * frac * frac
+            seg_len = 22 - i * 1.2
+            tx = tail_prev[0] + math.cos(t_ang) * seg_len
+            ty = tail_prev[1] + math.sin(t_ang) * seg_len
+            w = max(5, int(24 - i * 1.6))
+            draw.line([tail_prev, (tx, ty)], fill=fur_dark, width=w + 4)
+            draw.line([tail_prev, (tx, ty)], fill=fur_gold, width=w)
+            draw.line([tail_prev, (tx, ty)], fill=fur_cream, width=max(2, w - 6))
             tail_prev = (tx, ty)
+        draw.ellipse([tail_prev[0]-8, tail_prev[1]-8, tail_prev[0]+8, tail_prev[1]+8], fill=fur_cream)
 
-        # 4. Detailed Sculpted Canine Head
-        hx = sim.x + cos_a * 38
-        hy = sim.y + sin_a * 38
-        snout = (hx + cos_a * 54, hy + sin_a * 54)
+        # ── E. REALISTIC CANINE HEAD ──
+        hx = sim.x + cos_a * 44
+        hy = sim.y + sin_a * 44
 
-        ear_l = (hx - cos_a * 12 + perp_x * 32, hy - sin_a * 12 + perp_y * 32)
-        ear_tip_l = (ear_l[0] - cos_a * 36 + perp_x * 22, ear_l[1] - sin_a * 36 + perp_y * 22)
-        ear_r = (hx - cos_a * 12 - perp_x * 32, hy - sin_a * 12 - perp_y * 32)
-        ear_tip_r = (ear_r[0] - cos_a * 36 - perp_x * 22, ear_r[1] - sin_a * 36 - perp_y * 22)
-        draw.polygon([(hx, hy), ear_l, ear_tip_l], fill=(28, 17, 8), outline=(180, 83, 9), width=3)
-        draw.polygon([(hx, hy), ear_r, ear_tip_r], fill=(28, 17, 8), outline=(180, 83, 9), width=3)
-        draw.polygon([ear_l, ear_tip_l, (hx - cos_a * 8 + perp_x * 18, hy - sin_a * 8 + perp_y * 18)], fill=(253, 164, 175))
-        draw.polygon([ear_r, ear_tip_r, (hx - cos_a * 8 - perp_x * 18, hy - sin_a * 8 - perp_y * 18)], fill=(253, 164, 175))
+        # Skull
+        draw.ellipse([hx-28, hy-28, hx+28, hy+28], fill=fur_mid, outline=fur_dark, width=3)
+        draw.ellipse([hx+cos_a*4-12, hy+sin_a*4-12, hx+cos_a*4+12, hy+sin_a*4+12], fill=fur_gold)
+        draw.ellipse([hx+cos_a*6-6, hy+sin_a*6-6, hx+cos_a*6+6, hy+sin_a*6+6], fill=fur_light)
 
-        c1 = (hx + cos_a * 26 + perp_x * 32, hy + sin_a * 26 + perp_y * 32)
-        c2 = (hx - cos_a * 24 + perp_x * 36, hy - sin_a * 24 + perp_y * 36)
-        c3 = (hx - cos_a * 24 - perp_x * 36, hy - sin_a * 24 - perp_y * 36)
-        c4 = (hx + cos_a * 26 - perp_x * 32, hy + sin_a * 26 - perp_y * 32)
-        draw.polygon([snout, c1, c2, c3, c4], fill=(245, 158, 11), outline=(180, 83, 9), width=3)
+        # Drop ears
+        ear_l = (hx - cos_a * 16 + perp_x * 28, hy - sin_a * 16 + perp_y * 28)
+        ear_tip_l = (ear_l[0] - cos_a * 32 + perp_x * 14, ear_l[1] - sin_a * 32 + perp_y * 14)
+        ear_base_l = (hx + cos_a * 4 + perp_x * 24, hy + sin_a * 4 + perp_y * 24)
+        ear_r = (hx - cos_a * 16 - perp_x * 28, hy - sin_a * 16 - perp_y * 28)
+        ear_tip_r = (ear_r[0] - cos_a * 32 - perp_x * 14, ear_r[1] - sin_a * 32 - perp_y * 14)
+        ear_base_r = (hx + cos_a * 4 - perp_x * 24, hy + sin_a * 4 - perp_y * 24)
+        draw.polygon([ear_base_l, ear_l, ear_tip_l], fill=fur_dark, outline=fur_dark, width=2)
+        draw.polygon([ear_base_r, ear_r, ear_tip_r], fill=fur_dark, outline=fur_dark, width=2)
+        inner_l_tip = (ear_l[0] + cos_a * 8 - perp_x * 5, ear_l[1] + sin_a * 8 - perp_y * 5)
+        inner_r_tip = (ear_r[0] + cos_a * 8 + perp_x * 5, ear_r[1] + sin_a * 8 + perp_y * 5)
+        draw.polygon([(hx + perp_x * 12, hy + perp_y * 12), ear_l, inner_l_tip], fill=(210, 130, 140))
+        draw.polygon([(hx - perp_x * 12, hy - perp_y * 12), ear_r, inner_r_tip], fill=(210, 130, 140))
 
-        m1 = (hx + cos_a * 22 + perp_x * 20, hy + sin_a * 22 + perp_y * 20)
-        m2 = (hx + cos_a * 22 - perp_x * 20, hy + sin_a * 22 - perp_y * 20)
-        draw.polygon([snout, m1, m2], fill=(28, 17, 8))
+        # Muzzle ellipse
+        snout_cx = hx + cos_a * 36; snout_cy = hy + sin_a * 36
+        draw.ellipse([snout_cx-18, snout_cy-13, snout_cx+18, snout_cy+13], fill=fur_cream, outline=fur_mid, width=2)
 
-        tongue_tip = (snout[0] + cos_a * 22, snout[1] + sin_a * 22)
-        draw.ellipse([tongue_tip[0]-5.5, tongue_tip[1]-5.5, tongue_tip[0]+5.5, tongue_tip[1]+5.5], fill=(251, 113, 133))
-        draw.ellipse([snout[0]-8.5, snout[1]-7, snout[0]+8.5, snout[1]+7], fill=(0, 0, 0))
-        draw.ellipse([snout[0]+cos_a*2-2.5, snout[1]+sin_a*2-1.5, snout[0]+cos_a*2+2.5, snout[1]+sin_a*2+1.5], fill=(148, 163, 184))
+        # Nose (wet black)
+        nose_cx = snout_cx + cos_a * 14; nose_cy = snout_cy + sin_a * 14
+        draw.ellipse([nose_cx-9, nose_cy-7, nose_cx+9, nose_cy+7], fill=nose_black, outline=(40, 35, 30), width=2)
+        draw.ellipse([nose_cx+cos_a*2-3, nose_cy+sin_a*2-2, nose_cx+cos_a*2+3, nose_cy+sin_a*2+2], fill=(80, 80, 80))
+        draw.ellipse([nose_cx+perp_x*4-2, nose_cy+perp_y*4-2, nose_cx+perp_x*4+2, nose_cy+perp_y*4+2], fill=(10, 8, 5))
+        draw.ellipse([nose_cx-perp_x*4-2, nose_cy-perp_y*4-2, nose_cx-perp_x*4+2, nose_cy-perp_y*4+2], fill=(10, 8, 5))
 
-        eye_l = (hx + cos_a * 12 + perp_x * 18, hy + sin_a * 12 + perp_y * 18)
-        eye_r = (hx + cos_a * 12 - perp_x * 18, hy + sin_a * 12 - perp_y * 18)
-        draw.ellipse([eye_l[0]-6.5, eye_l[1]-6, eye_l[0]+6.5, eye_l[1]+6], fill=(69, 26, 3))
-        draw.ellipse([eye_r[0]-6.5, eye_r[1]-6, eye_r[0]+6.5, eye_r[1]+6], fill=(69, 26, 3))
-        draw.ellipse([eye_l[0]+1.8, eye_l[1]-1.8, eye_l[0]+4, eye_l[1]+0.6], fill=(255, 255, 255))
-        draw.ellipse([eye_r[0]+1.8, eye_r[1]-1.8, eye_r[0]+4, eye_r[1]+0.6], fill=(255, 255, 255))
+        # Panting tongue
+        tongue_phase = math.sin(sim_time * 1.5) * 0.3 + 0.7
+        if tongue_phase > 0.4:
+            t_len = 16 * tongue_phase
+            t_base = (snout_cx + cos_a * 2, snout_cy + sin_a * 2)
+            t_tip = (t_base[0] + cos_a * t_len, t_base[1] + sin_a * t_len)
+            draw.line([t_base, t_tip], fill=(230, 80, 100), width=10)
+            draw.ellipse([t_tip[0]-5, t_tip[1]-5, t_tip[0]+5, t_tip[1]+5], fill=(220, 70, 90))
+            draw.line([t_base, t_tip], fill=(200, 60, 80), width=2)
+
+        # Eyes with iris + pupil + highlight
+        eye_l = (hx + cos_a * 10 + perp_x * 17, hy + sin_a * 10 + perp_y * 17)
+        eye_r = (hx + cos_a * 10 - perp_x * 17, hy + sin_a * 10 - perp_y * 17)
+        for eye_pt in [eye_l, eye_r]:
+            draw.ellipse([eye_pt[0]-8, eye_pt[1]-7, eye_pt[0]+8, eye_pt[1]+7],
+                         fill=(30, 18, 5), outline=fur_dark, width=2)
+            draw.ellipse([eye_pt[0]-6, eye_pt[1]-5.5, eye_pt[0]+6, eye_pt[1]+5.5], fill=eye_amber)
+            draw.ellipse([eye_pt[0]-2.5, eye_pt[1]-4, eye_pt[0]+2.5, eye_pt[1]+4], fill=(5, 3, 1))
+            draw.ellipse([eye_pt[0]+2.5, eye_pt[1]-3.5, eye_pt[0]+5, eye_pt[1]-1], fill=(255, 255, 240))
+
+        # Eyebrow spots
+        brow_l = (hx - cos_a * 4 + perp_x * 16, hy - sin_a * 4 + perp_y * 16)
+        brow_r = (hx - cos_a * 4 - perp_x * 16, hy - sin_a * 4 - perp_y * 16)
+        draw.ellipse([brow_l[0]-3, brow_l[1]-2, brow_l[0]+3, brow_l[1]+2], fill=fur_dark)
+        draw.ellipse([brow_r[0]-3, brow_r[1]-2, brow_r[0]+3, brow_r[1]+2], fill=fur_dark)
 
     elif class_type == "arachnid":
         # 1. 8 Articulated Walking Legs with 3-Segment IK & Tarsal Claws

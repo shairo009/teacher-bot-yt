@@ -634,12 +634,17 @@ async def main():
 
     # ── Duplicate detection: skip IDs already in tech history ────────────
     # Prevents same video being uploaded if progress.json didn't get pushed
+    # IMPORTANT: Only check entries that have 'series' field (tech entries),
+    # not animal or other entries which also use 'id' field with different meaning.
     tech_done_ids = set()
     if history_path.exists():
         try:
             with open(history_path) as f:
                 all_hist = json.load(f)
-            tech_done_ids = {h['id'] for h in all_hist if 'id' in h}
+            tech_done_ids = {
+                h['id'] for h in all_hist
+                if 'series' in h and h.get('id') is not None
+            }
         except:
             pass
 

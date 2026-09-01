@@ -681,7 +681,7 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     except Exception as _bio_err:
         print(f"  ⚠ Bio renderer error: {_bio_err} — falling back to legacy renderer")
 
-      if class_type == "quadruped" or "dog" in sp_id or "wolf" in sp_id or "tiger" in sp_id:
+    if not _bio_rendered and (class_type == "quadruped" or "dog" in sp_id or "wolf" in sp_id or "tiger" in sp_id):
         # ── Research-driven colors (from Wikipedia/web anatomy search) ──
         # Falls back to Golden Shepherd defaults if no research data available
         fur_dark   = tuple(species.get("fur_dark",      [120, 60,  5]))

@@ -581,5 +581,23 @@
     "dry_run": false,
     "video_id": "ilamWsHuwjE",
     "youtube_url": "https://youtu.be/ilamWsHuwjE"
+  },
+  {
+    "id": 43,
+    "species": "GIRAFFE",
+    "scientific": "Giraffa camelopardalis",
+    "class_type": "quadruped",
+    "accent": [
+      185,
+      150,
+      80
+    ],
+    "anatomy_notes": "Giraffes are large African hoofed mammals. They are the tallest living terrestrial animals and the largest ruminants on Earth. They are classified under the family Giraffidae, along with their closest",
+    "file": "tmp/reel_0043/giraffe_short.mp4",
+    "timestamp": "2026-09-02T23:26:09.150135+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "5qdkNi2EJh0",
+    "youtube_url": "https://youtu.be/5qdkNi2EJh0"
   }
 ]

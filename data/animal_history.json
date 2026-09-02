@@ -527,5 +527,23 @@
     "dry_run": false,
     "video_id": "nUrOGnCjOOo",
     "youtube_url": "https://youtu.be/nUrOGnCjOOo"
+  },
+  {
+    "id": 40,
+    "species": "AFRICAN LION",
+    "scientific": "Panthera leo",
+    "class_type": "quadruped",
+    "accent": [
+      151,
+      108,
+      50
+    ],
+    "anatomy_notes": "The lion is a large cat of the genus Panthera, currently ranging only in Sub-Saharan Africa and India. It has a muscular, broad-chested body; a short, rounded head; round ears; and a dark, hairy tuft ",
+    "file": "tmp/reel_0040/african_lion_short.mp4",
+    "timestamp": "2026-09-02T12:11:55.271379+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "mPLN_xoDW6s",
+    "youtube_url": "https://youtu.be/mPLN_xoDW6s"
   }
 ]

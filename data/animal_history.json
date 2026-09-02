@@ -563,5 +563,23 @@
     "dry_run": false,
     "video_id": "4_x9H_q9uug",
     "youtube_url": "https://youtu.be/4_x9H_q9uug"
+  },
+  {
+    "id": 42,
+    "species": "LOGGERHEAD SEA TURTLE",
+    "scientific": "Caretta caretta",
+    "class_type": "reptile",
+    "accent": [
+      230,
+      200,
+      30
+    ],
+    "anatomy_notes": "The loggerhead sea turtle, loggerhead turtle or loggerhead, is a species of sea turtle distributed throughout the world. It is a marine reptile, belonging to the family Cheloniidae. The average logger",
+    "file": "tmp/reel_0042/loggerhead_sea_turtle_short.mp4",
+    "timestamp": "2026-09-02T19:53:42.613483+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "ilamWsHuwjE",
+    "youtube_url": "https://youtu.be/ilamWsHuwjE"
   }
 ]

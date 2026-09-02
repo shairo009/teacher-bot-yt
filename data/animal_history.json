@@ -509,5 +509,23 @@
     "dry_run": false,
     "video_id": "tT4A8Gc17LM",
     "youtube_url": "https://youtu.be/tT4A8Gc17LM"
+  },
+  {
+    "id": 39,
+    "species": "SHADOW LOBSTER",
+    "scientific": "Panulirus umbra",
+    "class_type": "crustacean",
+    "accent": [
+      160,
+      70,
+      20
+    ],
+    "anatomy_notes": "Lobsters are malacostracan decapod crustaceans of the family Nephropidae or its synonym Homaridae. They have long bodies with muscular tails and live in crevices or burrows on the sea floor. Three of ",
+    "file": "tmp/reel_0039/shadow_lobster_short.mp4",
+    "timestamp": "2026-09-02T07:13:35.877181+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "nUrOGnCjOOo",
+    "youtube_url": "https://youtu.be/nUrOGnCjOOo"
   }
 ]

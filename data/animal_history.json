@@ -545,5 +545,23 @@
     "dry_run": false,
     "video_id": "mPLN_xoDW6s",
     "youtube_url": "https://youtu.be/mPLN_xoDW6s"
+  },
+  {
+    "id": 41,
+    "species": "PHARAOH CUTTLEFISH",
+    "scientific": "Sepia pharaonis",
+    "class_type": "insect",
+    "accent": [
+      180,
+      109,
+      50
+    ],
+    "anatomy_notes": "The pharaoh cuttlefish is a large cuttlefish species, growing to 42\u00a0cm in mantle length and 5\u00a0kg in weight.",
+    "file": "tmp/reel_0041/pharaoh_cuttlefish_short.mp4",
+    "timestamp": "2026-09-02T16:38:22.412663+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "4_x9H_q9uug",
+    "youtube_url": "https://youtu.be/4_x9H_q9uug"
   }
 ]

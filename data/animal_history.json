@@ -617,5 +617,23 @@
     "dry_run": false,
     "video_id": "mfqbji4Q6-E",
     "youtube_url": "https://youtu.be/mfqbji4Q6-E"
+  },
+  {
+    "id": 45,
+    "species": "BLACK RHINOCEROS",
+    "scientific": "Diceros bicornis",
+    "class_type": "quadruped",
+    "accent": [
+      185,
+      150,
+      80
+    ],
+    "anatomy_notes": "The black rhinoceros, also called the black rhino or the hooked-lip rhinoceros, is a species of rhinoceros native to East and Southern Africa, including Angola, Botswana, Eswatini, Kenya, Lesotho, Mal",
+    "file": "tmp/reel_0045/black_rhinoceros_short.mp4",
+    "timestamp": "2026-09-03T12:13:19.226897+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "5Aa6FEtC6wg",
+    "youtube_url": "https://youtu.be/5Aa6FEtC6wg"
   }
 ]

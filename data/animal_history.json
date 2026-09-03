@@ -653,5 +653,23 @@
     "dry_run": false,
     "video_id": "AkBipniNp5s",
     "youtube_url": "https://youtu.be/AkBipniNp5s"
+  },
+  {
+    "id": 47,
+    "species": "LEOPARD SHARK",
+    "scientific": "Triakis semifasciata",
+    "class_type": "aquatic",
+    "accent": [
+      25,
+      20,
+      18
+    ],
+    "anatomy_notes": "The leopard shark is a species of houndshark, in the family Triakidae. It is found along the Pacific coast of North America, from the U.S. state of Oregon to Mazatl\u00e1n in Mexico. Typically measuring 1.",
+    "file": "tmp/reel_0047/leopard_shark_short.mp4",
+    "timestamp": "2026-09-03T19:57:03.676537+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "pBu51_N6xL4",
+    "youtube_url": "https://youtu.be/pBu51_N6xL4"
   }
 ]

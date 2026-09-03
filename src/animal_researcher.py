@@ -217,7 +217,8 @@ def _detect_class(text: str) -> str:
         for kw in keywords:
             if kw in lower:
                 scores[cls] += 1
-    best = max(scores, key=lambda k: scores[k])
+    # Tie breaker: prioritize aquatic > insect > arachnid over quadruped
+    best = max(scores, key=lambda k: (scores[k], list(_CLASS_KEYWORDS.keys()).index(k)))
     return best if scores[best] > 0 else "quadruped"
 
 

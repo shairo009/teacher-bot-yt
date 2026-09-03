@@ -671,5 +671,23 @@
     "dry_run": false,
     "video_id": "pBu51_N6xL4",
     "youtube_url": "https://youtu.be/pBu51_N6xL4"
+  },
+  {
+    "id": 48,
+    "species": "QUANTUM VAMPIRE SQUID",
+    "scientific": "Vampyroteuthis quantum",
+    "class_type": "cephalopod",
+    "accent": [
+      179,
+      111,
+      50
+    ],
+    "anatomy_notes": "The vampire squid is a small cephalopod found throughout temperate and tropical oceans in extreme deep sea conditions. The vampire squid uses its bioluminescent organs and its unique oxygen metabolism",
+    "file": "tmp/reel_0048/quantum_vampire_squid_short.mp4",
+    "timestamp": "2026-09-03T23:24:00.759203+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "PSCrXOTympk",
+    "youtube_url": "https://youtu.be/PSCrXOTympk"
   }
 ]

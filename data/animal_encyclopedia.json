@@ -408,17 +408,6 @@
     "class_type": "dummy"
   },
   {
-    "name": "LEOPARD SHARK",
-    "scientific": "Triakis semifasciata",
-    "class_type": "aquatic",
-    "accent": [
-      202,
-      138,
-      4
-    ],
-    "file_name": "LeopardShark.js"
-  },
-  {
     "name": "QUANTUM VIPER",
     "scientific": "Bitis quantum",
     "class_type": "serpent",
@@ -428,6 +417,17 @@
       212
     ],
     "file_name": "QuantumViper.js"
+  },
+  {
+    "name": "LEOPARD SHARK",
+    "scientific": "Triakis semifasciata",
+    "class_type": "aquatic",
+    "accent": [
+      202,
+      138,
+      4
+    ],
+    "file_name": "LeopardShark.js"
   },
   {
     "name": "QUANTUM VAMPIRE SQUID",

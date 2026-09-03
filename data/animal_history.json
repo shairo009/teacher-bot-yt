@@ -599,5 +599,23 @@
     "dry_run": false,
     "video_id": "5qdkNi2EJh0",
     "youtube_url": "https://youtu.be/5qdkNi2EJh0"
+  },
+  {
+    "id": 44,
+    "species": "STONE CRAB",
+    "scientific": "Menippe mercenaria",
+    "class_type": "crustacean",
+    "accent": [
+      160,
+      70,
+      20
+    ],
+    "anatomy_notes": "Stone crab may refer to:The Florida stone crab, Menippe mercenaria \nStone crab, Myomenippe hardwicki\nHairy Stone Crab, Lomis hirta \nKing crabs, crustaceans of the family Lithodidae",
+    "file": "tmp/reel_0044/stone_crab_short.mp4",
+    "timestamp": "2026-09-03T07:14:54.255887+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "mfqbji4Q6-E",
+    "youtube_url": "https://youtu.be/mfqbji4Q6-E"
   }
 ]

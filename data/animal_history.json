@@ -635,5 +635,23 @@
     "dry_run": false,
     "video_id": "5Aa6FEtC6wg",
     "youtube_url": "https://youtu.be/5Aa6FEtC6wg"
+  },
+  {
+    "id": 46,
+    "species": "BLUE MUD DAUBER WASP",
+    "scientific": "Chalybion californicum",
+    "class_type": "insect",
+    "accent": [
+      175,
+      110,
+      50
+    ],
+    "anatomy_notes": "A wasp is any insect of the narrow-waisted suborder Apocrita of the order Hymenoptera which is neither a bee nor an ant; this excludes the broad-waisted sawflies (Symphyta), which look somewhat like w",
+    "file": "tmp/reel_0046/blue_mud_dauber_wasp_short.mp4",
+    "timestamp": "2026-09-03T16:32:20.784686+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "AkBipniNp5s",
+    "youtube_url": "https://youtu.be/AkBipniNp5s"
   }
 ]

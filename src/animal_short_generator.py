@@ -40,10 +40,13 @@ DATA_DIR = ROOT / "data"
 TMP_DIR = ROOT / "tmp"
 PROGRESS_FILE = DATA_DIR / "animal_progress.json"
 HISTORY_FILE = DATA_DIR / "animal_history.json"
+DEFAULT_DURATION = 58.0
 LAST_FRAME_FILE = DATA_DIR / "last_uploaded_frame.jpg"
+RECENT_FRAMES_DIR = DATA_DIR / "recent_frames"
+MAX_RECENT_FRAMES = 5
 
 def compute_visual_difference(img1, img2) -> float:
-    """Calculates visual difference between two frames (0% = identical, 100% = completely opposite)."""
+    """Calculates percentage pixel difference between two frames (0% to 100%)."""
     thumb1 = img1.convert("RGB").resize((64, 64))
     thumb2 = img2.convert("RGB").resize((64, 64))
     b1 = thumb1.tobytes()
@@ -51,24 +54,108 @@ def compute_visual_difference(img1, img2) -> float:
     diff = sum(abs(a - b) for a, b in zip(b1, b2))
     return (diff / (len(b1) * 255)) * 100.0
 
-def verify_candidate_frame(species: dict) -> tuple[bool, float]:
-    """Renders a fast test frame and checks difference against data/last_uploaded_frame.jpg."""
-    if not LAST_FRAME_FILE.exists():
-        return True, 100.0
+def compute_dhash(img, hash_size: int = 8) -> str:
+    """Calculates 64-bit difference hash (perceptual digital DNA of the frame)."""
+    from PIL import Image
+    resized = img.convert("L").resize((hash_size + 1, hash_size), Image.Resampling.LANCZOS)
+    pixels = list(resized.tobytes())
+    diff = []
+    for row in range(hash_size):
+        for col in range(hash_size):
+            p_left = pixels[row * (hash_size + 1) + col]
+            p_right = pixels[row * (hash_size + 1) + col + 1]
+            diff.append(p_left > p_right)
+    dec = 0
+    hex_chars = []
+    for i, val in enumerate(diff):
+        if val: dec += 2 ** (i % 4)
+        if (i % 4) == 3:
+            hex_chars.append(hex(dec)[2:])
+            dec = 0
+    return "".join(hex_chars)
+
+def hamming_distance(h1: str, h2: str) -> int:
+    """Bitwise distance between two 64-bit hashes (0 = identical, 64 = completely inverted)."""
+    try:
+        return bin(int(h1, 16) ^ int(h2, 16)).count("1")
+    except Exception:
+        return 64
+
+def verify_candidate_against_recent_buffer(species: dict) -> tuple[bool, float, int]:
+    """
+    Multi-level verification:
+      1. Renders fast test frame of candidate animal
+      2. Pixel-diff checks against ALL frames in recent_frames (must be >= 9.0%)
+      3. Perceptual dHash check against last 10 uploads (Hamming distance must be >= 12)
+    Returns (is_ok, min_pixel_diff, min_hamming_dist)
+    """
     try:
         from PIL import Image
-        prev_img = Image.open(LAST_FRAME_FILE)
         candidate_frame = render_generative_frame(species, 0, 100)
-        diff = compute_visual_difference(prev_img, candidate_frame)
-        MIN_DIFF_THRESHOLD = 8.0  # Must be at least 8% visually distinct
-        is_ok = diff >= MIN_DIFF_THRESHOLD
-        return is_ok, diff
+        candidate_hash = compute_dhash(candidate_frame)
+
+        # 1. Check against physical rolling buffer of last 5 frames
+        min_pixel_diff = 100.0
+        if RECENT_FRAMES_DIR.exists():
+            for f_path in sorted(RECENT_FRAMES_DIR.glob("recent_*.jpg")):
+                try:
+                    p_img = Image.open(f_path)
+                    p_diff = compute_visual_difference(p_img, candidate_frame)
+                    if p_diff < min_pixel_diff:
+                        min_pixel_diff = p_diff
+                except Exception:
+                    pass
+        elif LAST_FRAME_FILE.exists():
+            try:
+                p_img = Image.open(LAST_FRAME_FILE)
+                min_pixel_diff = compute_visual_difference(p_img, candidate_frame)
+            except Exception:
+                pass
+
+        # 2. Check dHash against last 10 uploads in history
+        history = _load_json(HISTORY_FILE, [])
+        min_hamming = 64
+        for past_item in history[-10:]:
+            past_hash = past_item.get("dhash")
+            if past_hash:
+                dist = hamming_distance(candidate_hash, past_hash)
+                if dist < min_hamming:
+                    min_hamming = dist
+
+        # Criteria: must be visually distinct on both pixel & perceptual levels
+        is_ok = (min_pixel_diff >= 9.0) and (min_hamming >= 12)
+        return is_ok, min_pixel_diff, min_hamming
     except Exception as exc:
-        print(f"  ⚠ Visual verification check failed: {exc}")
-        return True, 100.0
+        print(f"  ⚠ Visual buffer verification check error: {exc}")
+        return True, 100.0, 64
 
-DEFAULT_DURATION = 58.0
+def update_rolling_frame_buffer(new_frame_path: Path):
+    """
+    Shifts the FIFO buffer of recent frames:
+      recent_3 -> recent_4, recent_2 -> recent_3, ..., new -> recent_0
+    Ensures only the last 5 uploaded frames are kept on disk.
+    """
+    RECENT_FRAMES_DIR.mkdir(parents=True, exist_ok=True)
+    # Shift existing frames
+    for i in range(MAX_RECENT_FRAMES - 1, 0, -1):
+        old_f = RECENT_FRAMES_DIR / f"recent_{i-1}.jpg"
+        new_f = RECENT_FRAMES_DIR / f"recent_{i}.jpg"
+        if old_f.exists():
+            if new_f.exists():
+                new_f.unlink()
+            shutil.move(str(old_f), str(new_f))
 
+    # Save current as recent_0.jpg
+    target_0 = RECENT_FRAMES_DIR / "recent_0.jpg"
+    if target_0.exists():
+        target_0.unlink()
+    shutil.copy2(new_frame_path, target_0)
+
+    # Sync single reference file
+    if LAST_FRAME_FILE.exists():
+        LAST_FRAME_FILE.unlink()
+    shutil.copy2(new_frame_path, LAST_FRAME_FILE)
+    print(f"📸 Rolling frame buffer updated: {target_0.name} saved, oldest dropped (Last 5 frames active)")
 
 def _load_json(path: Path, default):
     try:
@@ -162,9 +249,8 @@ def _upload_to_youtube(video_path: Path, species: dict, dry_run: bool) -> str | 
 
 def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dict]:
     """
-    Guarantees MAXIMUM visual variety!
-    Rotates strictly across distinct animal classes and verifies visually against
-    data/last_uploaded_frame.jpg to ensure no consecutive video is ever identical!
+    Guarantees MAXIMUM visual variety using Rolling 5-Frame Buffer & Perceptual dHash!
+    Rotates strictly across distinct animal classes and verifies against recent uploads.
     """
     from src.generative_dragon_engine import get_species_for_id
 
@@ -186,31 +272,31 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
         next_idx = (CLASS_CYCLE.index(last_class) + 1) % len(CLASS_CYCLE)
         target_class = CLASS_CYCLE[next_idx]
 
-    # Pass 1: Targeted class rotation + visual verification
+    # Pass 1: Targeted class rotation + rolling buffer verification
     if target_class:
         for offset in range(total):
             idx = (start_id + offset) % total
             sp = encyclopedia[idx]
             if sp.get("class_type") == target_class and not is_already_used(sp["name"]):
-                candidate_sp = get_species_for_id(idx)
-                is_ok, diff = verify_candidate_frame(candidate_sp)
+                cand_sp = get_species_for_id(idx)
+                is_ok, p_diff, h_dist = verify_candidate_against_recent_buffer(cand_sp)
                 if not is_ok:
-                    print(f"  ⏭ Skipping '{sp['name']}' — visual difference ({diff:.1f}%) too close to previous upload.")
+                    print(f"  ⏭ Skipping '{sp['name']}' — too similar to recent uploads (Diff: {p_diff:.1f}%, Hamming: {h_dist}).")
                     continue
-                print(f"  🎯 Variety Match: Selected '{sp['name']}' (Class: {target_class}, Visual Diff: {diff:.1f}%) following '{last_class}'")
-                return idx, candidate_sp
+                print(f"  🎯 Variety Match: Selected '{sp['name']}' (Class: {target_class}, Min Diff: {p_diff:.1f}%, Hamming: {h_dist}) following '{last_class}'")
+                return idx, cand_sp
 
-    # Pass 2: Any different class + visual verification
+    # Pass 2: Any different class + rolling buffer verification
     for offset in range(total):
         idx = (start_id + offset) % total
         sp = encyclopedia[idx]
-        if sp.get("class_type") != last_class and not is_already_used(sp["name"]):
-            candidate_sp = get_species_for_id(idx)
-            is_ok, diff = verify_candidate_frame(candidate_sp)
+        if sp.get("class_type") not in last_classes and not is_already_used(sp["name"]):
+            cand_sp = get_species_for_id(idx)
+            is_ok, p_diff, h_dist = verify_candidate_against_recent_buffer(cand_sp)
             if not is_ok:
                 continue
-            print(f"  🎯 Alternate Match: Selected '{sp['name']}' (Class: {sp.get('class_type')}, Visual Diff: {diff:.1f}%)")
-            return idx, candidate_sp
+            print(f"  🎯 Alternate Match: Selected '{sp['name']}' (Class: {sp.get('class_type')}, Min Diff: {p_diff:.1f}%, Hamming: {h_dist})")
+            return idx, cand_sp
 
     # Pass 3: Fallback any unused
     for offset in range(total):
@@ -324,28 +410,28 @@ def generate(
         progress["current_id"] = current_id + 1
         PROGRESS_FILE.write_text(json.dumps(progress, indent=2), encoding="utf-8")
 
-    # ── Update last uploaded frame in history (delete previous, save new) ──
+    # ── Update rolling buffer of recent frames & compute dHash ──
     diff_score = 100.0
-    if LAST_FRAME_FILE.exists():
+    frame_dhash = ""
+    mid_frame_idx = min(15, total_frames - 1)
+    source_frame = frames_dir / f"frame_{mid_frame_idx:04d}.jpg"
+    if source_frame.exists():
         try:
             from PIL import Image
-            prev_img = Image.open(LAST_FRAME_FILE)
-            curr_frame = Image.open(frames_dir / f"frame_{min(15, total_frames - 1):04d}.jpg")
-            diff_score = compute_visual_difference(prev_img, curr_frame)
+            curr_frame_img = Image.open(source_frame)
+            frame_dhash = compute_dhash(curr_frame_img)
+            if LAST_FRAME_FILE.exists():
+                prev_img = Image.open(LAST_FRAME_FILE)
+                diff_score = compute_visual_difference(prev_img, curr_frame_img)
         except Exception:
             pass
 
-    if not dry_run:
-        mid_frame_idx = min(15, total_frames - 1)
-        source_frame = frames_dir / f"frame_{mid_frame_idx:04d}.jpg"
-        if source_frame.exists():
-            if LAST_FRAME_FILE.exists():
-                LAST_FRAME_FILE.unlink()  # Purana frame delete karo
-            shutil.copy2(source_frame, LAST_FRAME_FILE)
-            print(f"📸 History frame updated: {LAST_FRAME_FILE.name} (pichla frame delete ho kar naya save hua)")
+    if not dry_run and source_frame.exists():
+        update_rolling_frame_buffer(source_frame)
 
     history = _load_json(HISTORY_FILE, [])
     history_entry = {
+        "dhash":        frame_dhash,
         "last_frame":   "data/last_uploaded_frame.jpg",
         "visual_diff":  round(diff_score, 1),
         "id":           current_id,

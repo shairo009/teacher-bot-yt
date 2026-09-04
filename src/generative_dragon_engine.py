@@ -485,7 +485,8 @@ def get_species_for_id(animal_id: int) -> dict:
     }
 
 class MasterSimulator:
-    def __init__(self, cx: float, cy: float, rx: float, ry: float, seed: int = 0):
+    def __init__(self, cx: float, cy: float, rx: float, ry: float, seed: int = 0, class_type: str = "quadruped"):
+        self.class_type = class_type
         self.cx = cx
         self.cy = cy
         self.rx = rx
@@ -537,13 +538,30 @@ class MasterSimulator:
         diff = target_ang - self.angle
         while diff < -math.pi: diff += math.pi * 2
         while diff > math.pi: diff -= math.pi * 2
-        self.angle += diff * 0.04
 
-        if dist > 25:
-            target_spd = min(2.4, dist * 0.035)
+        # Dynamic motion behavior per taxonomy class
+        if self.class_type == "aquatic":
+            self.angle += diff * 0.035
+            target_spd = min(2.8, dist * 0.042)
+            self.speed += (target_spd - self.speed) * 0.05
+        elif self.class_type == "insect":
+            self.angle += diff * 0.09
+            is_burst = (math.sin(t * 8.0) > 0.15)
+            target_spd = min(4.2, dist * 0.08) if is_burst else 0.6
+            self.speed += (target_spd - self.speed) * 0.12
+        elif self.class_type == "arachnid":
+            self.angle += diff * 0.07
+            is_scuttle = (int(t * 2.8) % 3) != 0
+            target_spd = min(3.2, dist * 0.06) if is_scuttle else 0.0
+            self.speed += (target_spd - self.speed) * 0.10
+        elif self.class_type == "serpent":
+            self.angle += diff * 0.05
+            slither_osc = math.sin(t * 7.5) * 16.0
+            self.speed += (min(2.6, dist * 0.038) - self.speed) * 0.06
+        else: # quadruped / default
+            self.angle += diff * 0.045
+            target_spd = min(2.5, dist * 0.035)
             self.speed += (target_spd - self.speed) * 0.06
-        else:
-            self.speed *= 0.90
 
         self.x += math.cos(self.angle) * self.speed
         self.y += math.sin(self.angle) * self.speed
@@ -791,7 +809,7 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
 
     sim_key = f"{sp_id}_{animal_id}_{total_frames}"
     if frame_idx == 0 or sim_key not in _SIM_CACHE:
-        _SIM_CACHE[sim_key] = MasterSimulator(cb_x, cb_y, rad_x, rad_y, seed=seed)
+        _SIM_CACHE[sim_key] = MasterSimulator(cb_x, cb_y, rad_x, rad_y, seed=seed, class_type=class_type)
     
     sim = _SIM_CACHE[sim_key]
     sim.update(sim_time)

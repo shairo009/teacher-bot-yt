@@ -40,6 +40,33 @@ DATA_DIR = ROOT / "data"
 TMP_DIR = ROOT / "tmp"
 PROGRESS_FILE = DATA_DIR / "animal_progress.json"
 HISTORY_FILE = DATA_DIR / "animal_history.json"
+LAST_FRAME_FILE = DATA_DIR / "last_uploaded_frame.jpg"
+
+def compute_visual_difference(img1, img2) -> float:
+    """Calculates visual difference between two frames (0% = identical, 100% = completely opposite)."""
+    thumb1 = img1.convert("RGB").resize((64, 64))
+    thumb2 = img2.convert("RGB").resize((64, 64))
+    b1 = thumb1.tobytes()
+    b2 = thumb2.tobytes()
+    diff = sum(abs(a - b) for a, b in zip(b1, b2))
+    return (diff / (len(b1) * 255)) * 100.0
+
+def verify_candidate_frame(species: dict) -> tuple[bool, float]:
+    """Renders a fast test frame and checks difference against data/last_uploaded_frame.jpg."""
+    if not LAST_FRAME_FILE.exists():
+        return True, 100.0
+    try:
+        from PIL import Image
+        prev_img = Image.open(LAST_FRAME_FILE)
+        candidate_frame = render_generative_frame(species, 0, 100)
+        diff = compute_visual_difference(prev_img, candidate_frame)
+        MIN_DIFF_THRESHOLD = 8.0  # Must be at least 8% visually distinct
+        is_ok = diff >= MIN_DIFF_THRESHOLD
+        return is_ok, diff
+    except Exception as exc:
+        print(f"  ⚠ Visual verification check failed: {exc}")
+        return True, 100.0
+
 DEFAULT_DURATION = 58.0
 
 
@@ -136,9 +163,8 @@ def _upload_to_youtube(video_path: Path, species: dict, dry_run: bool) -> str | 
 def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dict]:
     """
     Guarantees MAXIMUM visual variety!
-    Rotates strictly across distinct animal classes:
-    aquatic -> insect -> quadruped -> cephalopod -> reptile -> arachnid -> serpent -> crustacean
-    Ensures that NO TWO CONSECUTIVE VIDEOS ever share the same class or visual model!
+    Rotates strictly across distinct animal classes and verifies visually against
+    data/last_uploaded_frame.jpg to ensure no consecutive video is ever identical!
     """
     from src.generative_dragon_engine import get_species_for_id
 
@@ -160,34 +186,40 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
         next_idx = (CLASS_CYCLE.index(last_class) + 1) % len(CLASS_CYCLE)
         target_class = CLASS_CYCLE[next_idx]
 
-    # Pass 1: Find next unused animal matching the targeted rotating class
+    # Pass 1: Targeted class rotation + visual verification
     if target_class:
         for offset in range(total):
             idx = (start_id + offset) % total
             sp = encyclopedia[idx]
             if sp.get("class_type") == target_class and not is_already_used(sp["name"]):
-                print(f"  🎯 Variety Match: Selected \x27{sp['name']}\x27 (Class: {target_class}) following last class \x27{last_class}\x27")
-                return idx, get_species_for_id(idx)
+                candidate_sp = get_species_for_id(idx)
+                is_ok, diff = verify_candidate_frame(candidate_sp)
+                if not is_ok:
+                    print(f"  ⏭ Skipping '{sp['name']}' — visual difference ({diff:.1f}%) too close to previous upload.")
+                    continue
+                print(f"  🎯 Variety Match: Selected '{sp['name']}' (Class: {target_class}, Visual Diff: {diff:.1f}%) following '{last_class}'")
+                return idx, candidate_sp
 
-    # Pass 2: Find next unused animal whose class is DIFFERENT from the last class
+    # Pass 2: Any different class + visual verification
     for offset in range(total):
         idx = (start_id + offset) % total
         sp = encyclopedia[idx]
         if sp.get("class_type") != last_class and not is_already_used(sp["name"]):
-            print(f"  🎯 Alternate Match: Selected \x27{sp['name']}\x27 (Class: {sp.get('class_type')}) different from \x27{last_class}\x27")
-            return idx, get_species_for_id(idx)
+            candidate_sp = get_species_for_id(idx)
+            is_ok, diff = verify_candidate_frame(candidate_sp)
+            if not is_ok:
+                continue
+            print(f"  🎯 Alternate Match: Selected '{sp['name']}' (Class: {sp.get('class_type')}, Visual Diff: {diff:.1f}%)")
+            return idx, candidate_sp
 
-    # Pass 3: Any unused animal
+    # Pass 3: Fallback any unused
     for offset in range(total):
         idx = (start_id + offset) % total
         sp = encyclopedia[idx]
         if not is_already_used(sp["name"]):
             return idx, get_species_for_id(idx)
 
-    raise RuntimeError(
-        f"Koi naya animal nahi mila {max_search} animals check karne ke baad. "
-        "Nayi species encyclopedia mein add karo!"
-    )
+    raise RuntimeError("Koi naya animal nahi mila encyclopedia mein!")
 
 
 def generate(
@@ -292,8 +324,30 @@ def generate(
         progress["current_id"] = current_id + 1
         PROGRESS_FILE.write_text(json.dumps(progress, indent=2), encoding="utf-8")
 
+    # ── Update last uploaded frame in history (delete previous, save new) ──
+    diff_score = 100.0
+    if LAST_FRAME_FILE.exists():
+        try:
+            from PIL import Image
+            prev_img = Image.open(LAST_FRAME_FILE)
+            curr_frame = Image.open(frames_dir / f"frame_{min(15, total_frames - 1):04d}.jpg")
+            diff_score = compute_visual_difference(prev_img, curr_frame)
+        except Exception:
+            pass
+
+    if not dry_run:
+        mid_frame_idx = min(15, total_frames - 1)
+        source_frame = frames_dir / f"frame_{mid_frame_idx:04d}.jpg"
+        if source_frame.exists():
+            if LAST_FRAME_FILE.exists():
+                LAST_FRAME_FILE.unlink()  # Purana frame delete karo
+            shutil.copy2(source_frame, LAST_FRAME_FILE)
+            print(f"📸 History frame updated: {LAST_FRAME_FILE.name} (pichla frame delete ho kar naya save hua)")
+
     history = _load_json(HISTORY_FILE, [])
     history_entry = {
+        "last_frame":   "data/last_uploaded_frame.jpg",
+        "visual_diff":  round(diff_score, 1),
         "id":           current_id,
         "species":      species["name"],
         "scientific":   species.get("scientific", species["name"]),

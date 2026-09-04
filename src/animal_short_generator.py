@@ -45,6 +45,27 @@ LAST_FRAME_FILE = DATA_DIR / "last_uploaded_frame.jpg"
 RECENT_FRAMES_DIR = DATA_DIR / "recent_frames"
 MAX_RECENT_FRAMES = 5
 
+_BASE_IGNORE_WORDS = {
+    "CYBER", "VOLT", "QUANTUM", "SOLAR", "LASER", "PULSE", "VOID", "HEXA",
+    "DARK", "IRON", "MICRO", "SHADOW", "CHRONO", "CHROME", "NEON", "ELECTRIC",
+    "GIANT", "TINY", "BLUE", "BLACK", "RED", "GOLDEN", "WHITE", "GREEN", "SPOTTED",
+    "ASIAN", "AFRICAN", "INDIAN", "PACIFIC", "OCEANIC", "TREE", "MUD", "STONE",
+    "SAND", "SNOW", "SEA", "RIVER", "FOREST", "BARK", "MATTER", "COMMON", "GREAT",
+    "FAT-TAILED", "FAT-TAIL", "NET-CASTING"
+}
+
+def extract_base_noun(name: str) -> str:
+    """Extracts the core base animal noun (e.g. VOLT SCORPION -> SCORPION)."""
+    import re
+    words = [w.upper() for w in re.findall(r"[a-zA-Z]+", name) if w.upper() not in _BASE_IGNORE_WORDS]
+    return words[-1] if words else name.upper()
+
+def get_used_base_nouns() -> set[str]:
+    """Returns all base animal nouns that have already been uploaded."""
+    history = _load_json(HISTORY_FILE, [])
+    return {extract_base_noun(h["species"]) for h in history if h.get("species")}
+
+
 def compute_visual_difference(img1, img2) -> float:
     """Calculates percentage pixel difference between two frames (0% to 100%)."""
     thumb1 = img1.convert("RGB").resize((64, 64))
@@ -249,8 +270,10 @@ def _upload_to_youtube(video_path: Path, species: dict, dry_run: bool) -> str | 
 
 def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dict]:
     """
-    Guarantees MAXIMUM visual variety using Rolling 5-Frame Buffer & Perceptual dHash!
-    Rotates strictly across distinct animal classes and verifies against recent uploads.
+    Guarantees MAXIMUM visual variety using:
+      1. Base-Noun De-duplication (NO variants of Scorpions, Crabs, Spiders once uploaded!)
+      2. Strict multi-class rotation
+      3. Rolling 5-Frame buffer & Perceptual dHash check
     """
     from src.generative_dragon_engine import get_species_for_id
 
@@ -262,6 +285,9 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
     last_classes = [h.get("class_type") for h in history[-3:] if h.get("class_type")]
     last_class = last_classes[-1] if last_classes else None
 
+    # Base nouns already uploaded to YouTube
+    used_bases = get_used_base_nouns()
+
     CLASS_CYCLE = [
         "aquatic", "insect", "quadruped", "cephalopod",
         "reptile", "arachnid", "serpent", "crustacean"
@@ -272,33 +298,42 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
         next_idx = (CLASS_CYCLE.index(last_class) + 1) % len(CLASS_CYCLE)
         target_class = CLASS_CYCLE[next_idx]
 
-    # Pass 1: Targeted class rotation + rolling buffer verification
+    # Pass 1: Targeted class rotation + Base noun check + visual verification
     if target_class:
         for offset in range(total):
             idx = (start_id + offset) % total
             sp = encyclopedia[idx]
-            if sp.get("class_type") == target_class and not is_already_used(sp["name"]):
+            base = extract_base_noun(sp["name"])
+            if sp.get("class_type") == target_class and not is_already_used(sp["name"]) and base not in used_bases:
                 cand_sp = get_species_for_id(idx)
                 is_ok, p_diff, h_dist = verify_candidate_against_recent_buffer(cand_sp)
                 if not is_ok:
-                    print(f"  ⏭ Skipping '{sp['name']}' — too similar to recent uploads (Diff: {p_diff:.1f}%, Hamming: {h_dist}).")
                     continue
-                print(f"  🎯 Variety Match: Selected '{sp['name']}' (Class: {target_class}, Min Diff: {p_diff:.1f}%, Hamming: {h_dist}) following '{last_class}'")
+                print(f"  🎯 Variety Match: Selected '{sp['name']}' (Base: {base}, Class: {target_class}, Diff: {p_diff:.1f}%, Hamming: {h_dist})")
                 return idx, cand_sp
 
-    # Pass 2: Any different class + rolling buffer verification
+    # Pass 2: Different class + Base noun check + visual verification
     for offset in range(total):
         idx = (start_id + offset) % total
         sp = encyclopedia[idx]
-        if sp.get("class_type") not in last_classes and not is_already_used(sp["name"]):
+        base = extract_base_noun(sp["name"])
+        if sp.get("class_type") not in last_classes and not is_already_used(sp["name"]) and base not in used_bases:
             cand_sp = get_species_for_id(idx)
             is_ok, p_diff, h_dist = verify_candidate_against_recent_buffer(cand_sp)
             if not is_ok:
                 continue
-            print(f"  🎯 Alternate Match: Selected '{sp['name']}' (Class: {sp.get('class_type')}, Min Diff: {p_diff:.1f}%, Hamming: {h_dist})")
+            print(f"  🎯 Alternate Match: Selected '{sp['name']}' (Base: {base}, Class: {sp.get('class_type')}, Diff: {p_diff:.1f}%, Hamming: {h_dist})")
             return idx, cand_sp
 
-    # Pass 3: Fallback any unused
+    # Pass 3: Any unused base noun
+    for offset in range(total):
+        idx = (start_id + offset) % total
+        sp = encyclopedia[idx]
+        base = extract_base_noun(sp["name"])
+        if not is_already_used(sp["name"]) and base not in used_bases:
+            return idx, get_species_for_id(idx)
+
+    # Pass 4: Fallback
     for offset in range(total):
         idx = (start_id + offset) % total
         sp = encyclopedia[idx]

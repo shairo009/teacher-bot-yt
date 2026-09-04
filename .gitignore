@@ -18,6 +18,7 @@ venv/
 data/topics_index.json
 data/extracted_images/
 data/books/
+data/cache/
 
 # Temp files (created during video generation, cleaned up after)
 tmp/

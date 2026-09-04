@@ -725,5 +725,23 @@
     "dry_run": false,
     "video_id": "cCLtO3tMcq8",
     "youtube_url": "https://youtu.be/cCLtO3tMcq8"
+  },
+  {
+    "id": 51,
+    "species": "VOLT SCORPION",
+    "scientific": "Heterometrus volt",
+    "class_type": "arachnid",
+    "accent": [
+      250,
+      204,
+      21
+    ],
+    "anatomy_notes": "Heterometrus volt is an armored arachnid with bioluminescent yellow accent.",
+    "file": "tmp/reel_0051/volt_scorpion_short.mp4",
+    "timestamp": "2026-09-04T16:27:31.374682+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "ZuaPa0fSpUE",
+    "youtube_url": "https://youtu.be/ZuaPa0fSpUE"
   }
 ]

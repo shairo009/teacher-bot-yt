@@ -707,5 +707,23 @@
     "dry_run": false,
     "video_id": "9RTJ1sZ1r5E",
     "youtube_url": "https://youtu.be/9RTJ1sZ1r5E"
+  },
+  {
+    "id": 50,
+    "species": "DECORATOR CRAB",
+    "scientific": "Camposcia retusa",
+    "class_type": "insect",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "Decorator crabs are crabs of several different species, belonging to the superfamily Majoidea, that use materials from their environment to hide from, or ward off, predators. They decorate themselves ",
+    "file": "tmp/reel_0050/decorator_crab_short.mp4",
+    "timestamp": "2026-09-04T12:15:39.802379+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "cCLtO3tMcq8",
+    "youtube_url": "https://youtu.be/cCLtO3tMcq8"
   }
 ]

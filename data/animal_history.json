@@ -764,5 +764,26 @@
     "dry_run": false,
     "video_id": "DniGbYiOiwQ",
     "youtube_url": "https://youtu.be/DniGbYiOiwQ"
+  },
+  {
+    "dhash": "0eb113e187076008",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 26.8,
+    "id": 82,
+    "species": "TITAN CRUSTACEAN",
+    "scientific": "Crustacea colossus",
+    "class_type": "crustacean",
+    "accent": [
+      160,
+      70,
+      20
+    ],
+    "anatomy_notes": "Crustaceans are mandibulate arthropods that are traditionally a part of the paraphyletic subphylum Crustacea. Crustaceans are mainly aquatic, including decapods, seed shrimps, branchiopods, fish lice,",
+    "file": "tmp/reel_0082/titan_crustacean_short.mp4",
+    "timestamp": "2026-09-04T23:12:14.280858+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "N4z4FpE2Y1w",
+    "youtube_url": "https://youtu.be/N4z4FpE2Y1w"
   }
 ]

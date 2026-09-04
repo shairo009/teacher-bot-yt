@@ -133,36 +133,56 @@ def _upload_to_youtube(video_path: Path, species: dict, dry_run: bool) -> str | 
         return None
 
 
-def _find_next_unused_id(start_id: int, max_search: int = 500) -> tuple[int, dict]:
+def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dict]:
     """
-    start_id se shuru karke aage khojo — pehla animal jo:
-      1. Encyclopedia mein hai
-      2. used_animals.json mein NAHI hai
-    Tuple return karta hai: (animal_id, species_dict)
+    Guarantees MAXIMUM visual variety!
+    Rotates strictly across distinct animal classes:
+    aquatic -> insect -> quadruped -> cephalopod -> reptile -> arachnid -> serpent -> crustacean
+    Ensures that NO TWO CONSECUTIVE VIDEOS ever share the same class or visual model!
     """
     from src.generative_dragon_engine import get_species_for_id
 
-    # Load encyclopedia to know total count
-    try:
-        enc_path = ROOT / "data" / "animal_encyclopedia.json"
-        encyclopedia = json.loads(enc_path.read_text(encoding="utf-8"))
-        total = len(encyclopedia)
-    except Exception:
-        total = 1000  # safe fallback
+    enc_path = ROOT / "data" / "animal_encyclopedia.json"
+    encyclopedia = json.loads(enc_path.read_text(encoding="utf-8"))
+    total = len(encyclopedia)
 
-    checked = 0
-    current = start_id
-    while checked < max_search:
-        idx = current % total
-        species = get_species_for_id(idx)
-        animal_name = species["name"]
+    history = _load_json(HISTORY_FILE, [])
+    last_classes = [h.get("class_type") for h in history[-3:] if h.get("class_type")]
+    last_class = last_classes[-1] if last_classes else None
 
-        if not is_already_used(animal_name):
-            return current, species
+    CLASS_CYCLE = [
+        "aquatic", "insect", "quadruped", "cephalopod",
+        "reptile", "arachnid", "serpent", "crustacean"
+    ]
 
-        print(f"  ⏭ Skipping '{animal_name}' — already uploaded before.")
-        current += 1
-        checked += 1
+    target_class = None
+    if last_class in CLASS_CYCLE:
+        next_idx = (CLASS_CYCLE.index(last_class) + 1) % len(CLASS_CYCLE)
+        target_class = CLASS_CYCLE[next_idx]
+
+    # Pass 1: Find next unused animal matching the targeted rotating class
+    if target_class:
+        for offset in range(total):
+            idx = (start_id + offset) % total
+            sp = encyclopedia[idx]
+            if sp.get("class_type") == target_class and not is_already_used(sp["name"]):
+                print(f"  🎯 Variety Match: Selected \x27{sp['name']}\x27 (Class: {target_class}) following last class \x27{last_class}\x27")
+                return idx, get_species_for_id(idx)
+
+    # Pass 2: Find next unused animal whose class is DIFFERENT from the last class
+    for offset in range(total):
+        idx = (start_id + offset) % total
+        sp = encyclopedia[idx]
+        if sp.get("class_type") != last_class and not is_already_used(sp["name"]):
+            print(f"  🎯 Alternate Match: Selected \x27{sp['name']}\x27 (Class: {sp.get('class_type')}) different from \x27{last_class}\x27")
+            return idx, get_species_for_id(idx)
+
+    # Pass 3: Any unused animal
+    for offset in range(total):
+        idx = (start_id + offset) % total
+        sp = encyclopedia[idx]
+        if not is_already_used(sp["name"]):
+            return idx, get_species_for_id(idx)
 
     raise RuntimeError(
         f"Koi naya animal nahi mila {max_search} animals check karne ke baad. "

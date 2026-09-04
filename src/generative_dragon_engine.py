@@ -148,11 +148,184 @@ def _draw_highlighted_js_line(draw: ImageDraw.ImageDraw, x: int, y: int, line: s
 
 def _generate_js_code_for_animal(name: str, class_type: str, scientific: str) -> list[str]:
     import re
-    c_name = "".join(re.sub(r'[^a-zA-Z0-9]', '', w).capitalize() for w in name.split())
-    if class_type == "quadruped":
+    sp_id = name.lower()
+    is_lion     = "lion" in sp_id
+    is_tiger    = "tiger" in sp_id
+    is_giraffe  = "giraffe" in sp_id
+    is_rhino    = "rhino" in sp_id
+    is_elephant = "elephant" in sp_id
+    is_bear     = "bear" in sp_id or "panda" in sp_id
+    is_shark    = "shark" in sp_id
+    is_spider   = "spider" in sp_id or "tarantula" in sp_id
+    is_cobra    = "cobra" in sp_id
+
+    if is_lion:
         return [
             f"// ─── {name} ───",
-            f"const rig = new CanineRig({{",
+            "const rig = new ApexFelineRig({",
+            "  maneDensity: 140,",
+            "  clawsRetractable: true",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  const target = getPointer();",
+            "",
+            "  // Volumetric Feline Mane",
+            "  volumetricMane(ctx, rig.mane, 180);",
+            "  solveProwlGait(rig.limbs, target);",
+            "  felineHeadIK(ctx, rig.skull);",
+            "  wagTuftedTail(ctx, rig.tail);",
+            "};"
+        ]
+    elif is_tiger:
+        return [
+            f"// ─── {name} ───",
+            "const rig = new TigerRig({",
+            "  stripeCount: 42,",
+            "  musculature: 1.6",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  const p = getPointer();",
+            "",
+            "  // Undulating Tiger Stripes",
+            "  renderTigerStripes(ctx, rig.spine);",
+            "  solveQuadrupedIK(rig.legs, p);",
+            "  renderFelineMuzzle(ctx, rig.head);",
+            "};"
+        ]
+    elif is_giraffe:
+        return [
+            f"// ─── {name} ───",
+            "const rig = new GiraffeRig({",
+            "  neckVertebrae: 14,",
+            "  ossicones: 2",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  const p = getPointer();",
+            "",
+            "  // Elongated Neck Kinematics",
+            "  solveLongNeckIK(rig.neck, p);",
+            "  renderTessellatedPatches(ctx, rig);",
+            "  renderOssicones(ctx, rig.head);",
+            "};"
+        ]
+    elif is_rhino:
+        return [
+            f"// ─── {name} ───",
+            "const rig = new RhinocerosRig({",
+            "  dermalArmorPlates: 3,",
+            "  horns: 2",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  const p = getPointer();",
+            "",
+            "  // Armored Plate Folds",
+            "  renderNasalHorns(ctx, rig);",
+            "  dermalPlateFolds(ctx, rig.torso);",
+            "  heavyStompIK(rig.limbs, p);",
+            "};"
+        ]
+    elif is_elephant:
+        return [
+            f"// ─── {name} ───",
+            "const rig = new ElephantRig({",
+            "  trunkSegments: 16,",
+            "  tuskLength: 45",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  const p = getPointer();",
+            "",
+            "  // Prehensile Trunk Wave",
+            "  undulateTrunk(rig.trunk, p);",
+            "  renderSweepingFanEars(ctx, rig);",
+            "  pillarLegIK(rig.limbs);",
+            "};"
+        ]
+    elif is_bear:
+        return [
+            f"// ─── {name} ───",
+            "const rig = new UrsineRig({",
+            "  muscleMass: 1.8,",
+            "  clawCurve: 22",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  const p = getPointer();",
+            "",
+            "  // Heavy Shag Coat",
+            "  renderShaggyCoat(ctx, rig);",
+            "  bearPawSlashIK(rig.forelimbs, p);",
+            "  stubbyTailWag(rig.tail);",
+            "};"
+        ]
+    elif is_shark:
+        return [
+            f"// ─── {name} ───",
+            "const rig = new SharkHydroRig({",
+            "  dorsalFinHeight: 42,",
+            "  gillSlits: 5",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  rig.fuselage.follow(pointer, 0.06);",
+            "",
+            "  // Heterocercal Caudal Thrust",
+            "  heterocercalThrust(rig.tail, time);",
+            "  renderDorsalFin(ctx, rig.fin);",
+            "  lateralLineSensor(ctx, rig);",
+            "};"
+        ]
+    elif is_spider:
+        return [
+            f"// ─── {name} ───",
+            "const rig = new SpiderWebRig({",
+            "  abdomenBulbous: true,",
+            "  eyes: 8",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  const p = getPointer();",
+            "",
+            "  // 8-Leg Alternating Gait",
+            "  tripodGaitStep(rig.legs, p, time);",
+            "  renderOpisthosoma(ctx, rig);",
+            "  renderCheliceraeFangs(ctx, rig);",
+            "};"
+        ]
+    elif is_cobra:
+        return [
+            f"// ─── {name} ───",
+            "const rig = new CobraSerpentRig({",
+            "  hoodFlaring: 0.85,",
+            "  vertebrae: 48",
+            "});",
+            "",
+            "function animate() {",
+            "  requestAnimationFrame(animate);",
+            "  rig.head.follow(pointer, 0.08);",
+            "",
+            "  // Flared Cobra Hood",
+            "  flareCobraHood(rig.neck, 0.85);",
+            "  slitherTrajectory(rig.spine, time);",
+            "  flickForkedTongue(ctx, rig.head);",
+            "};"
+        ]
+    elif class_type == "quadruped":
+        return [
+            f"// ─── {name} ───",
+            "const rig = new QuadrupedRig({",
             "  spineSegs: 18,",
             "  limbs: 4",
             "});",
@@ -160,60 +333,24 @@ def _generate_js_code_for_animal(name: str, class_type: str, scientific: str) ->
             "function animate() {",
             "  requestAnimationFrame(animate);",
             "  const p = getPointer();",
-            "",
-            "  // Forelimbs: Elbow IK",
-            "  solveForelimbIK(",
-            "    rig.lArm, p.fl, 52, -1",
-            "  );",
-            "  solveForelimbIK(",
-            "    rig.rArm, p.fr, 52,  1",
-            "  );",
-            "",
-            "  // Hindlimbs: Hock IK",
-            "  solveHindlimbIK(",
-            "    rig.lLeg, p.hl, 48, -1",
-            "  );",
-            "  solveHindlimbIK(",
-            "    rig.rLeg, p.hr, 48,  1",
-            "  );",
-            "",
-            "  // Paws, Torso & Tail",
-            "  render4ToePaws(ctx, rig);",
+            "  solveForelimbIK(rig.lArm, p.fl, 52, -1);",
+            "  solveForelimbIK(rig.rArm, p.fr, 52,  1);",
+            "  solveHindlimbIK(rig.lLeg, p.hl, 48, -1);",
+            "  solveHindlimbIK(rig.rLeg, p.hr, 48,  1);",
             "  renderTorso(ctx, rig.spine);",
-            "  wagTail(rig.tail, time * 6);",
-            "  renderCanineHead(ctx, rig);",
+            "  renderHead(ctx, rig);",
             "};"
         ]
     elif class_type == "arachnid":
         return [
             f"// ─── {name} ───",
-            f"const rig = new ArachnidRig({{",
-            "  segments: 38,",
-            "  legs: 8",
-            "});",
+            "const rig = new ArachnidRig({ segments: 38, legs: 8 });",
             "",
             "function animate() {",
             "  requestAnimationFrame(animate);",
-            "  const p = getPointer();",
-            "",
-            "  // 3-Joint Pincer Arms",
-            "  solvePincerIK(",
-            "    rig.lArm, p, 54, -1",
-            "  );",
-            "  solvePincerIK(",
-            "    rig.rArm, p, 54,  1",
-            "  );",
-            "",
-            "  // 8-Leg Tripod Stepping",
-            "  for (let i = 0; i < 8; i++) {",
-            "    const s = i < 4 ? -1 : 1;",
-            "    const hip = getSocket(i, s);",
-            "    const step = tripodStep(i);",
-            "    solve3SegIK(hip, step, s);",
-            "    renderLeg(ctx, rig.legs[i]);",
-            "  }",
-            "",
-            "  // Segmented Tail & Stinger",
+            "  solvePincerIK(rig.lArm, pointer, 54, -1);",
+            "  solvePincerIK(rig.rArm, pointer, 54,  1);",
+            "  stepLegs(rig.legs, time);",
             "  curlTail(rig.tail, time * 2);",
             "  renderTelson(ctx, rig.tail);",
             "};"
@@ -221,161 +358,85 @@ def _generate_js_code_for_animal(name: str, class_type: str, scientific: str) ->
     elif class_type == "serpent":
         return [
             f"// ─── {name} ───",
-            f"const spine = new SnakeSpine({{",
-            "  vertebrae: 48,",
-            "  spacing: 14",
-            "});",
+            "const spine = new SnakeSpine({ vertebrae: 48, spacing: 14 });",
             "",
             "function animate() {",
             "  requestAnimationFrame(animate);",
-            "  const head = spine.head;",
-            "  head.follow(pointer, 0.08);",
-            "",
-            "  // Undulation Wave",
+            "  spine.head.follow(pointer, 0.08);",
             "  for (let i = 1; i < 48; i++) {",
-            "    const prev = spine.get(i-1);",
-            "    const curr = spine.get(i);",
-            "    const wave = Math.sin(",
-            "      time * 4.5 + i * 0.35",
-            "    ) * 6;",
-            "    curr.update(prev, 14, wave);",
-            "    renderScales(ctx, curr, i);",
+            "    const wave = Math.sin(time * 4.5 + i * 0.35) * 6;",
+            "    spine.get(i).update(spine.get(i-1), 14, wave);",
             "  }",
-            "",
-            "  // Fanged Head & Tongue",
-            "  renderViperHead(ctx, head);",
-            "  flickTongue(ctx, head, time);",
+            "  renderViperHead(ctx, spine.head);",
+            "  flickTongue(ctx, spine.head, time);",
             "};"
         ]
     elif class_type == "reptile":
         return [
             f"// ─── {name} ───",
-            f"const rig = new ReptileRig({{",
-            "  vertebrae: 26,",
-            "  limbs: 4",
-            "});",
+            "const rig = new ReptileRig({ vertebrae: 26, limbs: 4 });",
             "",
             "function animate() {",
             "  requestAnimationFrame(animate);",
             "  rig.head.follow(pointer);",
-            "",
-            "  // 2-Joint Claws IK",
-            "  rig.limbs.forEach(l => {",
-            "    const socket = getSocket(l);",
-            "    const step = gaitArc(l.phase);",
-            "    const ik = solve2JointIK(",
-            "      socket, step.foot, l.side",
-            "    );",
-            "    renderClaw(ctx, ik);",
-            "  });",
-            "",
-            "  // Heavy Armored Scales",
-            "  renderScales(ctx, rig.spine);",
+            "  renderArmoredCarapace(ctx, rig.spine);",
+            "  solveReptileClawIK(rig.limbs, pointer);",
             "  renderReptileHead(ctx, rig);",
             "};"
         ]
     elif class_type == "crustacean":
         return [
             f"// ─── {name} ───",
-            f"const rig = new CrustaceanRig({{",
-            "  segments: 24,",
-            "  dactylClubs: 2",
-            "});",
+            "const rig = new CrustaceanRig({ segments: 24, dactylClubs: 2 });",
             "",
             "function animate() {",
             "  requestAnimationFrame(animate);",
-            "  rig.update(pointer);",
-            "",
-            "  // Springloaded Punch IK",
-            "  solveClubIK(",
-            "    rig.leftClub, pointer, -1",
-            "  );",
-            "  solveClubIK(",
-            "    rig.rightClub, pointer, 1",
-            "  );",
-            "",
-            "  // Pleopods & Carapace",
+            "  solveClubIK(rig.leftClub, pointer, -1);",
+            "  solveClubIK(rig.rightClub, pointer, 1);",
             "  ripplePleopods(rig, time);",
             "  renderCarapace(ctx, rig);",
-            "  renderCompoundEyes(ctx, rig);",
             "};"
         ]
     elif class_type == "insect":
         return [
             f"// ─── {name} ───",
-            f"const rig = new InsectRig({{",
-            "  thorax: 14,",
-            "  raptorialArms: 2",
-            "});",
+            "const rig = new InsectRig({ thorax: 14, raptorialArms: 2 });",
             "",
             "function animate() {",
             "  requestAnimationFrame(animate);",
-            "  rig.head.track(pointer);",
-            "",
-            "  // Folded Raptorial Claws",
-            "  solveRaptorialIK(",
-            "    rig.lArm, pointer, -1",
-            "  );",
-            "  solveRaptorialIK(",
-            "    rig.rArm, pointer, 1",
-            "  );",
-            "",
-            "  // Walking Legs & Wings",
+            "  solveRaptorialIK(rig.lArm, pointer, -1);",
+            "  solveRaptorialIK(rig.rArm, pointer, 1);",
             "  stepInsectLegs(rig, time);",
-            "  renderThorax(ctx, rig);",
             "  renderTriangularHead(ctx, rig);",
             "};"
         ]
     elif class_type == "cephalopod":
         return [
             f"// ─── {name} ───",
-            f"const rig = new OctopusRig({{",
-            "  tentacles: 8,",
-            "  jointsPerArm: 16",
-            "});",
+            "const rig = new CephalopodRig({ tentacles: 8, jointsPerArm: 16 });",
             "",
             "function animate() {",
             "  requestAnimationFrame(animate);",
             "  rig.mantle.follow(pointer);",
-            "",
-            "  // Multi-Joint Tentacle IK",
             "  for (let i = 0; i < 8; i++) {",
-            "    const arm = rig.arms[i];",
-            "    const a = (i / 8) * Math.PI * 2;",
-            "    undulateArm(arm, a, time);",
-            "    renderGlowingRings(ctx, arm);",
+            "    undulateTentacle(rig.arms[i], i, time);",
+            "    renderGlowingSuctionRings(ctx, rig.arms[i]);",
             "  }",
-            "",
-            "  // Chromatophore Mantle",
-            "  renderMantle(ctx, rig.mantle);",
-            "  pulseBlueRings(ctx, rig, time);",
+            "  pulseChromatophores(ctx, rig.mantle);",
             "};"
         ]
     else:  # aquatic
         return [
             f"// ─── {name} ───",
-            f"const rig = new AquaticRig({{",
-            "  wingspan: 36,",
-            "  ribCount: 22",
-            "});",
+            "const rig = new AquaticRig({ wingspan: 36, ribCount: 22 });",
             "",
             "function animate() {",
             "  requestAnimationFrame(animate);",
             "  rig.head.follow(pointer, 0.05);",
-            "",
-            "  // Sinusoidal Wing Flap",
-            "  const flap = Math.sin(time*3)*0.4;",
-            "  undulatePectoralFin(",
-            "    rig.lWing, flap, -1",
-            "  );",
-            "  undulatePectoralFin(",
-            "    rig.rWing, flap,  1",
-            "  );",
-            "",
-            "  // Trailing Whip Tail",
-            "  followSpineChain(rig.tail);",
+            "  const flap = Math.sin(time * 3) * 0.4;",
+            "  undulatePectoralFin(rig.lWing, flap, -1);",
+            "  undulatePectoralFin(rig.rWing, flap,  1);",
             "  renderAquaticBody(ctx, rig);",
-            "  renderCephalicLobes(ctx, rig);",
             "};"
         ]
 
@@ -582,32 +643,126 @@ class MasterSimulator:
                 leg["cur"][1] = leg["start"][1] + (leg["tgt"][1] - leg["start"][1]) * ease_p
 
 
+
+ANIMAL_THEMES = {
+    "OCEAN": {
+        "bg": (6, 16, 32),
+        "grad_center": (14, 52, 90),
+        "canvas_fill": (10, 26, 48),
+        "canvas_border": (0, 210, 255),
+        "card_fill": (6, 14, 28),
+        "card_header": (4, 10, 20),
+        "card_border": (18, 45, 75),
+        "badge": "⚡ [WebGL] Hydrodynamic Verlet Shaders • 60 FPS IK",
+        "badge_color": (56, 189, 248),
+        "cursor_color": (0, 230, 255),
+    },
+    "SAVANNA": {
+        "bg": (28, 14, 8),
+        "grad_center": (80, 36, 14),
+        "canvas_fill": (245, 236, 222),
+        "canvas_border": (217, 119, 6),
+        "card_fill": (22, 14, 10),
+        "card_header": (16, 10, 6),
+        "card_border": (55, 32, 18),
+        "badge": "⚡ [JS] Quadruped Inverse Kinematics • 60 FPS",
+        "badge_color": (251, 191, 36),
+        "cursor_color": (239, 68, 68),
+    },
+    "JUNGLE": {
+        "bg": (8, 26, 14),
+        "grad_center": (18, 70, 36),
+        "canvas_fill": (232, 242, 234),
+        "canvas_border": (34, 197, 94),
+        "card_fill": (10, 22, 14),
+        "card_header": (6, 16, 10),
+        "card_border": (24, 50, 30),
+        "badge": "⚡ [Canvas] Sinuous Curvature & Strike IK • 60 FPS",
+        "badge_color": (74, 222, 128),
+        "cursor_color": (234, 179, 8),
+    },
+    "VOLCANIC": {
+        "bg": (20, 10, 14),
+        "grad_center": (75, 20, 18),
+        "canvas_fill": (28, 16, 20),
+        "canvas_border": (249, 115, 22),
+        "card_fill": (18, 10, 12),
+        "card_header": (12, 6, 8),
+        "card_border": (50, 22, 25),
+        "badge": "⚡ [GLSL] Segmented Exoskeleton Shaders • 60 FPS",
+        "badge_color": (251, 146, 60),
+        "cursor_color": (239, 68, 68),
+    },
+    "CYBER": {
+        "bg": (16, 8, 28),
+        "grad_center": (60, 20, 95),
+        "canvas_fill": (22, 12, 36),
+        "canvas_border": (217, 70, 239),
+        "card_fill": (14, 6, 24),
+        "card_header": (10, 4, 18),
+        "card_border": (45, 18, 70),
+        "badge": "⚡ [Physics] Multi-Joint Biological Simulation • 60 FPS",
+        "badge_color": (232, 121, 249),
+        "cursor_color": (244, 63, 94),
+    },
+    "ARCTIC": {
+        "bg": (10, 22, 36),
+        "grad_center": (26, 56, 90),
+        "canvas_fill": (238, 246, 255),
+        "canvas_border": (56, 189, 248),
+        "card_fill": (8, 18, 30),
+        "card_header": (5, 12, 22),
+        "card_border": (20, 42, 68),
+        "badge": "⚡ [Three.js] Sub-Zero Physics & Skeletal IK • 60 FPS",
+        "badge_color": (125, 211, 252),
+        "cursor_color": (14, 165, 233),
+    }
+}
+
+def pick_animal_theme(species: dict) -> dict:
+    class_type = species.get("class_type", "quadruped").lower()
+    name = species.get("name", "").lower()
+    
+    if class_type in ("aquatic", "cephalopod") or any(k in name for k in ("shark", "whale", "fish", "eel", "manta", "squid", "octopus")):
+        return ANIMAL_THEMES["OCEAN"]
+    elif class_type in ("serpent", "insect") or any(k in name for k in ("mantis", "wasp", "tree", "chameleon", "frog", "viper")):
+        return ANIMAL_THEMES["JUNGLE"]
+    elif class_type in ("arachnid", "crustacean") or any(k in name for k in ("scorpion", "spider", "crab", "lobster", "lava")):
+        return ANIMAL_THEMES["VOLCANIC"]
+    elif any(k in name for k in ("polar", "snow", "arctic", "glacier", "frost", "white")):
+        return ANIMAL_THEMES["ARCTIC"]
+    elif any(k in name for k in ("cyber", "quantum", "neon", "matrix", "volt")):
+        return ANIMAL_THEMES["CYBER"]
+    else:
+        return ANIMAL_THEMES["SAVANNA"]
+
 _SIM_CACHE = {}
 
 def render_generative_frame(species: dict, frame_idx: int, total_frames: int) -> Image.Image:
     progress = frame_idx / total_frames
     sim_time = (frame_idx / FPS) * 0.4
 
-    img = Image.new("RGBA", (WIDTH, HEIGHT), (11, 27, 38, 255))
+    theme = pick_animal_theme(species)
+    img = Image.new("RGBA", (WIDTH, HEIGHT), theme["bg"] + (255,))
     draw = ImageDraw.Draw(img)
 
     grad = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     g_draw = ImageDraw.Draw(grad)
-    g_draw.rectangle([0, 0, WIDTH, HEIGHT], fill=(14, 35, 49, 255))
-    g_draw.ellipse([WIDTH//2 - 500, HEIGHT//2 - 600, WIDTH//2 + 500, HEIGHT//2 + 600], fill=(22, 50, 70, 200))
+    g_draw.rectangle([0, 0, WIDTH, HEIGHT], fill=theme["bg"] + (255,))
+    g_draw.ellipse([WIDTH//2 - 500, HEIGHT//2 - 600, WIDTH//2 + 500, HEIGHT//2 + 600], fill=theme["grad_center"] + (200,))
     img = Image.alpha_composite(img, grad.filter(ImageFilter.GaussianBlur(80)))
     draw = ImageDraw.Draw(img)
 
     # 1. Top Header: ANIMAL NAME & TECH BADGE
     header_h = 135
-    draw.rectangle([0, 0, WIDTH, header_h], fill=(15, 18, 22, 255))
-    draw.line([(0, header_h), (WIDTH, header_h)], fill=(30, 36, 44), width=2)
+    draw.rectangle([0, 0, WIDTH, header_h], fill=theme["card_header"] + (255,))
+    draw.line([(0, header_h), (WIDTH, header_h)], fill=theme["card_border"], width=2)
 
     name_font = get_font(52, bold=True)
     draw.text((WIDTH // 2, 24), species["name"], font=name_font, fill=(255, 255, 255), anchor="mt")
 
     badge_font = get_font(20, bold=True, mono=True)
-    draw.text((WIDTH // 2, 88), "⚡ [JS] Vanilla JavaScript • HTML5 Canvas • 60 FPS IK", font=badge_font, fill=(148, 163, 184), anchor="mt")
+    draw.text((WIDTH // 2, 88), theme["badge"], font=badge_font, fill=theme["badge_color"], anchor="mt")
 
     # 2. Upper Section: Framed Creature Display Window
     box_w, box_h = 920, 640
@@ -616,12 +771,12 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
 
     shadow = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     s_draw = ImageDraw.Draw(shadow)
-    s_draw.rectangle([box_x - 12, box_y - 12, box_x + box_w + 12, box_y + box_h + 12], fill=(0, 0, 0, 150))
+    s_draw.rectangle([box_x - 12, box_y - 12, box_x + box_w + 12, box_y + box_h + 12], fill=(0, 0, 0, 160))
     img = Image.alpha_composite(img, shadow.filter(ImageFilter.GaussianBlur(25)))
     draw = ImageDraw.Draw(img)
 
-    draw.rectangle([box_x - 12, box_y - 12, box_x + box_w + 12, box_y + box_h + 12], fill=(235, 230, 220), outline=(190, 185, 175), width=2)
-    draw.rectangle([box_x, box_y, box_x + box_w, box_y + box_h], fill=(239, 236, 228))
+    draw.rectangle([box_x - 12, box_y - 12, box_x + box_w + 12, box_y + box_h + 12], fill=theme["canvas_border"], outline=theme["card_border"], width=2)
+    draw.rectangle([box_x, box_y, box_x + box_w, box_y + box_h], fill=theme["canvas_fill"])
 
     cb_x = box_x + box_w // 2
     cb_y = box_y + box_h // 2
@@ -1259,11 +1414,11 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     card_x = (WIDTH - card_w) // 2
     card_y = 840
 
-    draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + card_h], radius=22, fill=(12, 18, 25), outline=(28, 38, 50), width=2)
+    draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + card_h], radius=22, fill=theme["card_fill"], outline=theme["card_border"], width=2)
 
     title_h = 62
-    draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + title_h], radius=22, fill=(8, 13, 19))
-    draw.rectangle([card_x, card_y + 30, card_x + card_w, card_y + title_h], fill=(8, 13, 19))
+    draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + title_h], radius=22, fill=theme["card_header"])
+    draw.rectangle([card_x, card_y + 30, card_x + card_w, card_y + title_h], fill=theme["card_header"])
 
     draw.ellipse([card_x + 28, card_y + 24, card_x + 44, card_y + 40], fill=(255, 95, 86))
     draw.ellipse([card_x + 54, card_y + 24, card_x + 70, card_y + 40], fill=(255, 189, 46))

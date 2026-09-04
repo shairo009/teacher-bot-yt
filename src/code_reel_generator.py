@@ -84,12 +84,7 @@ const {{ execSync }} = require('child_process');
 const puppeteer = require('puppeteer');
 
 function getChromePath() {{
-  const paths = [
-    'C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe',
-    'C:\\\\Program Files (x86)\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe'
-  ];
-  for (const p of paths) {{ if (fs.existsSync(p)) return p; }}
-  return null;
+  return process.env.PUPPETEER_EXECUTABLE_PATH || null;
 }}
 
 async function render() {{

@@ -743,5 +743,26 @@
     "dry_run": false,
     "video_id": "ZuaPa0fSpUE",
     "youtube_url": "https://youtu.be/ZuaPa0fSpUE"
+  },
+  {
+    "dhash": "8fe8a8e9d7464629",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 25.7,
+    "id": 79,
+    "species": "BANDED SEA KRAIT",
+    "scientific": "Laticauda colubrina",
+    "class_type": "insect",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "Bungarus is a genus of venomous snakes in the family Elapidae. The genus is native to Asia. Often found on the floor of tropical forests in South Asia, Southeast Asia and Southern China, they are medi",
+    "file": "tmp/reel_0079/banded_sea_krait_short.mp4",
+    "timestamp": "2026-09-04T19:42:38.361449+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "DniGbYiOiwQ",
+    "youtube_url": "https://youtu.be/DniGbYiOiwQ"
   }
 ]

@@ -689,5 +689,23 @@
     "dry_run": false,
     "video_id": "PSCrXOTympk",
     "youtube_url": "https://youtu.be/PSCrXOTympk"
+  },
+  {
+    "id": 49,
+    "species": "CYBER PRAYING MANTIS",
+    "scientific": "Hierodula cybernetica",
+    "class_type": "insect",
+    "accent": [
+      152,
+      106,
+      50
+    ],
+    "anatomy_notes": "Mantises are an order (Mantodea) of insects that contains over 2,400 species in about 460 genera in 33 families. The largest family is the Mantidae (\"mantids\"). Mantises are distributed worldwide in t",
+    "file": "tmp/reel_0049/cyber_praying_mantis_short.mp4",
+    "timestamp": "2026-09-04T07:17:59.343408+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "9RTJ1sZ1r5E",
+    "youtube_url": "https://youtu.be/9RTJ1sZ1r5E"
   }
 ]

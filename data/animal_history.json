@@ -869,5 +869,26 @@
     "dry_run": false,
     "video_id": "KCMUtxNI3Ds",
     "youtube_url": "https://youtu.be/KCMUtxNI3Ds"
+  },
+  {
+    "dhash": "0b6a6aebd607b000",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 1.9,
+    "id": 89,
+    "species": "LEAF INSECT",
+    "scientific": "Phyllium philippinicum",
+    "class_type": "insect",
+    "accent": [
+      185,
+      150,
+      80
+    ],
+    "anatomy_notes": "The family Phylliidae is a family of stick insects and contains the extant true leaf insects or walking leaves, which include some of the most remarkably camouflaged leaf mimics (mimesis) in the entir",
+    "file": "tmp/reel_0089/leaf_insect_short.mp4",
+    "timestamp": "2026-09-05T23:01:39.139480+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "4Jc_y7jD2-w",
+    "youtube_url": "https://youtu.be/4Jc_y7jD2-w"
   }
 ]

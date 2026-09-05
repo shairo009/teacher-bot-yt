@@ -827,5 +827,26 @@
     "dry_run": false,
     "video_id": "POBz1PSARUg",
     "youtube_url": "https://youtu.be/POBz1PSARUg"
+  },
+  {
+    "dhash": "2be8ea4bd2870f43",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 2.9,
+    "id": 85,
+    "species": "JAGUAR",
+    "scientific": "Panthera onca",
+    "class_type": "quadruped",
+    "accent": [
+      230,
+      200,
+      30
+    ],
+    "anatomy_notes": "The jaguar is a large cat species and the only living member of the genus Panthera that is native to the Americas. Its distinctively marked coat features pale yellow to tan colored fur covered by spot",
+    "file": "tmp/reel_0085/jaguar_short.mp4",
+    "timestamp": "2026-09-05T15:19:49.477517+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "ehgRLk2sYuw",
+    "youtube_url": "https://youtu.be/ehgRLk2sYuw"
   }
 ]

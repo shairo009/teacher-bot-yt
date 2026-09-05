@@ -785,5 +785,26 @@
     "dry_run": false,
     "video_id": "N4z4FpE2Y1w",
     "youtube_url": "https://youtu.be/N4z4FpE2Y1w"
+  },
+  {
+    "dhash": "cc3333c3c3870728",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 1.9,
+    "id": 83,
+    "species": "BROWN RECLUSE SPIDER",
+    "scientific": "Loxosceles reclusa",
+    "class_type": "arachnid",
+    "accent": [
+      130,
+      75,
+      30
+    ],
+    "anatomy_notes": "The brown recluse is a recluse spider with necrotic venom. Similar to those of other recluse spiders, their bites sometimes require medical attention. The brown recluse is one of two spiders in North ",
+    "file": "tmp/reel_0083/brown_recluse_spider_short.mp4",
+    "timestamp": "2026-09-05T07:03:03.751268+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "zoKWGIOx-ik",
+    "youtube_url": "https://youtu.be/zoKWGIOx-ik"
   }
 ]

@@ -806,5 +806,26 @@
     "dry_run": false,
     "video_id": "zoKWGIOx-ik",
     "youtube_url": "https://youtu.be/zoKWGIOx-ik"
+  },
+  {
+    "dhash": "8f6aeaa95747b015",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 25.2,
+    "id": 84,
+    "species": "CROCODILE MONITOR",
+    "scientific": "Varanus salvadorii",
+    "class_type": "reptile",
+    "accent": [
+      74,
+      110,
+      50
+    ],
+    "anatomy_notes": "The crocodile monitor, also known as the Papuan monitor or Salvadori's monitor, is a species of monitor lizard endemic to New Guinea. It is the largest monitor lizard in New Guinea and is one of the l",
+    "file": "tmp/reel_0084/crocodile_monitor_short.mp4",
+    "timestamp": "2026-09-05T11:25:48.331157+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "POBz1PSARUg",
+    "youtube_url": "https://youtu.be/POBz1PSARUg"
   }
 ]

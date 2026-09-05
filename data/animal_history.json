@@ -848,5 +848,26 @@
     "dry_run": false,
     "video_id": "ehgRLk2sYuw",
     "youtube_url": "https://youtu.be/ehgRLk2sYuw"
+  },
+  {
+    "dhash": "0d6aeaa957464629",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 6.5,
+    "id": 87,
+    "species": "BIO-LUMINESCENT BOA",
+    "scientific": "Boa bio-lux",
+    "class_type": "serpent",
+    "accent": [
+      109,
+      66,
+      50
+    ],
+    "anatomy_notes": "BIO-LUMINESCENT BOA is an animal.",
+    "file": "tmp/reel_0087/bio-luminescent_boa_short.mp4",
+    "timestamp": "2026-09-05T19:09:56.130009+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "KCMUtxNI3Ds",
+    "youtube_url": "https://youtu.be/KCMUtxNI3Ds"
   }
 ]

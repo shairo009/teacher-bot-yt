@@ -974,5 +974,26 @@
     "dry_run": false,
     "video_id": "_Xolmi-hBik",
     "youtube_url": "https://youtu.be/_Xolmi-hBik"
+  },
+  {
+    "dhash": "8fe8a8eb9747b000",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 1.9,
+    "id": 97,
+    "species": "CYBER VELVET ANT",
+    "scientific": "Dasymutilla cyber",
+    "class_type": "insect",
+    "accent": [
+      220,
+      110,
+      20
+    ],
+    "anatomy_notes": "Velvet ants (Mutillidae) are a family of more than 7,000 species of wasps whose wingless females resemble large, hairy ants. Their common name velvet ant refers to their resemblance to an ant, and the",
+    "file": "tmp/reel_0097/cyber_velvet_ant_short.mp4",
+    "timestamp": "2026-09-06T23:00:57.185316+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "xSMBdhlmHZk",
+    "youtube_url": "https://youtu.be/xSMBdhlmHZk"
   }
 ]

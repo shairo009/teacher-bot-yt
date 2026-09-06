@@ -911,5 +911,26 @@
     "dry_run": false,
     "video_id": "Fvg9_NTkX_s",
     "youtube_url": "https://youtu.be/Fvg9_NTkX_s"
+  },
+  {
+    "dhash": "8b6828cbd2870f43",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 26.2,
+    "id": 93,
+    "species": "CHIMPANZEE",
+    "scientific": "Pan troglodytes",
+    "class_type": "quadruped",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The chimpanzee, commonly abbreviated to chimp, is a medium-sized great ape species found in the forests and savannas of equatorial Africa. It has four confirmed subspecies and a fifth proposed one. Th",
+    "file": "tmp/reel_0093/chimpanzee_short.mp4",
+    "timestamp": "2026-09-06T11:48:14.064674+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "1gKK0apaC4s",
+    "youtube_url": "https://youtu.be/1gKK0apaC4s"
   }
 ]

@@ -932,5 +932,26 @@
     "dry_run": false,
     "video_id": "1gKK0apaC4s",
     "youtube_url": "https://youtu.be/1gKK0apaC4s"
+  },
+  {
+    "dhash": "8e3173c0d7469010",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 26.0,
+    "id": 94,
+    "species": "CYBER KOI FISH",
+    "scientific": "Cyprinus cybernetica",
+    "class_type": "aquatic",
+    "accent": [
+      98,
+      110,
+      50
+    ],
+    "anatomy_notes": "A fish is an aquatic, anamniotic, gill-bearing vertebrate animal with a tough cranium to protect the brain, but lacking limbs with digits. Fish can be grouped into the more basal jawless fish and the ",
+    "file": "tmp/reel_0094/cyber_koi_fish_short.mp4",
+    "timestamp": "2026-09-06T15:32:32.023745+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "Cho7KOXKfA0",
+    "youtube_url": "https://youtu.be/Cho7KOXKfA0"
   }
 ]

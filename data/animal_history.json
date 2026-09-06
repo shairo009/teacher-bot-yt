@@ -890,5 +890,26 @@
     "dry_run": false,
     "video_id": "4Jc_y7jD2-w",
     "youtube_url": "https://youtu.be/4Jc_y7jD2-w"
+  },
+  {
+    "dhash": "4db311c14747b000",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 25.8,
+    "id": 92,
+    "species": "TEXAS HORNED LIZARD",
+    "scientific": "Phrynosoma cornutum",
+    "class_type": "aquatic",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The Texas horned lizard is one of about 21 North American species of spikey-bodied reptiles called horned lizards, all belonging the genus Phrynosoma. It occurs in south-central regions of the US and ",
+    "file": "tmp/reel_0092/texas_horned_lizard_short.mp4",
+    "timestamp": "2026-09-06T07:15:32.137589+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "Fvg9_NTkX_s",
+    "youtube_url": "https://youtu.be/Fvg9_NTkX_s"
   }
 ]

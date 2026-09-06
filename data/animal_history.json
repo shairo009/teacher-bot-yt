@@ -953,5 +953,26 @@
     "dry_run": false,
     "video_id": "Cho7KOXKfA0",
     "youtube_url": "https://youtu.be/Cho7KOXKfA0"
+  },
+  {
+    "dhash": "0bea6ae9d7464629",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 25.4,
+    "id": 95,
+    "species": "CORN SNAKE",
+    "scientific": "Pantherophis guttatus",
+    "class_type": "serpent",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The corn snake, sometimes called the Red Rat Snake is a species of North American rat snake in the family Colubridae. The species subdues its small prey by constriction. It is found throughout the sou",
+    "file": "tmp/reel_0095/corn_snake_short.mp4",
+    "timestamp": "2026-09-06T19:16:07.974020+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "_Xolmi-hBik",
+    "youtube_url": "https://youtu.be/_Xolmi-hBik"
   }
 ]

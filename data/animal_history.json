@@ -1016,5 +1016,26 @@
     "dry_run": false,
     "video_id": "C3rxLbjf_t0",
     "youtube_url": "https://youtu.be/C3rxLbjf_t0"
+  },
+  {
+    "dhash": "8ee8a8cbd7870720",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 26.2,
+    "id": 109,
+    "species": "ASIAN ELEPHANT",
+    "scientific": "Elephas maximus",
+    "class_type": "insect",
+    "accent": [
+      140,
+      140,
+      145
+    ],
+    "anatomy_notes": "The Asian elephant, also known as the Asiatic elephant, is the only living species in the genus Elephas. It is the largest living land animal in Asia and the second largest living elephantid in the wo",
+    "file": "tmp/reel_0109/asian_elephant_short.mp4",
+    "timestamp": "2026-09-07T17:53:01.656233+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "rXHYBtDpotU",
+    "youtube_url": "https://youtu.be/rXHYBtDpotU"
   }
 ]

@@ -995,5 +995,26 @@
     "dry_run": false,
     "video_id": "xSMBdhlmHZk",
     "youtube_url": "https://youtu.be/xSMBdhlmHZk"
+  },
+  {
+    "dhash": "8f71b3c0c7469010",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 25.7,
+    "id": 102,
+    "species": "MECH ORCA",
+    "scientific": "Orcinus ferreus",
+    "class_type": "aquatic",
+    "accent": [
+      185,
+      150,
+      80
+    ],
+    "anatomy_notes": "The orca, or killer whale, is a toothed whale and the largest member of the oceanic dolphin family. The only extant species in the genus Orcinus, it is recognizable by its distinct pigmentation; being",
+    "file": "tmp/reel_0102/mech_orca_short.mp4",
+    "timestamp": "2026-09-07T07:27:13.652269+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "C3rxLbjf_t0",
+    "youtube_url": "https://youtu.be/C3rxLbjf_t0"
   }
 ]

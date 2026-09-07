@@ -1037,5 +1037,26 @@
     "dry_run": false,
     "video_id": "rXHYBtDpotU",
     "youtube_url": "https://youtu.be/rXHYBtDpotU"
+  },
+  {
+    "dhash": "8e9133c0d7469010",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 26.3,
+    "id": 110,
+    "species": "BLUE WHALE",
+    "scientific": "Balaenoptera musculus",
+    "class_type": "aquatic",
+    "accent": [
+      50,
+      130,
+      200
+    ],
+    "anatomy_notes": "The blue whale is a species of baleen whale and the largest marine mammal in the rorqual family Balaenopteridae. Reaching a maximum confirmed length of 29.9\u201330.5\u00a0m (98\u2013100\u00a0ft) and weighing up to 190\u20132",
+    "file": "tmp/reel_0110/blue_whale_short.mp4",
+    "timestamp": "2026-09-07T23:37:55.469926+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "IxSnANryPBQ",
+    "youtube_url": "https://youtu.be/IxSnANryPBQ"
   }
 ]

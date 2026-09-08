@@ -1079,5 +1079,26 @@
     "dry_run": false,
     "video_id": "j4XJH4a3e9g",
     "youtube_url": "https://youtu.be/j4XJH4a3e9g"
+  },
+  {
+    "dhash": "0be82aebd607b000",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 1.8,
+    "id": 113,
+    "species": "LUNA MOTH",
+    "scientific": "Actias luna",
+    "class_type": "insect",
+    "accent": [
+      162,
+      108,
+      50
+    ],
+    "anatomy_notes": "The luna moth, also called the American moon moth, is a Nearctic moth in the family Saturniidae, subfamily Saturniinae, a group commonly named the giant silk moths.",
+    "file": "tmp/reel_0113/luna_moth_short.mp4",
+    "timestamp": "2026-09-08T12:16:19.104118+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "bXcdfiPle8k",
+    "youtube_url": "https://youtu.be/bXcdfiPle8k"
   }
 ]

@@ -1100,5 +1100,26 @@
     "dry_run": false,
     "video_id": "bXcdfiPle8k",
     "youtube_url": "https://youtu.be/bXcdfiPle8k"
+  },
+  {
+    "dhash": "8feaaacbd3870f43",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 6.8,
+    "id": 117,
+    "species": "SYNTHETIC GORILLA",
+    "scientific": "Gorilla cybernetica",
+    "class_type": "quadruped",
+    "accent": [
+      165,
+      111,
+      50
+    ],
+    "anatomy_notes": "Gorillas are large, primarily herbivorous, great apes that live in the tropical forests of equatorial Africa. The genus Gorilla is divided into two species: the eastern gorilla and the western gorilla",
+    "file": "tmp/reel_0117/synthetic_gorilla_short.mp4",
+    "timestamp": "2026-09-08T16:46:17.426154+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "bXKHmu4zJpg",
+    "youtube_url": "https://youtu.be/bXKHmu4zJpg"
   }
 ]

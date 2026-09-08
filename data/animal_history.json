@@ -1142,5 +1142,26 @@
     "dry_run": false,
     "video_id": "e0DjZ0KU01o",
     "youtube_url": "https://youtu.be/e0DjZ0KU01o"
+  },
+  {
+    "dhash": "8fe86ae9d7464629",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 25.6,
+    "id": 119,
+    "species": "DEATH ADDER",
+    "scientific": "Acanthophis antarcticus",
+    "class_type": "serpent",
+    "accent": [
+      78,
+      110,
+      50
+    ],
+    "anatomy_notes": "Vipera berus, commonly known as the common European adder and the common European viper, is a species of venomous snake in the family Viperidae. The species is extremely widespread, and thus can be fo",
+    "file": "tmp/reel_0119/death_adder_short.mp4",
+    "timestamp": "2026-09-08T23:32:02.830042+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "b7SSSSHeXRQ",
+    "youtube_url": "https://youtu.be/b7SSSSHeXRQ"
   }
 ]

@@ -1058,5 +1058,26 @@
     "dry_run": false,
     "video_id": "IxSnANryPBQ",
     "youtube_url": "https://youtu.be/IxSnANryPBQ"
+  },
+  {
+    "dhash": "0f6a6aa9d7464629",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 25.5,
+    "id": 111,
+    "species": "BOA CONSTRICTOR",
+    "scientific": "Boa constrictor",
+    "class_type": "serpent",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The boa constrictor, also known as the common boa, is a species of large, non-venomous, heavy-bodied snake that is frequently kept and bred in captivity. The boa constrictor is a member of the family ",
+    "file": "tmp/reel_0111/boa_constrictor_short.mp4",
+    "timestamp": "2026-09-08T07:23:22.481747+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "j4XJH4a3e9g",
+    "youtube_url": "https://youtu.be/j4XJH4a3e9g"
   }
 ]

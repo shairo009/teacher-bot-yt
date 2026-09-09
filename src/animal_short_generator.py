@@ -51,7 +51,9 @@ _BASE_IGNORE_WORDS = {
     "GIANT", "TINY", "BLUE", "BLACK", "RED", "GOLDEN", "WHITE", "GREEN", "SPOTTED",
     "ASIAN", "AFRICAN", "INDIAN", "PACIFIC", "OCEANIC", "TREE", "MUD", "STONE",
     "SAND", "SNOW", "SEA", "RIVER", "FOREST", "BARK", "MATTER", "COMMON", "GREAT",
-    "FAT-TAILED", "FAT-TAIL", "NET-CASTING"
+    "FAT-TAILED", "FAT-TAIL", "NET-CASTING", "EASTERN", "WESTERN", "NORTHERN",
+    "SOUTHERN", "AMERICAN", "EUROPEAN", "AUSTRALIAN", "MADAGASCAR", "AMAZON",
+    "MOUNTAIN", "DESERT", "ROCKY", "ATLANTIC", "ARCTIC", "WILD"
 }
 
 def extract_base_noun(name: str) -> str:
@@ -284,13 +286,14 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
     history = _load_json(HISTORY_FILE, [])
     last_classes = [h.get("class_type") for h in history[-3:] if h.get("class_type")]
     last_class = last_classes[-1] if last_classes else None
+    last_morphologies = [h.get("morphology") for h in history[-5:] if h.get("morphology")]
 
     # Base nouns already uploaded to YouTube
     used_bases = get_used_base_nouns()
 
     CLASS_CYCLE = [
-        "aquatic", "insect", "quadruped", "cephalopod",
-        "reptile", "arachnid", "serpent", "crustacean"
+        "aquatic", "bird", "insect", "quadruped", "cephalopod",
+        "reptile", "arachnid", "amphibian", "crustacean", "serpent"
     ]
 
     target_class = None
@@ -298,31 +301,39 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
         next_idx = (CLASS_CYCLE.index(last_class) + 1) % len(CLASS_CYCLE)
         target_class = CLASS_CYCLE[next_idx]
 
-    # Pass 1: Targeted class rotation + Base noun check + visual verification
+    # Pass 1: Targeted class rotation + Morphology check + Base noun check + visual verification
     if target_class:
         for offset in range(total):
             idx = (start_id + offset) % total
             sp = encyclopedia[idx]
             base = extract_base_noun(sp["name"])
-            if sp.get("class_type") == target_class and not is_already_used(sp["name"]) and base not in used_bases:
+            morph = sp.get("morphology")
+            if (sp.get("class_type") == target_class 
+                and (not morph or morph not in last_morphologies)
+                and not is_already_used(sp["name"]) 
+                and base not in used_bases):
                 cand_sp = get_species_for_id(idx)
                 is_ok, p_diff, h_dist = verify_candidate_against_recent_buffer(cand_sp)
                 if not is_ok:
                     continue
-                print(f"  🎯 Variety Match: Selected '{sp['name']}' (Base: {base}, Class: {target_class}, Diff: {p_diff:.1f}%, Hamming: {h_dist})")
+                print(f"  🎯 Variety Match: Selected '{sp['name']}' (Base: {base}, Class: {target_class}, Morph: {morph}, Diff: {p_diff:.1f}%, Hamming: {h_dist})")
                 return idx, cand_sp
 
-    # Pass 2: Different class + Base noun check + visual verification
+    # Pass 2: Different class + Morphology check + Base noun check + visual verification
     for offset in range(total):
         idx = (start_id + offset) % total
         sp = encyclopedia[idx]
         base = extract_base_noun(sp["name"])
-        if sp.get("class_type") not in last_classes and not is_already_used(sp["name"]) and base not in used_bases:
+        morph = sp.get("morphology")
+        if (sp.get("class_type") not in last_classes 
+            and (not morph or morph not in last_morphologies)
+            and not is_already_used(sp["name"]) 
+            and base not in used_bases):
             cand_sp = get_species_for_id(idx)
             is_ok, p_diff, h_dist = verify_candidate_against_recent_buffer(cand_sp)
             if not is_ok:
                 continue
-            print(f"  🎯 Alternate Match: Selected '{sp['name']}' (Base: {base}, Class: {sp.get('class_type')}, Diff: {p_diff:.1f}%, Hamming: {h_dist})")
+            print(f"  🎯 Alternate Match: Selected '{sp['name']}' (Base: {base}, Class: {sp.get('class_type')}, Morph: {morph}, Diff: {p_diff:.1f}%, Hamming: {h_dist})")
             return idx, cand_sp
 
     # Pass 3: Any unused base noun
@@ -395,8 +406,9 @@ def generate(
     # ── STEP 3: Merge research into species dict ──
     # Research se mili real colors aur class_type override karti hain encyclopedia entry
     species = {**base_species}
-    species["class_type"]    = research["class_type"]
-    species["accent"]        = tuple(research["accent"])
+    species["class_type"]    = base_species.get("class_type") or research.get("class_type", "quadruped")
+    species["morphology"]    = base_species.get("morphology", "small_mammal")
+    species["accent"]        = tuple(research.get("accent") or base_species.get("accent", (245, 158, 11)))
     species["anatomy_notes"] = research.get("anatomy_notes", "")
     # Fur colors (used by renderer)
     species["fur_dark"]      = tuple(research.get("fur_dark",      [120, 60,  5]))
@@ -473,6 +485,7 @@ def generate(
         "species":      species["name"],
         "scientific":   species.get("scientific", species["name"]),
         "class_type":   species["class_type"],
+        "morphology":   species.get("morphology", "small_mammal"),
         "accent":       list(species["accent"]),
         "anatomy_notes": species.get("anatomy_notes", "")[:200],
         "file":         str(output_file.relative_to(ROOT)),

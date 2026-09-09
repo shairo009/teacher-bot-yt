@@ -1163,5 +1163,26 @@
     "dry_run": false,
     "video_id": "b7SSSSHeXRQ",
     "youtube_url": "https://youtu.be/b7SSSSHeXRQ"
+  },
+  {
+    "dhash": "8ee8a8eb9647b000",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 1.8,
+    "id": 121,
+    "species": "AERO DRAGONFLY",
+    "scientific": "Anax aero",
+    "class_type": "insect",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "A dragonfly is a flying insect belonging to the infraorder Anisoptera below the order Odonata. About 3,000 extant species of dragonflies are known. Most are tropical, with fewer species in temperate r",
+    "file": "tmp/reel_0121/aero_dragonfly_short.mp4",
+    "timestamp": "2026-09-09T07:29:16.663923+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "hSk2i4xdaYs",
+    "youtube_url": "https://youtu.be/hSk2i4xdaYs"
   }
 ]

@@ -1206,5 +1206,27 @@
     "dry_run": false,
     "video_id": "0vhs2ynsBsU",
     "youtube_url": "https://youtu.be/0vhs2ynsBsU"
+  },
+  {
+    "dhash": "8f68eae9d747b015",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 0.9,
+    "id": 125,
+    "species": "GREEN IGUANA",
+    "scientific": "Iguana iguana",
+    "class_type": "reptile",
+    "morphology": "lizard",
+    "accent": [
+      50,
+      140,
+      60
+    ],
+    "anatomy_notes": "The green iguana, also known as the American iguana or the common green iguana, is a large, arboreal, mostly herbivorous species of lizard of the genus Iguana. Usually, this animal is simply called th",
+    "file": "tmp/reel_0125/green_iguana_short.mp4",
+    "timestamp": "2026-09-09T19:55:08.445064+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "WqLNjhoEk2s",
+    "youtube_url": "https://youtu.be/WqLNjhoEk2s"
   }
 ]

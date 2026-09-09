@@ -1228,5 +1228,27 @@
     "dry_run": false,
     "video_id": "WqLNjhoEk2s",
     "youtube_url": "https://youtu.be/WqLNjhoEk2s"
+  },
+  {
+    "dhash": "8f6aeaa99747b015",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 0.5,
+    "id": 128,
+    "species": "COMMON CHUCKWALLA",
+    "scientific": "Sauromalus ater",
+    "class_type": "reptile",
+    "morphology": "lizard",
+    "accent": [
+      155,
+      110,
+      50
+    ],
+    "anatomy_notes": "Sauromalus ater, also known as the common chuckwalla or northern chuckwalla, is a species of lizard in the family Iguanidae. It inhabits the Sonoran and Mojave Deserts of the Southwestern United State",
+    "file": "tmp/reel_0128/common_chuckwalla_short.mp4",
+    "timestamp": "2026-09-09T23:20:20.057032+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "E5oUOAsUW6g",
+    "youtube_url": "https://youtu.be/E5oUOAsUW6g"
   }
 ]

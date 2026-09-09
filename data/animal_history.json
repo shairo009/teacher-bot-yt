@@ -1184,5 +1184,27 @@
     "dry_run": false,
     "video_id": "hSk2i4xdaYs",
     "youtube_url": "https://youtu.be/hSk2i4xdaYs"
+  },
+  {
+    "dhash": "8f6a2ae9d747b015",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 5.4,
+    "id": 122,
+    "species": "LEOPARD GECKO",
+    "scientific": "Eublepharis macularius",
+    "class_type": "reptile",
+    "morphology": "lizard",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The leopard gecko or common leopard gecko is a ground-dwelling gecko native primarily to the rocky dry grassland and desert regions of Afghanistan, Iran, Pakistan, India, and Nepal. The leopard gecko ",
+    "file": "tmp/reel_0122/leopard_gecko_short.mp4",
+    "timestamp": "2026-09-09T16:45:52.744895+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "0vhs2ynsBsU",
+    "youtube_url": "https://youtu.be/0vhs2ynsBsU"
   }
 ]

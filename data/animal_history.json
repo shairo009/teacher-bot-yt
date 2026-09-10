@@ -1316,5 +1316,27 @@
     "dry_run": false,
     "video_id": "Iixp1wL80ks",
     "youtube_url": "https://youtu.be/Iixp1wL80ks"
+  },
+  {
+    "dhash": "8e3191c187074328",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 1.8,
+    "id": 455,
+    "species": "EASTERN HARVESTMAN",
+    "scientific": "Phalangium opilio",
+    "class_type": "arachnid",
+    "morphology": "spider",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The Opiliones are an order of arachnids, colloquially known as harvestmen, harvesters, daddy long legs, or granddaddy long legs. Over 6,650 species of harvestmen have been discovered worldwide, althou",
+    "file": "tmp/reel_0455/eastern_harvestman_short.mp4",
+    "timestamp": "2026-09-10T23:20:20.708825+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "4aJ7dLfdENI",
+    "youtube_url": "https://youtu.be/4aJ7dLfdENI"
   }
 ]

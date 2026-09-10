@@ -1250,5 +1250,27 @@
     "dry_run": false,
     "video_id": "E5oUOAsUW6g",
     "youtube_url": "https://youtu.be/E5oUOAsUW6g"
+  },
+  {
+    "dhash": "8d3331c187074328",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 24.6,
+    "id": 444,
+    "species": "SOUTHERN BLACK WIDOW",
+    "scientific": "Latrodectus mactans",
+    "class_type": "arachnid",
+    "morphology": "spider",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "Latrodectus mactans, known as southern black widow or simply black widow, and the shoe-button spider, is a venomous species of spider in the genus Latrodectus. The females are well known for their dis",
+    "file": "tmp/reel_0444/southern_black_widow_short.mp4",
+    "timestamp": "2026-09-10T07:25:28.284000+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "FtR0t3mCN8M",
+    "youtube_url": "https://youtu.be/FtR0t3mCN8M"
   }
 ]

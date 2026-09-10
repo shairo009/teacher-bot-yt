@@ -1294,5 +1294,27 @@
     "dry_run": false,
     "video_id": "13UHyuVIM-8",
     "youtube_url": "https://youtu.be/13UHyuVIM-8"
+  },
+  {
+    "dhash": "0d333143c3870728",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 1.8,
+    "id": 450,
+    "species": "CAMEL SPIDER SOLIFUGID",
+    "scientific": "Galeodes arabs",
+    "class_type": "arachnid",
+    "morphology": "spider",
+    "accent": [
+      190,
+      110,
+      50
+    ],
+    "anatomy_notes": "Solifugae is an order of arachnids known variously as solifuges, sun spiders, camel spiders, wind scorpions, and jerrymanders. The order includes more than 1,000 described species in about 147 genera.",
+    "file": "tmp/reel_0450/camel_spider_solifugid_short.mp4",
+    "timestamp": "2026-09-10T19:51:24.042133+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "Iixp1wL80ks",
+    "youtube_url": "https://youtu.be/Iixp1wL80ks"
   }
 ]

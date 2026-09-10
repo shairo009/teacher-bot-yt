@@ -1272,5 +1272,27 @@
     "dry_run": false,
     "video_id": "FtR0t3mCN8M",
     "youtube_url": "https://youtu.be/FtR0t3mCN8M"
+  },
+  {
+    "dhash": "cc33324387074328",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 0.3,
+    "id": 446,
+    "species": "GOLDEN SILK ORB WEAVER",
+    "scientific": "Trichonephila clavipes",
+    "class_type": "arachnid",
+    "morphology": "spider",
+    "accent": [
+      61,
+      110,
+      50
+    ],
+    "anatomy_notes": "Orb-weaver spiders are members of the spider family Araneidae. They are the most common group of builders of spiral wheel-shaped webs often found in gardens, fields, and forests. The English word \"orb",
+    "file": "tmp/reel_0446/golden_silk_orb_weaver_short.mp4",
+    "timestamp": "2026-09-10T16:34:27.015645+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "13UHyuVIM-8",
+    "youtube_url": "https://youtu.be/13UHyuVIM-8"
   }
 ]

@@ -1382,5 +1382,27 @@
     "dry_run": false,
     "video_id": "H-gqG06WP0w",
     "youtube_url": "https://youtu.be/H-gqG06WP0w"
+  },
+  {
+    "dhash": "0da8a869974e8000",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 0.5,
+    "id": 205,
+    "species": "AMERICAN BULLFROG",
+    "scientific": "Lithobates catesbeianus",
+    "class_type": "amphibian",
+    "morphology": "frog",
+    "accent": [
+      203,
+      108,
+      50
+    ],
+    "anatomy_notes": "The American bullfrog, often simply known as the bullfrog in Canada and the United States, is a species of large frog in the family Ranidae. The species is native to eastern North America. It typicall",
+    "file": "tmp/reel_0205/american_bullfrog_short.mp4",
+    "timestamp": "2026-09-11T16:38:39.523025+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "U8R9mSV4wUE",
+    "youtube_url": "https://youtu.be/U8R9mSV4wUE"
   }
 ]

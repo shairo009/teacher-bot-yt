@@ -482,6 +482,7 @@ def get_species_for_id(animal_id: int) -> dict:
         "accent": accent,
         "code_lines": code_lines,
         "animal_id": animal_id,
+        "bone_structure": entry.get("bone_structure", {}),
         "yt_title": yt_title,
         "yt_desc": f"✨ Realistic {name} ({scientific}) with biologically accurate joint kinematics in Vanilla JavaScript!\n\n#JavaScript #WebDev #Shorts #Coding #Tech #Programming #Canvas"
     }

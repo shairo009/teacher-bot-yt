@@ -975,12 +975,60 @@ def draw_bird(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float, co
     hy = sim.y + sin_a * 38
     draw.ellipse([hx - 14, hy - 13, hx + 14, hy + 13], fill=b_dark, outline=b_light, width=2)
 
-    # Beak (Hooked for raptors, straight for songbirds)
+    # Beak & Cranial Features (Species-Specific Osteology)
+    bone = species.get("bone_structure", {})
+    snout_t = bone.get("skull", {}).get("snout_type", "hooked_raptorial_beak")
+    cranial = bone.get("skull", {}).get("cranial_special", "none")
+
+    # Crown Crest (Peacock, Crowned Crane, Cockatoo)
+    if cranial == "feathered_crown_crest" or any(k in name for k in ("PEACOCK", "CRANE", "COCKATOO", "HOATZIN")):
+        for cr_i in range(-3, 4):
+            cr_root = (hx - cos_a * 8 + perp_x * (cr_i * 3), hy - sin_a * 8 + perp_y * (cr_i * 3))
+            cr_tip  = (cr_root[0] + cos_a * 14 + perp_x * (cr_i * 8), cr_root[1] + sin_a * 14 + perp_y * (cr_i * 8))
+            draw.line([cr_root, cr_tip], fill=b_light, width=2)
+            draw.ellipse([cr_tip[0]-3, cr_tip[1]-3, cr_tip[0]+3, cr_tip[1]+3], fill=accent)
+
     is_raptor = any(k in name for k in ("EAGLE", "FALCON", "HAWK", "OWL", "KESTREL", "OSPREY", "VULTURE", "CONDOR"))
     beak_col = (234, 179, 8) if is_raptor else (180, 83, 9)
     bk_tip = (hx + cos_a * 22, hy + sin_a * 22)
-    if is_raptor:
-        bk_hook = (bk_tip[0] - perp_y * 4, bk_tip[1] + perp_x * 4)
+
+    if "enormous_serrated" in snout_t or any(k in name for k in ("TOUCAN", "HORNBILL")):
+        # Giant Banana Casque Bill
+        beak_col = (245, 158, 11)
+        t_tip = (hx + cos_a * 50, hy + sin_a * 50)
+        t_poly = [
+            (hx + perp_x * 8, hy + perp_y * 8),
+            (hx + cos_a * 20 + perp_x * 12, hy + sin_a * 20 + perp_y * 12),
+            t_tip,
+            (hx + cos_a * 20 - perp_x * 6, hy + sin_a * 20 - perp_y * 6),
+            (hx - perp_x * 8, hy - perp_y * 8),
+        ]
+        draw.polygon(t_poly, fill=beak_col, outline=(220, 38, 38), width=2)
+    elif "clog_shaped" in snout_t or "SHOEBILL" in name:
+        # Massive Bulbous Shoebill
+        beak_col = (217, 119, 6)
+        s_tip = (hx + cos_a * 36, hy + sin_a * 36)
+        s_poly = [
+            (hx + perp_x * 12, hy + perp_y * 12),
+            (hx + cos_a * 20 + perp_x * 14, hy + sin_a * 20 + perp_y * 14),
+            s_tip,
+            (hx + cos_a * 20 - perp_x * 14, hy + sin_a * 20 - perp_y * 14),
+            (hx - perp_x * 12, hy - perp_y * 12),
+        ]
+        draw.polygon(s_poly, fill=beak_col, outline=(60, 50, 45), width=2)
+    elif "specialized_filter" in snout_t or any(k in name for k in ("FLAMINGO", "SPOONBILL")):
+        # Decurved Filter Beak
+        beak_col = (244, 114, 182)
+        f_mid = (hx + cos_a * 20, hy + sin_a * 20)
+        f_tip = (f_mid[0] + perp_x * 18, f_mid[1] + perp_y * 18)
+        draw.polygon([(hx + perp_x * 6, hy + perp_y * 6), (hx - perp_x * 6, hy - perp_y * 6), f_mid, f_tip], fill=beak_col, outline=(15, 23, 42), width=2)
+    elif "spearing_dagger" in snout_t or any(k in name for k in ("HERON", "EGRET", "STORK")):
+        # Straight Stiletto Dagger Beak
+        beak_col = (234, 179, 8)
+        d_tip = (hx + cos_a * 44, hy + sin_a * 44)
+        draw.polygon([(hx + perp_x * 4, hy + perp_y * 4), (hx - perp_x * 4, hy - perp_y * 4), d_tip], fill=beak_col)
+    elif is_raptor:
+        bk_hook = (bk_tip[0] - perp_y * 6, bk_tip[1] + perp_x * 6)
         draw.polygon([(hx + perp_x * 6, hy + perp_y * 6), (hx - perp_x * 6, hy - perp_y * 6), bk_hook], fill=beak_col)
     else:
         draw.polygon([(hx + perp_x * 5, hy + perp_y * 5), (hx - perp_x * 5, hy - perp_y * 5), bk_tip], fill=beak_col)
@@ -1086,20 +1134,91 @@ def draw_cervid_bovid(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: f
     sn_x, sn_y = hx + cos_a * 18, hy + sin_a * 18
     draw.ellipse([sn_x - 8, sn_y - 7, sn_x + 8, sn_y + 7], fill=c_dark)
 
-    # Antlers / Horns
-    is_antler = any(k in name for k in ("DEER", "MOOSE", "ELK", "REINDEER", "CARIBOU", "WAPITI"))
-    horn_col = (235, 225, 205) if is_antler else (50, 45, 40)
+    # Dedicated Species-Specific Cranial Bone Structures
+    bone = species.get("bone_structure", {})
+    cranial = bone.get("skull", {}).get("cranial_special", "none")
+    if cranial == "none":
+        if "MOOSE" in name: cranial = "antler_palmate"
+        elif any(k in name for k in ("ELK", "REINDEER", "CARIBOU", "RED DEER", "MULE DEER")): cranial = "antler_branching"
+        elif any(k in name for k in ("MARKHOR", "BLACKBUCK", "KUDU")): cranial = "horn_spiral"
+        elif any(k in name for k in ("BIGHORN", "MOUFLON", "ARGALI")): cranial = "horn_ram_curl"
+        elif any(k in name for k in ("BUFFALO", "BISON", "MUSKOX")): cranial = "horn_boss"
+        elif any(k in name for k in ("ORYX", "GEMSBOK")): cranial = "horn_rapier"
+        elif any(k in name for k in ("IMPALA", "GAZELLE", "SPRINGBOK")): cranial = "horn_lyrate"
+        elif any(k in name for k in ("IBEX", "GOAT")): cranial = "horn_scythe"
+        else: cranial = "antler_compact" if "DEER" in name else "horn_lyrate"
+
+    antler_col = (235, 225, 205)
+    horn_col   = (45, 40, 35)
+
     for s in [-1, 1]:
         h_b = (hx - cos_a * 4 + perp_x * (10 * s), hy - sin_a * 4 + perp_y * (10 * s))
-        if is_antler:
+        if cranial == "antler_palmate": # Moose shovel palm
+            p_center = (h_b[0] + cos_a * 15 + perp_x * (32 * s), h_b[1] + sin_a * 15 + perp_y * (32 * s))
+            draw.line([h_b, p_center], fill=antler_col, width=7)
+            # Palm plate
+            palm_poly = [
+                (p_center[0] - cos_a * 12 + perp_x * (10 * s), p_center[1] - sin_a * 12 + perp_y * (10 * s)),
+                (p_center[0] + cos_a * 18 + perp_x * (22 * s), p_center[1] + sin_a * 18 + perp_y * (22 * s)),
+                (p_center[0] + cos_a * 8 + perp_x * (36 * s), p_center[1] + sin_a * 8 + perp_y * (36 * s)),
+                (p_center[0] - cos_a * 18 + perp_x * (26 * s), p_center[1] - sin_a * 18 + perp_y * (26 * s)),
+            ]
+            draw.polygon(palm_poly, fill=antler_col, outline=_darken(antler_col, 20), width=2)
+            # Perimeter points
+            for pi in range(5):
+                pt_root = (p_center[0] + cos_a * (12 - pi * 6) + perp_x * (30 * s), p_center[1] + sin_a * (12 - pi * 6) + perp_y * (30 * s))
+                pt_tip = (pt_root[0] + cos_a * (8 - pi * 4) + perp_x * (12 * s), pt_root[1] + sin_a * (8 - pi * 4) + perp_y * (12 * s))
+                draw.line([pt_root, pt_tip], fill=antler_col, width=4)
+        elif cranial == "antler_branching": # Elk / Red Deer multi-tined
             h_m = (h_b[0] + cos_a * 25 + perp_x * (28 * s), h_b[1] + sin_a * 25 + perp_y * (28 * s))
-            h_t = (h_m[0] + cos_a * 18 + perp_x * (15 * s), h_m[1] + sin_a * 18 + perp_y * (15 * s))
-            draw.line([h_b, h_m], fill=horn_col, width=5)
-            draw.line([h_m, h_t], fill=horn_col, width=3)
-            draw.line([h_m, (h_m[0] + cos_a * 14 - perp_x * (8 * s), h_m[1] + sin_a * 14 - perp_y * (8 * s))], fill=horn_col, width=3)
-        else:
-            h_t = (h_b[0] - cos_a * 15 + perp_x * (32 * s), h_b[1] - sin_a * 15 + perp_y * (32 * s))
-            draw.line([h_b, h_t], fill=horn_col, width=6)
+            h_t = (h_m[0] + cos_a * 22 + perp_x * (18 * s), h_m[1] + sin_a * 22 + perp_y * (18 * s))
+            draw.line([h_b, h_m], fill=antler_col, width=6)
+            draw.line([h_m, h_t], fill=antler_col, width=4)
+            # Brow tine
+            draw.line([h_b, (h_b[0] + cos_a * 16 - perp_x * (6 * s), h_b[1] + sin_a * 16 - perp_y * (6 * s))], fill=antler_col, width=4)
+            # Bez & Trez tines
+            draw.line([h_m, (h_m[0] + cos_a * 15 - perp_x * (8 * s), h_m[1] + sin_a * 15 - perp_y * (8 * s))], fill=antler_col, width=3)
+            draw.line([h_m, (h_m[0] - cos_a * 8 + perp_x * (14 * s), h_m[1] - sin_a * 8 + perp_y * (14 * s))], fill=antler_col, width=3)
+        elif cranial == "horn_spiral": # Markhor / Blackbuck corkscrew
+            prev_p = h_b
+            for sp_step in range(6):
+                twist_w = math.sin(sp_step * 1.5) * 8.0 * s
+                sp_x = h_b[0] + cos_a * (sp_step * 8) + perp_x * (12 * s + twist_w)
+                sp_y = h_b[1] + sin_a * (sp_step * 8) + perp_y * (12 * s + twist_w)
+                draw.line([prev_p, (sp_x, sp_y)], fill=horn_col, width=max(3, 7 - sp_step))
+                prev_p = (sp_x, sp_y)
+        elif cranial == "horn_ram_curl": # Bighorn Sheep curled ram horn
+            curl_pts = [
+                h_b,
+                (h_b[0] - cos_a * 12 + perp_x * (16 * s), h_b[1] - sin_a * 12 + perp_y * (16 * s)),
+                (h_b[0] - cos_a * 24 + perp_x * (26 * s), h_b[1] - sin_a * 24 + perp_y * (26 * s)),
+                (h_b[0] - cos_a * 10 + perp_x * (32 * s), h_b[0] - sin_a * 10 + perp_y * (32 * s)),
+                (h_b[0] + cos_a * 12 + perp_x * (26 * s), h_b[1] + sin_a * 12 + perp_y * (26 * s)),
+                (h_b[0] + cos_a * 18 + perp_x * (14 * s), h_b[1] + sin_a * 18 + perp_y * (14 * s)),
+            ]
+            for ci in range(len(curl_pts) - 1):
+                draw.line([curl_pts[ci], curl_pts[ci+1]], fill=horn_col, width=max(4, 9 - ci))
+        elif cranial == "horn_boss": # Cape Buffalo / Bison skull boss
+            boss_sweep = [
+                (hx + perp_x * (4 * s), hy + perp_y * (4 * s)),
+                (hx - cos_a * 8 + perp_x * (22 * s), hy - sin_a * 8 + perp_y * (22 * s)),
+                (hx - cos_a * 12 + perp_x * (34 * s), hy - sin_a * 12 + perp_y * (34 * s)),
+                (hx + cos_a * 8 + perp_x * (30 * s), hy + sin_a * 8 + perp_y * (30 * s)),
+            ]
+            for bi in range(len(boss_sweep) - 1):
+                draw.line([boss_sweep[bi], boss_sweep[bi+1]], fill=horn_col, width=max(5, 12 - bi * 2))
+        elif cranial == "horn_rapier": # Oryx straight spear
+            draw.line([h_b, (h_b[0] - cos_a * 35 + perp_x * (22 * s), h_b[1] - sin_a * 35 + perp_y * (22 * s))], fill=horn_col, width=5)
+        elif cranial == "horn_lyrate": # Impala / Gazelle lyre curve
+            l1 = (h_b[0] + cos_a * 14 + perp_x * (18 * s), h_b[1] + sin_a * 14 + perp_y * (18 * s))
+            l2 = (h_b[0] - cos_a * 10 + perp_x * (24 * s), h_b[1] - sin_a * 10 + perp_y * (24 * s))
+            l3 = (h_b[0] - cos_a * 24 + perp_x * (16 * s), h_b[1] - sin_a * 24 + perp_y * (16 * s))
+            draw.line([h_b, l1], fill=horn_col, width=6)
+            draw.line([l1, l2], fill=horn_col, width=5)
+            draw.line([l2, l3], fill=horn_col, width=3)
+        else: # horn_scythe / compact antler
+            h_t = (h_b[0] - cos_a * 18 + perp_x * (26 * s), h_b[1] - sin_a * 18 + perp_y * (26 * s))
+            draw.line([h_b, h_t], fill=horn_col if "horn" in cranial else antler_col, width=6)
             draw.ellipse([h_t[0]-3, h_t[1]-3, h_t[0]+3, h_t[1]+3], fill=(20, 20, 20))
 
     # Eyes
@@ -1187,7 +1306,11 @@ def draw_shark(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float, c
         right_pts.append((sx - perp_x * hw, sy - perp_y * hw))
 
     # Head
-    if is_hammerhead:
+    bone = species.get("bone_structure", {})
+    cranial = bone.get("skull", {}).get("cranial_special", "none")
+    is_sawfish = cranial == "saw_rostrum_bladed" or any(k in name for k in ("SAWFISH", "SAWSHARK"))
+
+    if is_hammerhead or cranial == "cephalofoil_hammer":
         head_t1 = (sim.x + cos_a * 25 + perp_x * 65, sim.y + sin_a * 25 + perp_y * 65)
         head_t2 = (sim.x + cos_a * 25 - perp_x * 65, sim.y + sin_a * 25 - perp_y * 65)
         head_c  = (sim.x + cos_a * 35, sim.y + sin_a * 35)
@@ -1197,6 +1320,25 @@ def draw_shark(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float, c
         # Hammerhead eyes at far tips
         draw.ellipse([head_t1[0]-6, head_t1[1]-6, head_t1[0]+6, head_t1[1]+6], fill=(15, 20, 30), outline=accent, width=2)
         draw.ellipse([head_t2[0]-6, head_t2[1]-6, head_t2[0]+6, head_t2[1]+6], fill=(15, 20, 30), outline=accent, width=2)
+    elif is_sawfish:
+        # Elongated Toothed Saw Blade Rostrum
+        snout = (sim.x + cos_a * 45, sim.y + sin_a * 45)
+        saw_tip = (sim.x + cos_a * 115, sim.y + sin_a * 115)
+        shark_poly = [snout] + left_pts + list(reversed(right_pts))
+        draw.polygon(shark_poly, fill=body_mid, outline=body_dark, width=3)
+        # Saw blade
+        draw.line([snout, saw_tip], fill=(210, 215, 220), width=9)
+        draw.line([snout, saw_tip], fill=(70, 80, 95), width=3)
+        # Lateral Teeth along the blade
+        for ti in range(12):
+            t_base = (snout[0] + cos_a * (ti * 5.8), snout[1] + sin_a * (ti * 5.8))
+            for s in [-1, 1]:
+                t_point = (t_base[0] + perp_x * (10 * s), t_base[1] + perp_y * (10 * s))
+                draw.line([t_base, t_point], fill=(255, 255, 255), width=2)
+        # Eyes
+        for s in [-1, 1]:
+            ep = (sim.x + cos_a * 28 + perp_x * (18 * s), sim.y + sin_a * 28 + perp_y * (18 * s))
+            draw.ellipse([ep[0]-4, ep[1]-4, ep[0]+4, ep[1]+4], fill=(15, 20, 30), outline=accent, width=1)
     else:
         snout = (sim.x + cos_a * 55, sim.y + sin_a * 55)
         shark_poly = [snout] + left_pts + list(reversed(right_pts))

@@ -1404,5 +1404,27 @@
     "dry_run": false,
     "video_id": "U8R9mSV4wUE",
     "youtube_url": "https://youtu.be/U8R9mSV4wUE"
+  },
+  {
+    "dhash": "860b6bc287070e02",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 27.7,
+    "id": 357,
+    "species": "COMMON YABBY",
+    "scientific": "Cherax destructor",
+    "class_type": "crustacean",
+    "morphology": "lobster",
+    "accent": [
+      160,
+      70,
+      20
+    ],
+    "anatomy_notes": "The common yabby is an Australian freshwater crustacean in the Parastacidae family. It is listed as a vulnerable species of crayfish by the International Union for Conservation of Nature (IUCN), thoug",
+    "file": "tmp/reel_0357/common_yabby_short.mp4",
+    "timestamp": "2026-09-11T19:45:41.114926+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "-T3bWxHBHqg",
+    "youtube_url": "https://youtu.be/-T3bWxHBHqg"
   }
 ]

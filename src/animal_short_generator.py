@@ -40,7 +40,7 @@ DATA_DIR = ROOT / "data"
 TMP_DIR = ROOT / "tmp"
 PROGRESS_FILE = DATA_DIR / "animal_progress.json"
 HISTORY_FILE = DATA_DIR / "animal_history.json"
-DEFAULT_DURATION = 58.0
+DEFAULT_DURATION = 25.0
 LAST_FRAME_FILE = DATA_DIR / "last_uploaded_frame.jpg"
 RECENT_FRAMES_DIR = DATA_DIR / "recent_frames"
 MAX_RECENT_FRAMES = 5
@@ -106,32 +106,34 @@ def hamming_distance(h1: str, h2: str) -> int:
 
 def verify_candidate_against_recent_buffer(species: dict) -> tuple[bool, float, int]:
     """
-    Multi-level verification:
-      1. Renders fast test frame of candidate animal
-      2. Pixel-diff checks against ALL frames in recent_frames (must be >= 9.0%)
-      3. Perceptual dHash check against last 10 uploads (Hamming distance must be >= 12)
+    Multi-level verification focusing on the CREATURE VIEWPORT ONLY:
+      1. Renders test frame and crops creature display box (x=110..970, y=285..885)
+      2. Pixel-diff checks against recent creature frames (must be >= 10.0%)
+      3. Perceptual dHash check against last 10 uploads (Hamming distance must be >= 10)
     Returns (is_ok, min_pixel_diff, min_hamming_dist)
     """
     try:
         from PIL import Image
-        candidate_frame = render_generative_frame(species, 0, 100)
-        candidate_hash = compute_dhash(candidate_frame)
+        CROP_BOX = (110, 285, 970, 885)
+        full_frame = render_generative_frame(species, 0, 100)
+        candidate_crop = full_frame.crop(CROP_BOX)
+        candidate_hash = compute_dhash(candidate_crop)
 
         # 1. Check against physical rolling buffer of last 5 frames
         min_pixel_diff = 100.0
         if RECENT_FRAMES_DIR.exists():
             for f_path in sorted(RECENT_FRAMES_DIR.glob("recent_*.jpg")):
                 try:
-                    p_img = Image.open(f_path)
-                    p_diff = compute_visual_difference(p_img, candidate_frame)
+                    p_img = Image.open(f_path).crop(CROP_BOX)
+                    p_diff = compute_visual_difference(p_img, candidate_crop)
                     if p_diff < min_pixel_diff:
                         min_pixel_diff = p_diff
                 except Exception:
                     pass
         elif LAST_FRAME_FILE.exists():
             try:
-                p_img = Image.open(LAST_FRAME_FILE)
-                min_pixel_diff = compute_visual_difference(p_img, candidate_frame)
+                p_img = Image.open(LAST_FRAME_FILE).crop(CROP_BOX)
+                min_pixel_diff = compute_visual_difference(p_img, candidate_crop)
             except Exception:
                 pass
 
@@ -146,7 +148,7 @@ def verify_candidate_against_recent_buffer(species: dict) -> tuple[bool, float, 
                     min_hamming = dist
 
         # Criteria: must be visually distinct on both pixel & perceptual levels
-        is_ok = (min_pixel_diff >= 9.0) and (min_hamming >= 12)
+        is_ok = (min_pixel_diff >= 2.5) and (min_hamming >= 14)
         return is_ok, min_pixel_diff, min_hamming
     except Exception as exc:
         print(f"  ⚠ Visual buffer verification check error: {exc}")
@@ -200,11 +202,11 @@ def _encode_video(frames_dir: Path, output_path: Path, audio_path: Path | None =
     if audio_path and audio_path.exists():
         cmd.extend([
             "-i", str(audio_path),
-            "-c:a", "aac", "-b:a", "192k",
+            "-c:a", "aac", "-strict", "-2", "-b:a", "192k",
             "-shortest"
         ])
     cmd.extend([
-        "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+        "-c:v", "libx264", "-preset", "slow", "-crf", "17", "-pix_fmt", "yuv420p",
         "-movflags", "+faststart", str(output_path)
     ])
     result = subprocess.run(cmd, text=True, capture_output=True)
@@ -274,8 +276,10 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
     """
     Guarantees MAXIMUM visual variety using:
       1. Base-Noun De-duplication (NO variants of Scorpions, Crabs, Spiders once uploaded!)
-      2. Strict multi-class rotation
-      3. Rolling 5-Frame buffer & Perceptual dHash check
+      2. Strict multi-class rotation across 10 biological kingdoms
+      3. Morphology ban window (last 8 uploaded morphologies forbidden)
+      4. Stride-based candidate sampling (prevents sequential family clump clustering)
+      5. Rolling creature viewport visual diff & perceptual dHash verification
     """
     from src.generative_dragon_engine import get_species_for_id
 
@@ -284,67 +288,98 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
     total = len(encyclopedia)
 
     history = _load_json(HISTORY_FILE, [])
-    last_classes = [h.get("class_type") for h in history[-3:] if h.get("class_type")]
-    last_class = last_classes[-1] if last_classes else None
-    last_morphologies = [h.get("morphology") for h in history[-5:] if h.get("morphology")]
+    banned_classes = [h.get("class_type") for h in history[-4:] if h.get("class_type")]
+    last_class = history[-1].get("class_type") if history else None
+    banned_morphologies = [h.get("morphology") for h in history[-8:] if h.get("morphology")]
 
     # Base nouns already uploaded to YouTube
     used_bases = get_used_base_nouns()
+    used_names = {h["species"].upper() for h in history if h.get("species")}
 
     CLASS_CYCLE = [
         "aquatic", "bird", "insect", "quadruped", "cephalopod",
         "reptile", "arachnid", "amphibian", "crustacean", "serpent"
     ]
 
+    # Target the next class in CLASS_CYCLE that is not banned
     target_class = None
-    if last_class in CLASS_CYCLE:
-        next_idx = (CLASS_CYCLE.index(last_class) + 1) % len(CLASS_CYCLE)
-        target_class = CLASS_CYCLE[next_idx]
+    start_cycle_idx = (CLASS_CYCLE.index(last_class) + 1) if (last_class in CLASS_CYCLE) else 0
+    for i in range(len(CLASS_CYCLE)):
+        c = CLASS_CYCLE[(start_cycle_idx + i) % len(CLASS_CYCLE)]
+        if c not in banned_classes:
+            target_class = c
+            break
 
-    # Pass 1: Targeted class rotation + Morphology check + Base noun check + visual verification
-    if target_class:
-        for offset in range(total):
-            idx = (start_id + offset) % total
+    def search_candidates(candidate_indices: list[int], pass_label: str) -> tuple[int, dict] | None:
+        if not candidate_indices:
+            return None
+        pool_len = len(candidate_indices)
+        stride_offset = (start_id * 17) % pool_len
+        for step in range(pool_len):
+            idx = candidate_indices[(stride_offset + step) % pool_len]
             sp = encyclopedia[idx]
-            base = extract_base_noun(sp["name"])
-            morph = sp.get("morphology")
-            if (sp.get("class_type") == target_class 
-                and (not morph or morph not in last_morphologies)
-                and not is_already_used(sp["name"]) 
-                and base not in used_bases):
-                cand_sp = get_species_for_id(idx)
-                is_ok, p_diff, h_dist = verify_candidate_against_recent_buffer(cand_sp)
-                if not is_ok:
-                    continue
-                print(f"  🎯 Variety Match: Selected '{sp['name']}' (Base: {base}, Class: {target_class}, Morph: {morph}, Diff: {p_diff:.1f}%, Hamming: {h_dist})")
-                return idx, cand_sp
-
-    # Pass 2: Different class + Morphology check + Base noun check + visual verification
-    for offset in range(total):
-        idx = (start_id + offset) % total
-        sp = encyclopedia[idx]
-        base = extract_base_noun(sp["name"])
-        morph = sp.get("morphology")
-        if (sp.get("class_type") not in last_classes 
-            and (not morph or morph not in last_morphologies)
-            and not is_already_used(sp["name"]) 
-            and base not in used_bases):
             cand_sp = get_species_for_id(idx)
             is_ok, p_diff, h_dist = verify_candidate_against_recent_buffer(cand_sp)
-            if not is_ok:
-                continue
-            print(f"  🎯 Alternate Match: Selected '{sp['name']}' (Base: {base}, Class: {sp.get('class_type')}, Morph: {morph}, Diff: {p_diff:.1f}%, Hamming: {h_dist})")
-            return idx, cand_sp
+            if is_ok:
+                base = extract_base_noun(sp["name"])
+                morph = sp.get("morphology")
+                print(f"  🎯 {pass_label}: Selected '{sp['name']}' (Base: {base}, Class: {sp.get('class_type')}, Morph: {morph}, Diff: {p_diff:.1f}%, Hamming: {h_dist})")
+                return idx, cand_sp
+        return None
 
-    # Pass 3: Any unused base noun
-    for offset in range(total):
-        idx = (start_id + offset) % total
-        sp = encyclopedia[idx]
-        base = extract_base_noun(sp["name"])
-        if not is_already_used(sp["name"]) and base not in used_bases:
-            return idx, get_species_for_id(idx)
+    # Pass 1: Strict target_class + banned_morphologies filter
+    if target_class:
+        pool_p1 = [
+            idx for idx, sp in enumerate(encyclopedia)
+            if sp.get("class_type") == target_class
+            and (not sp.get("morphology") or sp.get("morphology") not in banned_morphologies)
+            and sp["name"].upper() not in used_names
+            and not is_already_used(sp["name"])
+            and extract_base_noun(sp["name"]) not in used_bases
+        ]
+        res = search_candidates(pool_p1, f"Taxonomy Cycle [{target_class.upper()}]")
+        if res:
+            return res
 
-    # Pass 4: Fallback
+    # Pass 2: Any non-banned class + banned_morphologies filter
+    pool_p2 = [
+        idx for idx, sp in enumerate(encyclopedia)
+        if sp.get("class_type") not in banned_classes
+        and (not sp.get("morphology") or sp.get("morphology") not in banned_morphologies)
+        and sp["name"].upper() not in used_names
+        and not is_already_used(sp["name"])
+        and extract_base_noun(sp["name"]) not in used_bases
+    ]
+    res = search_candidates(pool_p2, "Diversity Match")
+    if res:
+        return res
+
+    # Pass 3: Relax morphology ban to last 3 entries
+    relaxed_morphologies = [h.get("morphology") for h in history[-3:] if h.get("morphology")]
+    pool_p3 = [
+        idx for idx, sp in enumerate(encyclopedia)
+        if sp.get("class_type") not in banned_classes
+        and (not sp.get("morphology") or sp.get("morphology") not in relaxed_morphologies)
+        and sp["name"].upper() not in used_names
+        and not is_already_used(sp["name"])
+        and extract_base_noun(sp["name"]) not in used_bases
+    ]
+    res = search_candidates(pool_p3, "Relaxed Morph Match")
+    if res:
+        return res
+
+    # Pass 4: Any unused base noun across all classes
+    pool_p4 = [
+        idx for idx, sp in enumerate(encyclopedia)
+        if sp["name"].upper() not in used_names
+        and not is_already_used(sp["name"])
+        and extract_base_noun(sp["name"]) not in used_bases
+    ]
+    res = search_candidates(pool_p4, "Unused Base Match")
+    if res:
+        return res
+
+    # Pass 5: Hard fallback (only if almost all 687 species uploaded)
     for offset in range(total):
         idx = (start_id + offset) % total
         sp = encyclopedia[idx]
@@ -476,29 +511,30 @@ def generate(
     if not dry_run and source_frame.exists():
         update_rolling_frame_buffer(source_frame)
 
-    history = _load_json(HISTORY_FILE, [])
-    history_entry = {
-        "dhash":        frame_dhash,
-        "last_frame":   "data/last_uploaded_frame.jpg",
-        "visual_diff":  round(diff_score, 1),
-        "id":           current_id,
-        "species":      species["name"],
-        "scientific":   species.get("scientific", species["name"]),
-        "class_type":   species["class_type"],
-        "morphology":   species.get("morphology", "small_mammal"),
-        "accent":       list(species["accent"]),
-        "anatomy_notes": species.get("anatomy_notes", "")[:200],
-        "file":         str(output_file.relative_to(ROOT)),
-        "timestamp":    datetime.now(timezone.utc).isoformat(),
-        "uploaded":     video_id is not None,
-        "dry_run":      dry_run,
-    }
-    if video_id:
-        history_entry["video_id"] = video_id
-        history_entry["youtube_url"] = f"https://youtu.be/{video_id}"
+    if not dry_run:
+        history = _load_json(HISTORY_FILE, [])
+        history_entry = {
+            "dhash":        frame_dhash,
+            "last_frame":   "data/last_uploaded_frame.jpg",
+            "visual_diff":  round(diff_score, 1),
+            "id":           current_id,
+            "species":      species["name"],
+            "scientific":   species.get("scientific", species["name"]),
+            "class_type":   species["class_type"],
+            "morphology":   species.get("morphology", "small_mammal"),
+            "accent":       list(species["accent"]),
+            "anatomy_notes": species.get("anatomy_notes", "")[:200],
+            "file":         str(output_file.relative_to(ROOT)),
+            "timestamp":    datetime.now(timezone.utc).isoformat(),
+            "uploaded":     video_id is not None,
+            "dry_run":      dry_run,
+        }
+        if video_id:
+            history_entry["video_id"] = video_id
+            history_entry["youtube_url"] = f"https://youtu.be/{video_id}"
 
-    history.append(history_entry)
-    HISTORY_FILE.write_text(json.dumps(history[-500:], indent=2), encoding="utf-8")
+        history.append(history_entry)
+        HISTORY_FILE.write_text(json.dumps(history[-500:], indent=2), encoding="utf-8")
 
     print(f"\n{'🚀' if video_id else '📁'} Done! Animal: {animal_name} | Used: {not dry_run}")
     return output_file

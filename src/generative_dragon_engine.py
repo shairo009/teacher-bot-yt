@@ -773,40 +773,65 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     img = Image.alpha_composite(img, grad.filter(ImageFilter.GaussianBlur(80)))
     draw = ImageDraw.Draw(img)
 
-    # 1. Top Header: ANIMAL NAME & TECH BADGE
-    header_h = 135
-    draw.rectangle([0, 0, WIDTH, header_h], fill=theme["card_header"] + (255,))
-    draw.line([(0, header_h), (WIDTH, header_h)], fill=theme["card_border"], width=2)
+    # 1. Top Header & Hook Section (Strictly within YouTube Shorts Safe Zones: y=160..275)
+    accent_color = tuple(species.get("accent", [245, 158, 11]))
 
-    name_font = get_font(52, bold=True)
-    draw.text((WIDTH // 2, 24), species["name"], font=name_font, fill=(255, 255, 255), anchor="mt")
+    # Hook Badge
+    badge_w, badge_h = 440, 36
+    bx1 = (WIDTH - badge_w) // 2
+    by1 = 162
+    draw.rounded_rectangle([bx1, by1, bx1 + badge_w, by1 + badge_h], radius=18, fill=theme["card_header"], outline=accent_color, width=2)
+    badge_font = get_font(18, bold=True, mono=True)
+    draw.text((WIDTH // 2, by1 + 9), "⚡ 100% VANILLA JS CANVAS • 60 FPS", font=badge_font, fill=accent_color, anchor="mt")
 
-    badge_font = get_font(20, bold=True, mono=True)
-    draw.text((WIDTH // 2, 88), theme["badge"], font=badge_font, fill=theme["badge_color"], anchor="mt")
+    # Animal Name (Prominent, High-Contrast Typography)
+    name_font = get_font(44, bold=True)
+    # Subtle drop shadow
+    draw.text((WIDTH // 2 + 2, 207), species["name"], font=name_font, fill=(0, 0, 0), anchor="mt")
+    draw.text((WIDTH // 2, 205), species["name"], font=name_font, fill=(255, 255, 255), anchor="mt")
 
-    # 2. Upper Section: Framed Creature Display Window
-    box_w, box_h = 920, 640
+    # Subtitle / Taxonomy Tag
+    sci_name = species.get("scientific", species["name"])
+    cls_tag = species.get("class_type", "quadruped").upper()
+    morph_tag = species.get("morphology", "").upper()
+    sub_text = f"// {sci_name} • [{cls_tag}]"
+    draw.text((WIDTH // 2, 256), sub_text, font=get_font(20, mono=True), fill=(148, 163, 184), anchor="mt")
+
+    # 2. Upper Section: Framed Creature Hologram Display (y=285..885, w=860, h=600)
+    # Leaves 110px margins on left and right, completely clear of YouTube's Like/Comment buttons!
+    box_w, box_h = 860, 600
     box_x = (WIDTH - box_w) // 2
-    box_y = 165
+    box_y = 285
 
     shadow = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     s_draw = ImageDraw.Draw(shadow)
-    s_draw.rectangle([box_x - 12, box_y - 12, box_x + box_w + 12, box_y + box_h + 12], fill=(0, 0, 0, 160))
+    s_draw.rectangle([box_x - 10, box_y - 10, box_x + box_w + 10, box_y + box_h + 10], fill=(0, 0, 0, 180))
     img = Image.alpha_composite(img, shadow.filter(ImageFilter.GaussianBlur(25)))
     draw = ImageDraw.Draw(img)
 
-    draw.rectangle([box_x - 12, box_y - 12, box_x + box_w + 12, box_y + box_h + 12], fill=theme["canvas_border"], outline=theme["card_border"], width=2)
+    draw.rectangle([box_x - 6, box_y - 6, box_x + box_w + 6, box_y + box_h + 6], fill=theme["canvas_border"], outline=theme["card_border"], width=2)
     draw.rectangle([box_x, box_y, box_x + box_w, box_y + box_h], fill=theme["canvas_fill"])
+
+    # Cyber Corner Brackets on Display Viewport
+    cw, ch = 24, 24
+    draw.line([(box_x, box_y + ch), (box_x, box_y), (box_x + cw, box_y)], fill=accent_color, width=3)
+    draw.line([(box_x + box_w - cw, box_y), (box_x + box_w, box_y), (box_x + box_w, box_y + ch)], fill=accent_color, width=3)
+    draw.line([(box_x, box_y + box_h - ch), (box_x, box_y + box_h), (box_x + cw, box_y + box_h)], fill=accent_color, width=3)
+    draw.line([(box_x + box_w - cw, box_y + box_h), (box_x + box_w, box_y + box_h), (box_x + box_w, box_y + box_h - ch)], fill=accent_color, width=3)
+
+    # Viewport HUD Badges
+    hud_font = get_font(16, bold=True, mono=True)
+    draw.text((box_x + 18, box_y + 14), "🔴 LIVE CANVAS API", font=hud_font, fill=(239, 68, 68))
+    draw.text((box_x + box_w - 18, box_y + 14), "🧬 IK SOLVER: 60 FPS", font=hud_font, fill=accent_color, anchor="rt")
 
     cb_x = box_x + box_w // 2
     cb_y = box_y + box_h // 2
-    rad_x = box_w * 0.33
-    rad_y = box_h * 0.30
+    rad_x = box_w * 0.34
+    rad_y = box_h * 0.32
 
     sp_id = species.get("id", "golden_shepherd_dog")
     animal_id = species.get("animal_id", 0)
     class_type = species.get("class_type", "quadruped")
-    accent_color = species.get("accent", (245, 158, 11))
     seed = (animal_id * 10007) & 0xFFFFFF
 
     sim_key = f"{sp_id}_{animal_id}_{total_frames}"
@@ -822,18 +847,33 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     perp_y =  cos_a
 
     # ─────────────────────────────────────────────────────────────
-    # BIOLOGICAL ANIMAL RENDERING: 8 TAXONOMIC ANIMAL CLASSES
+    # GLOWING INTERACTIVE CURSOR & LUMINOUS PARTICLE TRAIL
     # ─────────────────────────────────────────────────────────────
-    # Glowing Interactive Cursor Target Indicator
     t_c = sim_time
     tgt_x = sim.cx + math.cos(t_c * sim.f1 + sim.p1) * (rad_x * 0.85) + math.sin(t_c * sim.f2 + sim.p2) * (rad_x * 0.20)
     tgt_y = sim.cy + math.sin(t_c * sim.f3 + sim.p1) * (rad_y * 0.80) + math.cos(t_c * sim.f4 + sim.p2) * (rad_y * 0.18)
 
-    pulse_r = 10 + math.sin(sim_time * 8) * 3
+    # 1. Fading luminous particle embers trailing behind cursor
+    for pt_i in range(1, 7):
+        past_t = t_c - pt_i * 0.04
+        px = sim.cx + math.cos(past_t * sim.f1 + sim.p1) * (rad_x * 0.85) + math.sin(past_t * sim.f2 + sim.p2) * (rad_x * 0.20)
+        py = sim.cy + math.sin(past_t * sim.f3 + sim.p1) * (rad_y * 0.80) + math.cos(past_t * sim.f4 + sim.p2) * (rad_y * 0.18)
+        alpha_r = max(2, 7 - pt_i)
+        draw.ellipse([px - alpha_r, py - alpha_r, px + alpha_r, py + alpha_r], fill=accent_color)
+
+    # 2. Dual Crosshair Reticle & Ripple Waves
+    pulse_r = 12 + math.sin(sim_time * 8) * 3
     draw.ellipse([tgt_x - pulse_r, tgt_y - pulse_r, tgt_x + pulse_r, tgt_y + pulse_r], outline=(239, 68, 68), width=2)
-    ripple_r = 14 + (frame_idx % 35) * 0.85
+    # Crosshair ticks
+    draw.line([(tgt_x - pulse_r - 6, tgt_y), (tgt_x - pulse_r + 2, tgt_y)], fill=(239, 68, 68), width=2)
+    draw.line([(tgt_x + pulse_r - 2, tgt_y), (tgt_x + pulse_r + 6, tgt_y)], fill=(239, 68, 68), width=2)
+    draw.line([(tgt_x, tgt_y - pulse_r - 6), (tgt_x, tgt_y - pulse_r + 2)], fill=(239, 68, 68), width=2)
+    draw.line([(tgt_x, tgt_y + pulse_r - 2), (tgt_x, tgt_y + pulse_r + 6)], fill=(239, 68, 68), width=2)
+
+    ripple_r = 16 + (frame_idx % 30) * 1.2
     draw.ellipse([tgt_x - ripple_r, tgt_y - ripple_r, tgt_x + ripple_r, tgt_y + ripple_r], outline=(251, 113, 133), width=1)
     draw.ellipse([tgt_x - 4, tgt_y - 4, tgt_x + 4, tgt_y + 4], fill=(239, 68, 68))
+
 
 
     # ── Try NEW bio bone renderer first (realistic skeleton + muscle + skin) ──
@@ -1417,34 +1457,40 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
 
 
     # ─────────────────────────────────────────────────────────────
-    # LOWER SECTION: macOS DARK CODE WINDOW (MOBILE OPTIMIZED)
+    # LOWER SECTION: macOS DARK CODE WINDOW (YOUTUBE SHORTS SAFE ZONE: y=905..1515)
+    # Leaves 110px margins on left and right, completely clear of YouTube action buttons!
     # ─────────────────────────────────────────────────────────────
-    card_w, card_h = 920, 980
+    card_w, card_h = 860, 610
     card_x = (WIDTH - card_w) // 2
-    card_y = 840
+    card_y = 905
 
-    draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + card_h], radius=22, fill=theme["card_fill"], outline=theme["card_border"], width=2)
+    draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + card_h], radius=20, fill=theme["card_fill"], outline=theme["card_border"], width=2)
 
-    title_h = 62
-    draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + title_h], radius=22, fill=theme["card_header"])
-    draw.rectangle([card_x, card_y + 30, card_x + card_w, card_y + title_h], fill=theme["card_header"])
+    title_h = 54
+    draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + title_h], radius=20, fill=theme["card_header"])
+    draw.rectangle([card_x, card_y + 24, card_x + card_w, card_y + title_h], fill=theme["card_header"])
 
-    draw.ellipse([card_x + 28, card_y + 24, card_x + 44, card_y + 40], fill=(255, 95, 86))
-    draw.ellipse([card_x + 54, card_y + 24, card_x + 70, card_y + 40], fill=(255, 189, 46))
-    draw.ellipse([card_x + 80, card_y + 24, card_x + 96, card_y + 40], fill=(39, 201, 63))
+    # macOS Window Buttons
+    draw.ellipse([card_x + 24, card_y + 20, card_x + 38, card_y + 34], fill=(255, 95, 86))
+    draw.ellipse([card_x + 48, card_y + 20, card_x + 62, card_y + 34], fill=(255, 189, 46))
+    draw.ellipse([card_x + 72, card_y + 20, card_x + 86, card_y + 34], fill=(39, 201, 63))
 
-    draw.rounded_rectangle([card_x + 135, card_y + 14, card_x + 168, card_y + 48], radius=5, fill=(247, 223, 30))
-    draw.text((card_x + 140, card_y + 18), "JS", font=get_font(18, bold=True), fill=(20, 20, 20))
-    draw.text((card_x + 180, card_y + 19), species["file_name"], font=get_font(24, bold=True), fill=(160, 175, 195))
+    # File Tag
+    draw.rounded_rectangle([card_x + 115, card_y + 12, card_x + 146, card_y + 42], radius=4, fill=(247, 223, 30))
+    draw.text((card_x + 120, card_y + 15), "JS", font=get_font(16, bold=True), fill=(20, 20, 20))
+    draw.text((card_x + 156, card_y + 16), species["file_name"], font=get_font(21, bold=True), fill=(160, 175, 195))
+
+    # Active solver indicator on title bar
+    draw.text((card_x + card_w - 20, card_y + 17), "⚡ Active IK Rig", font=get_font(16, bold=True, mono=True), fill=accent_color, anchor="rt")
 
     all_lines = species["code_lines"]
     total_lines = len(all_lines)
     
-    line_h = 52
-    code_font = get_font(28, mono=True, bold=True)
-    line_num_font = get_font(24, mono=True)
+    line_h = 46
+    code_font = get_font(25, mono=True, bold=True)
+    line_num_font = get_font(21, mono=True)
     
-    visible_lines = int((card_h - title_h - 40) / line_h)
+    visible_lines = int((card_h - title_h - 24) / line_h)
     max_scroll_lines = max(0, total_lines - visible_lines)
     scroll_factor = 0.5 - math.cos(progress * math.pi) / 2
     curr_scroll = scroll_factor * max_scroll_lines
@@ -1452,8 +1498,8 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     start_line_idx = int(curr_scroll)
     line_pixel_offset = (curr_scroll - start_line_idx) * line_h
 
-    code_box_top = card_y + title_h + 18
-    code_box_bottom = card_y + card_h - 24
+    code_box_top = card_y + title_h + 12
+    code_box_bottom = card_y + card_h - 16
 
     active_idx = min(total_lines - 1, start_line_idx + 2)
 
@@ -1465,31 +1511,35 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         line_text = all_lines[actual_line_idx]
         y_pos = code_box_top + (idx * line_h) - int(line_pixel_offset)
 
-        if y_pos < code_box_top - 16 or y_pos > code_box_bottom:
+        if y_pos < code_box_top - 12 or y_pos > code_box_bottom:
             continue
 
         # Soft active line background highlight
         if actual_line_idx == active_idx:
-            draw.rounded_rectangle([card_x + 16, y_pos - 4, card_x + card_w - 16, y_pos + line_h - 8], radius=6, fill=(24, 34, 48))
+            draw.rounded_rectangle([card_x + 12, y_pos - 4, card_x + card_w - 12, y_pos + line_h - 6], radius=6, fill=(24, 34, 48))
 
-        draw.text((card_x + 36, y_pos), f"{actual_line_idx + 1:2d}", font=line_num_font, fill=(140, 160, 185) if actual_line_idx == active_idx else (80, 100, 125))
+        draw.text((card_x + 30, y_pos), f"{actual_line_idx + 1:2d}", font=line_num_font, fill=(140, 160, 185) if actual_line_idx == active_idx else (80, 100, 125))
 
-        indent_x = card_x + 98
+        indent_x = card_x + 85
         _draw_highlighted_js_line(draw, indent_x, y_pos, line_text, code_font)
 
         # Blinking cursor on active line
         if actual_line_idx == active_idx and (frame_idx // 10) % 2 == 0:
-            cursor_x = indent_x + int(len(line_text) * 16.5)
-            if cursor_x < card_x + card_w - 30:
-                draw.rectangle([cursor_x, y_pos + 4, cursor_x + 3, y_pos + 32], fill=accent_color)
+            cursor_x = indent_x + int(len(line_text) * 15.0)
+            if cursor_x < card_x + card_w - 25:
+                draw.rectangle([cursor_x, y_pos + 4, cursor_x + 3, y_pos + 28], fill=accent_color)
 
-    # Bottom Progress Bar with Accent Glow
-    bar_w = 920
+    # 3. Progress Bar (y=1528..1538 — strictly above YouTube bottom overlay y=1560)
+    bar_w = 860
     bar_x = (WIDTH - bar_w) // 2
-    bar_y = 1855
-    draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_w, bar_y + 12], radius=6, fill=(35, 46, 62))
-    fill_w = max(12, int(bar_w * progress))
-    draw.rounded_rectangle([bar_x, bar_y, bar_x + fill_w, bar_y + 12], radius=6, fill=accent_color)
+    bar_y = 1528
+    draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_w, bar_y + 10], radius=5, fill=(35, 46, 62))
+    fill_w = max(10, int(bar_w * progress))
+    draw.rounded_rectangle([bar_x, bar_y, bar_x + fill_w, bar_y + 10], radius=5, fill=accent_color)
 
+    # 4. Safe Subtitle Tag (y=1552)
+    draw.text((WIDTH // 2, 1552), "✨ Creative Coding • JavaScript Canvas Engine", font=get_font(18, bold=True), fill=(148, 163, 184), anchor="mt")
+
+    # Bottom area (y=1580..1920) is left completely unobstructed for YouTube's native title & channel overlay!
     return img.convert("RGB")
 

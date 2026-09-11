@@ -1426,5 +1426,27 @@
     "dry_run": false,
     "video_id": "-T3bWxHBHqg",
     "youtube_url": "https://youtu.be/-T3bWxHBHqg"
+  },
+  {
+    "dhash": "868e23f0c34b0e20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.4,
+    "id": 154,
+    "species": "BURMESE PYTHON",
+    "scientific": "Python bivittatus",
+    "class_type": "serpent",
+    "morphology": "serpent",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The Burmese python is one of the largest species of snakes. It is native to a large area of Southeast Asia and is listed as Vulnerable on the IUCN Red List. Until 2009, it was considered a subspecies ",
+    "file": "tmp/reel_0154/burmese_python_short.mp4",
+    "timestamp": "2026-09-11T23:18:57.606686+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "LX5c0Mp1ZH8",
+    "youtube_url": "https://youtu.be/LX5c0Mp1ZH8"
   }
 ]

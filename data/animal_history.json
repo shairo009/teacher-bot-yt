@@ -1338,5 +1338,27 @@
     "dry_run": false,
     "video_id": "4aJ7dLfdENI",
     "youtube_url": "https://youtu.be/4aJ7dLfdENI"
+  },
+  {
+    "dhash": "0db1314786074328",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 0.7,
+    "id": 460,
+    "species": "GIANT NORTH AMERICAN VINEGAROON",
+    "scientific": "Mastigoproctus giganteus",
+    "class_type": "arachnid",
+    "morphology": "scorpion",
+    "accent": [
+      118,
+      113,
+      50
+    ],
+    "anatomy_notes": "Uropygi is an arachnid order comprising invertebrates commonly known as whip scorpions or vinegaroons. They are often called uropygids. The name \"whip scorpion\" refers to their resemblance to true sco",
+    "file": "tmp/reel_0460/giant_north_american_vinegaroon_short.mp4",
+    "timestamp": "2026-09-11T07:24:46.073938+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "ZC58dEbqbaE",
+    "youtube_url": "https://youtu.be/ZC58dEbqbaE"
   }
 ]

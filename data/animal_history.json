@@ -1360,5 +1360,27 @@
     "dry_run": false,
     "video_id": "ZC58dEbqbaE",
     "youtube_url": "https://youtu.be/ZC58dEbqbaE"
+  },
+  {
+    "dhash": "0faaaa69974e8000",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 27.1,
+    "id": 197,
+    "species": "GOLDEN POISON FROG",
+    "scientific": "Phyllobates terribilis",
+    "class_type": "amphibian",
+    "morphology": "frog",
+    "accent": [
+      218,
+      165,
+      32
+    ],
+    "anatomy_notes": "The golden poison frog, also known as the golden dart frog or golden poison arrow frog, is a poison dart frog endemic from the rainforests of Colombia. The golden poison frog has become endangered due",
+    "file": "tmp/reel_0197/golden_poison_frog_short.mp4",
+    "timestamp": "2026-09-11T12:19:16.178062+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "H-gqG06WP0w",
+    "youtube_url": "https://youtu.be/H-gqG06WP0w"
   }
 ]

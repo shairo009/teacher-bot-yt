@@ -1110,121 +1110,301 @@ def draw_kangaroo(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float
 # ─────────────────────────────────────────────────────────────────────────────
 def draw_cervid_bovid(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float, cos_a: float, sin_a: float, perp_x: float, perp_y: float) -> None:
     accent = tuple(species.get("accent", [160, 90, 45]))
-    c_dark = _darken(accent, 40)
-    c_mid = accent
-    c_light = _brighten(accent, 35)
     name = species.get("name", "").upper()
+    is_moose = "MOOSE" in name
+    is_bison = "BISON" in name or "BUFFALO" in name or "MUSKOX" in name
+    is_elk = any(k in name for k in ("ELK", "RED DEER", "CARIBOU", "REINDEER", "MULE DEER", "WAPITI"))
+    is_antelope = any(k in name for k in ("ANTELOPE", "GAZELLE", "IMPALA", "SPRINGBOK", "ORYX", "KUDU", "GEMSBOK"))
 
-    # Slender Hooved Legs
-    for leg in sim.legs4:
+    if is_moose:
+        c_dark = (34, 22, 14)
+        c_mid = (68, 44, 28)
+        c_light = (108, 74, 48)
+        c_leg = (92, 78, 62)
+        leg_w = 14
+    elif is_bison:
+        c_dark = (28, 18, 12)
+        c_mid = (54, 34, 20)
+        c_light = (90, 60, 36)
+        c_leg = (42, 26, 16)
+        leg_w = 20
+    elif is_antelope:
+        c_dark = (125, 62, 22)
+        c_mid = accent if accent != (160, 90, 45) else (190, 110, 40)
+        c_light = (240, 215, 175)
+        c_leg = c_dark
+        leg_w = 11
+    else:
+        c_dark = _darken(accent, 40)
+        c_mid = accent
+        c_light = _brighten(accent, 35)
+        c_leg = c_dark
+        leg_w = 13
+
+    def draw_limb(p1, p2, base_w, dark_col, mid_col):
+        dx = p2[0] - p1[0]; dy = p2[1] - p1[1]
+        ln = math.hypot(dx, dy)
+        if ln < 1: return
+        nx = -dy / ln; ny = dx / ln
+        draw.line([p1, p2], fill=dark_col, width=base_w + 4)
+        draw.line([p1, p2], fill=mid_col, width=base_w)
+        hi = _brighten(mid_col, 30)
+        draw.line([(p1[0]+nx*2, p1[1]+ny*2), (p2[0]+nx*2, p2[1]+ny*2)], fill=hi, width=max(1, base_w // 3))
+
+    def draw_cloven_hoof(paw_pos, side):
+        hx, hy = paw_pos[0], paw_pos[1]
+        draw.ellipse([hx - 9, hy - 7, hx + 9, hy + 7], fill=(18, 14, 12), outline=(42, 34, 30), width=2)
+        draw.line([(hx + cos_a * 6, hy + sin_a * 6), (hx - cos_a * 5, hy - sin_a * 5)], fill=(8, 6, 5), width=2)
+
+    # 1. HINDLEGS (Pelvis -> Thigh -> Stifle Knee -> Shin -> Hock -> Cloven Hoof)
+    for leg in [l for l in sim.legs4 if not l["is_front"]]:
+        paw_pos = (leg["cur"][0], leg["cur"][1])
         sock = leg["socket"]
-        paw = (leg["cur"][0], leg["cur"][1])
-        draw.line([sock, paw], fill=c_dark, width=12)
-        draw.line([sock, paw], fill=c_mid, width=8)
-        draw.ellipse([paw[0]-6, paw[1]-5, paw[0]+6, paw[1]+5], fill=(20, 20, 20), outline=c_dark, width=1)
+        side = leg["side"]
+        knee = (sock[0] + cos_a * 16 + perp_x * (28 * side), sock[1] + sin_a * 16 + perp_y * (28 * side))
+        draw_limb(sock, knee, leg_w + 3, c_dark, c_mid)
+        hock = (knee[0] - cos_a * 22 + perp_x * (12 * side), knee[1] - sin_a * 22 + perp_y * (12 * side))
+        draw_limb(knee, hock, leg_w + 1, c_dark, c_leg)
+        draw.ellipse([knee[0]-6, knee[1]-6, knee[0]+6, knee[1]+6], fill=c_dark)
+        draw_limb(hock, paw_pos, leg_w - 1, c_dark, c_leg)
+        draw.ellipse([hock[0]-5, hock[1]-5, hock[0]+5, hock[1]+5], fill=c_dark)
+        draw_cloven_hoof(paw_pos, side)
 
-    # Body
-    draw.ellipse([sim.x - 36, sim.y - 24, sim.x + 36, sim.y + 24], fill=c_mid, outline=c_dark, width=3)
+    # 2. FORELEGS (Scapula -> Elbow -> Carpal Knee -> Cloven Hoof)
+    for leg in [l for l in sim.legs4 if l["is_front"]]:
+        paw_pos = (leg["cur"][0], leg["cur"][1])
+        sock = leg["socket"]
+        side = leg["side"]
+        elbow = (sock[0] - cos_a * 14 + perp_x * (24 * side), sock[1] - sin_a * 14 + perp_y * (24 * side))
+        draw_limb(sock, elbow, leg_w + 3, c_dark, c_mid)
+        draw.ellipse([elbow[0]-6, elbow[1]-6, elbow[0]+6, elbow[1]+6], fill=c_dark)
+        draw_limb(elbow, paw_pos, leg_w, c_dark, c_leg)
+        draw_cloven_hoof(paw_pos, side)
 
-    # Arched Neck & Head
-    hx = sim.x + cos_a * 46
-    hy = sim.y + sin_a * 46
-    draw.ellipse([hx - 18, hy - 16, hx + 18, hy + 16], fill=c_mid, outline=c_dark, width=2)
-    # Muzzle
-    sn_x, sn_y = hx + cos_a * 18, hy + sin_a * 18
-    draw.ellipse([sn_x - 8, sn_y - 7, sn_x + 8, sn_y + 7], fill=c_dark)
-
-    # Dedicated Species-Specific Cranial Bone Structures
+    # 3. BODY SILHOUETTE ALONG 9 SPINE VERTEBRAE (COMPACT ORGANIC TORSO)
+    spine_pts = [(seg["x"], seg["y"]) for seg in sim.spine[:9]]
     bone = species.get("bone_structure", {})
+    seg_widths = bone.get("vertebrae", {}).get("segment_widths", [])
+
+    if is_moose:
+        body_widths = [26, 44, 52, 50, 46, 40, 42, 38, 24]
+    elif is_bison:
+        body_widths = [30, 48, 58, 54, 46, 40, 44, 40, 26]
+    elif is_antelope:
+        body_widths = [20, 28, 36, 34, 30, 26, 32, 28, 16]
+    elif seg_widths and len(seg_widths) >= 9:
+        body_widths = [w * 1.3 for w in seg_widths[:9]]
+    else:
+        body_widths = [24, 34, 44, 42, 38, 34, 38, 34, 20]
+
+    left_out, right_out = [], []
+    for i, seg in enumerate(sim.spine[:9]):
+        s_px = -math.sin(seg["angle"]); s_py = math.cos(seg["angle"])
+        hw = max(8, body_widths[i] if i < len(body_widths) else 14)
+        left_out.append((seg["x"] + s_px * (hw + 4), seg["y"] + s_py * (hw + 4)))
+        right_out.append((seg["x"] - s_px * (hw + 4), seg["y"] - s_py * (hw + 4)))
+
+    # Drop shadow
+    shadow_pts = [(x+6, y+6) for x,y in left_out] + list(reversed([(x+6, y+6) for x,y in right_out]))
+    if len(shadow_pts) >= 3: draw.polygon(shadow_pts, fill=(14, 10, 8))
+
+    # Primary coat polygon
+    body_poly = left_out + list(reversed(right_out))
+    if len(body_poly) >= 3:
+        draw.polygon(body_poly, fill=c_mid, outline=c_dark, width=3)
+
+    # Dorsal highlight ridge
+    mid_poly = [(x*0.45 + spine_pts[min(i, len(spine_pts)-1)][0]*0.55,
+                 y*0.45 + spine_pts[min(i, len(spine_pts)-1)][1]*0.55)
+                for i, (x, y) in enumerate(left_out[:8])] + \
+               list(reversed([(x*0.45 + spine_pts[min(i, len(spine_pts)-1)][0]*0.55,
+                               y*0.45 + spine_pts[min(i, len(spine_pts)-1)][1]*0.55)
+                              for i, (x, y) in enumerate(right_out[:8])]))
+    if len(mid_poly) >= 3:
+        draw.polygon(mid_poly, fill=c_light)
+
+    # 4. TAIL
+    tail_prev = spine_pts[-1]
+    wag = math.sin(sim_time * 6.5) * 0.4
+    if is_moose:
+        tx = tail_prev[0] - cos_a * 14 + wag * 4
+        ty = tail_prev[1] - sin_a * 14 + wag * 4
+        draw.line([tail_prev, (tx, ty)], fill=c_dark, width=10)
+    elif is_bison:
+        t1 = (tail_prev[0] - cos_a * 22 + wag * 8, tail_prev[1] - sin_a * 22 + wag * 8)
+        draw.line([tail_prev, t1], fill=c_dark, width=5)
+        draw.ellipse([t1[0]-7, t1[1]-7, t1[0]+7, t1[1]+7], fill=(18, 14, 10))
+    else:
+        for i in range(7):
+            t_ang = sim.angle + math.pi + wag * ((i + 1) / 7)
+            tx = tail_prev[0] + math.cos(t_ang) * 12
+            ty = tail_prev[1] + math.sin(t_ang) * 12
+            draw.line([tail_prev, (tx, ty)], fill=c_dark, width=max(3, 8 - i))
+            tail_prev = (tx, ty)
+
+    # 5. NECK & HEAD
+    neck_len = 50 if is_moose else (42 if is_bison else 46)
+    hx = sim.x + cos_a * neck_len
+    hy = sim.y + sin_a * neck_len
+
+    n_base_l = (sim.x + perp_x * 22, sim.y + perp_y * 22)
+    n_base_r = (sim.x - perp_x * 22, sim.y - perp_y * 22)
+    n_head_l = (hx + perp_x * 15, hy + perp_y * 15)
+    n_head_r = (hx - perp_x * 15, hy - perp_y * 15)
+    draw.polygon([n_base_l, n_head_l, n_head_r, n_base_r], fill=c_mid, outline=c_dark, width=2)
+
+    # Moose Throat Dewlap ("Bell")
+    if is_moose:
+        dew_b = (hx - cos_a * 14, hy - sin_a * 14)
+        dew_t = (dew_b[0] + perp_x * 24 - cos_a * 4, dew_b[1] + perp_y * 24 - sin_a * 4)
+        dew_f = (dew_b[0] + cos_a * 8 + perp_x * 14, dew_b[1] + sin_a * 8 + perp_y * 14)
+        draw.polygon([dew_b, dew_t, dew_f], fill=c_dark, outline=(22, 14, 10), width=1)
+
+    # Head Skull
+    head_w, head_h = (24, 20) if is_bison else ((22, 18) if is_moose else (18, 15))
+    draw.ellipse([hx - head_w, hy - head_h, hx + head_w, hy + head_h], fill=c_mid, outline=c_dark, width=2)
+
+    # Elongated Roman Muzzle & Nostrils
+    sn_len = 26 if is_moose else (22 if is_bison else 20)
+    sn_x, sn_y = hx + cos_a * sn_len, hy + sin_a * sn_len
+    sn_w = 13 if is_moose else (14 if is_bison else 9)
+    draw.ellipse([sn_x - sn_w, sn_y - 9, sn_x + sn_w, sn_y + 9], fill=c_dark, outline=(22, 16, 12), width=2)
+    for s in [-1, 1]:
+        nos = (sn_x + cos_a * 6 + perp_x * (4 * s), sn_y + sin_a * 6 + perp_y * (4 * s))
+        draw.ellipse([nos[0]-2, nos[1]-2, nos[0]+2, nos[1]+2], fill=(10, 6, 5))
+
+    # Large Alert Leaf Ears (Positioned below the antler pedicles)
+    for s in [-1, 1]:
+        eb = (hx - cos_a * 12 + perp_x * (14 * s), hy - sin_a * 12 + perp_y * (14 * s))
+        etip = (eb[0] - cos_a * 18 + perp_x * (26 * s), eb[1] - sin_a * 18 + perp_y * (26 * s))
+        draw.polygon([eb, etip, (eb[0] - cos_a * 6 + perp_x * (28 * s), eb[1] - sin_a * 6 + perp_y * (28 * s))], fill=c_dark, outline=(215, 155, 145), width=1)
+
+    # Expressive Eyes with Specular Catchlight
+    for s in [-1, 1]:
+        ep = (hx + cos_a * 8 + perp_x * (12 * s), hy + sin_a * 8 + perp_y * (12 * s))
+        draw.ellipse([ep[0]-4, ep[1]-4, ep[0]+4, ep[1]+4], fill=(16, 10, 8), outline=c_dark, width=1)
+        draw.ellipse([ep[0]+1, ep[1]-1, ep[0]+2.5, ep[1]+0.5], fill=(255, 255, 255))
+
+    # 6. CRANIAL ANTLERS & HORNS
     cranial = bone.get("skull", {}).get("cranial_special", "none")
     if cranial == "none":
-        if "MOOSE" in name: cranial = "antler_palmate"
-        elif any(k in name for k in ("ELK", "REINDEER", "CARIBOU", "RED DEER", "MULE DEER")): cranial = "antler_branching"
+        if is_moose: cranial = "antler_palmate"
+        elif is_elk: cranial = "antler_branching"
         elif any(k in name for k in ("MARKHOR", "BLACKBUCK", "KUDU")): cranial = "horn_spiral"
         elif any(k in name for k in ("BIGHORN", "MOUFLON", "ARGALI")): cranial = "horn_ram_curl"
         elif any(k in name for k in ("BUFFALO", "BISON", "MUSKOX")): cranial = "horn_boss"
         elif any(k in name for k in ("ORYX", "GEMSBOK")): cranial = "horn_rapier"
-        elif any(k in name for k in ("IMPALA", "GAZELLE", "SPRINGBOK")): cranial = "horn_lyrate"
+        elif is_antelope: cranial = "horn_lyrate"
         elif any(k in name for k in ("IBEX", "GOAT")): cranial = "horn_scythe"
         else: cranial = "antler_compact" if "DEER" in name else "horn_lyrate"
 
-    antler_col = (235, 225, 205)
-    horn_col   = (45, 40, 35)
+    antler_col = (245, 238, 222)
+    antler_dark = (165, 148, 122)
+    horn_col = (42, 36, 30)
+    horn_hi = (92, 80, 68)
 
     for s in [-1, 1]:
-        h_b = (hx - cos_a * 4 + perp_x * (10 * s), hy - sin_a * 4 + perp_y * (10 * s))
-        if cranial == "antler_palmate": # Moose shovel palm
-            p_center = (h_b[0] + cos_a * 15 + perp_x * (32 * s), h_b[1] + sin_a * 15 + perp_y * (32 * s))
-            draw.line([h_b, p_center], fill=antler_col, width=7)
-            # Palm plate
+        h_b = (hx - cos_a * 4 + perp_x * (12 * s), hy - sin_a * 4 + perp_y * (12 * s))
+
+        if cranial == "antler_palmate":
+            # ─────────────────────────────────────────────────────────────
+            # ALASKAN MOOSE MAJESTIC WIDE-SPAN PALMATE SHOVEL ANTLERS
+            # ─────────────────────────────────────────────────────────────
+            # Main lateral beam sweeping straight outward
+            beam_end = (h_b[0] - cos_a * 2 + perp_x * (36 * s), h_b[1] - sin_a * 2 + perp_y * (36 * s))
+            draw.line([h_b, beam_end], fill=antler_dark, width=9)
+            draw.line([h_b, beam_end], fill=antler_col, width=6)
+
+            # Brow tines pointing forward and inward over the brow
+            brow_tip1 = (h_b[0] + cos_a * 26 + perp_x * (14 * s), h_b[1] + sin_a * 26 + perp_y * (14 * s))
+            brow_tip2 = (h_b[0] + cos_a * 20 + perp_x * (6 * s), h_b[1] + sin_a * 20 + perp_y * (6 * s))
+            draw.line([h_b, brow_tip1], fill=antler_dark, width=5)
+            draw.line([h_b, brow_tip1], fill=antler_col, width=3)
+            draw.line([h_b, brow_tip2], fill=antler_dark, width=4)
+            draw.line([h_b, brow_tip2], fill=antler_col, width=2)
+
+            # Massive Lateral Shovel Palm Plate (Extends from perp 36 out to perp 95)
             palm_poly = [
-                (p_center[0] - cos_a * 12 + perp_x * (10 * s), p_center[1] - sin_a * 12 + perp_y * (10 * s)),
-                (p_center[0] + cos_a * 18 + perp_x * (22 * s), p_center[1] + sin_a * 18 + perp_y * (22 * s)),
-                (p_center[0] + cos_a * 8 + perp_x * (36 * s), p_center[1] + sin_a * 8 + perp_y * (36 * s)),
-                (p_center[0] - cos_a * 18 + perp_x * (26 * s), p_center[1] - sin_a * 18 + perp_y * (26 * s)),
+                (beam_end[0] - cos_a * 12, beam_end[1] - sin_a * 12),
+                (beam_end[0] + cos_a * 16 + perp_x * (18 * s), beam_end[1] + sin_a * 16 + perp_y * (18 * s)),
+                (beam_end[0] + cos_a * 10 + perp_x * (58 * s), beam_end[1] + sin_a * 10 + perp_y * (58 * s)),
+                (beam_end[0] - cos_a * 14 + perp_x * (56 * s), beam_end[1] - sin_a * 14 + perp_y * (56 * s)),
+                (beam_end[0] - cos_a * 24 + perp_x * (22 * s), beam_end[1] - sin_a * 24 + perp_y * (22 * s)),
             ]
-            draw.polygon(palm_poly, fill=antler_col, outline=_darken(antler_col, 20), width=2)
-            # Perimeter points
-            for pi in range(5):
-                pt_root = (p_center[0] + cos_a * (12 - pi * 6) + perp_x * (30 * s), p_center[1] + sin_a * (12 - pi * 6) + perp_y * (30 * s))
-                pt_tip = (pt_root[0] + cos_a * (8 - pi * 4) + perp_x * (12 * s), pt_root[1] + sin_a * (8 - pi * 4) + perp_y * (12 * s))
-                draw.line([pt_root, pt_tip], fill=antler_col, width=4)
-        elif cranial == "antler_branching": # Elk / Red Deer multi-tined
-            h_m = (h_b[0] + cos_a * 25 + perp_x * (28 * s), h_b[1] + sin_a * 25 + perp_y * (28 * s))
-            h_t = (h_m[0] + cos_a * 22 + perp_x * (18 * s), h_m[1] + sin_a * 22 + perp_y * (18 * s))
-            draw.line([h_b, h_m], fill=antler_col, width=6)
+            draw.polygon(palm_poly, fill=antler_col, outline=antler_dark, width=2)
+            # Palm rib textures
+            draw.line([beam_end, (beam_end[0] + cos_a * 8 + perp_x * (48 * s), beam_end[1] + sin_a * 8 + perp_y * (48 * s))], fill=antler_dark, width=2)
+            draw.line([beam_end, (beam_end[0] - cos_a * 10 + perp_x * (50 * s), beam_end[1] - sin_a * 10 + perp_y * (50 * s))], fill=antler_dark, width=2)
+
+            # 7 Sharp Raking Perimeter Points / Tines along lateral edge
+            for pi in range(7):
+                f = pi / 6.0
+                edge_x = beam_end[0] + cos_a * (14 - f * 28) + perp_x * ((24 + f * 34) * s)
+                edge_y = beam_end[1] + sin_a * (14 - f * 28) + perp_y * ((24 + f * 34) * s)
+                tine_tip = (edge_x + cos_a * (12 - f * 6) + perp_x * (16 * s),
+                            edge_y + sin_a * (12 - f * 6) + perp_y * (16 * s))
+                draw.line([(edge_x, edge_y), tine_tip], fill=antler_dark, width=4)
+                draw.line([(edge_x, edge_y), tine_tip], fill=antler_col, width=2)
+
+        elif cranial == "antler_branching":
+            h_m = (h_b[0] + cos_a * 28 + perp_x * (30 * s), h_b[1] + sin_a * 28 + perp_y * (30 * s))
+            h_t = (h_m[0] + cos_a * 24 + perp_x * (20 * s), h_m[1] + sin_a * 24 + perp_y * (20 * s))
+            draw.line([h_b, h_m], fill=antler_dark, width=8)
+            draw.line([h_b, h_m], fill=antler_col, width=5)
+            draw.line([h_m, h_t], fill=antler_dark, width=6)
             draw.line([h_m, h_t], fill=antler_col, width=4)
-            # Brow tine
-            draw.line([h_b, (h_b[0] + cos_a * 16 - perp_x * (6 * s), h_b[1] + sin_a * 16 - perp_y * (6 * s))], fill=antler_col, width=4)
-            # Bez & Trez tines
-            draw.line([h_m, (h_m[0] + cos_a * 15 - perp_x * (8 * s), h_m[1] + sin_a * 15 - perp_y * (8 * s))], fill=antler_col, width=3)
-            draw.line([h_m, (h_m[0] - cos_a * 8 + perp_x * (14 * s), h_m[1] - sin_a * 8 + perp_y * (14 * s))], fill=antler_col, width=3)
-        elif cranial == "horn_spiral": # Markhor / Blackbuck corkscrew
+            draw.line([h_b, (h_b[0] + cos_a * 20 - perp_x * (8 * s), h_b[1] + sin_a * 20 - perp_y * (8 * s))], fill=antler_col, width=4)
+            draw.line([h_m, (h_m[0] + cos_a * 18 - perp_x * (10 * s), h_m[1] + sin_a * 18 - perp_y * (10 * s))], fill=antler_col, width=3)
+            draw.line([h_m, (h_m[0] - cos_a * 10 + perp_x * (16 * s), h_m[1] - sin_a * 10 + perp_y * (16 * s))], fill=antler_col, width=3)
+            draw.line([h_t, (h_t[0] + cos_a * 14 + perp_x * (12 * s), h_t[1] + sin_a * 14 + perp_y * (12 * s))], fill=antler_col, width=3)
+            draw.line([h_t, (h_t[0] - cos_a * 8 + perp_x * (14 * s), h_t[1] - sin_a * 8 + perp_y * (14 * s))], fill=antler_col, width=3)
+
+        elif cranial == "horn_spiral":
             prev_p = h_b
-            for sp_step in range(6):
-                twist_w = math.sin(sp_step * 1.5) * 8.0 * s
-                sp_x = h_b[0] + cos_a * (sp_step * 8) + perp_x * (12 * s + twist_w)
-                sp_y = h_b[1] + sin_a * (sp_step * 8) + perp_y * (12 * s + twist_w)
-                draw.line([prev_p, (sp_x, sp_y)], fill=horn_col, width=max(3, 7 - sp_step))
+            for sp_step in range(8):
+                twist_w = math.sin(sp_step * 1.6) * 10.0 * s
+                sp_x = h_b[0] + cos_a * (sp_step * 9) + perp_x * (14 * s + twist_w)
+                sp_y = h_b[1] + sin_a * (sp_step * 9) + perp_y * (14 * s + twist_w)
+                draw.line([prev_p, (sp_x, sp_y)], fill=horn_col, width=max(3, 9 - sp_step))
                 prev_p = (sp_x, sp_y)
-        elif cranial == "horn_ram_curl": # Bighorn Sheep curled ram horn
+
+        elif cranial == "horn_ram_curl":
             curl_pts = [
                 h_b,
-                (h_b[0] - cos_a * 12 + perp_x * (16 * s), h_b[1] - sin_a * 12 + perp_y * (16 * s)),
-                (h_b[0] - cos_a * 24 + perp_x * (26 * s), h_b[1] - sin_a * 24 + perp_y * (26 * s)),
-                (h_b[0] - cos_a * 10 + perp_x * (32 * s), h_b[0] - sin_a * 10 + perp_y * (32 * s)),
-                (h_b[0] + cos_a * 12 + perp_x * (26 * s), h_b[1] + sin_a * 12 + perp_y * (26 * s)),
-                (h_b[0] + cos_a * 18 + perp_x * (14 * s), h_b[1] + sin_a * 18 + perp_y * (14 * s)),
+                (h_b[0] - cos_a * 14 + perp_x * (18 * s), h_b[1] - sin_a * 14 + perp_y * (18 * s)),
+                (h_b[0] - cos_a * 28 + perp_x * (28 * s), h_b[1] - sin_a * 28 + perp_y * (28 * s)),
+                (h_b[0] - cos_a * 12 + perp_x * (36 * s), h_b[1] - sin_a * 12 + perp_y * (36 * s)),
+                (h_b[0] + cos_a * 14 + perp_x * (30 * s), h_b[1] + sin_a * 14 + perp_y * (30 * s)),
+                (h_b[0] + cos_a * 22 + perp_x * (16 * s), h_b[1] + sin_a * 22 + perp_y * (16 * s)),
             ]
             for ci in range(len(curl_pts) - 1):
-                draw.line([curl_pts[ci], curl_pts[ci+1]], fill=horn_col, width=max(4, 9 - ci))
-        elif cranial == "horn_boss": # Cape Buffalo / Bison skull boss
+                draw.line([curl_pts[ci], curl_pts[ci+1]], fill=horn_col, width=max(4, 12 - ci * 2))
+                draw.line([curl_pts[ci], curl_pts[ci+1]], fill=horn_hi, width=max(2, 6 - ci))
+
+        elif cranial == "horn_boss":
             boss_sweep = [
-                (hx + perp_x * (4 * s), hy + perp_y * (4 * s)),
-                (hx - cos_a * 8 + perp_x * (22 * s), hy - sin_a * 8 + perp_y * (22 * s)),
-                (hx - cos_a * 12 + perp_x * (34 * s), hy - sin_a * 12 + perp_y * (34 * s)),
-                (hx + cos_a * 8 + perp_x * (30 * s), hy + sin_a * 8 + perp_y * (30 * s)),
+                (hx + perp_x * (5 * s), hy + perp_y * (5 * s)),
+                (hx - cos_a * 10 + perp_x * (24 * s), hy - sin_a * 10 + perp_y * (24 * s)),
+                (hx - cos_a * 14 + perp_x * (38 * s), hy - sin_a * 14 + perp_y * (38 * s)),
+                (hx + cos_a * 10 + perp_x * (32 * s), hy + sin_a * 10 + perp_y * (32 * s)),
             ]
             for bi in range(len(boss_sweep) - 1):
-                draw.line([boss_sweep[bi], boss_sweep[bi+1]], fill=horn_col, width=max(5, 12 - bi * 2))
-        elif cranial == "horn_rapier": # Oryx straight spear
-            draw.line([h_b, (h_b[0] - cos_a * 35 + perp_x * (22 * s), h_b[1] - sin_a * 35 + perp_y * (22 * s))], fill=horn_col, width=5)
-        elif cranial == "horn_lyrate": # Impala / Gazelle lyre curve
-            l1 = (h_b[0] + cos_a * 14 + perp_x * (18 * s), h_b[1] + sin_a * 14 + perp_y * (18 * s))
-            l2 = (h_b[0] - cos_a * 10 + perp_x * (24 * s), h_b[1] - sin_a * 10 + perp_y * (24 * s))
-            l3 = (h_b[0] - cos_a * 24 + perp_x * (16 * s), h_b[1] - sin_a * 24 + perp_y * (16 * s))
+                draw.line([boss_sweep[bi], boss_sweep[bi+1]], fill=horn_col, width=max(5, 14 - bi * 3))
+
+        elif cranial == "horn_rapier":
+            draw.line([h_b, (h_b[0] - cos_a * 45 + perp_x * (26 * s), h_b[1] - sin_a * 45 + perp_y * (26 * s))], fill=horn_col, width=6)
+
+        elif cranial == "horn_lyrate":
+            l1 = (h_b[0] + cos_a * 16 + perp_x * (20 * s), h_b[1] + sin_a * 16 + perp_y * (20 * s))
+            l2 = (h_b[0] - cos_a * 12 + perp_x * (26 * s), h_b[1] - sin_a * 12 + perp_y * (26 * s))
+            l3 = (h_b[0] - cos_a * 26 + perp_x * (18 * s), h_b[1] - sin_a * 26 + perp_y * (18 * s))
             draw.line([h_b, l1], fill=horn_col, width=6)
             draw.line([l1, l2], fill=horn_col, width=5)
             draw.line([l2, l3], fill=horn_col, width=3)
-        else: # horn_scythe / compact antler
-            h_t = (h_b[0] - cos_a * 18 + perp_x * (26 * s), h_b[1] - sin_a * 18 + perp_y * (26 * s))
-            draw.line([h_b, h_t], fill=horn_col if "horn" in cranial else antler_col, width=6)
-            draw.ellipse([h_t[0]-3, h_t[1]-3, h_t[0]+3, h_t[1]+3], fill=(20, 20, 20))
 
-    # Eyes
-    for s in [-1, 1]:
-        ep = (hx + cos_a * 4 + perp_x * (11 * s), hy + sin_a * 4 + perp_y * (11 * s))
-        draw.ellipse([ep[0]-4, ep[1]-4, ep[0]+4, ep[1]+4], fill=(15, 23, 42))
+        else:
+            h_t = (h_b[0] - cos_a * 22 + perp_x * (28 * s), h_b[1] - sin_a * 22 + perp_y * (28 * s))
+            draw.line([h_b, h_t], fill=horn_col if "horn" in cranial else antler_col, width=7)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1237,42 +1417,107 @@ def draw_equine(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float, 
     eq_dark = (20, 20, 20) if is_zebra else _darken(accent, 40)
     eq_mid = (245, 245, 245) if is_zebra else accent
     eq_light = (255, 255, 255) if is_zebra else _brighten(accent, 35)
+    leg_w = 22
 
-    # Long Slender Legs with Hooves
-    for leg in sim.legs4:
+    def draw_limb(p1, p2, base_w, dark_col, mid_col):
+        dx = p2[0] - p1[0]; dy = p2[1] - p1[1]
+        ln = math.hypot(dx, dy)
+        if ln < 1: return
+        nx = -dy / ln; ny = dx / ln
+        draw.line([p1, p2], fill=dark_col, width=base_w + 6)
+        draw.line([p1, p2], fill=mid_col, width=base_w)
+        hi = _brighten(mid_col, 35)
+        draw.line([(p1[0]+nx*2.5, p1[1]+ny*2.5), (p2[0]+nx*2.5, p2[1]+ny*2.5)], fill=hi, width=max(2, base_w // 3))
+
+    def draw_solid_hoof(paw_pos):
+        hx, hy = paw_pos[0], paw_pos[1]
+        draw.ellipse([hx - 12, hy - 9, hx + 12, hy + 9], fill=(22, 18, 16), outline=(48, 40, 36), width=2)
+
+    # 1. HINDLEGS
+    for leg in [l for l in sim.legs4 if not l["is_front"]]:
+        paw_pos = (leg["cur"][0], leg["cur"][1])
         sock = leg["socket"]
-        paw = (leg["cur"][0], leg["cur"][1])
-        draw.line([sock, paw], fill=eq_dark, width=14)
-        draw.line([sock, paw], fill=eq_mid, width=9)
-        draw.ellipse([paw[0]-6, paw[1]-5, paw[0]+6, paw[1]+5], fill=(15, 15, 15))
+        side = leg["side"]
+        thigh_end = (sock[0] + cos_a * 36 + perp_x * (24 * side), sock[1] + sin_a * 36 + perp_y * (24 * side))
+        draw_limb(sock, thigh_end, leg_w + 4, eq_dark, eq_mid)
+        shin_end = (thigh_end[0] - cos_a * 34 + perp_x * (16 * side), thigh_end[1] - sin_a * 34 + perp_y * (16 * side))
+        draw_limb(thigh_end, shin_end, leg_w, eq_dark, eq_light)
+        draw.ellipse([thigh_end[0]-9, thigh_end[1]-9, thigh_end[0]+9, thigh_end[1]+9], fill=eq_dark)
+        hock = (shin_end[0] - cos_a * 12 + perp_x * (10 * side), shin_end[1] - sin_a * 12 + perp_y * (10 * side))
+        draw_limb(shin_end, hock, max(12, leg_w - 4), eq_dark, eq_mid)
+        draw_limb(hock, paw_pos, max(12, leg_w - 6), eq_dark, eq_mid)
+        draw_solid_hoof(paw_pos)
 
-    # Muscular Body
-    draw.ellipse([sim.x - 38, sim.y - 25, sim.x + 38, sim.y + 25], fill=eq_mid, outline=eq_dark, width=3)
+    # 2. FORELEGS
+    for leg in [l for l in sim.legs4 if l["is_front"]]:
+        paw_pos = (leg["cur"][0], leg["cur"][1])
+        sock = leg["socket"]
+        side = leg["side"]
+        _, elbow, _ = solve_forelimb_ik(sock, paw_pos, leg["l1"], leg["l2"], side)
+        draw_limb(sock, elbow, leg_w + 2, eq_dark, eq_mid)
+        draw.ellipse([elbow[0]-9, elbow[1]-9, elbow[0]+9, elbow[1]+9], fill=eq_dark)
+        draw_limb(elbow, paw_pos, leg_w, eq_dark, eq_light)
+        draw_solid_hoof(paw_pos)
+
+    # 3. BODY SILHOUETTE
+    spine_pts = [(seg["x"], seg["y"]) for seg in sim.spine[:16]]
+    body_widths = [24, 34, 46, 50, 48, 46, 44, 42, 40, 42, 46, 42, 34, 26, 18, 12]
+    left_out, right_out = [], []
+    for i, seg in enumerate(sim.spine[:16]):
+        s_px = -math.sin(seg["angle"]); s_py = math.cos(seg["angle"])
+        hw = max(10, body_widths[i] if i < len(body_widths) else 14)
+        left_out.append((seg["x"] + s_px * (hw + 4), seg["y"] + s_py * (hw + 4)))
+        right_out.append((seg["x"] - s_px * (hw + 4), seg["y"] - s_py * (hw + 4)))
+
+    shadow_pts = [(x+6, y+6) for x,y in left_out] + list(reversed([(x+6, y+6) for x,y in right_out]))
+    if len(shadow_pts) >= 3: draw.polygon(shadow_pts, fill=(18, 12, 10))
+
+    body_poly = left_out + list(reversed(right_out))
+    if len(body_poly) >= 3:
+        draw.polygon(body_poly, fill=eq_mid, outline=eq_dark, width=3)
+
     if is_zebra:
-        # Zebra Stripes
-        for r in range(-30, 30, 10):
-            draw.line([(sim.x + r + perp_x * 20, sim.y + perp_y * 20), (sim.x + r - perp_x * 20, sim.y - perp_y * 20)], fill=(15, 15, 15), width=4)
+        for i in range(2, 14, 2):
+            sp = spine_pts[i]
+            s_px = -math.sin(sim.spine[i]["angle"]); s_py = math.cos(sim.spine[i]["angle"])
+            w = body_widths[i] * 0.92
+            draw.line([(sp[0] - s_px * w, sp[1] - s_py * w), (sp[0] + s_px * w, sp[1] + s_py * w)], fill=(18, 18, 22), width=5)
 
-    # Long Flowing Tail
-    t_prev = (sim.x - cos_a * 35, sim.y - sin_a * 35)
-    for i in range(8):
-        tx = t_prev[0] - cos_a * 12
-        ty = t_prev[1] - sin_a * 12
-        draw.line([t_prev, (tx, ty)], fill=eq_dark, width=max(3, 8 - i))
-        t_prev = (tx, ty)
+    # 4. LONG FLOWING TAIL
+    tail_prev = spine_pts[-1]
+    wag = math.sin(sim_time * 6.0) * 0.6
+    for i in range(12):
+        t_ang = sim.angle + math.pi + wag * ((i + 1) / 12)
+        tx = tail_prev[0] + math.cos(t_ang) * 16
+        ty = tail_prev[1] + math.sin(t_ang) * 16
+        w = max(4, int(18 - i * 1.2))
+        draw.line([tail_prev, (tx, ty)], fill=eq_dark, width=w + 3)
+        draw.line([tail_prev, (tx, ty)], fill=(40, 35, 30) if not is_zebra else (20, 20, 20), width=w)
+        tail_prev = (tx, ty)
 
-    # Arched Neck with Mane & Head
-    hx = sim.x + cos_a * 48
-    hy = sim.y + sin_a * 48
+    # 5. HIGH ARCHED CREST NECK, MANE & HEAD
+    hx = sim.x + cos_a * 50
+    hy = sim.y + sin_a * 50
+    draw.polygon([(sim.x + perp_x * 22, sim.y + perp_y * 22),
+                  (hx + perp_x * 14, hy + perp_y * 14),
+                  (hx - perp_x * 14, hy - perp_y * 14),
+                  (sim.x - perp_x * 22, sim.y - perp_y * 22)], fill=eq_mid, outline=eq_dark, width=2)
+
+    for m in range(6):
+        mx = sim.x + cos_a * (m * 8 + 6) - perp_x * 16
+        my = sim.y + sin_a * (m * 8 + 6) - perp_y * 16
+        draw.line([(mx, my), (mx - perp_x * 12, my - perp_y * 12)], fill=eq_dark, width=5)
+
     draw.ellipse([hx - 20, hy - 16, hx + 20, hy + 16], fill=eq_mid, outline=eq_dark, width=2)
-    # Mane
-    draw.line([(sim.x + cos_a * 20, sim.y + sin_a * 20), (hx, hy)], fill=eq_dark, width=8)
-    # Muzzle & Ears
-    sn_x, sn_y = hx + cos_a * 22, hy + sin_a * 22
-    draw.ellipse([sn_x - 9, sn_y - 8, sn_x + 9, sn_y + 8], fill=eq_dark)
+    sn_x, sn_y = hx + cos_a * 24, hy + sin_a * 24
+    draw.ellipse([sn_x - 10, sn_y - 8, sn_x + 10, sn_y + 8], fill=eq_dark)
     for s in [-1, 1]:
         eb = (hx - cos_a * 8 + perp_x * (10 * s), hy - sin_a * 8 + perp_y * (10 * s))
-        draw.line([eb, (eb[0] + cos_a * 8 + perp_x * (14 * s), eb[1] + sin_a * 8 + perp_y * (14 * s))], fill=eq_dark, width=4)
+        draw.line([eb, (eb[0] + cos_a * 6 + perp_x * (18 * s), eb[1] + sin_a * 6 + perp_y * (18 * s))], fill=eq_dark, width=5)
+    for s in [-1, 1]:
+        ep = (hx + cos_a * 6 + perp_x * (11 * s), hy + sin_a * 6 + perp_y * (11 * s))
+        draw.ellipse([ep[0]-4, ep[1]-4, ep[0]+4, ep[1]+4], fill=(18, 14, 10))
+        draw.ellipse([ep[0]+1, ep[1]-1, ep[0]+3, ep[1]+1], fill=(255, 255, 255))
 
 
 # ─────────────────────────────────────────────────────────────────────────────

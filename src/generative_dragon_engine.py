@@ -522,10 +522,10 @@ class MasterSimulator:
         ]
         # 4 Quadruped Legs
         self.legs4 = [
-            {"id": "FL", "spine_i": 3, "side": -1, "is_front": True,  "l1": 52, "l2": 58, "phase": 0.0,     "cur": [cx + 20, cy - 45], "tgt": [cx + 20, cy - 45], "start": [cx + 20, cy - 45], "prog": 1.0, "socket": (cx + 20, cy - 45)},
-            {"id": "FR", "spine_i": 3, "side":  1, "is_front": True,  "l1": 52, "l2": 58, "phase": math.pi, "cur": [cx + 20, cy + 45], "tgt": [cx + 20, cy + 45], "start": [cx + 20, cy + 45], "prog": 1.0, "socket": (cx + 20, cy + 45)},
-            {"id": "HL", "spine_i": 11, "side": -1, "is_front": False, "l1": 48, "l2": 48, "l3": 32, "phase": math.pi, "cur": [cx - 60, cy - 45], "tgt": [cx - 60, cy - 45], "start": [cx - 60, cy - 45], "prog": 1.0, "socket": (cx - 60, cy - 45)},
-            {"id": "HR", "spine_i": 11, "side":  1, "is_front": False, "l1": 48, "l2": 48, "l3": 32, "phase": 0.0,     "cur": [cx - 60, cy + 45], "tgt": [cx - 60, cy + 45], "start": [cx - 60, cy + 45], "prog": 1.0, "socket": (cx - 60, cy + 45)},
+            {"id": "FL", "spine_i": 2, "side": -1, "is_front": True,  "l1": 42, "l2": 46, "phase": 0.0,     "cur": [cx + 34, cy - 56], "tgt": [cx + 34, cy - 56], "start": [cx + 34, cy - 56], "prog": 1.0, "socket": (cx, cy - 36)},
+            {"id": "FR", "spine_i": 2, "side":  1, "is_front": True,  "l1": 42, "l2": 46, "phase": math.pi, "cur": [cx + 34, cy + 56], "tgt": [cx + 34, cy + 56], "start": [cx + 34, cy + 56], "prog": 1.0, "socket": (cx, cy + 36)},
+            {"id": "HL", "spine_i": 7, "side": -1, "is_front": False, "l1": 44, "l2": 44, "l3": 28, "phase": math.pi, "cur": [cx - 110, cy - 50], "tgt": [cx - 110, cy - 50], "start": [cx - 110, cy - 50], "prog": 1.0, "socket": (cx - 90, cy - 30)},
+            {"id": "HR", "spine_i": 7, "side":  1, "is_front": False, "l1": 44, "l2": 44, "l3": 28, "phase": 0.0,     "cur": [cx - 110, cy + 50], "tgt": [cx - 110, cy + 50], "start": [cx - 110, cy + 50], "prog": 1.0, "socket": (cx - 90, cy + 30)},
         ]
 
     def update(self, sim_time: float):
@@ -579,10 +579,11 @@ class MasterSimulator:
         self.spine[0]["x"] = self.x
         self.spine[0]["y"] = self.y
         self.spine[0]["angle"] = self.angle
+        base_s_dist = 17.0 if self.class_type == "quadruped" else (24.0 if self.class_type == "serpent" else 20.0)
         for i in range(1, len(self.spine)):
             prev = self.spine[i - 1]
             curr = self.spine[i]
-            s_dist = 28 - (i / len(self.spine)) * 5
+            s_dist = base_s_dist - (i / len(self.spine)) * (3.5 if self.class_type == "quadruped" else 5.0)
             p_dx = curr["x"] - prev["x"]
             p_dy = curr["y"] - prev["y"]
             d = math.hypot(p_dx, p_dy)
@@ -593,8 +594,8 @@ class MasterSimulator:
             else:
                 curr["angle"] = prev["angle"]
 
-        # 4 Quadruped Legs Gait
-        trot_clock = sim_time * 6.5
+        # 4 Quadruped Legs Gait (Classic Diagonal Trot)
+        trot_clock = sim_time * 16.0
         for leg in self.legs4:
             s_pt = self.spine[leg["spine_i"]]
             s_ang = s_pt["angle"]
@@ -603,34 +604,36 @@ class MasterSimulator:
             s_perp_x = -s_sin
             s_perp_y =  s_cos
 
-            sock_dist = 28 if leg["is_front"] else 24
+            sock_dist = 36 if leg["is_front"] else 30
             sock = (s_pt["x"] + s_perp_x * (sock_dist * leg["side"]),
                     s_pt["y"] + s_perp_y * (sock_dist * leg["side"]))
             leg["socket"] = sock
 
-            f_reach = 36 if leg["is_front"] else -10
-            l_spread = 32 if leg["is_front"] else 28
+            f_reach = 36 if leg["is_front"] else -22
+            l_spread = 56 if leg["is_front"] else 50
             ideal_x = sock[0] + s_cos * f_reach + s_perp_x * (l_spread * leg["side"])
             ideal_y = sock[1] + s_sin * f_reach + s_perp_y * (l_spread * leg["side"])
 
             d_ideal = math.hypot(ideal_x - leg["cur"][0], ideal_y - leg["cur"][1])
             phase_v = math.sin(trot_clock + leg["phase"])
 
-            if d_ideal > 36 and leg["prog"] >= 1.0 and phase_v > 0.1:
+            # Step triggers when foot is stretched back and gait phase is in swing phase
+            if (d_ideal > 18 or (d_ideal > 10 and phase_v > 0.4)) and leg["prog"] >= 1.0 and phase_v > 0.0:
                 leg["prog"] = 0.0
                 leg["start"] = [leg["cur"][0], leg["cur"][1]]
+                stride = max(24.0, self.speed * 12 + 20)
                 leg["tgt"] = [
-                    ideal_x + cos_a * (self.speed * 10 + 20),
-                    ideal_y + sin_a * (self.speed * 10 + 20)
+                    ideal_x + cos_a * stride,
+                    ideal_y + sin_a * stride
                 ]
 
             if leg["prog"] < 1.0:
-                leg["prog"] += 0.10
+                leg["prog"] += 0.16
                 p = min(1.0, leg["prog"])
                 ease_p = 0.5 - math.cos(p * math.pi) / 2
-                lift = math.sin(p * math.pi) * 20
+                lift = math.sin(p * math.pi) * 16
                 leg["cur"][0] = leg["start"][0] + (leg["tgt"][0] - leg["start"][0]) * ease_p
-                leg["cur"][1] = leg["start"][1] + (leg["tgt"][1] - leg["start"][1]) * ease_p - lift * 0.2
+                leg["cur"][1] = leg["start"][1] + (leg["tgt"][1] - leg["start"][1]) * ease_p - lift * 0.25
 
         # 8 Arachnid Legs Gait
         gait_clock = sim_time * 6.5
@@ -679,24 +682,24 @@ ANIMAL_THEMES = {
         "cursor_color": (0, 230, 255),
     },
     "SAVANNA": {
-        "bg": (28, 14, 8),
-        "grad_center": (80, 36, 14),
-        "canvas_fill": (245, 236, 222),
-        "canvas_border": (217, 119, 6),
-        "card_fill": (22, 14, 10),
-        "card_header": (16, 10, 6),
+        "bg": (18, 12, 8),
+        "grad_center": (65, 30, 14),
+        "canvas_fill": (22, 14, 10),
+        "canvas_border": (245, 158, 11),
+        "card_fill": (18, 11, 8),
+        "card_header": (14, 8, 6),
         "card_border": (55, 32, 18),
         "badge": "⚡ [JS] Quadruped Inverse Kinematics • 60 FPS",
         "badge_color": (251, 191, 36),
         "cursor_color": (239, 68, 68),
     },
     "JUNGLE": {
-        "bg": (8, 26, 14),
-        "grad_center": (18, 70, 36),
-        "canvas_fill": (232, 242, 234),
+        "bg": (8, 20, 12),
+        "grad_center": (14, 55, 28),
+        "canvas_fill": (10, 24, 14),
         "canvas_border": (34, 197, 94),
-        "card_fill": (10, 22, 14),
-        "card_header": (6, 16, 10),
+        "card_fill": (10, 18, 12),
+        "card_header": (6, 14, 8),
         "card_border": (24, 50, 30),
         "badge": "⚡ [Canvas] Sinuous Curvature & Strike IK • 60 FPS",
         "badge_color": (74, 222, 128),
@@ -727,9 +730,9 @@ ANIMAL_THEMES = {
         "cursor_color": (244, 63, 94),
     },
     "ARCTIC": {
-        "bg": (10, 22, 36),
-        "grad_center": (26, 56, 90),
-        "canvas_fill": (238, 246, 255),
+        "bg": (8, 18, 28),
+        "grad_center": (18, 48, 75),
+        "canvas_fill": (8, 20, 32),
         "canvas_border": (56, 189, 248),
         "card_fill": (8, 18, 30),
         "card_header": (5, 12, 22),
@@ -746,12 +749,12 @@ def pick_animal_theme(species: dict) -> dict:
     
     if class_type in ("aquatic", "cephalopod") or any(k in name for k in ("shark", "whale", "fish", "eel", "manta", "squid", "octopus")):
         return ANIMAL_THEMES["OCEAN"]
+    elif any(k in name for k in ("polar", "snow", "arctic", "glacier", "frost", "white", "alaska", "alaskan", "tundra", "taiga", "moose", "caribou", "reindeer")):
+        return ANIMAL_THEMES["ARCTIC"]
     elif class_type in ("serpent", "insect") or any(k in name for k in ("mantis", "wasp", "tree", "chameleon", "frog", "viper")):
         return ANIMAL_THEMES["JUNGLE"]
     elif class_type in ("arachnid", "crustacean") or any(k in name for k in ("scorpion", "spider", "crab", "lobster", "lava")):
         return ANIMAL_THEMES["VOLCANIC"]
-    elif any(k in name for k in ("polar", "snow", "arctic", "glacier", "frost", "white")):
-        return ANIMAL_THEMES["ARCTIC"]
     elif any(k in name for k in ("cyber", "quantum", "neon", "matrix", "volt")):
         return ANIMAL_THEMES["CYBER"]
     else:
@@ -812,6 +815,13 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
 
     draw.rectangle([box_x - 6, box_y - 6, box_x + box_w + 6, box_y + box_h + 6], fill=theme["canvas_border"], outline=theme["card_border"], width=2)
     draw.rectangle([box_x, box_y, box_x + box_w, box_y + box_h], fill=theme["canvas_fill"])
+
+    # High-tech blueprint grid lines
+    grid_col = tuple(min(255, int(c * 1.5) + 8) for c in theme["canvas_fill"])
+    for gx in range(box_x + 40, box_x + box_w, 40):
+        draw.line([(gx, box_y), (gx, box_y + box_h)], fill=grid_col, width=1)
+    for gy in range(box_y + 40, box_y + box_h, 40):
+        draw.line([(box_x, gy), (box_x + box_w, gy)], fill=grid_col, width=1)
 
     # Cyber Corner Brackets on Display Viewport
     cw, ch = 24, 24
@@ -1484,7 +1494,9 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     # Active solver indicator on title bar
     draw.text((card_x + card_w - 20, card_y + 17), "⚡ Active IK Rig", font=get_font(16, bold=True, mono=True), fill=accent_color, anchor="rt")
 
-    all_lines = species["code_lines"]
+    all_lines = species.get("code_lines")
+    if not all_lines:
+        all_lines = _generate_js_code_for_animal(species.get("name", "Creature"), species.get("class_type", "quadruped"), species.get("scientific", ""))
     total_lines = len(all_lines)
     
     line_h = 46

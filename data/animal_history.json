@@ -1448,5 +1448,27 @@
     "dry_run": false,
     "video_id": "LX5c0Mp1ZH8",
     "youtube_url": "https://youtu.be/LX5c0Mp1ZH8"
+  },
+  {
+    "dhash": "0f0f2be193470f00",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.9,
+    "id": 257,
+    "species": "GIANT FRESHWATER STINGRAY",
+    "scientific": "Urogymnus polylepis",
+    "class_type": "aquatic",
+    "morphology": "ray",
+    "accent": [
+      140,
+      140,
+      145
+    ],
+    "anatomy_notes": "Stingrays are a group of rays, a type of cartilaginous fish. They are classified in the suborder Myliobatoidei of the order Myliobatiformes and consist of eleven families: Hexatrygonidae, Gymnuridae, ",
+    "file": "tmp/reel_0257/giant_freshwater_stingray_short.mp4",
+    "timestamp": "2026-09-12T07:11:04.918749+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "jg4uWCk9yk0",
+    "youtube_url": "https://youtu.be/jg4uWCk9yk0"
   }
 ]

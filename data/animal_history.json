@@ -1514,5 +1514,27 @@
     "dry_run": false,
     "video_id": "OsMEeBV9CO8",
     "youtube_url": "https://youtu.be/OsMEeBV9CO8"
+  },
+  {
+    "dhash": "0e0b8160d3870f30",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 1.7,
+    "id": 473,
+    "species": "ARCTIC WOLF",
+    "scientific": "Canis lupus arctos",
+    "class_type": "quadruped",
+    "morphology": "canine",
+    "accent": [
+      240,
+      235,
+      225
+    ],
+    "anatomy_notes": "The Arctic wolf, also known as the white wolf, polar wolf, and the Arctic grey wolf, is a subspecies of grey wolf native to the High Arctic tundra of Canada's Queen Elizabeth Islands, from Melville Is",
+    "file": "tmp/reel_0473/arctic_wolf_short.mp4",
+    "timestamp": "2026-09-12T19:24:08.687593+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "u_docz3t5Rs",
+    "youtube_url": "https://youtu.be/u_docz3t5Rs"
   }
 ]

@@ -1492,5 +1492,27 @@
     "dry_run": false,
     "video_id": "ovZh1VerWzs",
     "youtube_url": "https://youtu.be/ovZh1VerWzs"
+  },
+  {
+    "dhash": "060f31d3c3870f20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 6.4,
+    "id": 520,
+    "species": "WHITE NOSED COATI",
+    "scientific": "Nasua narica",
+    "class_type": "quadruped",
+    "morphology": "small_mammal",
+    "accent": [
+      147,
+      109,
+      50
+    ],
+    "anatomy_notes": "Coatis, also known as coatimundis, are members of the family Procyonidae in the genera Nasua and Nasuella. They are diurnal mammals native to South America, Central America, Mexico, and the Southweste",
+    "file": "tmp/reel_0520/white_nosed_coati_short.mp4",
+    "timestamp": "2026-09-12T15:34:03.240751+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "OsMEeBV9CO8",
+    "youtube_url": "https://youtu.be/OsMEeBV9CO8"
   }
 ]

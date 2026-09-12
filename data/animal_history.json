@@ -1470,5 +1470,27 @@
     "dry_run": false,
     "video_id": "jg4uWCk9yk0",
     "youtube_url": "https://youtu.be/jg4uWCk9yk0"
+  },
+  {
+    "dhash": "0f2b33f0c3470e00",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.1,
+    "id": 48,
+    "species": "OSPREY",
+    "scientific": "Pandion haliaetus",
+    "class_type": "bird",
+    "morphology": "bird",
+    "accent": [
+      185,
+      150,
+      80
+    ],
+    "anatomy_notes": "The osprey, historically known as sea hawk, river hawk, and fish hawk, is a diurnal, fish-eating bird of prey with a cosmopolitan range. It is a large raptor, reaching more than 60\u00a0cm (24\u00a0in) in lengt",
+    "file": "tmp/reel_0048/osprey_short.mp4",
+    "timestamp": "2026-09-12T11:39:25.596797+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "ovZh1VerWzs",
+    "youtube_url": "https://youtu.be/ovZh1VerWzs"
   }
 ]

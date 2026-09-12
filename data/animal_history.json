@@ -1536,5 +1536,27 @@
     "dry_run": false,
     "video_id": "u_docz3t5Rs",
     "youtube_url": "https://youtu.be/u_docz3t5Rs"
+  },
+  {
+    "dhash": "0f0d28a183070f02",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.4,
+    "id": 463,
+    "species": "GIANT AFRICAN MILLIPEDE",
+    "scientific": "Archispirostreptus gigas",
+    "class_type": "arachnid",
+    "morphology": "spider",
+    "accent": [
+      130,
+      200,
+      40
+    ],
+    "anatomy_notes": "Archispirostreptus gigas, known as the giant African millipede, shongololo or Bongololo, is the largest extant species of millipede, growing up to 33.5 centimetres (13.2\u00a0in) in length, 67 millimetres ",
+    "file": "tmp/reel_0463/giant_african_millipede_short.mp4",
+    "timestamp": "2026-09-12T23:06:36.281104+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "Z3PcGgzH4XM",
+    "youtube_url": "https://youtu.be/Z3PcGgzH4XM"
   }
 ]

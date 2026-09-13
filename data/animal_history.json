@@ -1624,5 +1624,27 @@
     "dry_run": false,
     "video_id": "TtcxVg1DCFE",
     "youtube_url": "https://youtu.be/TtcxVg1DCFE"
+  },
+  {
+    "dhash": "2b2bad40d3470f00",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.2,
+    "id": 320,
+    "species": "NARWHAL",
+    "scientific": "Monodon monoceros",
+    "class_type": "aquatic",
+    "morphology": "marine_mammal",
+    "accent": [
+      112,
+      108,
+      50
+    ],
+    "anatomy_notes": "The narwhal is a species of toothed whale native to the Arctic. It is the only member of the genus Monodon and one of two living representatives of the family Monodontidae. The narwhal is a stocky cet",
+    "file": "tmp/reel_0320/narwhal_short.mp4",
+    "timestamp": "2026-09-13T23:11:07.864024+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "n2ND-EKMM5o",
+    "youtube_url": "https://youtu.be/n2ND-EKMM5o"
   }
 ]

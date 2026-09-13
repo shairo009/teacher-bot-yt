@@ -1580,5 +1580,27 @@
     "dry_run": false,
     "video_id": "OMoCHPTZ9lY",
     "youtube_url": "https://youtu.be/OMoCHPTZ9lY"
+  },
+  {
+    "dhash": "8c0f2b2353570e02",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.7,
+    "id": 374,
+    "species": "WUNDERPUS PHOTOGENICUS",
+    "scientific": "Wunderpus photogenicus",
+    "class_type": "cephalopod",
+    "morphology": "octopus",
+    "accent": [
+      160,
+      70,
+      20
+    ],
+    "anatomy_notes": "Wunderpus photogenicus, the wunderpus octopus, is a small-bodied species of octopus with distinct white and rusty brown coloration. 'Wunderpus' from German \"wunder\" meaning 'marvel' or 'wonder'.",
+    "file": "tmp/reel_0374/wunderpus_photogenicus_short.mp4",
+    "timestamp": "2026-09-13T16:18:15.980295+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "qEmvaNsu8UQ",
+    "youtube_url": "https://youtu.be/qEmvaNsu8UQ"
   }
 ]

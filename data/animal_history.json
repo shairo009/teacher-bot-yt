@@ -1602,5 +1602,27 @@
     "dry_run": false,
     "video_id": "qEmvaNsu8UQ",
     "youtube_url": "https://youtu.be/qEmvaNsu8UQ"
+  },
+  {
+    "dhash": "868fb1f183070e02",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.0,
+    "id": 112,
+    "species": "AMERICAN ALLIGATOR",
+    "scientific": "Alligator mississippiensis",
+    "class_type": "reptile",
+    "morphology": "crocodile",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The American alligator, sometimes referred to as a common alligator or just gator, is a large crocodilian reptile native to the Southeastern United States. It is one of the two extant species in the g",
+    "file": "tmp/reel_0112/american_alligator_short.mp4",
+    "timestamp": "2026-09-13T19:30:40.373092+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "TtcxVg1DCFE",
+    "youtube_url": "https://youtu.be/TtcxVg1DCFE"
   }
 ]

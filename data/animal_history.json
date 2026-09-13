@@ -1558,5 +1558,27 @@
     "dry_run": false,
     "video_id": "Z3PcGgzH4XM",
     "youtube_url": "https://youtu.be/Z3PcGgzH4XM"
+  },
+  {
+    "dhash": "8e0f73f183070e01",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.2,
+    "id": 387,
+    "species": "EUROPEAN STAG BEETLE",
+    "scientific": "Lucanus cervus",
+    "class_type": "insect",
+    "morphology": "beetle",
+    "accent": [
+      163,
+      108,
+      50
+    ],
+    "anatomy_notes": "Stag beetles compose the family Lucanidae. It has about 1,200 species of beetles in four subfamilies. Some species grow to over 12 centimetres, but most to about 5\u00a0cm (2\u00a0in).",
+    "file": "tmp/reel_0387/european_stag_beetle_short.mp4",
+    "timestamp": "2026-09-13T07:31:14.834514+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "OMoCHPTZ9lY",
+    "youtube_url": "https://youtu.be/OMoCHPTZ9lY"
   }
 ]

@@ -1646,5 +1646,27 @@
     "dry_run": false,
     "video_id": "n2ND-EKMM5o",
     "youtube_url": "https://youtu.be/n2ND-EKMM5o"
+  },
+  {
+    "dhash": "868f93b3c3870f20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.6,
+    "id": 585,
+    "species": "DROMEDARY CAMEL",
+    "scientific": "Camelus dromedarius",
+    "class_type": "quadruped",
+    "morphology": "camelid",
+    "accent": [
+      185,
+      150,
+      80
+    ],
+    "anatomy_notes": "The dromedary, also known as the dromedary camel, Arabian camel and one-humped camel, is a large camel of the genus Camelus with one hump on its back. It is the tallest of the three camel species; adu",
+    "file": "tmp/reel_0585/dromedary_camel_short.mp4",
+    "timestamp": "2026-09-14T07:56:54.265912+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "tVcH_6Mvrv4",
+    "youtube_url": "https://youtu.be/tVcH_6Mvrv4"
   }
 ]

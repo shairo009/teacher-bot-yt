@@ -1690,5 +1690,27 @@
     "dry_run": false,
     "video_id": "lMIFKLrcZsk",
     "youtube_url": "https://youtu.be/lMIFKLrcZsk"
+  },
+  {
+    "dhash": "868e41d1c34b0e20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.5,
+    "id": 168,
+    "species": "EASTERN COPPERHEAD",
+    "scientific": "Agkistrodon contortrix",
+    "class_type": "serpent",
+    "morphology": "serpent",
+    "accent": [
+      180,
+      100,
+      45
+    ],
+    "anatomy_notes": "The eastern copperhead, also known simply as the copperhead, is a widespread species of venomous snake, a pit viper, endemic to eastern United States of America; it is a member of the subfamily Crotal",
+    "file": "tmp/reel_0168/eastern_copperhead_short.mp4",
+    "timestamp": "2026-09-14T23:55:02.009016+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "6ECCA9tWorE",
+    "youtube_url": "https://youtu.be/6ECCA9tWorE"
   }
 ]

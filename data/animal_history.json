@@ -1668,5 +1668,27 @@
     "dry_run": false,
     "video_id": "tVcH_6Mvrv4",
     "youtube_url": "https://youtu.be/tVcH_6Mvrv4"
+  },
+  {
+    "dhash": "4e0f2be283070e02",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 3.0,
+    "id": 355,
+    "species": "NORWAY LOBSTER SCAMPI",
+    "scientific": "Nephrops norvegicus",
+    "class_type": "crustacean",
+    "morphology": "lobster",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "Scampi is a crustacean-based seafood dish, typically featuring langoustine, prawns or shrimp saut\u00e9ed in olive oil, garlic, and white wine, and garnished with Parmesan cheese and lemon juice, though ex",
+    "file": "tmp/reel_0355/norway_lobster_scampi_short.mp4",
+    "timestamp": "2026-09-14T18:07:54.779756+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "lMIFKLrcZsk",
+    "youtube_url": "https://youtu.be/lMIFKLrcZsk"
   }
 ]

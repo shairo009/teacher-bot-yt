@@ -1756,5 +1756,27 @@
     "dry_run": false,
     "video_id": "g7-Uqg_Y1ys",
     "youtube_url": "https://youtu.be/g7-Uqg_Y1ys"
+  },
+  {
+    "dhash": "0e2b91f3c3870f20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 2.3,
+    "id": 579,
+    "species": "GREVYS ZEBRA",
+    "scientific": "Equus grevyi",
+    "class_type": "quadruped",
+    "morphology": "equine",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "Gr\u00e9vy's zebra, also known commonly as the imperial zebra, is the largest living species of wild equid and the most threatened of the three species of zebras, the other two being the plains zebra and t",
+    "file": "tmp/reel_0579/grevys_zebra_short.mp4",
+    "timestamp": "2026-09-15T20:17:57.808745+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "ocWGlYKl6g4",
+    "youtube_url": "https://youtu.be/ocWGlYKl6g4"
   }
 ]

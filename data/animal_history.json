@@ -1734,5 +1734,27 @@
     "dry_run": false,
     "video_id": "plyi7MzblpM",
     "youtube_url": "https://youtu.be/plyi7MzblpM"
+  },
+  {
+    "dhash": "060f73f183470e00",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 5.9,
+    "id": 63,
+    "species": "BLUE FOOTED BOOBY",
+    "scientific": "Sula nebouxii",
+    "class_type": "bird",
+    "morphology": "bird",
+    "accent": [
+      50,
+      130,
+      200
+    ],
+    "anatomy_notes": "The blue-footed booby is a species of marine bird in the family Sulidae. The species is native to subtropical and tropical regions of the eastern Pacific Ocean. It is one of six species of the genus S",
+    "file": "tmp/reel_0063/blue_footed_booby_short.mp4",
+    "timestamp": "2026-09-15T17:02:33.121904+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "g7-Uqg_Y1ys",
+    "youtube_url": "https://youtu.be/g7-Uqg_Y1ys"
   }
 ]

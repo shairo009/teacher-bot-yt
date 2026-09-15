@@ -1712,5 +1712,27 @@
     "dry_run": false,
     "video_id": "6ECCA9tWorE",
     "youtube_url": "https://youtu.be/6ECCA9tWorE"
+  },
+  {
+    "dhash": "0b2b33f0c3070e00",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 3.9,
+    "id": 45,
+    "species": "SNOWY OWL",
+    "scientific": "Bubo scandiacus",
+    "class_type": "bird",
+    "morphology": "bird",
+    "accent": [
+      185,
+      150,
+      80
+    ],
+    "anatomy_notes": "The snowy owl, also known as the polar owl, the white owl and the Arctic owl, is a large, white owl of the true owl family. Snowy owls are native to the Arctic regions of both North America and the Pa",
+    "file": "tmp/reel_0045/snowy_owl_short.mp4",
+    "timestamp": "2026-09-15T07:46:48.777377+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "plyi7MzblpM",
+    "youtube_url": "https://youtu.be/plyi7MzblpM"
   }
 ]

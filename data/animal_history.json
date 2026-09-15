@@ -1778,5 +1778,27 @@
     "dry_run": false,
     "video_id": "ocWGlYKl6g4",
     "youtube_url": "https://youtu.be/ocWGlYKl6g4"
+  },
+  {
+    "dhash": "8e8e6be1d3570e02",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.9,
+    "id": 386,
+    "species": "CHAMBERED NAUTILUS",
+    "scientific": "Nautilus pompilius",
+    "class_type": "cephalopod",
+    "morphology": "cuttlefish",
+    "accent": [
+      210,
+      150,
+      20
+    ],
+    "anatomy_notes": "The chambered nautilus, also called the pearly nautilus, is the best-known species of nautilus. The shell, when cut away, reveals a lining of lustrous nacre and displays a nearly perfect equiangular s",
+    "file": "tmp/reel_0386/chambered_nautilus_short.mp4",
+    "timestamp": "2026-09-15T23:35:07.000843+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "UG8qnxkSamY",
+    "youtube_url": "https://youtu.be/UG8qnxkSamY"
   }
 ]

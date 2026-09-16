@@ -1866,5 +1866,27 @@
     "dry_run": false,
     "video_id": "T1NiQGwgOUA",
     "youtube_url": "https://youtu.be/T1NiQGwgOUA"
+  },
+  {
+    "dhash": "868f83d3c3870f20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 6.7,
+    "id": 543,
+    "species": "VERREAUX SIFAKA",
+    "scientific": "Propithecus verreauxi",
+    "class_type": "quadruped",
+    "morphology": "primate",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "Verreaux's sifaka, or the white sifaka, is a medium-sized primate in one of the lemur families, the Indriidae. Critically Endangered, it lives in Madagascar and can be found in a variety of habitats f",
+    "file": "tmp/reel_0543/verreaux_sifaka_short.mp4",
+    "timestamp": "2026-09-16T23:43:00.957315+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "jOr2bC0ZFwg",
+    "youtube_url": "https://youtu.be/jOr2bC0ZFwg"
   }
 ]

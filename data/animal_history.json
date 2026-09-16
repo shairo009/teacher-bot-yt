@@ -1844,5 +1844,27 @@
     "dry_run": false,
     "video_id": "k_tbyzrOUm0",
     "youtube_url": "https://youtu.be/k_tbyzrOUm0"
+  },
+  {
+    "dhash": "0e2b33f0c3470e00",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.1,
+    "id": 66,
+    "species": "SNOWY EGRET",
+    "scientific": "Egretta thula",
+    "class_type": "bird",
+    "morphology": "bird",
+    "accent": [
+      240,
+      235,
+      225
+    ],
+    "anatomy_notes": "The snowy egret is a small white heron. The genus name comes from Proven\u00e7al French for the little egret, aigrette, which is a diminutive of aigron, 'heron'. The species name thula is the Mapudungun te",
+    "file": "tmp/reel_0066/snowy_egret_short.mp4",
+    "timestamp": "2026-09-16T20:11:57.908711+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "T1NiQGwgOUA",
+    "youtube_url": "https://youtu.be/T1NiQGwgOUA"
   }
 ]

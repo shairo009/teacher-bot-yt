@@ -1800,5 +1800,27 @@
     "dry_run": false,
     "video_id": "UG8qnxkSamY",
     "youtube_url": "https://youtu.be/UG8qnxkSamY"
+  },
+  {
+    "dhash": "060e2bc1c1830e21",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.1,
+    "id": 359,
+    "species": "GIANT TIGER PRAWN",
+    "scientific": "Penaeus monodon",
+    "class_type": "crustacean",
+    "morphology": "shrimp",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "Penaeus monodon, commonly known as the giant tiger prawn, Asian tiger shrimp, black tiger shrimp, and other names, is a marine crustacean that is widely reared for food.",
+    "file": "tmp/reel_0359/giant_tiger_prawn_short.mp4",
+    "timestamp": "2026-09-16T07:43:42.469332+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "gi4yqWkgTEA",
+    "youtube_url": "https://youtu.be/gi4yqWkgTEA"
   }
 ]

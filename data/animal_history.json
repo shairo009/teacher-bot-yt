@@ -1932,5 +1932,27 @@
     "dry_run": false,
     "video_id": "Zc1IoXnKLNE",
     "youtube_url": "https://youtu.be/Zc1IoXnKLNE"
+  },
+  {
+    "dhash": "0e8c2b4303070f02",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.4,
+    "id": 461,
+    "species": "AMAZONIAN GIANT CENTIPEDE",
+    "scientific": "Scolopendra gigantea",
+    "class_type": "arachnid",
+    "morphology": "spider",
+    "accent": [
+      230,
+      200,
+      30
+    ],
+    "anatomy_notes": "Scolopendra gigantea, also known as the Peruvian giant yellow-leg centipede or Amazonian giant centipede, is a centipede in the genus Scolopendra. It is the largest centipede species in the world, wit",
+    "file": "tmp/reel_0461/amazonian_giant_centipede_short.mp4",
+    "timestamp": "2026-09-17T20:22:17.291252+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "tikw48VZQ58",
+    "youtube_url": "https://youtu.be/tikw48VZQ58"
   }
 ]

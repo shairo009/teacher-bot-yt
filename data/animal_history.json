@@ -1954,5 +1954,27 @@
     "dry_run": false,
     "video_id": "tikw48VZQ58",
     "youtube_url": "https://youtu.be/tikw48VZQ58"
+  },
+  {
+    "dhash": "8c0d33f143070e01",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.2,
+    "id": 393,
+    "species": "SEVEN SPOTTED LADYBUG",
+    "scientific": "Coccinella septempunctata",
+    "class_type": "insect",
+    "morphology": "beetle",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "Coccinellidae is a widespread family of small beetles. They are commonly known as ladybugs in North America and ladybirds in the United Kingdom, Australia, New Zealand, Ireland, and other English spea",
+    "file": "tmp/reel_0393/seven_spotted_ladybug_short.mp4",
+    "timestamp": "2026-09-17T23:36:56.011691+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "NYi_1ttMn08",
+    "youtube_url": "https://youtu.be/NYi_1ttMn08"
   }
 ]

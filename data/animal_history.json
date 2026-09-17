@@ -1888,5 +1888,27 @@
     "dry_run": false,
     "video_id": "jOr2bC0ZFwg",
     "youtube_url": "https://youtu.be/jOr2bC0ZFwg"
+  },
+  {
+    "dhash": "2b4b91b3c3870f30",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 6.8,
+    "id": 476,
+    "species": "ARCTIC FOX",
+    "scientific": "Vulpes lagopus",
+    "class_type": "quadruped",
+    "morphology": "canine",
+    "accent": [
+      240,
+      235,
+      225
+    ],
+    "anatomy_notes": "The Arctic fox, also known as the white fox, polar fox, or snow fox, is a small species of fox native to the Arctic regions of the Northern Hemisphere and common throughout the Arctic tundra. It is we",
+    "file": "tmp/reel_0476/arctic_fox_short.mp4",
+    "timestamp": "2026-09-17T07:42:28.142421+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "j56Jv9_gIGo",
+    "youtube_url": "https://youtu.be/j56Jv9_gIGo"
   }
 ]

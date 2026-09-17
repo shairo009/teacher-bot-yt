@@ -1910,5 +1910,27 @@
     "dry_run": false,
     "video_id": "j56Jv9_gIGo",
     "youtube_url": "https://youtu.be/j56Jv9_gIGo"
+  },
+  {
+    "dhash": "860e2981d3d30f20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 3.5,
+    "id": 244,
+    "species": "PACIFIC ANGELSHARK",
+    "scientific": "Squatina californica",
+    "class_type": "aquatic",
+    "morphology": "shark",
+    "accent": [
+      55,
+      110,
+      50
+    ],
+    "anatomy_notes": "Angel sharks are sharks belonging to the genus Squatina. They are the only living members of the family Squatinidae and order Squatiniformes. They commonly inhabit sandy seabeds close to 150\u00a0m (490\u00a0ft",
+    "file": "tmp/reel_0244/pacific_angelshark_short.mp4",
+    "timestamp": "2026-09-17T17:00:42.652235+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "Zc1IoXnKLNE",
+    "youtube_url": "https://youtu.be/Zc1IoXnKLNE"
   }
 ]

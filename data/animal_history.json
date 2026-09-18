@@ -2042,5 +2042,27 @@
     "dry_run": false,
     "video_id": "a7J7UCNxvhQ",
     "youtube_url": "https://youtu.be/a7J7UCNxvhQ"
+  },
+  {
+    "dhash": "860f11f0c3470e00",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.1,
+    "id": 221,
+    "species": "MEXICAN AXOLOTL",
+    "scientific": "Ambystoma mexicanum",
+    "class_type": "amphibian",
+    "morphology": "frog",
+    "accent": [
+      61,
+      111,
+      50
+    ],
+    "anatomy_notes": "The axolotl is a species of mole salamander. It is neotenic, reaching sexual maturity without undergoing metamorphosis, and the adults remain fully aquatic with obvious external gills. Axolotls may be",
+    "file": "tmp/reel_0221/mexican_axolotl_short.mp4",
+    "timestamp": "2026-09-18T23:20:52.825320+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "JwKIyZBcfSI",
+    "youtube_url": "https://youtu.be/JwKIyZBcfSI"
   }
 ]

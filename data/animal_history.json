@@ -2020,5 +2020,27 @@
     "dry_run": false,
     "video_id": "NNohpx3FhOU",
     "youtube_url": "https://youtu.be/NNohpx3FhOU"
+  },
+  {
+    "dhash": "860d29c293470f00",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 3.2,
+    "id": 328,
+    "species": "WEST INDIAN MANATEE",
+    "scientific": "Trichechus manatus",
+    "class_type": "aquatic",
+    "morphology": "marine_mammal",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The West Indian manatee, also known as the North American manatee, is a large, aquatic mammal native to warm coastal areas of the Caribbean, from the Eastern United States to northern Brazil. Living a",
+    "file": "tmp/reel_0328/west_indian_manatee_short.mp4",
+    "timestamp": "2026-09-18T19:37:58.573659+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "a7J7UCNxvhQ",
+    "youtube_url": "https://youtu.be/a7J7UCNxvhQ"
   }
 ]

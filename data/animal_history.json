@@ -1976,5 +1976,27 @@
     "dry_run": false,
     "video_id": "NYi_1ttMn08",
     "youtube_url": "https://youtu.be/NYi_1ttMn08"
+  },
+  {
+    "dhash": "860e33f1c3470e00",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.1,
+    "id": 65,
+    "species": "GREAT BLUE HERON",
+    "scientific": "Ardea herodias",
+    "class_type": "bird",
+    "morphology": "bird",
+    "accent": [
+      50,
+      130,
+      200
+    ],
+    "anatomy_notes": "The great blue heron is a large wading bird in the heron family (Ardeidae), common near shores of open water and wetlands over most of North and Central America, as well as Northwestern South America,",
+    "file": "tmp/reel_0065/great_blue_heron_short.mp4",
+    "timestamp": "2026-09-18T07:27:32.527018+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "o2EVRTE3_Zk",
+    "youtube_url": "https://youtu.be/o2EVRTE3_Zk"
   }
 ]

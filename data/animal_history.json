@@ -1998,5 +1998,27 @@
     "dry_run": false,
     "video_id": "o2EVRTE3_Zk",
     "youtube_url": "https://youtu.be/o2EVRTE3_Zk"
+  },
+  {
+    "dhash": "0e2a31d1c3870f20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 6.2,
+    "id": 617,
+    "species": "ARCTIC MUSKOX",
+    "scientific": "Ovibos moschatus",
+    "class_type": "quadruped",
+    "morphology": "cervid_bovid",
+    "accent": [
+      100,
+      115,
+      130
+    ],
+    "anatomy_notes": "The muskox is a hoofed mammal of the family Bovidae. Native to the Arctic, it is noted for its thick coat and for the strong odor emitted by males during the seasonal rut, from which its name derives.",
+    "file": "tmp/reel_0617/arctic_muskox_short.mp4",
+    "timestamp": "2026-09-18T16:26:44.472542+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "NNohpx3FhOU",
+    "youtube_url": "https://youtu.be/NNohpx3FhOU"
   }
 ]

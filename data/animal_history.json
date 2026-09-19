@@ -2130,5 +2130,27 @@
     "dry_run": false,
     "video_id": "YFGJbD2Cq3E",
     "youtube_url": "https://youtu.be/YFGJbD2Cq3E"
+  },
+  {
+    "dhash": "868f2bc293470f00",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 8.0,
+    "id": 310,
+    "species": "BANDED PIPEFISH",
+    "scientific": "Dunckerocampus dactyliophorus",
+    "class_type": "aquatic",
+    "morphology": "seahorse",
+    "accent": [
+      78,
+      102,
+      50
+    ],
+    "anatomy_notes": "The banded pipefish or ringed pipefish is a species of fish in the Syngnathidae family.",
+    "file": "tmp/reel_0310/banded_pipefish_short.mp4",
+    "timestamp": "2026-09-19T23:05:31.858150+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "0SApRghgzU8",
+    "youtube_url": "https://youtu.be/0SApRghgzU8"
   }
 ]

@@ -2064,5 +2064,27 @@
     "dry_run": false,
     "video_id": "JwKIyZBcfSI",
     "youtube_url": "https://youtu.be/JwKIyZBcfSI"
+  },
+  {
+    "dhash": "0d2f0b6107070e02",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 2.7,
+    "id": 364,
+    "species": "PELAGIC GOOSENECK BARNACLE",
+    "scientific": "Lepas anatifera",
+    "class_type": "crustacean",
+    "morphology": "shrimp",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "Goose barnacles or stalked barnacles are any of several species of filter-feeding crustaceans characterized by a fleshy stalk of which one end is connected to an armored capitulum and the other end is",
+    "file": "tmp/reel_0364/pelagic_gooseneck_barnacle_short.mp4",
+    "timestamp": "2026-09-19T07:22:47.194799+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "sG_2rbvMJfw",
+    "youtube_url": "https://youtu.be/sG_2rbvMJfw"
   }
 ]

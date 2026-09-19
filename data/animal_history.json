@@ -2086,5 +2086,27 @@
     "dry_run": false,
     "video_id": "sG_2rbvMJfw",
     "youtube_url": "https://youtu.be/sG_2rbvMJfw"
+  },
+  {
+    "dhash": "860f21f0c34b0e20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.5,
+    "id": 153,
+    "species": "YELLOW ANACONDA",
+    "scientific": "Eunectes notaeus",
+    "class_type": "serpent",
+    "morphology": "serpent",
+    "accent": [
+      230,
+      200,
+      30
+    ],
+    "anatomy_notes": "The yellow anaconda, also known as the Paraguayan anaconda, is a boa species endemic to southern South America. It is one of the largest snakes in the world but smaller than its close relative, the gr",
+    "file": "tmp/reel_0153/yellow_anaconda_short.mp4",
+    "timestamp": "2026-09-19T15:55:12.471869+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "IwOkeDS0Dfk",
+    "youtube_url": "https://youtu.be/IwOkeDS0Dfk"
   }
 ]

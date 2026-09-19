@@ -2108,5 +2108,27 @@
     "dry_run": false,
     "video_id": "IwOkeDS0Dfk",
     "youtube_url": "https://youtu.be/IwOkeDS0Dfk"
+  },
+  {
+    "dhash": "0f2b8370c3870f20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.9,
+    "id": 479,
+    "species": "COYOTE",
+    "scientific": "Canis latrans",
+    "class_type": "quadruped",
+    "morphology": "canine",
+    "accent": [
+      218,
+      165,
+      32
+    ],
+    "anatomy_notes": "The coyote is a species of canine also known as the American jackal, prairie wolf, and brush wolf. It is native to North America, and it is smaller than its close relative, the gray wolf, and slightly",
+    "file": "tmp/reel_0479/coyote_short.mp4",
+    "timestamp": "2026-09-19T19:23:00.497359+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "YFGJbD2Cq3E",
+    "youtube_url": "https://youtu.be/YFGJbD2Cq3E"
   }
 ]

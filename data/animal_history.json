@@ -2152,5 +2152,27 @@
     "dry_run": false,
     "video_id": "0SApRghgzU8",
     "youtube_url": "https://youtu.be/0SApRghgzU8"
+  },
+  {
+    "dhash": "860f93d3c3870f20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.5,
+    "id": 582,
+    "species": "AFRICAN WILD ASS",
+    "scientific": "Equus africanus",
+    "class_type": "quadruped",
+    "morphology": "equine",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The African wild ass or African wild donkey, is a wild member of the horse family, Equidae. This species is thought to be the ancestor of the domestic donkey, which is sometimes placed within the same",
+    "file": "tmp/reel_0582/african_wild_ass_short.mp4",
+    "timestamp": "2026-09-20T07:48:33.279171+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "YnOFgo4OM54",
+    "youtube_url": "https://youtu.be/YnOFgo4OM54"
   }
 ]

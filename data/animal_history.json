@@ -2174,5 +2174,27 @@
     "dry_run": false,
     "video_id": "YnOFgo4OM54",
     "youtube_url": "https://youtu.be/YnOFgo4OM54"
+  },
+  {
+    "dhash": "960b23f0c3470e00",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 1.9,
+    "id": 43,
+    "species": "PEREGRINE FALCON",
+    "scientific": "Falco peregrinus",
+    "class_type": "bird",
+    "morphology": "bird",
+    "accent": [
+      240,
+      235,
+      225
+    ],
+    "anatomy_notes": "The peregrine falcon, also referred to simply as the peregrine, is a bird of prey (raptor) in the family Falconidae known for its speed. A large, crow-sized falcon, it has a blue-grey back, barred whi",
+    "file": "tmp/reel_0043/peregrine_falcon_short.mp4",
+    "timestamp": "2026-09-20T16:07:13.278495+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "E1_NCQOnHfg",
+    "youtube_url": "https://youtu.be/E1_NCQOnHfg"
   }
 ]

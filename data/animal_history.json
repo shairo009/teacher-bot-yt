@@ -2218,5 +2218,27 @@
     "dry_run": false,
     "video_id": "BNY3mx0D3KE",
     "youtube_url": "https://youtu.be/BNY3mx0D3KE"
+  },
+  {
+    "dhash": "868e31d1c3070e01",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 3.3,
+    "id": 431,
+    "species": "MIGRATORY LOCUST",
+    "scientific": "Locusta migratoria",
+    "class_type": "insect",
+    "morphology": "orthoptera",
+    "accent": [
+      108,
+      111,
+      50
+    ],
+    "anatomy_notes": "The migratory locust is the most widespread locust species, and the only species in the genus Locusta. It occurs throughout Africa, Europe, Asia, Australia and New Zealand. Because of the vast geograp",
+    "file": "tmp/reel_0431/migratory_locust_short.mp4",
+    "timestamp": "2026-09-20T23:17:46.939048+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "PWuycUPpJZw",
+    "youtube_url": "https://youtu.be/PWuycUPpJZw"
   }
 ]

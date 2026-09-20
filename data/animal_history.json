@@ -2196,5 +2196,27 @@
     "dry_run": false,
     "video_id": "E1_NCQOnHfg",
     "youtube_url": "https://youtu.be/E1_NCQOnHfg"
+  },
+  {
+    "dhash": "860b31f0c7070e02",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 6.2,
+    "id": 363,
+    "species": "ANTARCTIC KRILL",
+    "scientific": "Euphausia superba",
+    "class_type": "crustacean",
+    "morphology": "shrimp",
+    "accent": [
+      160,
+      70,
+      20
+    ],
+    "anatomy_notes": "Antarctic krill is a species of krill found in the Antarctic waters of the Southern Ocean. It is a small, swimming crustacean that lives in large schools, called swarms, sometimes reaching densities o",
+    "file": "tmp/reel_0363/antarctic_krill_short.mp4",
+    "timestamp": "2026-09-20T19:30:25.606676+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "BNY3mx0D3KE",
+    "youtube_url": "https://youtu.be/BNY3mx0D3KE"
   }
 ]

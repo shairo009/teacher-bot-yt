@@ -2262,5 +2262,27 @@
     "dry_run": false,
     "video_id": "uV1o8-bbmMA",
     "youtube_url": "https://youtu.be/uV1o8-bbmMA"
+  },
+  {
+    "dhash": "232ba9c0d3470f00",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.3,
+    "id": 302,
+    "species": "NEON TETRA",
+    "scientific": "Paracheirodon innesi",
+    "class_type": "aquatic",
+    "morphology": "fish",
+    "accent": [
+      25,
+      20,
+      18
+    ],
+    "anatomy_notes": "The neon tetra is a species of freshwater fish belonging to the family Acestrorhamphidae, the American characins, of the order Characiformes. The type species of its genus, it is native to blackwater ",
+    "file": "tmp/reel_0302/neon_tetra_short.mp4",
+    "timestamp": "2026-09-21T18:16:16.864695+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "ik_CQe5CtJE",
+    "youtube_url": "https://youtu.be/ik_CQe5CtJE"
   }
 ]

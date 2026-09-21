@@ -2240,5 +2240,27 @@
     "dry_run": false,
     "video_id": "PWuycUPpJZw",
     "youtube_url": "https://youtu.be/PWuycUPpJZw"
+  },
+  {
+    "dhash": "0eae2343c3830f20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.7,
+    "id": 550,
+    "species": "BLACK HEADED SPIDER MONKEY",
+    "scientific": "Ateles fusciceps",
+    "class_type": "quadruped",
+    "morphology": "primate",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "Spider monkeys are New World monkeys belonging to the genus Ateles, part of the subfamily Atelinae, family Atelidae. Like other atelines, they are found in tropical forests of Central and South Americ",
+    "file": "tmp/reel_0550/black_headed_spider_monkey_short.mp4",
+    "timestamp": "2026-09-21T08:01:36.713717+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "uV1o8-bbmMA",
+    "youtube_url": "https://youtu.be/uV1o8-bbmMA"
   }
 ]

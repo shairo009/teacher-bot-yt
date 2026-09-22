@@ -2350,5 +2350,27 @@
     "dry_run": false,
     "video_id": "4XrwG95-7sk",
     "youtube_url": "https://youtu.be/4XrwG95-7sk"
+  },
+  {
+    "dhash": "868e31d183070e01",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.9,
+    "id": 117,
+    "species": "PANTHER CHAMELEON",
+    "scientific": "Furcifer pardalis",
+    "class_type": "reptile",
+    "morphology": "chameleon",
+    "accent": [
+      129,
+      110,
+      50
+    ],
+    "anatomy_notes": "The panther chameleon is a species of chameleon found in the eastern and northern parts of Madagascar in a tropical forest biome. Additionally, it has been introduced to R\u00e9union and Mauritius, as well",
+    "file": "tmp/reel_0117/panther_chameleon_short.mp4",
+    "timestamp": "2026-09-22T20:15:13.096906+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "iYosoryLbkc",
+    "youtube_url": "https://youtu.be/iYosoryLbkc"
   }
 ]

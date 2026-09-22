@@ -2284,5 +2284,27 @@
     "dry_run": false,
     "video_id": "ik_CQe5CtJE",
     "youtube_url": "https://youtu.be/ik_CQe5CtJE"
+  },
+  {
+    "dhash": "0e0b91b2c3870f20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 8.2,
+    "id": 596,
+    "species": "MALAYAN TAPIR",
+    "scientific": "Tapirus indicus",
+    "class_type": "quadruped",
+    "morphology": "pachyderm",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The Malayan tapir, also called Asian tapir, Asiatic tapir, oriental tapir, Indian tapir, piebald tapir, or black-and-white tapir, is the only living tapir species outside of the Americas. It is native",
+    "file": "tmp/reel_0596/malayan_tapir_short.mp4",
+    "timestamp": "2026-09-22T00:08:27.175761+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "F3WgcuaQaEs",
+    "youtube_url": "https://youtu.be/F3WgcuaQaEs"
   }
 ]

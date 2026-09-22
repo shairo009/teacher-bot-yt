@@ -2372,5 +2372,27 @@
     "dry_run": false,
     "video_id": "iYosoryLbkc",
     "youtube_url": "https://youtu.be/iYosoryLbkc"
+  },
+  {
+    "dhash": "8e8f31f1c3870f30",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.3,
+    "id": 686,
+    "species": "HONDURAN WHITE BAT",
+    "scientific": "Ectophylla alba",
+    "class_type": "quadruped",
+    "morphology": "small_mammal",
+    "accent": [
+      240,
+      235,
+      225
+    ],
+    "anatomy_notes": "The Honduran white bat, also called the Caribbean white tent-making bat, is a species of bat in the family Phyllostomatidae. It is the only member of the genus Ectophylla. The genus and the species we",
+    "file": "tmp/reel_0686/honduran_white_bat_short.mp4",
+    "timestamp": "2026-09-22T23:41:13.810881+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "cV2sxLCXl3I",
+    "youtube_url": "https://youtu.be/cV2sxLCXl3I"
   }
 ]

@@ -2328,5 +2328,27 @@
     "dry_run": false,
     "video_id": "wGXXHpcOFwQ",
     "youtube_url": "https://youtu.be/wGXXHpcOFwQ"
+  },
+  {
+    "dhash": "9e2b81d0c3870f20",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 2.2,
+    "id": 526,
+    "species": "SPOTTED HYENA",
+    "scientific": "Crocuta crocuta",
+    "class_type": "quadruped",
+    "morphology": "canine",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The spotted hyena, also known as the laughing hyena, is a hyena species, currently classed as the sole extant member of the genus Crocuta, native to sub-Saharan Africa. It is listed as being of least ",
+    "file": "tmp/reel_0526/spotted_hyena_short.mp4",
+    "timestamp": "2026-09-22T16:59:39.579152+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "4XrwG95-7sk",
+    "youtube_url": "https://youtu.be/4XrwG95-7sk"
   }
 ]

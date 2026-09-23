@@ -234,6 +234,37 @@ class GeometryTests(OfflineCase):
                 self.assertEqual(report['numerical_samples'],121)
                 self.assertGreater(report['planted_limb_samples'],0)
                 self.assertFalse(report['specimen_validated'])
+                self.assertTrue(report['numerical_pass'], report['numerical_checks'])
+                self.assertGreater(report['max_sampled_swing_clearance'], 0)
+                self.assertLess(report['max_limb_cycle_closure_error'], 1e-8)
+
+    def test_gait_report_detects_cumulative_sliding(self):
+        real_pose = preview.mammal_pose
+        def sliding_pose(species, time, travel=None):
+            p, bob, limbs = real_pose(species, time, travel)
+            for limb in limbs:
+                limb['contact_x'] += (travel or 0)*.01
+            return p, bob, limbs
+        with patch.object(preview, 'mammal_pose', side_effect=sliding_pose):
+            report = preview.gait_report(engine.get_species_for_id(0))
+        self.assertFalse(report['numerical_pass'])
+        self.assertFalse(report['numerical_checks']['max_stance_world_drift'])
+        self.assertGreater(report['max_stance_world_drift'], .1)
+
+    def test_gait_report_detects_boundary_teleport(self):
+        real_pose = preview.mammal_pose
+        def broken_pose(species, time, travel=None):
+            p, bob, limbs = real_pose(species, time, travel)
+            for limb in limbs:
+                if not limb['planted']:
+                    x, y = limb['points'][-1]
+                    limb['points'][-1] = (x+10,y)
+            return p, bob, limbs
+        with patch.object(preview, 'mammal_pose', side_effect=broken_pose):
+            report = preview.gait_report(engine.get_species_for_id(0))
+        self.assertFalse(report['numerical_pass'])
+        self.assertGreater(report['max_boundary_position_gap'], 9)
+        self.assertFalse(report['numerical_checks']['max_boundary_velocity_gap'])
 
 
 class PreviewTests(OfflineCase):
@@ -352,6 +383,67 @@ class PreviewTests(OfflineCase):
                 (self.output/'link.json').symlink_to(source)
         self.assertEqual(json.loads(source.read_text()),{'protected':True})
         self.assertEqual(list(self.output.glob('artifact_*')),[])
+
+    def test_catalogue_audit_counts_and_truthful_scope(self):
+        report = preview.catalogue_audit()
+        self.assertEqual(report['catalogue_entries'],687)
+        self.assertEqual(report['mammal_rigs_checked'],234)
+        self.assertEqual(sum(report['body_plan_counts'].values()),687)
+        self.assertTrue(report['numerical_pass'])
+        self.assertEqual(report['failed_animal_ids'],[])
+        self.assertFalse(report['render_smoke_performed'])
+        self.assertFalse(report['uploaded'])
+        self.assertTrue(all(e['review_required'] and not e['specimen_validated'] for e in report['entries']))
+        self.assertEqual(list(self.output.iterdir()),[])
+
+    def test_audit_cli_writes_report_only_and_fails_on_numeric_error(self):
+        report = {'catalogue_entries':1,'mammal_rigs_checked':1,'failed_animal_ids':[0],'numerical_pass':False}
+        with patch.object(preview,'catalogue_audit',return_value=report), patch('builtins.print'):
+            status = preview.main(['--audit-catalogue','--output-dir',str(self.output)])
+        self.assertEqual(status,1)
+        self.assertEqual([p.name for p in self.output.iterdir()],['catalogue_audit.json'])
+        self.assertEqual(json.loads((self.output/'catalogue_audit.json').read_text()),report)
+
+    def test_study_frame_is_deterministic_without_species_mutation(self):
+        species = preview.preview_species(0)
+        original = copy.deepcopy(species)
+        first = preview.render_study_frame(species,12,60)
+        preview.render_study_frame(species,0,60)
+        again = preview.render_study_frame(species,12,60)
+        self.assertEqual(first.size,(1600,900))
+        self.assertEqual(first.mode,'RGB')
+        self.assertEqual(first.tobytes(),again.tobytes())
+        self.assertEqual(species,original)
+
+    def test_nonmammal_study_rejected_before_creating_artifacts(self):
+        species = self.species_named('PACIFIC CLEANER SHRIMP')
+        with self.assertRaises(ValueError):
+            preview.encode_preview(species,self.output,.1,study=True)
+        with self.assertRaises(ValueError):
+            preview.render_study_frame(species,0,3)
+        self.assertEqual(list(self.output.iterdir()),[])
+
+    @unittest.skipUnless(shutil.which('ffmpeg') and shutil.which('ffprobe'), 'FFmpeg required')
+    def test_encoded_study_dimensions_and_frame_count(self):
+        path = preview.encode_preview(preview.preview_species(0),self.output,.1,study=True)
+        result = subprocess.run(['ffprobe','-v','error','-count_frames','-show_streams','-of','json',str(path)],check=True,capture_output=True,text=True)
+        streams = json.loads(result.stdout)['streams']
+        self.assertEqual(len(streams),1)
+        self.assertEqual(streams[0]['codec_type'],'video')
+        self.assertEqual(streams[0]['nb_read_frames'],'3')
+        self.assertEqual((streams[0]['width'],streams[0]['height']),(1600,900))
+        self.assertEqual(list(self.output.glob('preview_*.mp4')),[])
+
+    @unittest.skipUnless(shutil.which('ffmpeg'), 'FFmpeg required')
+    def test_invalid_video_frame_preserves_existing_file(self):
+        species = preview.preview_species(0)
+        destination = self.output/f"{species['id']}_study.mp4"
+        destination.write_bytes(b'previous')
+        with patch.object(preview,'render_study_frame',return_value=Image.new('RGB',(10,10))):
+            with self.assertRaises(ValueError):
+                preview.encode_preview(species,self.output,.1,study=True)
+        self.assertEqual(destination.read_bytes(),b'previous')
+        self.assertEqual(list(self.output.glob('preview_*.mp4')),[])
 
     @unittest.skipUnless(shutil.which('ffmpeg') and shutil.which('ffprobe'), 'FFmpeg required')
     def test_encoded_mp4_frame_count_and_no_audio(self):

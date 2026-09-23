@@ -139,7 +139,8 @@ def gait_report(species: dict) -> dict:
     p = mammal_profile(species)
     stride, duty = gait_parameters(p)
     bone_error = height_error = contact_drift = 0.0
-    previous = {}
+    penetration = swing_clearance = 0.0
+    anchors = {}
     stance_samples = 0
     for step in range(121):
         travel = stride*step/120
@@ -149,18 +150,57 @@ def gait_report(species: dict) -> dict:
             bone_error = max(bone_error, *(abs(math.dist(a,b)-length)
                                          for a,b,length in zip(points,points[1:],limb["lengths"])))
             key = (limb["side"], limb["front"])
+            # Kangaroo forelimbs are unsupported hands, not ground-contact feet.
+            if not (p.family == "kangaroo" and limb["front"]):
+                clearance = p.legs-points[-1][1]
+                penetration = max(penetration, -clearance)
+                if not limb["planted"]:
+                    swing_clearance = max(swing_clearance, clearance)
             if limb["planted"]:
                 stance_samples += 1
                 height_error = max(height_error, abs(points[-1][1]-p.legs))
-                prev = previous.get(key)
-                if prev and prev["planted"] and limb["phase"] > prev["phase"]:
-                    contact_drift = max(contact_drift, abs(limb["contact_x"]-prev["contact_x"]))
-            previous[key] = limb
+                # Compare to the first contact in this stance, not only to the
+                # adjacent sample: slow cumulative sliding must not be hidden.
+                if key not in anchors or limb["phase"] < anchors[key]["phase"]:
+                    anchors[key] = {"x": limb["contact_x"], "phase": limb["phase"]}
+                contact_drift = max(contact_drift, abs(limb["contact_x"]-anchors[key]["x"]))
+            else:
+                anchors.pop(key, None)
+    start = mammal_pose(species, 0, 0)[2]
+    end = mammal_pose(species, stride/72, stride)[2]
+    cycle_error = max(math.dist(a,b) for first,last in zip(start,end)
+                      for a,b in zip(first["points"],last["points"]))
+    position_gap = velocity_gap = 0.0
+    epsilon = stride*1e-6
+    for index, limb in enumerate(start):
+        for boundary in (duty, 1.0):
+            center = stride*(boundary-limb["phase"])
+            samples = [mammal_pose(species, x/72, x)[2][index]["points"][-1]
+                       for x in (center-epsilon, center, center+epsilon)]
+            before, at, after = samples
+            position_gap = max(position_gap, math.dist(before,after))
+            velocity_gap = max(velocity_gap, math.hypot(*(
+                (after[k]-2*at[k]+before[k])/epsilon for k in (0,1))))
+    errors = {"max_bone_length_error": bone_error,
+              "max_planted_height_error": height_error,
+              "max_stance_world_drift": contact_drift,
+              "max_ground_penetration": penetration,
+              "max_limb_cycle_closure_error": cycle_error,
+              "max_boundary_position_gap": position_gap,
+              "max_boundary_velocity_gap": velocity_gap}
+    tolerances = {key: 1e-7 for key in errors}
+    tolerances.update(max_boundary_position_gap=1e-3, max_boundary_velocity_gap=1e-2)
+    checks = {key: math.isfinite(value) and value <= tolerances[key] for key,value in errors.items()}
     return {"animal_id": species["animal_id"], "name": species["name"],
             "gait": p.gait, "stride_rig_units": stride, "stance_fraction": duty,
             "cycle_seconds_at_preview_speed": stride/(72*MOTION_RATE), "numerical_samples": 121,
-            "planted_limb_samples": stance_samples, "max_bone_length_error": bone_error,
-            "max_planted_height_error": height_error, "max_stance_world_drift": contact_drift,
+            "planted_limb_samples": stance_samples, **errors,
+            "max_sampled_swing_clearance": swing_clearance,
+            "boundary_sample_epsilon": epsilon,
+            "velocity_units": "rig displacement per rig unit of travel",
+            "numerical_checks": checks, "numerical_tolerances": tolerances,
+            "numerical_pass": all(checks.values()),
+            "cycle_scope": "limb rig only; secondary tail sway is not stride-periodic",
             "units": "procedural rig units, not centimeters",
             "offline": True, "uploaded": False, **anatomy_summary(species)}
 
@@ -200,18 +240,98 @@ def create_gait_sheet(animal_id: int, output: Path) -> Path:
     return path
 
 
-def encode_preview(species: dict, output: Path, duration: float) -> Path:
+def catalogue_audit() -> dict:
+    """Audit routing and numeric mammal rigs without rendering or publishing."""
+    entries = []
+    counts = {}
+    for animal_id in range(len(load_encyclopedia())):
+        species = get_species_for_id(animal_id)
+        summary = anatomy_summary(species)
+        plan = summary["body_plan"]
+        counts[plan] = counts.get(plan, 0)+1
+        entry = {"animal_id": animal_id, "name": species["name"], **summary}
+        if plan == "mammal":
+            entry["gait_report"] = gait_report(species)
+        entries.append(entry)
+    mammal_reports = [entry["gait_report"] for entry in entries if "gait_report" in entry]
+    failed = [report["animal_id"] for report in mammal_reports if not report["numerical_pass"]]
+    maxima = {key: max(report[key] for report in mammal_reports)
+              for key in mammal_reports[0]["numerical_checks"]} if mammal_reports else {}
+    return {"schema_version": 1, "offline": True, "uploaded": False,
+            "catalogue_entries": len(entries), "body_plan_counts": counts,
+            "mammal_rigs_checked": len(mammal_reports), "failed_animal_ids": failed,
+            "numerical_pass": not failed, "maxima": maxima,
+            "render_smoke_performed": False,
+            "scope": "Routing and numeric rig audit, not pixel or biological validation. Run test_anatomy for render smoke tests.",
+            "entries": entries}
+
+
+STUDY_SIZE = (1600, 900)
+
+
+def render_study_frame(species: dict, frame_idx: int, total: int) -> Image.Image:
+    """Synchronized lateral surface/overlay views with real rig contact states."""
+    if anatomy_summary(species)["body_plan"] != "mammal":
+        raise ValueError("Motion-study video currently supports mammal rigs only")
+    image = Image.new("RGB", STUDY_SIZE, (12,20,30))
+    draw = ImageDraw.Draw(image)
+    title = species["name"].upper()+" / 2D MOTION STUDY"
+    font_size = 32
+    while get_font(font_size,bold=True).getlength(title) > 1516 and font_size > 12:
+        font_size -= 1
+    draw.text((42,30),title,font=get_font(font_size,bold=True),fill=(231,239,245))
+    draw.text((42,80),"Shared skin, head, tail and limb rig / fixed camera / no 3D assets",font=get_font(20),fill=(151,178,193))
+    for index, mode in enumerate(("surface", "overlay")):
+        subject = {**species, "render_mode": mode}
+        frame = render_generative_frame(subject,frame_idx,total)
+        crop = frame.crop((110,340,970,832)).resize((744,426),Image.Resampling.LANCZOS)
+        x = 42+index*774
+        draw.text((x,127),mode.upper(),font=get_font(19,bold=True),fill=(132,215,203))
+        image.paste(crop,(x,162))
+    time = frame_idx/FPS*MOTION_RATE
+    p,_,limbs = mammal_pose(species,time)
+    stride,duty = gait_parameters(p)
+    phase = (time*72/stride)%1
+    draw.text((42,612),f"{p.family} / {p.gait} approximation / {frame_idx/FPS:.2f}s / cycle {phase:.2f}",font=get_font(21,bold=True),fill=(230,238,245))
+    for x,label,color in ((985,"STANCE",(77,158,124)),(1140,"SWING",(175,131,65)),(1290,"UNSUPPORTED",(69,87,106))):
+        draw.rectangle((x,615,x+17,632),fill=color)
+        draw.text((x+25,613),label,font=get_font(16),fill=(188,207,216))
+    initial = mammal_pose(species,0,0)[2]
+    bar_x,bar_w = 210,1100
+    for index,limb in enumerate(limbs):
+        y = 662+index*37
+        label = ("Front" if limb["front"] else "Hind")+(" near" if limb["side"]==1 else " far")
+        unsupported = p.family == "kangaroo" and limb["front"]
+        draw.text((42,y+3),label,font=get_font(17),fill=(194,210,222))
+        for sample in range(160):
+            planted = (sample/160+initial[index]["phase"])%1 < duty
+            color = (69,87,106) if unsupported else (77,158,124) if planted else (175,131,65)
+            draw.rectangle((bar_x+sample*bar_w/160,y,bar_x+(sample+1)*bar_w/160,y+23),fill=color)
+        marker = bar_x+phase*bar_w
+        draw.line((marker,y-3,marker,y+27),fill=(238,245,248),width=3)
+        status = "unsupported" if unsupported else "stance" if limb["planted"] else "swing"
+        draw.text((1340,y+2),status,font=get_font(17),fill=(153,210,195))
+    draw.text((42,836),"Family-level procedural approximation. Numeric rig checks are NOT biological validation.",font=get_font(19),fill=(157,179,193))
+    return image
+
+
+def encode_preview(species: dict, output: Path, duration: float, *, study: bool = False) -> Path:
     """Stream frames with bounded memory and atomic output; no stale JPEG sequences."""
     total = timeline_frames(duration)
+    if study and anatomy_summary(species)["body_plan"] != "mammal":
+        raise ValueError("Motion-study video currently supports mammal rigs only")
+    width, height = STUDY_SIZE if study else (WIDTH, HEIGHT)
+    renderer = render_study_frame if study else render_generative_frame
     executable = shutil.which("ffmpeg")
     if not executable:
         raise RuntimeError("Install FFmpeg to encode videos; PNG previews do not need it")
-    destination = output_file(output, f"{species['id']}_{species['render_mode']}.mp4")
+    suffix = "study" if study else species['render_mode']
+    destination = output_file(output, f"{species['id']}_{suffix}.mp4")
     fd, temp_name = tempfile.mkstemp(prefix="preview_", suffix=".mp4", dir=output)
     os.close(fd)
     partial = Path(temp_name)
     command = [executable, "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
-               "-s", f"{WIDTH}x{HEIGHT}", "-r", str(FPS), "-i", "pipe:0", "-an",
+               "-s", f"{width}x{height}", "-r", str(FPS), "-i", "pipe:0", "-an",
                "-c:v", "libx264", "-threads", "2", "-preset", "fast", "-crf", "20",
                "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(partial)]
     process = None
@@ -220,7 +340,10 @@ def encode_preview(species: dict, output: Path, duration: float) -> Path:
             process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=errors)
             try:
                 for frame_idx in range(total):
-                    process.stdin.write(render_generative_frame(species, frame_idx, total).tobytes())
+                    frame = renderer(species, frame_idx, total)
+                    if frame.size != (width, height) or frame.mode != "RGB":
+                        raise ValueError("Renderer returned an invalid raw-video frame")
+                    process.stdin.write(frame.tobytes())
                 process.stdin.close()
             except BrokenPipeError as exc:
                 raise RuntimeError("FFmpeg closed the stream before every frame was sent") from exc
@@ -255,11 +378,21 @@ def main(argv=None) -> int:
     parser.add_argument("--comparison", action="store_true", help="Aligned mammal surface, overlay and skeleton sheet")
     parser.add_argument("--gait-sheet", action="store_true", help="Eight mammal poses across a full stride, with JSON rig checks")
     parser.add_argument("--ids", default=",".join(map(str, DEFAULT_IDS)))
+    parser.add_argument("--audit-catalogue", action="store_true", help="Standalone routing/numeric audit of all 687 entries, without rendering")
+    parser.add_argument("--study-video", action="store_true", help="Also create a silent 1600x900 surface/overlay motion study (mammals only)")
     parser.add_argument("--video", action="store_true", help="Also create a silent 1080x1920 MP4")
     parser.add_argument("--duration", type=float, default=4.0)
     parser.add_argument("--output-dir", help="Directory inside teacher-bot/outputs")
     args = parser.parse_args(argv)
     try:
+        if args.audit_catalogue:
+            if any((args.list, args.video, args.study_video, args.comparison, args.gait_sheet, args.contact_sheet)):
+                raise ValueError("--audit-catalogue is standalone; do not combine it with list/render options")
+            report = catalogue_audit()
+            output = output_directory(args.output_dir)
+            print(save_report(report, output, "catalogue_audit.json"))
+            print(f"{report['catalogue_entries']} entries / {report['mammal_rigs_checked']} mammal rigs / {len(report['failed_animal_ids'])} numerical failures")
+            return 0 if report["numerical_pass"] else 1
         if args.list:
             query = args.search.casefold()
             for index, species in enumerate(load_encyclopedia()):
@@ -271,7 +404,7 @@ def main(argv=None) -> int:
             raise ValueError("Still frame must be between 0 and 179")
         timeline_frames(args.duration)
         species = preview_species(args.animal_id, args.mode)
-        if args.comparison or args.gait_sheet:
+        if args.comparison or args.gait_sheet or args.study_video:
             preview_species(args.animal_id, "skeleton")
         ids = [int(value.strip()) for value in args.ids.split(",")] if args.contact_sheet else []
         if args.contact_sheet:
@@ -293,6 +426,9 @@ def main(argv=None) -> int:
             print(create_gait_sheet(args.animal_id, output))
         if args.video:
             print(encode_preview(species, output, args.duration))
+        if args.study_video:
+            print(save_image(render_study_frame(species, args.frame, 180), output, f"{species['id']}_study.jpg", quality=94))
+            print(encode_preview(species, output, args.duration, study=True))
         return 0
     except (ValueError, RuntimeError, OSError, subprocess.TimeoutExpired) as exc:
         parser.exit(2, f"Preview error: {exc}\n")

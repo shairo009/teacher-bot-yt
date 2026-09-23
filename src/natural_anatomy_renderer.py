@@ -7,7 +7,7 @@ views. Debug bones come from the SAME pose that draws the limbs.
 from __future__ import annotations
 
 import math
-from src.anatomy_profiles import mammal_profile, words, resolve_body_plan, finite_ratio
+from src.anatomy_profiles import mammal_profile, words, resolve_body_plan, finite_ratio, supports_spider_rig, supports_scorpion_rig
 from src.bio_bone_renderer import solve_two_bone_ik
 
 
@@ -365,27 +365,114 @@ def _mammal_skeleton(pen,p,bob,limbs,head_geometry,tail):
         for x,y in limb['points']: pen.oval(x,y,4,4,joint,(22,38,42),1)
 
 
-def draw_elongated(draw,sim,species,time,*unused):
-    """Eels/legless lizards: tapered axial body, no invented paired hind fins."""
-    pen=Pen(draw,sim.x,sim.y,sim.angle)
-    plan=resolve_body_plan(species);w=words(species)
-    base=tuple(species['fur_mid']);dark=tuple(species['fur_dark'])
-    pts=[];width=[]
-    for i in range(52):
-        u=i/51
-        pts.append((-u*420, math.sin(time*3-u*9)*u*40))
-        width.append(max(2,42*(1-u)**.65))
-    if plan=="eel":
-        pen.taper(pts,[x*1.34 for x in width],blend(base,(166,177,141),.35),dark)
-    pen.taper(pts,width,base,dark)
-    pen.line([(x,y-4) for x,y in pts],blend(base,(206,202,160),.25),3)
-    pen.poly([(19,0),(9,-17),(-17,-20),(-29,-12),(-29,13),(3,15)],base,dark)
-    pen.oval(8,-9,3,3,(18,20,15));pen.oval(9,-10,1,1,(224,227,201))
-    pen.line([(19,3),(-5,6)],dark,2)
-    if species.get('render_mode') in {'skeleton','overlay'}:
-        pen.line(pts,(224,229,198),2)
-        for i in range(2,50,2):
-            x,y=pts[i];pen.line([(x,y-width[i]*.36),(x,y+width[i]*.36)],(210,221,194),1)
+AXIAL_PLANS = frozenset({"serpent", "eel", "legless_lizard"})
+AXIAL_ANGULAR_SPEED = 3.0
+
+
+def axial_pose(species, time):
+    """Fixed-length 2D chain with a travelling tangent wave.
+
+    A rig-local motion study, not a friction/fluid simulation. The 52 segments
+    are drawing controls, NOT a species' anatomical vertebra count. Surface,
+    axial guide and measurements all consume this exact geometry.
+    """
+    plan = resolve_body_plan(species)
+    if plan not in AXIAL_PLANS or not math.isfinite(time):
+        raise ValueError("Axial poses require a supported body plan and finite time")
+    names = words(species)
+    cobra = plan == "serpent" and "cobra" in names
+    rattle = plan == "serpent" and "rattlesnake" in names
+    broad_head = plan == "serpent" and bool(names & {"viper", "rattlesnake", "adder"})
+    length = 480.0 if plan == "serpent" else 420.0
+    segments = 52
+    segment_length = length / segments
+    flex = finite_ratio(species.get("bone_structure", {}).get("vertebrae", {}).get("flexibility_index"), 1, .5, 1.4)
+    amplitude = (.60 if plan == "serpent" else .44) * flex
+    phase = time * AXIAL_ANGULAR_SPEED
+    points = [(0.0, 0.0)]
+    for index in range(segments):
+        u = index / (segments-1)
+        # The head/neck tangent remains fixed; the wave grows caudally.
+        envelope = min(1.0, u/.18)
+        envelope = envelope*envelope*(3-2*envelope)
+        angle = amplitude * envelope * math.sin(phase-u*math.tau*1.35)
+        x, y = points[-1]
+        points.append((x-segment_length*math.cos(angle), y+segment_length*math.sin(angle)))
+    widths, normals, ribs = [], [], []
+    for index, (x, y) in enumerate(points):
+        u = index / segments
+        width = max(1.5, (39 if plan == "serpent" else 36)*(1-u)**.65)
+        if cobra and .02 < u < .25:
+            width += 43*math.sin(math.pi*(u-.02)/.23)**2
+        widths.append(width)
+        a, b = points[max(0,index-1)], points[min(segments,index+1)]
+        dx, dy = b[0]-a[0], b[1]-a[1]
+        span = math.hypot(dx,dy)
+        normal = (-dy/span, dx/span)
+        normals.append(normal)
+        if 3 <= index < int(segments*.78) and index % 2 == 0:
+            nx, ny = normal
+            # Schematic transverse guides terminate INSIDE the shared skin.
+            ribs.append([(x+nx*width*.37,y+ny*width*.37),(x,y),
+                         (x-nx*width*.37,y-ny*width*.37)])
+    head_width = 22 if broad_head else 16
+    head = [(27,0),(17,-head_width*.72),(0,-head_width),(-15,-11),
+            (-15,11),(0,head_width),(17,head_width*.72)]
+    # End decorations follow the tail tangent, not the head's heading.
+    a, b = points[-2:]
+    tangent = ((b[0]-a[0])/segment_length, (b[1]-a[1])/segment_length)
+    rattles = [(b[0]+tangent[0]*(4+i*5), b[1]+tangent[1]*(4+i*5)) for i in range(4)] if rattle else []
+    return {"points": points, "widths": widths, "normals": normals, "ribs": ribs,
+            "head": head, "rattles": rattles, "cobra_hood": cobra,
+            "segment_lengths": [segment_length]*segments,
+            "cycle_seconds": math.tau/AXIAL_ANGULAR_SPEED, "plan": plan}
+
+
+def draw_elongated(draw, sim, species, time, *unused):
+    """Shared surface/axial guide for snakes, eels and legless lizards."""
+    pose = axial_pose(species,time)
+    pen = Pen(draw,sim.x,sim.y,sim.angle)
+    pts, widths = pose["points"], pose["widths"]
+    base, dark = tuple(species['fur_mid']), tuple(species['fur_dark'])
+    mode = species.get("render_mode", "surface")
+    if mode != "skeleton":
+        if pose["plan"] == "eel":
+            # Median fin fringe only: never add paired hind fins.
+            pen.taper(pts,[w*1.30 for w in widths],blend(base,(166,177,141),.35),dark)
+        pen.taper(pts,widths,base,dark)
+        highlight = [(x+nx*w*.17,y+ny*w*.17) for (x,y),(nx,ny),w in zip(pts,pose['normals'],widths)]
+        pen.line(highlight,blend(base,(206,202,160),.28),2)
+        if pose["plan"] == "serpent":
+            for i in range(5,len(pts)-5,3):
+                x,y = pts[i]
+                nx,ny = pose['normals'][i]
+                radius = widths[i]*.18
+                pen.poly([(x+nx*radius,y+ny*radius),(x+ny*5,y-nx*5),
+                          (x-nx*radius,y-ny*radius),(x-ny*5,y+nx*5)],dark,curved=False)
+        pen.poly(pose['head'],base,dark)
+        for side in (-1,1):
+            pen.oval(13,side*10,3,3,(18,20,15))
+            pen.oval(14,side*10-1,1,1,(224,227,201))
+        pen.line([(25,2),(7,6)],dark,1)
+        if pose['plan'] in {'serpent','legless_lizard'}:
+            # Smooth extension/retraction avoids the old on/off tongue pop.
+            extension = max(0,math.sin(time*6))**2
+            if extension > .01:
+                tip = 27+19*extension
+                pen.line([(25,0),(tip,0)],(154,69,69),1)
+                for side in (-1,1):
+                    pen.line([(tip,0),(tip+7*extension,side*4*extension)],(154,69,69),1)
+        for i,(x,y) in enumerate(pose['rattles']):
+            pen.oval(x,y,4-i*.5,4-i*.5,(189,166,120),dark)
+    if mode in {'skeleton','overlay'}:
+        bone, joint = (231,232,203), (102,219,204)
+        pen.line(pts,bone,2,False)
+        for rib in pose['ribs']:
+            pen.line(rib,bone,1,False)
+        pen.poly(pose['head'],None,bone,2)
+        for x,y in pts[1::2]:
+            pen.oval(x,y,1.8,1.8,joint)
+        # The rattle is keratin, not an extension of the bony axial guide.
 
 
 def draw_myriapod(draw,sim,species,time,*unused):
@@ -521,23 +608,368 @@ def draw_shrimp(draw, sim, species, time, *unused):
         pen.poly([(53, 48), (83, 39), (96, 51), (81, 54), (93, 64), (68, 69)], base, dark, curved=False)
 
 
+def scorpion_pose(species, time, travel=None):
+    """Dorsal 2D study: eight walking legs, chelate pedipalps and metasoma.
+
+    Tail bends IN the illustration plane; this is not projection of a raised
+    tail. All links are fixed-length artist controls, not specimen dimensions.
+    The independent tail/pincer cycle is not required to match the walking gait.
+    """
+    if not supports_scorpion_rig(species) or not math.isfinite(time):
+        raise ValueError('Scorpion diagnostics require a true scorpion and finite time')
+    travel = time*28 if travel is None else travel
+    if not math.isfinite(travel):
+        raise ValueError('Scorpion travel must be finite')
+    w = words(species)
+    form = 'robust' if w & {'emperor', 'volt'} else 'slender'
+    robust = form == 'robust'
+    rx, ry = (36.0, 31.0) if robust else (31.0, 25.0)
+    stride, duty = 26.0, .70
+    limbs = []
+    for side in (-1, 1):
+        for index in range(4):
+            root = (rx*(.52, .18, -.18, -.52)[index], side*ry*(.76, .94, .94, .76)[index])
+            offset = ((index+(side == 1)) % 2)*.5
+            phase = (travel/stride+offset) % 1
+            neutral_x = root[0]+(39, 10, -29, -60)[index]
+            reach_y = (92, 105, 109, 98)[index]
+            if phase < duty:
+                foot_x, foot_y = neutral_x+stride*(duty/2-phase), side*reach_y
+            else:
+                q = (phase-duty)/(1-duty)
+                eased = q**3*(10+q*(-15+6*q))
+                foot_x = neutral_x-stride*duty/2-stride*(1-duty)*q+stride*eased
+                foot_y = side*(reach_y-7*math.sin(math.pi*q)**2)
+            distal = 12.0
+            ankle = (foot_x, foot_y-side*distal)
+            total = math.hypot(neutral_x-root[0], reach_y-abs(root[1])-distal)*1.32+stride*.35
+            lengths = [total*.51, total*.49, distal]
+            root, knee, end = solve_two_bone_ik(root, ankle, *lengths[:2], side)
+            foot = (end[0], end[1]+side*distal)
+            limbs.append(dict(side=side, index=index, points=[root,knee,end,foot],
+                              lengths=lengths, phase=phase, phase_offset=offset,
+                              target=(foot_x,foot_y), planted=phase < duty,
+                              contact=(foot[0]+travel,foot[1])))
+
+    def advance(point, length, angle):
+        return point[0]+length*math.cos(angle), point[1]+length*math.sin(angle)
+
+    pedipalps = []
+    for side in (-1, 1):
+        angles = (side*(.88+.035*math.sin(time*1.6)), side*(.28+.04*math.sin(time*1.6+.4)))
+        points = [(rx*.72, side*ry*.61)]
+        lengths = [43.0, 39.0] if robust else [49.0, 43.0]
+        for length, angle in zip(lengths, angles):
+            points.append(advance(points[-1], length, angle))
+        angle = angles[-1]
+        palm_length, palm_width = (29.0, 17.0) if robust else (22.0, 8.0)
+        def palm_point(x, y):
+            return (points[-1][0]+x*math.cos(angle)-y*math.sin(angle),
+                    points[-1][1]+x*math.sin(angle)+y*math.cos(angle))
+        palm = [palm_point(palm_length*(.5+.6*math.cos(k*math.tau/32)),
+                           palm_width*math.sin(k*math.tau/32)) for k in range(32)]
+        fixed_root = palm_point(palm_length*.85, -side*palm_width*.60)
+        moving_root = palm_point(palm_length*.72, side*palm_width*.65)
+        opening = .27+.12*math.sin(time*1.6+.8)
+        fixed = [fixed_root, advance(fixed_root, 27.0, angle+side*.12)]
+        moving = [moving_root, advance(moving_root, 27.0, angle-side*opening)]
+        pedipalps.append(dict(side=side, points=points, lengths=lengths, palm=palm,
+                             fingers=[fixed,moving], finger_lengths=[27.0,27.0]))
+    # Seven dorsal mesosoma plates, then five metasomal segments; telson separate.
+    mesosoma = [(-rx-9-index*13, 0, 12, ry*(1.01-index*.075)) for index in range(7)]
+    tail = [(mesosoma[-1][0]-11, 0)]
+    tail_lengths = [20.0, 22.0, 24.0, 26.0, 29.0] if robust else [24.0, 26.0, 28.0, 30.0, 33.0]
+    for index, length in enumerate(tail_lengths):
+        angle = math.pi+.15+index*.13+.08*math.sin(time*1.6-index*.3)
+        tail.append(advance(tail[-1], length, angle))
+    telson_center = advance(tail[-1], 9, angle)
+    tip = advance(telson_center, 27, angle-.48)
+    stinger = [tail[-1], telson_center, advance(telson_center, 17, angle), tip]
+    return dict(plan='arachnid', rig_type='scorpion', form=form, limbs=limbs,
+                prosoma=(0,0,rx,ry), mesosoma=mesosoma, pedipalps=pedipalps,
+                tail=tail, tail_lengths=tail_lengths, telson=(*telson_center,12,8), stinger=stinger,
+                limb_width=7 if robust else 4, stride=stride, duty=duty,
+                cycle_seconds=stride/28, travel_speed=28.0, appendage_cycle_seconds=math.tau/1.6)
+
+
+def draw_scorpion(draw, sim, species, time, *unused):
+    """Shared planar geometry for surface, overlay and exoskeleton joint guide."""
+    pose = scorpion_pose(species,time)
+    pen = Pen(draw,sim.x,sim.y,sim.angle)
+    base = (70,76,65) if pose['form'] == 'robust' else (187,155,88)
+    dark, light = blend(base,(17,22,22),.60), blend(base,(239,225,185),.32)
+    guide = (223,232,205)
+    mode = species.get('render_mode','surface')
+    if mode != 'skeleton':
+        for limb in pose['limbs']:
+            width = pose['limb_width']
+            for index in range(3):
+                pen.taper(limb['points'][index:index+2], [width*(1-index*.25),max(2,width*(.75-index*.25))],base,dark)
+            for x,y in limb['points'][1:3]: pen.oval(x,y,width*.44,width*.44,light,dark)
+        for palp in pose['pedipalps']:
+            for index in range(2): pen.taper(palp['points'][index:index+2],[10,8],base,dark)
+            pen.poly(palp['palm'],base,dark,2,False)
+            for finger in palp['fingers']: pen.taper(finger,[6,1.6],base,dark)
+        for segment in reversed(pose['mesosoma']):
+            pen.oval(*segment,base,dark,2)
+            x,y,rx,ry = segment
+            pen.line([(x-2,y-ry*.7),(x+3,y),(x-2,y+ry*.7)],light,1)
+        pen.oval(*pose['prosoma'],base,dark,2)
+        pen.line([(-22,-17),(2,-20),(20,-10)],light,2)
+        for side in (-1,1):
+            pen.oval(12,side*6,2.6,2.6,(16,20,19),light)
+            pen.line([(pose['prosoma'][2]-3,side*6),(pose['prosoma'][2]+8,side*5)],dark,4,False)
+        for index in range(5):
+            pen.taper(pose['tail'][index:index+2],[16-index,15-index],base,dark)
+            pen.oval(*pose['tail'][index+1],5,5,light,dark)
+        pen.oval(*pose['telson'],base,dark,2)
+        pen.taper(pose['stinger'][1:],[10,5,1],dark)
+    if mode in {'overlay','skeleton'}:
+        pen.oval(*pose['prosoma'],None,guide,2)
+        for segment in pose['mesosoma']: pen.oval(*segment,None,guide,1)
+        pen.oval(*pose['telson'],None,guide,2)
+        pen.line(pose['stinger'],guide,1,False)
+        chains = [limb['points'] for limb in pose['limbs']]+[pose['tail']]
+        for palp in pose['pedipalps']:
+            pen.poly(palp['palm'],None,guide,1,False)
+            chains.append(palp['points'])
+            chains.extend(palp['fingers'])
+        for points in chains:
+            pen.line(points,guide,2,False)
+            for x,y in points: pen.oval(x,y,2.5,2.5,guide)
+        for limb in pose['limbs']:
+            pen.oval(*limb['points'][-1],3.5,3.5,(112,220,165) if limb['planted'] else (240,182,94))
+
+
+def spider_pose(species, time, travel=None):
+    """Pure dorsal eight-leg pose; three fixed links per leg are rig controls.
+
+    Four roots per side attach to the prosoma, never the abdomen. Pedipalps
+    are separate non-walking appendages. The alternating-tetrapod timing and
+    translated local contacts are an illustration, not a measured spider gait.
+    """
+    if not supports_spider_rig(species) or not math.isfinite(time):
+        raise ValueError('Spider diagnostics require a supported true spider and finite time')
+    travel = time*32 if travel is None else travel
+    if not math.isfinite(travel):
+        raise ValueError('Spider travel must be finite')
+    w = words(species)
+    family = ('tarantula' if 'tarantula' in w or {'ornamental', 'tree'} <= w else
+              'jumping' if w & {'jumping', 'peacock'} else
+              'widow' if 'widow' in w else 'orb_weaver' if 'weaver' in w else
+              'laterigrade' if w & {'crab', 'huntsman', 'sand'} else 'ground')
+    # Length, radius and outward leg reach differentiate broad family silhouettes.
+    shapes = {'tarantula': (32,29,44,34,104,9), 'jumping': (31,27,32,23,73,7),
+              'widow': (23,20,40,36,100,4), 'orb_weaver': (24,18,45,25,130,3),
+              'laterigrade': (30,27,36,28,129,5), 'ground': (30,24,38,26,105,5)}
+    rx,ry,ax,ay,reach,width = shapes[family]
+    stride, duty = (22.0 if family == 'jumping' else 30.0), .68
+    limbs = []
+    for side in (-1,1):
+        for index in range(4):
+            root_x = rx*(.55,.20,-.20,-.55)[index]
+            root_y = side*ry*(.77,.94,.94,.77)[index]
+            root = (root_x,root_y)
+            offset = ((index+(side == 1))%2)*.5
+            phase = (travel/stride+offset)%1
+            splay = (1.0,.50,-.38,-.95)[index]
+            if family == 'laterigrade': splay = (.62,.25,-.22,-.64)[index]
+            neutral_x = root_x+splay*reach*.72
+            reach_y = reach*(.87,1.04,1.04,.90)[index]
+            if family == 'laterigrade' and index < 2: reach_y *= 1.16
+            if phase < duty:
+                foot_x = neutral_x+stride*(duty/2-phase)
+                foot_y = side*reach_y
+            else:
+                q = (phase-duty)/(1-duty)
+                eased = q**3*(10+q*(-15+6*q))
+                foot_x = neutral_x-stride*duty/2-stride*(1-duty)*q+stride*eased
+                foot_y = side*(reach_y-7*math.sin(math.pi*q)**2)
+            distal = 13.0
+            ankle = (foot_x,foot_y-side*distal)
+            # Constant lengths leave reach margin across the entire stride.
+            neutral_reach = math.hypot(neutral_x-root_x,reach_y-abs(root_y)-distal)
+            total = neutral_reach*1.32+stride*.35
+            upper,lower = total*.51,total*.49
+            root,knee,end = solve_two_bone_ik(root,ankle,upper,lower,side)
+            foot = (end[0],end[1]+side*distal)
+            limbs.append({'side':side,'index':index,'points':[root,knee,end,foot],
+                          'lengths':[upper,lower,distal],'target':(foot_x,foot_y),
+                          'phase':phase,'phase_offset':offset,'planted':phase < duty,
+                          'contact':(foot[0]+travel,foot[1])})
+    abdomen = (-rx-ax+6,0,ax,ay)
+    pedipalps = [[(rx*.78,side*ry*.38),(rx+12,side*ry*.71),(rx+24,side*ry*.60)]
+                for side in (-1,1)]
+    return {'plan':'arachnid','rig_type':'spider','family':family,'limbs':limbs,
+            'prosoma':(0,0,rx,ry),'abdomen':abdomen,'pedipalps':pedipalps,
+            'pedicel':[(-rx+4,0),(abdomen[0]+ax-3,0)],'limb_width':width,
+            'stride':stride,'duty':duty,'cycle_seconds':stride/32,'travel_speed':32.0}
+
+
+def draw_spider(draw, sim, species, time, *unused):
+    """Surface and joint guide consume the same eight-leg geometry in 2D."""
+    pose = spider_pose(species,time)
+    pen = Pen(draw,sim.x,sim.y,sim.angle)
+    family = pose['family']
+    base = {'tarantula':(116,81,57),'jumping':(64,71,66),'widow':(41,42,43),
+            'orb_weaver':(153,128,70),'laterigrade':(166,147,98),'ground':(124,100,70)}[family]
+    w = words(species)
+    if 'cobalt' in w: base = (54,84,121)
+    if 'greenbottle' in w: base = (76,107,112)
+    dark = blend(base,(17,21,23),.62)
+    light = blend(base,(233,213,175),.38)
+    guide = (223,232,205)
+    mode = species.get('render_mode','surface')
+    rx = pose['prosoma'][2]
+    if mode != 'skeleton':
+        for limb in pose['limbs']:
+            points = limb['points']
+            width = pose['limb_width']
+            widths = (width*1.2,width,width*.56,1.8)
+            for i in range(3):
+                pen.taper(points[i:i+2],widths[i:i+2],base,dark)
+                if family == 'tarantula':
+                    a,b = points[i:i+2]
+                    dx,dy = b[0]-a[0],b[1]-a[1]
+                    length = math.hypot(dx,dy)
+                    for fraction in (.25,.45,.65,.85):
+                        x,y = a[0]+dx*fraction,a[1]+dy*fraction
+                        pen.line([(x,y),(x-dy/length*(width*.7+2),y+dx/length*(width*.7+2))],light,1,False)
+            for x,y in points[1:3]:
+                color = (187,111,62) if w & {'redknee','redleg'} else light
+                pen.oval(x,y,width*.5,width*.5,color,dark)
+        pen.line(pose['pedicel'],dark,10,False)
+        pen.oval(*pose['abdomen'],base,dark,2)
+        pen.oval(*pose['prosoma'],base,dark,2)
+        # Dorsal markings only: never paint a widow's ventral hourglass on its back.
+        ax,ay,arx,ary = pose['abdomen']
+        if family in {'ground','tarantula'}:
+            pen.line([(ax-arx*.6,0),(ax+arx*.55,0)],light,3,False)
+            for i in range(4):
+                x = ax-arx*.4+i*arx*.24
+                pen.line([(x-5,-ary*.40),(x,0),(x-5,ary*.40)],dark,2)
+        if family == 'jumping':
+            for x,y in ((ax+8,0),(ax-10,-9),(ax-10,9)):
+                pen.oval(x,y,4,3,(211,211,185))
+        for palp in pose['pedipalps']:
+            pen.line(palp,light,4,False)
+        for side in (-1,1):
+            pen.line([(rx*.85,side*5),(rx+9,side*7),(rx+11,side*3)],dark,3)
+        # Schematic eye field; no species-level eye-count/layout claim.
+        for side in (-1,1):
+            pen.oval(rx*.71,side*7,4 if family == 'jumping' else 2.5,3,(18,22,22),light)
+            pen.oval(rx*.40,side*16,2,2,(18,22,22))
+    if mode in {'overlay','skeleton'}:
+        pen.oval(*pose['abdomen'],None,guide,2)
+        pen.oval(*pose['prosoma'],None,guide,2)
+        pen.line(pose['pedicel'],guide,2,False)
+        for palp in pose['pedipalps']: pen.line(palp,guide,1,False)
+        for limb in pose['limbs']:
+            pen.line(limb['points'],guide,2,False)
+            for x,y in limb['points'][:-1]: pen.oval(x,y,2.8,2.8,guide)
+            color = (112,220,165) if limb['planted'] else (240,182,94)
+            pen.oval(*limb['points'][-1],3.5,3.5,color)
+
+
+INSECT_PLANS = frozenset({'orthoptera', 'cicada', 'stick_insect', 'insect'})
+
+
+def insect_pose(species, time, travel=None):
+    """Pure planar six-leg study with fixed links and alternating tripod timing.
+
+    Contacts are stationary only in a straight rig-local reference translated by
+    ``travel``. Dorsal swing is a lateral excursion, NOT physical foot elevation;
+    cursor steering, substrate forces, flight and jumping are not simulated.
+    Three links per leg are animation controls, not a full anatomical inventory.
+    """
+    plan = resolve_body_plan(species)
+    if plan not in INSECT_PLANS or not math.isfinite(time):
+        raise ValueError('Six-leg diagnostics require a supported insect and finite time')
+    travel = time*36 if travel is None else travel
+    if not math.isfinite(travel):
+        raise ValueError('Insect travel must be finite')
+    stick = plan == 'stick_insect'
+    mole = {'mole', 'cricket'} <= words(species)
+    radius = 9 if stick else 30
+    length = 210 if stick else 143
+    stride, duty = 32.0, .65
+    limbs = []
+    for side in (-1, 1):
+        for index in range(3):
+            offset = ((index + (side == 1)) % 2)*.5
+            phase = (travel/stride+offset) % 1
+            root = (-12-index*21, side*radius*.65)
+            enlarged_hind = index == 2 and plan == 'orthoptera' and not mole
+            reach_y = 132 if enlarged_hind else 100 if stick else 94
+            neutral_x = root[0]+(20, -12, -35)[index]
+            if phase < duty:
+                foot_x = neutral_x+stride*(duty/2-phase)
+                foot_y = side*reach_y
+            else:
+                q = (phase-duty)/(1-duty)
+                eased = q**3*(10+q*(-15+6*q))
+                foot_x = neutral_x-stride*duty/2-stride*(1-duty)*q+stride*eased
+                foot_y = side*(reach_y-8*math.sin(math.pi*q)**2)
+            # A fixed outward distal link keeps the tarsus connected to the IK.
+            distal = 12.0
+            ankle = (foot_x, foot_y-side*distal)
+            total = (reach_y-abs(root[1]))*1.38
+            split = .58 if enlarged_hind else .50
+            upper, lower = total*split, total*(1-split)
+            root, knee, end = solve_two_bone_ik(root, ankle, upper, lower, side)
+            foot = (end[0], end[1]+side*distal)
+            limbs.append({'index': index, 'side': side, 'points': [root,knee,end,foot],
+                          'lengths': [upper,lower,distal], 'phase': phase, 'phase_offset': offset,
+                          'planted': phase < duty, 'contact': (foot[0]+travel,foot[1]),
+                          'target': (foot_x,foot_y), 'enlarged_hind': enlarged_hind,
+                          'digging_front': mole and index == 0})
+    return {'plan': plan, 'length': length, 'radius': radius, 'limbs': limbs,
+            'stride': stride, 'duty': duty, 'cycle_seconds': stride/36,
+            'head': (21,0,17,19), 'thorax': [(8,0),(-12,0),(-33,0),(-57,0)],
+            'abdomen': [(-57,0),(-length*.67,0),(-length,0)], 'mole_cricket': mole}
+
+
 def draw_special_insect(draw,sim,species,time,*unused):
-    """Six thoracic legs; no mantis raptorial arms on locusts or stick insects."""
-    plan=resolve_body_plan(species);pen=Pen(draw,sim.x,sim.y,sim.angle)
-    base=tuple(species['fur_mid']);dark=tuple(species['fur_dark'])
-    stick=plan=='stick_insect';length=210 if stick else 143;radius=9 if stick else 30
-    for side in (-1,1):
-        for i in range(3):
-            hip=(-12-i*21,side*radius*.65)
-            leap=(i==2 and plan=='orthoptera'); phase=time*6+i*math.pi+side*math.pi/2
-            knee=(hip[0]-(60 if leap else 27),side*(75 if leap else 57))
-            foot=(hip[0]-35+math.sin(phase)*13,side*(133 if leap else 101))
-            pen.taper([hip,knee,foot],[15 if leap else 5,11 if leap else 4,2],base,dark)
-    pen.taper([(17,0),(-30,0),(-length*.7,0),(-length,0)],[radius*1.6,radius*2,radius*1.8,4],base,dark)
-    if not stick:
-        for side in (-1,1): pen.poly([(-13,side*3),(-48,side*31),(-length+5,side*12)],blend(base,(177,178,126),.25),dark)
-        for i in range(7): pen.line([(-50-i*12,-radius*.6),(-55-i*12,radius*.6)],dark,1)
-    pen.oval(21,0,17,19,base,dark)
-    for side in (-1,1):
-        pen.oval(28,side*13,6,7,(75,75,42),dark)
-        pen.line([(30,side*10),(66,side*20),(94,side*(22+math.sin(time)*3))],dark,2)
+    """One shared six-leg pose for surface and schematic exoskeleton guides."""
+    pose = insect_pose(species,time)
+    pen = Pen(draw,sim.x,sim.y,sim.angle)
+    base, dark = tuple(species['fur_mid']), tuple(species['fur_dark'])
+    light = blend(base,(223,225,183),.35)
+    guide = (218,231,205)
+    mode = species.get('render_mode','surface')
+    radius, length = pose['radius'], pose['length']
+    if mode != 'skeleton':
+        for limb in pose['limbs']:
+            widths = [15,11,4,2] if limb['enlarged_hind'] else [6,5,3,2]
+            if limb['digging_front']: widths = [12,14,9,3]
+            points = limb['points']
+            # Draw individual straight links: no smoothed taper bends off-rig.
+            for i in range(3):
+                pen.taper(points[i:i+2],widths[i:i+2],base,dark)
+            for (x,y),width in zip(points[1:3],widths[1:3]):
+                pen.oval(x,y,width*.45,width*.45,light,dark)
+            if limb['digging_front']:
+                x,y = points[2]
+                for i in range(3):
+                    pen.line([(x-i*4,y),(x-i*4-3,y+limb['side']*8)],dark,2,curved=False)
+        pen.taper(pose['abdomen'],[radius*1.7,radius*1.5,4],base,dark)
+        pen.taper(pose['thorax'],[radius*1.25,radius*1.65,radius*1.8,radius*1.7],base,dark)
+        if pose['plan'] != 'stick_insect':
+            for side in (-1,1):
+                pen.poly([(-33,side*3),(-68,side*28),(-length+5,side*10)],light,dark)
+            for i in range(6):
+                pen.line([(-63-i*11,-radius*.5),(-67-i*11,radius*.5)],dark,1)
+        pen.oval(*pose['head'],base,dark)
+        for side in (-1,1):
+            pen.oval(28,side*13,6,7,(75,75,42),dark)
+            pen.line([(30,side*10),(66,side*20),(94,side*(22+math.sin(time)*3))],dark,2)
+    if mode in {'overlay','skeleton'}:
+        # Insects have exoskeletons: these are linked joint guides, not bones.
+        pen.oval(*pose['head'],None,guide,2)
+        pen.line(pose['thorax']+pose['abdomen'][1:],guide,2,curved=False)
+        for limb in pose['limbs']:
+            pen.line(limb['points'],guide,2,curved=False)
+            for x,y in limb['points'][:-1]: pen.oval(x,y,3,3,guide)
+            x,y = limb['points'][-1]
+            color = (112,220,165) if limb['planted'] else (240,182,94)
+            pen.oval(x,y,4,4,color)

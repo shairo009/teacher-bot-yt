@@ -784,16 +784,23 @@ _SIM_CACHE = OrderedDict()
 MAX_SIMULATORS = 8
 
 
+def new_preview_simulator(species: dict) -> MasterSimulator:
+    """Independent settled simulator; camera preflight never alters frame-seek state."""
+    sim = MasterSimulator(540, 585, 245, 150,
+                          seed=(species.get("animal_id", 0) * 10007) & 0xFFFFFF,
+                          class_type=species.get("class_type", "quadruped"), species=species)
+    for step in range(-90, 0):
+        sim.update(step / FPS * MOTION_RATE)
+    return sim
+
+
 def _simulation_for_frame(species: dict, frame_idx: int) -> MasterSimulator:
     """Deterministic seeking: frame N is identical in previews and sequential video."""
     rig_key = json.dumps(species.get("bone_structure", {}), sort_keys=True, separators=(",", ":"))
     key = (species.get("id"), species.get("animal_id", 0), species.get("class_type", "quadruped"), rig_key)
     cached = _SIM_CACHE.pop(key, None)
     if cached is None or frame_idx <= cached[0]:
-        sim = MasterSimulator(540, 585, 245, 150, seed=(key[1] * 10007) & 0xFFFFFF, class_type=key[2], species=species)
-        # Settle the initially straight chain and feet before the first visible frame.
-        for step in range(-90, 0):
-            sim.update(step / FPS * MOTION_RATE)
+        sim = new_preview_simulator(species)
         last_frame = -1
     else:
         last_frame, sim = cached
@@ -857,6 +864,93 @@ class _SupersampledDraw:
         return self._shape("arc", xy, start=start, end=end, **kwargs)
 
 
+class _GeometryBounds:
+    """ImageDraw-compatible measurement without a finite raster that can clip.
+
+    Curves arrive already tessellated from the rig. Arc bounds conservatively
+    include their entire ellipse; stroke padding also covers raster rounding.
+    """
+    def __init__(self):
+        self.bounds = None
+
+    def _shape(self, xy, **kwargs):
+        points = list(xy) if isinstance(xy[0], (tuple, list)) else list(zip(xy[::2], xy[1::2]))
+        if not points or not all(math.isfinite(v) for point in points for v in point):
+            raise ValueError("Renderer produced empty or non-finite geometry")
+        padding = max(1, kwargs.get("width", 1)) / 2 + 2
+        xs, ys = zip(*points)
+        box = (min(xs)-padding, min(ys)-padding, max(xs)+padding, max(ys)+padding)
+        if self.bounds is None:
+            self.bounds = box
+        else:
+            a, b, c, d = self.bounds
+            self.bounds = min(a, box[0]), min(b, box[1]), max(c, box[2]), max(d, box[3])
+
+    line = polygon = ellipse = rectangle = _shape
+
+    def arc(self, xy, start, end, **kwargs):
+        self._shape(xy, **kwargs)
+
+
+def creature_geometry_bounds(species, sim, sim_time):
+    """Conservative command extents in world coordinates, without allocating pixels."""
+    from src.bio_bone_renderer import draw_bio_creature
+    probe = _GeometryBounds()
+    ca, sa = math.cos(sim.angle), math.sin(sim.angle)
+    if not draw_bio_creature(probe, sim, species, sim_time, ca, sa, -sa, ca) or probe.bounds is None:
+        raise ValueError("Biological renderer produced empty geometry")
+    return probe.bounds
+
+
+CAMERA_LAST_FRAME = 30 * FPS - 1
+CAMERA_SAMPLE_STEP = 15
+
+
+@lru_cache(maxsize=32)
+def _nonmammal_camera_bounds(species_json):
+    """30-second sampled envelope with safety margin, independent of clip length.
+
+    This is a framing preflight, NOT a proof of anatomical correctness or of
+    containment at unsampled times. Every rendered frame is checked as well.
+    """
+    species = json.loads(species_json)
+    sim = new_preview_simulator(species)
+    bounds = None
+    for frame_idx in range(CAMERA_LAST_FRAME + 1):
+        time = frame_idx / FPS * MOTION_RATE
+        sim.update(time)
+        if frame_idx % CAMERA_SAMPLE_STEP and frame_idx != CAMERA_LAST_FRAME:
+            continue
+        x0, y0, x1, y1 = creature_geometry_bounds(species, sim, time)
+        box = (x0-sim.x, y0-sim.y, x1-sim.x, y1-sim.y)
+        if bounds is None:
+            bounds = box
+        else:
+            bounds = (min(bounds[0], box[0]), min(bounds[1], box[1]),
+                      max(bounds[2], box[2]), max(bounds[3], box[3]))
+    x0, y0, x1, y1 = bounds
+    padding = max(24, max(x1-x0, y1-y0) * .10)
+    return x0-padding, y0-padding, x1+padding, y1+padding
+
+
+def fixed_camera_bounds(species):
+    """Species-fixed root-relative camera; no per-frame alpha-box auto zoom."""
+    from src.anatomy_profiles import resolve_body_plan
+    if resolve_body_plan(species) == "mammal":
+        return mammal_camera_bounds(species)
+    # Preserve every potentially geometric input in the cache key. Diagnostic
+    # modes share framing; poster text and publication metadata do not affect it.
+    subject = {key: value for key, value in species.items()
+               if key not in {"render_mode", "code_lines", "yt_title", "yt_desc", "file_name"}}
+    subject["render_mode"] = "surface"
+    return _nonmammal_camera_bounds(json.dumps(subject, sort_keys=True, allow_nan=False))
+
+
+def camera_zoom(bounds):
+    left, top, right, bottom = bounds
+    return min(1.65, 752 / max(1, right-left), 462 / max(1, bottom-top))
+
+
 def mammal_camera_bounds(species):
     """Fixed envelope in rig coordinates, shared by surface and diagnostics.
 
@@ -879,8 +973,12 @@ def mammal_camera_bounds(species):
 def _draw_creature_stage(img, species, sim, sim_time, theme):
     from src.bio_bone_renderer import draw_bio_creature
     accent = theme["canvas_border"]
-    layer = Image.new("RGBA", (2400, 2400))
-    origin = (sim.x - 600, sim.y - 600)
+    geometry = creature_geometry_bounds(species, sim, sim_time)
+    origin = (math.floor(geometry[0])-2, math.floor(geometry[1])-2)
+    size = (math.ceil((geometry[2]-origin[0]+2)*2), math.ceil((geometry[3]-origin[1]+2)*2))
+    if max(size) > 8192 or size[0]*size[1] > 16_000_000:
+        raise ValueError("Rig geometry exceeds safe preview raster size")
+    layer = Image.new("RGBA", size)
     painter = _SupersampledDraw(layer, origin)
     ca, sa = math.cos(sim.angle), math.sin(sim.angle)
     from src.anatomy_profiles import resolve_body_plan, mammal_profile
@@ -893,17 +991,16 @@ def _draw_creature_stage(img, species, sim, sim_time, theme):
     tx = sim.cx + math.cos(sim_time * sim.f1 + sim.p1) * sim.rx * 0.85 + math.sin(sim_time * sim.f2 + sim.p2) * sim.rx * 0.20
     ty = sim.cy + math.sin(sim_time * sim.f3 + sim.p1) * sim.ry * 0.80 + math.cos(sim_time * sim.f4 + sim.p2) * sim.ry * 0.18
     world = (bounds[0] / 2 + origin[0], bounds[1] / 2 + origin[1], bounds[2] / 2 + origin[0], bounds[3] / 2 + origin[1])
-    # Lateral mammals use a species-fixed envelope: no zoom pumping each stride.
+    camera = fixed_camera_bounds(species)
+    left, top, right, bottom = camera
+    left, right = left + sim.x, right + sim.x
+    top, bottom = top + sim.y, bottom + sim.y
     if plan == "mammal":
         p = mammal_profile(species)
-        left, top, right, bottom = mammal_camera_bounds(species)
-        left, right = left + sim.x, right + sim.x
-        top, bottom = top + sim.y, bottom + sim.y
         tx, ty = right-25, sim.y
-    else:
-        left, top = min(world[0], tx - 35), min(world[1], ty - 35)
-        right, bottom = max(world[2], tx + 35), max(world[3], ty + 35)
-    zoom = min(1.65, 752 / max(1, right - left), 462 / max(1, bottom - top))
+    elif geometry[0] < left or geometry[1] < top or geometry[2] > right or geometry[3] > bottom:
+        raise ValueError("Rig exceeds fixed camera envelope; review framing instead of silently clipping or zooming")
+    zoom = camera_zoom(camera)
     def screen(x, y):
         return (540 + (x - (left + right) / 2) * zoom, 585 + (y - (top + bottom) / 2) * zoom)
     x, y = screen(world[0], world[1])
@@ -917,8 +1014,9 @@ def _draw_creature_stage(img, species, sim, sim_time, theme):
     d = ImageDraw.Draw(img)
     head = screen(sim.x, sim.y)
     target = screen(tx, ty)
+    target_visible = 164 <= target[0] <= 916 and 370 <= target[1] <= 800
     dist = math.dist(head, target)
-    count = max(2, int(dist / 14))
+    count = max(2, int(dist / 14)) if target_visible else 0
     for idx in range(0, count, 2):
         a, b = idx / count, min(1, (idx + 0.8) / count)
         d.line([(head[0] + (target[0] - head[0]) * a, head[1] + (target[1] - head[1]) * a),
@@ -941,9 +1039,10 @@ def _draw_creature_stage(img, species, sim, sim_time, theme):
             d.ellipse((px-radius, py-radius, px+radius, py+radius), fill=color)
     px, py = target
     radius = 14 + 2 * math.sin(sim_time * 5)
-    for angle in range(0, 360, 90):
-        d.arc((px-radius, py-radius, px+radius, py+radius), angle + sim_time * 45, angle + sim_time * 45 + 55, fill=accent, width=2)
-    d.ellipse((px-3, py-3, px+3, py+3), fill=(246, 250, 255))
+    if target_visible:
+        for angle in range(0, 360, 90):
+            d.arc((px-radius, py-radius, px+radius, py+radius), angle + sim_time * 45, angle + sim_time * 45 + 55, fill=accent, width=2)
+        d.ellipse((px-3, py-3, px+3, py+3), fill=(246, 250, 255))
     return tx, ty, math.hypot(tx - sim.x, ty - sim.y)
 
 

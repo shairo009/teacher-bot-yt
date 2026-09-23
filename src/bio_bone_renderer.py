@@ -367,67 +367,10 @@ def draw_bio_quadruped(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: 
             draw.ellipse([eye_pt[0]-6, eye_pt[1]-5, eye_pt[0]+6, eye_pt[1]+5], fill=(235, 170, 30))
 
 def draw_bio_serpent(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float, cos_a: float, sin_a: float, perp_x: float, perp_y: float) -> None:
-    sp_id = species.get("id", "").lower()
-    accent = tuple(species.get("accent", [16, 185, 129]))
-    is_cobra = "cobra" in sp_id or "naja" in sp_id
-    is_rattlesnake = "rattle" in sp_id or "viper" in sp_id
+    """Compatibility entry point for the shared fixed-length axial renderer."""
+    from src.natural_anatomy_renderer import draw_elongated
+    draw_elongated(draw, sim, species, sim_time)
 
-    spine = sim.spine[:18]
-    left_pts, right_pts = [], []
-    for i, seg in enumerate(spine):
-        s_px = -math.sin(seg["angle"]); s_py = math.cos(seg["angle"])
-        if is_cobra and 1 <= i <= 4:
-            hw = 48 - (i - 2)**2 * 6
-        else:
-            hw = max(8, 28 - i * 1.3)
-        left_pts.append((seg["x"] + s_px * hw, seg["y"] + s_py * hw))
-        right_pts.append((seg["x"] - s_px * hw, seg["y"] - s_py * hw))
-
-    shadow_pts = [(x+5, y+5) for x,y in left_pts] + list(reversed([(x+5, y+5) for x,y in right_pts]))
-    if len(shadow_pts) >= 3: draw.polygon(shadow_pts, fill=(15, 20, 25))
-
-    body_poly = left_pts + list(reversed(right_pts))
-    if len(body_poly) >= 3:
-        draw.polygon(body_poly, fill=(20, 35, 30), outline=accent, width=2)
-
-    for i in range(1, len(spine)-1, 2):
-        sp = spine[i]
-        draw.ellipse([sp["x"]-6, sp["y"]-6, sp["x"]+6, sp["y"]+6], fill=accent)
-
-    if is_cobra:
-        h_seg = spine[2]
-        draw.ellipse([h_seg["x"]-14, h_seg["y"]-14, h_seg["x"]+14, h_seg["y"]+14], outline=(255, 255, 255), width=2)
-        draw.ellipse([h_seg["x"]-5, h_seg["y"]-5, h_seg["x"]+5, h_seg["y"]+5], fill=accent)
-
-    t_end = (spine[-1]["x"], spine[-1]["y"])
-    if is_rattlesnake:
-        for r in range(4):
-            rx = t_end[0] - cos_a * (r * 7)
-            ry = t_end[1] - sin_a * (r * 7)
-            draw.ellipse([rx-6, ry-6, rx+6, ry+6], fill=(210, 180, 130), outline=(50, 40, 30), width=1)
-
-    hx = sim.x + cos_a * 35
-    hy = sim.y + sin_a * 35
-    if is_rattlesnake or "viper" in sp_id:
-        h_front = (hx + cos_a * 22, hy + sin_a * 22)
-        h_l = (hx - cos_a * 12 + perp_x * 24, hy - sin_a * 12 + perp_y * 24)
-        h_r = (hx - cos_a * 12 - perp_x * 24, hy - sin_a * 12 - perp_y * 24)
-        draw.polygon([h_front, h_l, h_r], fill=(25, 45, 35), outline=accent, width=2)
-    else:
-        draw.ellipse([hx-18, hy-14, hx+18, hy+14], fill=(25, 45, 35), outline=accent, width=2)
-
-    for s in [-1, 1]:
-        ep = (hx + cos_a * 8 + perp_x * (14 * s), hy + sin_a * 8 + perp_y * (14 * s))
-        draw.ellipse([ep[0]-5, ep[1]-5, ep[0]+5, ep[1]+5], fill=(245, 180, 20))
-        draw.line([(ep[0], ep[1]-3), (ep[0], ep[1]+3)], fill=(0, 0, 0), width=2)
-
-    tongue_f = math.sin(sim_time * 12)
-    if tongue_f > 0.4:
-        tb = (hx + cos_a * 20, hy + sin_a * 20)
-        tm = (tb[0] + cos_a * 18, tb[1] + sin_a * 18)
-        draw.line([tb, tm], fill=(230, 40, 60), width=2)
-        draw.line([tm, (tm[0] + cos_a * 8 + perp_x * 6, tm[1] + sin_a * 8 + perp_y * 6)], fill=(230, 40, 60), width=2)
-        draw.line([tm, (tm[0] + cos_a * 8 - perp_x * 6, tm[1] - sin_a * 8 - perp_y * 6)], fill=(230, 40, 60), width=2)
 
 def draw_bio_arachnid(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float, cos_a: float, sin_a: float, perp_x: float, perp_y: float) -> None:
     sp_id = species.get("id", "").lower()
@@ -2356,9 +2299,9 @@ def draw_hippo(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float, c
 # ─────────────────────────────────────────────────────────────────────────────
 def draw_bio_creature(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float, cos_a: float, sin_a: float, perp_x: float, perp_y: float) -> bool:
     """Taxonomy-first dispatch. Never infer a body plan from a substring."""
-    from src.anatomy_profiles import resolve_body_plan
+    from src.anatomy_profiles import resolve_body_plan, supports_spider_rig, supports_scorpion_rig
     from src.natural_anatomy_renderer import (
-        draw_mammal, draw_elongated, draw_myriapod, draw_special_insect,
+        draw_mammal, draw_elongated, draw_myriapod, draw_special_insect, draw_spider, draw_scorpion,
         draw_marine_body, draw_pinniped, draw_shell_special, draw_shrimp,
     )
     plan = resolve_body_plan(species)
@@ -2379,7 +2322,7 @@ def draw_bio_creature(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: f
         "dragonfly": draw_dragonfly, "ant": draw_ant,
         "axolotl": draw_axolotl, "salamander": draw_salamander,
         "frog": draw_frog, "bird": draw_bird, "serpent": draw_bio_serpent,
-        "arachnid": draw_bio_arachnid,
+        "arachnid": draw_spider if supports_spider_rig(species) else draw_scorpion if supports_scorpion_rig(species) else draw_bio_arachnid,
     }
     renderer = registry.get(plan)
     if renderer is None:

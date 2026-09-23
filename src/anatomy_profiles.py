@@ -153,6 +153,28 @@ def natural_palette(species):
     return dict(fur_dark=shift(-47), fur_mid=base, fur_gold=shift(16), fur_light=shift(38), fur_cream=shift(67), fur_highlight=shift(83))
 
 
+def supports_spider_rig(species):
+    """Gate true-spider studies without trusting the catalogue's broad morphology.
+
+    Solifugids and harvestmen in this catalogue are labelled 'spider' but are
+    different arachnid orders. Do not enable spider diagnostics for them.
+    """
+    w = words(species)
+    return (resolve_body_plan(species) == "arachnid"
+            and species.get("morphology", "").lower() == "spider"
+            and not w & {"solifugid", "camel", "harvestman", "scorpion", "vinegaroon"}
+            and bool(w & {"spider", "tarantula", "widow", "weaver"}))
+
+
+def supports_scorpion_rig(species):
+    """True-scorpion gate; whip scorpions/vinegaroons belong to other orders."""
+    w = words(species)
+    return (resolve_body_plan(species) == "arachnid"
+            and species.get("morphology", "").lower() == "scorpion"
+            and "scorpion" in w
+            and not w & {"whip", "tailless", "vinegaroon", "pseudoscorpion"})
+
+
 def anatomy_summary(species):
     plan = resolve_body_plan(species)
     support = "endoskeleton"
@@ -166,8 +188,22 @@ def anatomy_summary(species):
         issues.append("Stylized catalogue name; identity requires manual review.")
     if plan in {"insect", "vampire_squid", "barnacle", "mantis_shrimp"}:
         issues.append("Specialized body form is approximated by a family-level rig.")
-    return {"body_plan": plan, "support": support, "confidence": "family-level procedural approximation", "specimen_validated": False,
-            "diagnostic_modes": ["surface", "overlay", "skeleton"] if plan == "mammal" else ["surface"],
+    if plan in {"serpent", "eel", "legless_lizard"}:
+        issues.append("Axial guide is schematic; 52 fixed-length segments are rig controls, not vertebra counts. No friction or fluid dynamics are simulated.")
+        if plan == "serpent" and "cobra" in words(species):
+            issues.append("Flattened hood is an illustrative display pose, not a normal crawling posture.")
+    if plan in {"orthoptera", "cicada", "stick_insect", "insect"}:
+        issues.append("Six-leg planar gait approximation. Joint guides represent exoskeleton articulation, not internal bones. Contact flags are rig-local; no foot elevation, forces, jumping or flight are simulated.")
+    spider = supports_spider_rig(species)
+    if spider:
+        issues.append("Eight-leg planar alternating-tetrapod approximation. Shared exoskeleton joint guides are not internal bones or a complete segment inventory. Contacts are rig-local; no elevation, forces, silk or jumping are simulated.")
+    scorpion = supports_scorpion_rig(species)
+    if scorpion:
+        issues.append("Eight walking legs plus two separate chelate pedipalps. Five metasomal links and a separate telson share surface/guide geometry. Tail is splayed in the dorsal 2D plane, not a raised 3D arch; no strike, venom, elevation or force simulation. Gait and proportions are family approximations.")
+    if plan == "arachnid" and not (spider or scorpion):
+        issues.append("Legacy arachnid surface rig only. Unsupported orders need dedicated anatomy and locomotion review; no true-spider or true-scorpion diagnostics are claimed.")
+    return {"body_plan": plan, "rig_type": "spider" if spider else "scorpion" if scorpion else plan, "support": support, "confidence": "family-level procedural approximation", "specimen_validated": False,
+            "diagnostic_modes": ["surface", "overlay", "skeleton"] if plan in {"mammal", "serpent", "eel", "legless_lizard", "orthoptera", "cicada", "stick_insect", "insect"} or spider or scorpion else ["surface"],
             "review_required": True, "review_notes": issues,
             "notes": "Rig counts/ratios are animation controls, not measured anatomical bone counts. Species review is required before educational claims."}
 

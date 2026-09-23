@@ -1,16 +1,3 @@
-## 0A. AUTONOMOUS CONTINUATION / NO-QUESTION MODE (MANDATORY)
-- The user has explicitly instructed every future AI to continue from the latest checkpoint without asking routine continuation questions.
-- Do NOT ask the user to re-upload a preview history, confirm a routine offline test, choose between equivalent safe preview options, or restate what to do next.
-- If the named preview ledger is missing, create a new isolated preview ledger (for example `tmp/continuation-auto-preview`) and clearly record that it is a NEW ledger, not a continuation of the missing ledger.
-- Perform all safe offline work directly: render, audit, test, compare production state, update handoff, and package.
-- If a hard external dependency is genuinely missing, document the blocker and continue with every non-blocked task instead of waiting for user input.
-- Update `AI_HANDOFF.md` and `data/ai_resume_state.json` before credits/context/time run out.
-
-## 0. CONTINUATION-FIRST RULE (MANDATORY)
-- On a resumed AI session, read `AI_HANDOFF.md` **first** and obey its `NEXT ACTION` exactly.
-- Treat the latest top-of-file checkpoint as authoritative. Do NOT restart completed work, re-run old repairs without evidence of regression, or invent a new plan before executing the listed next action.
-- After every meaningful change/test, update `AI_HANDOFF.md` with the exact result and the next concrete action so the next AI can continue without guessing.
-
 # Teacher Bot YT — Agent Guidelines & Permanent Rules
 
 ## 1. Zero Duplicate Animal Policy (Base-Noun Deduplication)

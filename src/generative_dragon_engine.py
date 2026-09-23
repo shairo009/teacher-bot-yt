@@ -14,6 +14,9 @@ from __future__ import annotations
 import json
 import math
 import os
+import textwrap
+from collections import OrderedDict
+from functools import lru_cache
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
@@ -23,6 +26,7 @@ DATA_DIR = ROOT_DIR / "data"
 FONTS_DIR = ROOT_DIR / "assets" / "fonts"
 ENCYCLOPEDIA_FILE = DATA_DIR / "animal_encyclopedia.json"
 
+@lru_cache(maxsize=64)
 def get_font(size: int, bold: bool = False, serif: bool = False, mono: bool = False) -> ImageFont.FreeTypeFont:
     candidates = []
     if mono:
@@ -59,43 +63,21 @@ def get_font(size: int, bold: bool = False, serif: bool = False, mono: bool = Fa
     except Exception:
         return ImageFont.load_default()
 
-def solve_forelimb_ik(shoulder: tuple[float, float], paw: tuple[float, float], l1: float, l2: float, side: float):
-    dx = paw[0] - shoulder[0]
-    dy = paw[1] - shoulder[1]
-    dist = math.hypot(dx, dy)
-    clamped = min(dist, l1 + l2 - 0.001)
-    base = math.atan2(dy, dx)
-    cos_a = (l1 * l1 + clamped * clamped - l2 * l2) / (2 * l1 * clamped)
-    ang = base - math.acos(max(-1.0, min(1.0, cos_a))) * side * 0.92
-    elbow = (shoulder[0] + math.cos(ang) * l1, shoulder[1] + math.sin(ang) * l1)
-    return shoulder, elbow, paw
+def solve_forelimb_ik(shoulder, paw, l1, l2, side):
+    from src.bio_bone_renderer import solve_two_bone_ik
+    return solve_two_bone_ik(shoulder, paw, l1, l2, -side)
 
-def solve_ik_2joint(origin: tuple[float, float], target: tuple[float, float], l1: float, l2: float, bend_side: float):
-    dx = target[0] - origin[0]
-    dy = target[1] - origin[1]
-    dist = math.hypot(dx, dy)
-    clamped_dist = min(dist, l1 + l2 - 0.001)
-    base_angle = math.atan2(dy, dx)
-    cos_a = (l1 * l1 + clamped_dist * clamped_dist - l2 * l2) / (2 * l1 * clamped_dist)
-    angle_a = math.acos(max(-1.0, min(1.0, cos_a)))
-    knee_angle = base_angle + angle_a * bend_side
-    knee = (origin[0] + math.cos(knee_angle) * l1, origin[1] + math.sin(knee_angle) * l1)
-    return origin, knee, target
 
-def solve_ik_3segment(origin: tuple[float, float], target: tuple[float, float], l1: float, l2: float, l3: float, side: float):
-    dx = target[0] - origin[0]
-    dy = target[1] - origin[1]
-    base_angle = math.atan2(dy, dx)
-    coxa_ang = base_angle + side * 0.35
-    j1 = (origin[0] + math.cos(coxa_ang) * l1, origin[1] + math.sin(coxa_ang) * l1)
-    d2 = math.hypot(target[0] - j1[0], target[1] - j1[1])
-    clamped_d2 = min(d2, l2 + l3 - 0.001)
-    base_ang2 = math.atan2(target[1] - j1[1], target[0] - j1[0])
-    cos_a = (l2 * l2 + clamped_d2 * clamped_d2 - l3 * l3) / (2 * l2 * clamped_d2)
-    angle_a = math.acos(max(-1.0, min(1.0, cos_a)))
-    knee_ang = base_ang2 + angle_a * side
-    j2 = (j1[0] + math.cos(knee_ang) * l2, j1[1] + math.sin(knee_ang) * l2)
-    return origin, j1, j2, target
+def solve_ik_2joint(origin, target, l1, l2, bend_side):
+    from src.bio_bone_renderer import solve_two_bone_ik
+    return solve_two_bone_ik(origin, target, l1, l2, bend_side)
+
+
+def solve_ik_3segment(origin, target, l1, l2, l3, side):
+    angle = math.atan2(target[1] - origin[1], target[0] - origin[0]) + side * 0.35
+    first = (origin[0] + math.cos(angle) * l1, origin[1] + math.sin(angle) * l1)
+    _, second, endpoint = solve_ik_2joint(first, target, l2, l3, side)
+    return origin, first, second, endpoint
 
 def _draw_highlighted_js_line(draw: ImageDraw.ImageDraw, x: int, y: int, line: str, font: ImageFont.FreeTypeFont) -> None:
     stripped = line.strip()
@@ -142,8 +124,7 @@ def _draw_highlighted_js_line(draw: ImageDraw.ImageDraw, x: int, y: int, line: s
             color = (226, 232, 240)
 
         draw.text((curr_x, y), val, font=font, fill=color)
-        bbox = draw.textbbox((curr_x, y), val, font=font)
-        curr_x = bbox[2]
+        curr_x += draw.textlength(val, font=font)
 
 
 def _generate_js_code_for_animal(name: str, class_type: str, scientific: str) -> list[str]:
@@ -200,7 +181,7 @@ def _generate_js_code_for_animal(name: str, class_type: str, scientific: str) ->
         return [
             f"// ─── {name} ───",
             "const rig = new GiraffeRig({",
-            "  neckVertebrae: 14,",
+            "  neckVertebrae: 7,",
             "  ossicones: 2",
             "});",
             "",
@@ -464,10 +445,10 @@ def get_species_for_id(animal_id: int) -> dict:
 
     hooks = [
         f"I Built an Interactive {name} with Vanilla JS IK Physics 🤯 #Shorts #Coding",
-        f"Realistic {name} in JavaScript Canvas (60 FPS Simulation) ✨ #Shorts #WebDev",
+        f"Procedural {name} Motion Study (30 FPS Animation) ✨ #Shorts #WebDev",
         f"How to Code an Interactive {name} Cursor in JavaScript ⚡ #Shorts #Programming",
         f"Coding an Interactive {name} with Joint Kinematics ✨ #Shorts #Coding",
-        f"I Simulated a Realistic {name} in 100% Pure JavaScript 🤯 #Shorts #Tech",
+        f"I Simulated a Realistic {name} in a 2D Motion Study 🤯 #Shorts #Tech",
         f"Interactive {name} Cursor in Vanilla JS ✨ #Shorts #CreativeCoding"
     ]
     yt_title = hooks[animal_id % len(hooks)]
@@ -484,7 +465,7 @@ def get_species_for_id(animal_id: int) -> dict:
         "animal_id": animal_id,
         "bone_structure": entry.get("bone_structure", {}),
         "yt_title": yt_title,
-        "yt_desc": f"✨ Realistic {name} ({scientific}) with biologically accurate joint kinematics in Vanilla JavaScript!\n\n#JavaScript #WebDev #Shorts #Coding #Tech #Programming #Canvas"
+        "yt_desc": f"✨ Realistic {name} ({scientific}) 2D procedural motion study rendered in Python, with illustrative JavaScript kinematics snippets!\n\n#JavaScript #WebDev #Shorts #Coding #Tech #Programming #Canvas"
     }
 
 class MasterSimulator:
@@ -543,7 +524,7 @@ class MasterSimulator:
         while diff > math.pi: diff -= math.pi * 2
 
         # Dynamic motion behavior per taxonomy class
-        if self.class_type == "aquatic":
+        if self.class_type in ("aquatic", "cephalopod"):
             self.angle += diff * 0.035
             target_spd = min(2.8, dist * 0.042)
             self.speed += (target_spd - self.speed) * 0.05
@@ -587,12 +568,15 @@ class MasterSimulator:
             p_dx = curr["x"] - prev["x"]
             p_dy = curr["y"] - prev["y"]
             d = math.hypot(p_dx, p_dy)
-            if d > 0.0001:
-                curr["x"] = prev["x"] + (p_dx / d) * s_dist
-                curr["y"] = prev["y"] + (p_dy / d) * s_dist
-                curr["angle"] = math.atan2(prev["y"] - curr["y"], prev["x"] - curr["x"])
-            else:
-                curr["angle"] = prev["angle"]
+            desired = math.atan2(-p_dy, -p_dx) if d > 0.0001 else prev["angle"]
+            turn = (desired - prev["angle"] + math.pi) % (2 * math.pi) - math.pi
+            # Flexible neck, stable thorax and progressively softer tail.
+            limit = 0.30 if i < 3 else (0.12 if i < 10 else 0.20 + (i - 10) * 0.035)
+            if self.class_type in ("serpent", "aquatic", "cephalopod"):
+                limit = 0.38
+            curr["angle"] = prev["angle"] + max(-limit, min(limit, turn))
+            curr["x"] = prev["x"] - math.cos(curr["angle"]) * s_dist
+            curr["y"] = prev["y"] - math.sin(curr["angle"]) * s_dist
 
         # 4 Quadruped Legs Gait (Classic Diagonal Trot)
         trot_clock = sim_time * 16.0
@@ -677,7 +661,7 @@ ANIMAL_THEMES = {
         "card_fill": (6, 14, 28),
         "card_header": (4, 10, 20),
         "card_border": (18, 45, 75),
-        "badge": "⚡ [WebGL] Hydrodynamic Verlet Shaders • 60 FPS IK",
+        "badge": "2D Procedural Motion Study",
         "badge_color": (56, 189, 248),
         "cursor_color": (0, 230, 255),
     },
@@ -689,7 +673,7 @@ ANIMAL_THEMES = {
         "card_fill": (18, 11, 8),
         "card_header": (14, 8, 6),
         "card_border": (55, 32, 18),
-        "badge": "⚡ [JS] Quadruped Inverse Kinematics • 60 FPS",
+        "badge": "2D Procedural Motion Study",
         "badge_color": (251, 191, 36),
         "cursor_color": (239, 68, 68),
     },
@@ -701,7 +685,7 @@ ANIMAL_THEMES = {
         "card_fill": (10, 18, 12),
         "card_header": (6, 14, 8),
         "card_border": (24, 50, 30),
-        "badge": "⚡ [Canvas] Sinuous Curvature & Strike IK • 60 FPS",
+        "badge": "2D Procedural Motion Study",
         "badge_color": (74, 222, 128),
         "cursor_color": (234, 179, 8),
     },
@@ -713,7 +697,7 @@ ANIMAL_THEMES = {
         "card_fill": (18, 10, 12),
         "card_header": (12, 6, 8),
         "card_border": (50, 22, 25),
-        "badge": "⚡ [GLSL] Segmented Exoskeleton Shaders • 60 FPS",
+        "badge": "2D Procedural Motion Study",
         "badge_color": (251, 146, 60),
         "cursor_color": (239, 68, 68),
     },
@@ -725,7 +709,7 @@ ANIMAL_THEMES = {
         "card_fill": (14, 6, 24),
         "card_header": (10, 4, 18),
         "card_border": (45, 18, 70),
-        "badge": "⚡ [Physics] Multi-Joint Biological Simulation • 60 FPS",
+        "badge": "2D Procedural Motion Study",
         "badge_color": (232, 121, 249),
         "cursor_color": (244, 63, 94),
     },
@@ -737,7 +721,7 @@ ANIMAL_THEMES = {
         "card_fill": (8, 18, 30),
         "card_header": (5, 12, 22),
         "card_border": (20, 42, 68),
-        "badge": "⚡ [Three.js] Sub-Zero Physics & Skeletal IK • 60 FPS",
+        "badge": "2D Procedural Motion Study",
         "badge_color": (125, 211, 252),
         "cursor_color": (14, 165, 233),
     }
@@ -760,828 +744,241 @@ def pick_animal_theme(species: dict) -> dict:
     else:
         return ANIMAL_THEMES["SAVANNA"]
 
-_SIM_CACHE = {}
+_SIM_CACHE = OrderedDict()
+MAX_SIMULATORS = 8
+
+
+def _simulation_for_frame(species: dict, frame_idx: int) -> MasterSimulator:
+    """Deterministic seeking: frame N is identical in previews and sequential video."""
+    key = (species.get("id"), species.get("animal_id", 0), species.get("class_type", "quadruped"))
+    cached = _SIM_CACHE.pop(key, None)
+    if cached is None or frame_idx <= cached[0]:
+        sim = MasterSimulator(540, 585, 245, 150, seed=(key[1] * 10007) & 0xFFFFFF, class_type=key[2])
+        # Settle the initially straight chain and feet before the first visible frame.
+        for step in range(-90, 0):
+            sim.update(step / FPS * 0.4)
+        last_frame = -1
+    else:
+        last_frame, sim = cached
+    for step in range(last_frame + 1, frame_idx + 1):
+        sim.update(step / FPS * 0.4)
+    _SIM_CACHE[key] = (frame_idx, sim)
+    while len(_SIM_CACHE) > MAX_SIMULATORS:
+        _SIM_CACHE.popitem(last=False)
+    return sim
+
+
+@lru_cache(maxsize=6)
+def _studio_background(theme_name: str) -> Image.Image:
+    theme = ANIMAL_THEMES[theme_name]
+    # Build the soft light at quarter resolution, once per theme, not every frame.
+    glow = Image.new("RGB", (270, 480), theme["bg"])
+    d = ImageDraw.Draw(glow)
+    d.ellipse((5, 35, 265, 365), fill=theme["grad_center"])
+    glow = glow.filter(ImageFilter.GaussianBlur(45))
+    return glow.resize((WIDTH, HEIGHT), Image.Resampling.BICUBIC).convert("RGBA")
+
+
+def _fit_font(text: str, max_width: int, size: int, **kwargs):
+    while size > 12:
+        font = get_font(size, **kwargs)
+        if font.getlength(text) <= max_width:
+            return font
+        size -= 1
+    return get_font(size, **kwargs)
+
+
+class _SupersampledDraw:
+    """Small ImageDraw adapter: existing biological rigs stay in world coordinates."""
+    def __init__(self, image, origin, scale=2):
+        self.draw = ImageDraw.Draw(image)
+        self.origin, self.scale = origin, scale
+
+    def _xy(self, xy):
+        if isinstance(xy[0], (tuple, list)):
+            return [((x - self.origin[0]) * self.scale, (y - self.origin[1]) * self.scale) for x, y in xy]
+        return [(value - self.origin[i % 2]) * self.scale for i, value in enumerate(xy)]
+
+    def _shape(self, kind, xy, **kwargs):
+        if "width" in kwargs:
+            kwargs["width"] = max(1, round(kwargs["width"] * self.scale))
+        return getattr(self.draw, kind)(self._xy(xy), **kwargs)
+
+    def line(self, xy, **kwargs):
+        return self._shape("line", xy, **kwargs)
+
+    def polygon(self, xy, **kwargs):
+        return self._shape("polygon", xy, **kwargs)
+
+    def ellipse(self, xy, **kwargs):
+        return self._shape("ellipse", xy, **kwargs)
+
+    def rectangle(self, xy, **kwargs):
+        return self._shape("rectangle", xy, **kwargs)
+
+    def arc(self, xy, start, end, **kwargs):
+        return self._shape("arc", xy, start=start, end=end, **kwargs)
+
+
+def _draw_creature_stage(img, species, sim, sim_time, theme):
+    from src.bio_bone_renderer import draw_bio_creature
+    accent = theme["canvas_border"]
+    layer = Image.new("RGBA", (2400, 2400))
+    origin = (sim.x - 600, sim.y - 600)
+    painter = _SupersampledDraw(layer, origin)
+    ca, sa = math.cos(sim.angle), math.sin(sim.angle)
+    if not draw_bio_creature(painter, sim, species, sim_time, ca, sa, -sa, ca):
+        raise ValueError(f"No biological rig registered for {species.get('name')}")
+    bounds = layer.getbbox()
+    if not bounds:
+        raise ValueError("Biological renderer produced an empty silhouette")
+    tx = sim.cx + math.cos(sim_time * sim.f1 + sim.p1) * sim.rx * 0.85 + math.sin(sim_time * sim.f2 + sim.p2) * sim.rx * 0.20
+    ty = sim.cy + math.sin(sim_time * sim.f3 + sim.p1) * sim.ry * 0.80 + math.cos(sim_time * sim.f4 + sim.p2) * sim.ry * 0.18
+    world = (bounds[0] / 2 + origin[0], bounds[1] / 2 + origin[1], bounds[2] / 2 + origin[0], bounds[3] / 2 + origin[1])
+    # Frame the animal AND its target together. No tails, antlers or wings under HUD.
+    left, top = min(world[0], tx - 35), min(world[1], ty - 35)
+    right, bottom = max(world[2], tx + 35), max(world[3], ty + 35)
+    zoom = min(1.45, 752 / (right - left), 462 / (bottom - top))
+    def screen(x, y):
+        return (540 + (x - (left + right) / 2) * zoom, 585 + (y - (top + bottom) / 2) * zoom)
+    x, y = screen(world[0], world[1])
+    creature = layer.crop(bounds).resize((max(1, round((world[2] - world[0]) * zoom)), max(1, round((world[3] - world[1]) * zoom))), Image.Resampling.LANCZOS)
+    alpha = creature.getchannel("A")
+    contact = Image.new("RGBA", creature.size, (0, 0, 0, 0))
+    contact.putalpha(alpha.point(lambda value: value * 100 // 255))
+    shadow = Image.new("RGBA", img.size)
+    shadow.alpha_composite(contact, (round(x + 6), round(y + 12)))
+    img.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(9)))
+    d = ImageDraw.Draw(img)
+    head = screen(sim.x, sim.y)
+    target = screen(tx, ty)
+    dist = math.dist(head, target)
+    count = max(2, int(dist / 14))
+    for idx in range(0, count, 2):
+        a, b = idx / count, min(1, (idx + 0.8) / count)
+        d.line([(head[0] + (target[0] - head[0]) * a, head[1] + (target[1] - head[1]) * a),
+                (head[0] + (target[0] - head[0]) * b, head[1] + (target[1] - head[1]) * b)], fill=theme["card_border"], width=2)
+    # Silhouette overlays its guide, never the other way around.
+    img.alpha_composite(creature, (round(x), round(y)))
+    d = ImageDraw.Draw(img)
+    for idx in range(1, 8):
+        past = sim_time - idx * 0.045
+        px = sim.cx + math.cos(past * sim.f1 + sim.p1) * sim.rx * 0.85 + math.sin(past * sim.f2 + sim.p2) * sim.rx * 0.20
+        py = sim.cy + math.sin(past * sim.f3 + sim.p1) * sim.ry * 0.80 + math.cos(past * sim.f4 + sim.p2) * sim.ry * 0.18
+        px, py = screen(px, py)
+        if 145 < px < 935 and 351 < py < 819:
+            radius = max(1, 4 - idx // 2)
+            color = tuple(round(a * (1 - idx / 9) + b * idx / 9) for a, b in zip(accent, theme["canvas_fill"]))
+            d.ellipse((px-radius, py-radius, px+radius, py+radius), fill=color)
+    px, py = target
+    radius = 14 + 2 * math.sin(sim_time * 5)
+    for angle in range(0, 360, 90):
+        d.arc((px-radius, py-radius, px+radius, py+radius), angle + sim_time * 45, angle + sim_time * 45 + 55, fill=accent, width=2)
+    d.ellipse((px-3, py-3, px+3, py+3), fill=(246, 250, 255))
+    return tx, ty, math.hypot(tx - sim.x, ty - sim.y)
+
+
+def _code_rows(lines, width=46):
+    rows = []
+    for number, line in enumerate(lines, 1):
+        indent = len(line) - len(line.lstrip())
+        wrapped = textwrap.wrap(line, width=width, subsequent_indent=" " * min(indent + 2, 8),
+                                replace_whitespace=False, drop_whitespace=False, break_long_words=True, break_on_hyphens=False) or [""]
+        rows.extend((number if idx == 0 else None, text) for idx, text in enumerate(wrapped))
+    return rows
+
+
+def _draw_code_panel(img, species, progress, frame_idx, theme):
+    d = ImageDraw.Draw(img)
+    x, y, w, h = 110, 905, 860, 610
+    d.rounded_rectangle((x, y, x+w, y+h), radius=20, fill=theme["card_fill"], outline=theme["card_border"], width=2)
+    d.rounded_rectangle((x+1, y+1, x+w-1, y+56), radius=18, fill=theme["card_header"])
+    d.rectangle((x+2, y+30, x+w-2, y+56), fill=theme["card_header"])
+    for idx, color in enumerate(((255, 95, 86), (255, 189, 46), (39, 201, 63))):
+        d.ellipse((x+22+idx*22, y+22, x+32+idx*22, y+32), fill=color)
+    filename = species.get("file_name", "MotionStudy.js")
+    d.text((x+108, y+18), filename, font=_fit_font(filename, 470, 21, mono=True), fill=(205, 216, 230))
+    d.text((x+w-20, y+20), "ILLUSTRATIVE JS", font=get_font(15, mono=True), fill=theme["badge_color"], anchor="rt")
+    rows = _code_rows(species.get("code_lines") or _generate_js_code_for_animal(species["name"], species["class_type"], species.get("scientific", "")))
+    font, num_font = get_font(26, mono=True), get_font(18, mono=True)
+    line_h = 42
+    # Hold a useful opening block, type the rest, then let viewers read the ending.
+    lengths = [len(text) + 1 for _, text in rows]
+    initial = sum(lengths[:5])
+    revealed = min(sum(lengths), initial + round(max(0, min(1, (progress - 0.08) / 0.78)) * (sum(lengths) - initial)))
+    active, consumed = 0, 0
+    for idx, length in enumerate(lengths):
+        if consumed + length > revealed:
+            break
+        consumed += length
+        active = min(idx + 1, len(rows) - 1)
+    visible = 12
+    scroll = max(0, active - visible + 2)
+    content = Image.new("RGB", (w-4, h-76), theme["card_fill"])
+    cd = ImageDraw.Draw(content)
+    for idx in range(scroll, min(len(rows), scroll+visible)):
+        number, text = rows[idx]
+        ypos = 8 + (idx-scroll) * line_h
+        if idx > active:
+            break
+        if idx == active:
+            cd.rounded_rectangle((8, ypos-3, w-16, ypos+34), radius=5, fill=theme["card_header"])
+            text = text[:max(0, revealed-consumed)]
+        if number is not None:
+            cd.text((20, ypos+5), f"{number:02}", font=num_font, fill=(108, 125, 145))
+        _draw_highlighted_js_line(cd, 76, ypos, text, font)
+        if idx == active and (frame_idx // 12) % 2 == 0:
+            cx = min(w-20, 76+round(font.getlength(text)))
+            cd.line((cx, ypos+5, cx, ypos+29), fill=theme["badge_color"], width=2)
+    # Dedicated crop makes long code and scrolling incapable of bleeding into UI.
+    img.paste(content, (x+2, y+64))
+
 
 def render_generative_frame(species: dict, frame_idx: int, total_frames: int) -> Image.Image:
-    progress = frame_idx / total_frames
-    sim_time = (frame_idx / FPS) * 0.4
-
+    if total_frames < 1 or not 0 <= frame_idx < total_frames:
+        raise ValueError("Frame index must lie within a non-empty timeline")
+    progress = frame_idx / max(1, total_frames-1)
+    sim_time = frame_idx / FPS * 0.4
     theme = pick_animal_theme(species)
-    img = Image.new("RGBA", (WIDTH, HEIGHT), theme["bg"] + (255,))
-    draw = ImageDraw.Draw(img)
-
-    grad = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
-    g_draw = ImageDraw.Draw(grad)
-    g_draw.rectangle([0, 0, WIDTH, HEIGHT], fill=theme["bg"] + (255,))
-    g_draw.ellipse([WIDTH//2 - 500, HEIGHT//2 - 600, WIDTH//2 + 500, HEIGHT//2 + 600], fill=theme["grad_center"] + (200,))
-    img = Image.alpha_composite(img, grad.filter(ImageFilter.GaussianBlur(80)))
-    draw = ImageDraw.Draw(img)
-
-    # 1. Top Header & Hook Section (Strictly within YouTube Shorts Safe Zones: y=160..275)
-    accent_color = tuple(species.get("accent", [245, 158, 11]))
-
-    # Hook Badge
-    badge_w, badge_h = 440, 36
-    bx1 = (WIDTH - badge_w) // 2
-    by1 = 162
-    draw.rounded_rectangle([bx1, by1, bx1 + badge_w, by1 + badge_h], radius=18, fill=theme["card_header"], outline=accent_color, width=2)
-    badge_font = get_font(18, bold=True, mono=True)
-    draw.text((WIDTH // 2, by1 + 9), "⚡ 100% VANILLA JS CANVAS • 60 FPS", font=badge_font, fill=accent_color, anchor="mt")
-
-    # Animal Name (Prominent, High-Contrast Typography)
-    name_font = get_font(44, bold=True)
-    # Subtle drop shadow
-    draw.text((WIDTH // 2 + 2, 207), species["name"], font=name_font, fill=(0, 0, 0), anchor="mt")
-    draw.text((WIDTH // 2, 205), species["name"], font=name_font, fill=(255, 255, 255), anchor="mt")
-
-    # Subtitle / Taxonomy Tag
-    sci_name = species.get("scientific", species["name"])
-    cls_tag = species.get("class_type", "quadruped").upper()
-    morph_tag = species.get("morphology", "").upper()
-    sub_text = f"// {sci_name} • [{cls_tag}]"
-    draw.text((WIDTH // 2, 256), sub_text, font=get_font(20, mono=True), fill=(148, 163, 184), anchor="mt")
-
-    # 2. Upper Section: Framed Creature Hologram Display (y=285..885, w=860, h=600)
-    # Leaves 110px margins on left and right, completely clear of YouTube's Like/Comment buttons!
-    box_w, box_h = 860, 600
-    box_x = (WIDTH - box_w) // 2
-    box_y = 285
-
-    shadow = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
-    s_draw = ImageDraw.Draw(shadow)
-    s_draw.rectangle([box_x - 10, box_y - 10, box_x + box_w + 10, box_y + box_h + 10], fill=(0, 0, 0, 180))
-    img = Image.alpha_composite(img, shadow.filter(ImageFilter.GaussianBlur(25)))
-    draw = ImageDraw.Draw(img)
-
-    draw.rectangle([box_x - 6, box_y - 6, box_x + box_w + 6, box_y + box_h + 6], fill=theme["canvas_border"], outline=theme["card_border"], width=2)
-    draw.rectangle([box_x, box_y, box_x + box_w, box_y + box_h], fill=theme["canvas_fill"])
-
-    # High-tech blueprint grid lines
-    grid_col = tuple(min(255, int(c * 1.5) + 8) for c in theme["canvas_fill"])
-    for gx in range(box_x + 40, box_x + box_w, 40):
-        draw.line([(gx, box_y), (gx, box_y + box_h)], fill=grid_col, width=1)
-    for gy in range(box_y + 40, box_y + box_h, 40):
-        draw.line([(box_x, gy), (box_x + box_w, gy)], fill=grid_col, width=1)
-
-    # Cyber Corner Brackets on Display Viewport
-    cw, ch = 24, 24
-    draw.line([(box_x, box_y + ch), (box_x, box_y), (box_x + cw, box_y)], fill=accent_color, width=3)
-    draw.line([(box_x + box_w - cw, box_y), (box_x + box_w, box_y), (box_x + box_w, box_y + ch)], fill=accent_color, width=3)
-    draw.line([(box_x, box_y + box_h - ch), (box_x, box_y + box_h), (box_x + cw, box_y + box_h)], fill=accent_color, width=3)
-    draw.line([(box_x + box_w - cw, box_y + box_h), (box_x + box_w, box_y + box_h), (box_x + box_w, box_y + box_h - ch)], fill=accent_color, width=3)
-
-    # Viewport HUD Badges
-    hud_font = get_font(16, bold=True, mono=True)
-    draw.ellipse([box_x + 18, box_y + 17, box_x + 28, box_y + 27], fill=(34, 197, 94))
-    draw.text((box_x + 34, box_y + 14), "LIVE INTERACTIVE API", font=hud_font, fill=(241, 245, 249))
-    draw.text((box_x + box_w - 18, box_y + 14), "⚡ IK SOLVER: 60 FPS", font=hud_font, fill=accent_color, anchor="rt")
-
-    cb_x = box_x + box_w // 2
-    cb_y = box_y + box_h // 2
-    rad_x = box_w * 0.34
-    rad_y = box_h * 0.32
-
-    sp_id = species.get("id", "golden_shepherd_dog")
-    animal_id = species.get("animal_id", 0)
-    class_type = species.get("class_type", "quadruped")
-    seed = (animal_id * 10007) & 0xFFFFFF
-
-    sim_key = f"{sp_id}_{animal_id}_{total_frames}"
-    if frame_idx == 0 or sim_key not in _SIM_CACHE:
-        _SIM_CACHE[sim_key] = MasterSimulator(cb_x, cb_y, rad_x, rad_y, seed=seed, class_type=class_type)
-    
-    sim = _SIM_CACHE[sim_key]
-    sim.update(sim_time)
-
-    cos_a = math.cos(sim.angle)
-    sin_a = math.sin(sim.angle)
-    perp_x = -sin_a
-    perp_y =  cos_a
-
-    # ─────────────────────────────────────────────────────────────
-    # GLOWING INTERACTIVE CURSOR & LUMINOUS PARTICLE TRAIL
-    # ─────────────────────────────────────────────────────────────
-    t_c = sim_time
-    tgt_x = sim.cx + math.cos(t_c * sim.f1 + sim.p1) * (rad_x * 0.85) + math.sin(t_c * sim.f2 + sim.p2) * (rad_x * 0.20)
-    tgt_y = sim.cy + math.sin(t_c * sim.f3 + sim.p1) * (rad_y * 0.80) + math.cos(t_c * sim.f4 + sim.p2) * (rad_y * 0.18)
-
-    # 1. Fading luminous particle embers trailing behind cursor
-    for pt_i in range(1, 7):
-        past_t = t_c - pt_i * 0.04
-        px = sim.cx + math.cos(past_t * sim.f1 + sim.p1) * (rad_x * 0.85) + math.sin(past_t * sim.f2 + sim.p2) * (rad_x * 0.20)
-        py = sim.cy + math.sin(past_t * sim.f3 + sim.p1) * (rad_y * 0.80) + math.cos(past_t * sim.f4 + sim.p2) * (rad_y * 0.18)
-        alpha_r = max(2, 7 - pt_i)
-        draw.ellipse([px - alpha_r, py - alpha_r, px + alpha_r, py + alpha_r], fill=accent_color)
-
-    # 2. Glowing Cyber Laser Trajectory from creature head to cursor
-    dist_to_tgt = math.hypot(tgt_x - sim.x, tgt_y - sim.y)
-    num_dashes = max(4, int(dist_to_tgt / 18))
-    for d_i in range(0, num_dashes, 2):
-        t1 = d_i / num_dashes
-        t2 = min(1.0, (d_i + 1) / num_dashes)
-        lx1 = sim.x + (tgt_x - sim.x) * t1
-        ly1 = sim.y + (tgt_y - sim.y) * t1
-        lx2 = sim.x + (tgt_x - sim.x) * t2
-        ly2 = sim.y + (tgt_y - sim.y) * t2
-        draw.line([(lx1, ly1), (lx2, ly2)], fill=(239, 68, 68), width=1)
-
-    # 3. Dual Crosshair Reticle & Rotating Cyber Brackets
-    pulse_r = 12 + math.sin(sim_time * 8) * 3
-    draw.ellipse([tgt_x - pulse_r, tgt_y - pulse_r, tgt_x + pulse_r, tgt_y + pulse_r], outline=(239, 68, 68), width=2)
-    # Crosshair ticks
-    draw.line([(tgt_x - pulse_r - 6, tgt_y), (tgt_x - pulse_r + 2, tgt_y)], fill=(239, 68, 68), width=2)
-    draw.line([(tgt_x + pulse_r - 2, tgt_y), (tgt_x + pulse_r + 6, tgt_y)], fill=(239, 68, 68), width=2)
-    draw.line([(tgt_x, tgt_y - pulse_r - 6), (tgt_x, tgt_y - pulse_r + 2)], fill=(239, 68, 68), width=2)
-    draw.line([(tgt_x, tgt_y + pulse_r - 2), (tgt_x, tgt_y + pulse_r + 6)], fill=(239, 68, 68), width=2)
-
-    # Rotating cyber reticle brackets
-    reticle_ang = sim_time * 2.5
-    for r_i in [0, math.pi/2, math.pi, math.pi*1.5]:
-        b_a = reticle_ang + r_i
-        bx1 = tgt_x + math.cos(b_a - 0.28) * (pulse_r + 7)
-        by1 = tgt_y + math.sin(b_a - 0.28) * (pulse_r + 7)
-        bx2 = tgt_x + math.cos(b_a + 0.28) * (pulse_r + 7)
-        by2 = tgt_y + math.sin(b_a + 0.28) * (pulse_r + 7)
-        draw.line([(bx1, by1), (bx2, by2)], fill=accent_color, width=2)
-
-    ripple_r = 16 + (frame_idx % 30) * 1.4
-    draw.ellipse([tgt_x - ripple_r, tgt_y - ripple_r, tgt_x + ripple_r, tgt_y + ripple_r], outline=(251, 113, 133), width=1)
-    draw.ellipse([tgt_x - 4, tgt_y - 4, tgt_x + 4, tgt_y + 4], fill=(239, 68, 68))
-    draw.ellipse([tgt_x - 1.5, tgt_y - 1.5, tgt_x + 1.5, tgt_y + 1.5], fill=(255, 255, 255))
-
-    # 4. Canvas Bottom Telemetry Readout
-    tele_font = get_font(15, mono=True)
-    draw.text((box_x + 18, box_y + box_h - 24), f"🎯 TARGET: [{int(tgt_x)}, {int(tgt_y)}]  •  DIST: {int(dist_to_tgt)}px", font=tele_font, fill=(148, 163, 184))
-    draw.text((box_x + box_w - 18, box_y + box_h - 24), f"ROT: {int(math.degrees(sim.angle)) % 360:03d}°", font=tele_font, fill=(148, 163, 184), anchor="rt")
-
-
-
-    # ── Try NEW bio bone renderer first (realistic skeleton + muscle + skin) ──
-    _bio_rendered = False
-    try:
-        from src.bio_bone_renderer import draw_bio_creature
-        _bio_rendered = draw_bio_creature(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-    except Exception as _bio_err:
-        print(f"  ⚠ Bio renderer error: {_bio_err} — falling back to legacy renderer")
-
-    if not _bio_rendered:
-        if (class_type == "quadruped" or "dog" in sp_id or "wolf" in sp_id or "tiger" in sp_id):
-            # ── Research-driven colors (from Wikipedia/web anatomy search) ──
-            # Falls back to Golden Shepherd defaults if no research data available
-            fur_dark   = tuple(species.get("fur_dark",      [120, 60,  5]))
-            fur_mid    = tuple(species.get("fur_mid",       [190, 110, 20]))
-            fur_gold   = tuple(species.get("fur_gold",      [230, 160, 45]))
-            fur_light  = tuple(species.get("fur_light",     [255, 210, 100]))
-            fur_cream  = tuple(species.get("fur_cream",     [255, 235, 170]))
-            # Eye/nose colors derived from fur_dark and accent
-            nose_black = (max(10, fur_dark[0]//3), max(8, fur_dark[1]//4), max(5, fur_dark[2]//5))
-            eye_amber  = tuple(min(255, int(c * 0.65)) for c in fur_mid)
-            joint_col  = tuple(int((a + b) // 2) for a, b in zip(fur_mid, fur_gold))
-
-            def draw_limb(p1, p2, base_w, dark_col, mid_col):
-                dx = p2[0] - p1[0]; dy = p2[1] - p1[1]
-                ln = math.hypot(dx, dy)
-                if ln < 1: return
-                nx = -dy / ln; ny = dx / ln
-                draw.line([p1, p2], fill=dark_col, width=base_w + 6)
-                draw.line([p1, p2], fill=mid_col, width=base_w)
-                hi = (min(255, mid_col[0]+45), min(255, mid_col[1]+35), min(255, mid_col[2]+20))
-                draw.line([(p1[0]+nx*3, p1[1]+ny*3), (p2[0]+nx*3, p2[1]+ny*3)],
-                          fill=hi, width=max(2, base_w // 3))
-
-            # ── A. HINDLEGS (behind body) ──
-            for leg in [l for l in sim.legs4 if not l["is_front"]]:
-                paw_pos = (leg["cur"][0], leg["cur"][1])
-                sock = leg["socket"]
-                side = leg["side"]
-                thigh_end = (sock[0] + cos_a * 36 + perp_x * (24 * side),
-                             sock[1] + sin_a * 36 + perp_y * (24 * side))
-                draw_limb(sock, thigh_end, 26, fur_dark, fur_mid)
-                shin_end = (thigh_end[0] - cos_a * 34 + perp_x * (16 * side),
-                            thigh_end[1] - sin_a * 34 + perp_y * (16 * side))
-                draw_limb(thigh_end, shin_end, 20, fur_dark, fur_gold)
-                draw.ellipse([thigh_end[0]-11, thigh_end[1]-11, thigh_end[0]+11, thigh_end[1]+11],
-                             fill=joint_col, outline=fur_dark, width=2)
-                hock = (shin_end[0] - cos_a * 10 + perp_x * (12 * side),
-                        shin_end[1] - sin_a * 10 + perp_y * (12 * side))
-                draw_limb(shin_end, hock, 16, fur_dark, fur_mid)
-                draw.ellipse([hock[0]-7, hock[1]-7, hock[0]+7, hock[1]+7],
-                             fill=fur_dark, outline=fur_mid, width=1)
-                draw_limb(hock, paw_pos, 14, fur_dark, fur_mid)
-                draw.ellipse([paw_pos[0]-15, paw_pos[1]-10, paw_pos[0]+15, paw_pos[1]+10],
-                             fill=nose_black, outline=fur_dark, width=2)
-                for t_off in [-6, -2, 2, 6]:
-                    bx = paw_pos[0] + cos_a * 12 + perp_x * t_off
-                    by = paw_pos[1] + sin_a * 12 + perp_y * t_off
-                    draw.ellipse([bx-4, by-4, bx+4, by+4], fill=(35, 25, 15))
-                    draw.line([(bx, by), (bx + cos_a * 6, by + sin_a * 6)], fill=(10, 8, 5), width=2)
-
-            # ── C. FORELEGS (drawn under body as well) ──
-            for leg in [l for l in sim.legs4 if l["is_front"]]:
-                paw_pos = (leg["cur"][0], leg["cur"][1])
-                sock = leg["socket"]
-                side = leg["side"]
-                _, elbow, _ = solve_forelimb_ik(sock, paw_pos, leg["l1"], leg["l2"], side)
-                draw_limb(sock, elbow, 24, fur_dark, fur_mid)
-                draw.ellipse([elbow[0]-11, elbow[1]-11, elbow[0]+11, elbow[1]+11],
-                             fill=joint_col, outline=fur_dark, width=2)
-                draw_limb(elbow, paw_pos, 18, fur_dark, fur_gold)
-                draw.ellipse([paw_pos[0]-15, paw_pos[1]-10, paw_pos[0]+15, paw_pos[1]+10],
-                             fill=nose_black, outline=fur_dark, width=2)
-                for t_off in [-6, -2, 2, 6]:
-                    bx = paw_pos[0] + cos_a * 12 + perp_x * t_off
-                    by = paw_pos[1] + sin_a * 12 + perp_y * t_off
-                    draw.ellipse([bx-4, by-4, bx+4, by+4], fill=(35, 25, 15))
-                    draw.line([(bx, by), (bx + cos_a * 6, by + sin_a * 6)], fill=(10, 8, 5), width=2)
-
-            # ── B. ORGANIC BODY silhouette ──
-            spine_pts = [(seg["x"], seg["y"]) for seg in sim.spine[:16]]
-            left_out, right_out = [], []
-            for i, seg in enumerate(sim.spine[:16]):
-                s_px = -math.sin(seg["angle"]); s_py = math.cos(seg["angle"])
-                body_widths = [28, 36, 46, 54, 52, 50, 48, 44, 40, 44, 48, 44, 36, 28, 20, 14]
-                hw = max(10, body_widths[i] if i < len(body_widths) else 12)
-                left_out.append((seg["x"] + s_px * (hw + 4), seg["y"] + s_py * (hw + 4)))
-                right_out.append((seg["x"] - s_px * (hw + 4), seg["y"] - s_py * (hw + 4)))
-
-            # Drop shadow
-            shadow_pts = [(x+5, y+5) for x,y in left_out] + list(reversed([(x+5, y+5) for x,y in right_out]))
-            if len(shadow_pts) >= 3: draw.polygon(shadow_pts, fill=(60, 30, 5))
-
-            # Outer fur body
-            body_poly = left_out + list(reversed(right_out))
-            if len(body_poly) >= 3:
-                draw.polygon(body_poly, fill=fur_mid, outline=fur_dark, width=3)
-
-            # Mid-tone inset layer
-            mid_poly = [(x*0.45 + spine_pts[min(i, len(spine_pts)-1)][0]*0.55,
-                         y*0.45 + spine_pts[min(i, len(spine_pts)-1)][1]*0.55)
-                        for i, (x, y) in enumerate(left_out[:14])] + \
-                       list(reversed([(x*0.45 + spine_pts[min(i, len(spine_pts)-1)][0]*0.55,
-                                       y*0.45 + spine_pts[min(i, len(spine_pts)-1)][1]*0.55)
-                                      for i, (x, y) in enumerate(right_out[:14])]))
-            if len(mid_poly) >= 3: draw.polygon(mid_poly, fill=fur_gold)
-
-            # Dorsal highlight stripe
-            for i in range(len(spine_pts) - 1):
-                draw.line([spine_pts[i], spine_pts[i+1]], fill=fur_light, width=4)
-                draw.line([spine_pts[i], spine_pts[i+1]], fill=fur_cream, width=2)
-
-            # Belly cream patch
-            belly_pts = [(sim.spine[i]["x"] + math.cos(sim.spine[i]["angle"]) * 10,
-                          sim.spine[i]["y"] + math.sin(sim.spine[i]["angle"]) * 10) for i in range(4, 11)]
-            if len(belly_pts) >= 3: draw.polygon(belly_pts, fill=fur_cream)
-
-            # ── D. WAGGING PLUME TAIL ──
-            tail_prev = spine_pts[-1]
-            wag = math.sin(sim_time * 7.0) * 0.65
-            for i in range(12):
-                frac = (i + 1) / 12
-                t_ang = sim.angle + math.pi + wag * frac * frac
-                seg_len = 22 - i * 1.2
-                tx = tail_prev[0] + math.cos(t_ang) * seg_len
-                ty = tail_prev[1] + math.sin(t_ang) * seg_len
-                w = max(5, int(24 - i * 1.6))
-                draw.line([tail_prev, (tx, ty)], fill=fur_dark, width=w + 4)
-                draw.line([tail_prev, (tx, ty)], fill=fur_gold, width=w)
-                draw.line([tail_prev, (tx, ty)], fill=fur_cream, width=max(2, w - 6))
-                tail_prev = (tx, ty)
-            draw.ellipse([tail_prev[0]-8, tail_prev[1]-8, tail_prev[0]+8, tail_prev[1]+8], fill=fur_cream)
-
-            # ── E. REALISTIC CANINE HEAD ──
-            hx = sim.x + cos_a * 44
-            hy = sim.y + sin_a * 44
-
-            # Skull
-            draw.ellipse([hx-28, hy-28, hx+28, hy+28], fill=fur_mid, outline=fur_dark, width=3)
-            draw.ellipse([hx+cos_a*4-12, hy+sin_a*4-12, hx+cos_a*4+12, hy+sin_a*4+12], fill=fur_gold)
-            draw.ellipse([hx+cos_a*6-6, hy+sin_a*6-6, hx+cos_a*6+6, hy+sin_a*6+6], fill=fur_light)
-
-            # Drop ears
-            ear_l = (hx - cos_a * 16 + perp_x * 28, hy - sin_a * 16 + perp_y * 28)
-            ear_tip_l = (ear_l[0] - cos_a * 32 + perp_x * 14, ear_l[1] - sin_a * 32 + perp_y * 14)
-            ear_base_l = (hx + cos_a * 4 + perp_x * 24, hy + sin_a * 4 + perp_y * 24)
-            ear_r = (hx - cos_a * 16 - perp_x * 28, hy - sin_a * 16 - perp_y * 28)
-            ear_tip_r = (ear_r[0] - cos_a * 32 - perp_x * 14, ear_r[1] - sin_a * 32 - perp_y * 14)
-            ear_base_r = (hx + cos_a * 4 - perp_x * 24, hy + sin_a * 4 - perp_y * 24)
-            draw.polygon([ear_base_l, ear_l, ear_tip_l], fill=fur_dark, outline=fur_dark, width=2)
-            draw.polygon([ear_base_r, ear_r, ear_tip_r], fill=fur_dark, outline=fur_dark, width=2)
-            inner_l_tip = (ear_l[0] + cos_a * 8 - perp_x * 5, ear_l[1] + sin_a * 8 - perp_y * 5)
-            inner_r_tip = (ear_r[0] + cos_a * 8 + perp_x * 5, ear_r[1] + sin_a * 8 + perp_y * 5)
-            draw.polygon([(hx + perp_x * 12, hy + perp_y * 12), ear_l, inner_l_tip], fill=(210, 130, 140))
-            draw.polygon([(hx - perp_x * 12, hy - perp_y * 12), ear_r, inner_r_tip], fill=(210, 130, 140))
-
-            # Muzzle ellipse
-            snout_cx = hx + cos_a * 36; snout_cy = hy + sin_a * 36
-            draw.ellipse([snout_cx-18, snout_cy-13, snout_cx+18, snout_cy+13], fill=fur_cream, outline=fur_mid, width=2)
-
-            # Nose (wet black)
-            nose_cx = snout_cx + cos_a * 14; nose_cy = snout_cy + sin_a * 14
-            draw.ellipse([nose_cx-9, nose_cy-7, nose_cx+9, nose_cy+7], fill=nose_black, outline=(40, 35, 30), width=2)
-            draw.ellipse([nose_cx+cos_a*2-3, nose_cy+sin_a*2-2, nose_cx+cos_a*2+3, nose_cy+sin_a*2+2], fill=(80, 80, 80))
-            draw.ellipse([nose_cx+perp_x*4-2, nose_cy+perp_y*4-2, nose_cx+perp_x*4+2, nose_cy+perp_y*4+2], fill=(10, 8, 5))
-            draw.ellipse([nose_cx-perp_x*4-2, nose_cy-perp_y*4-2, nose_cx-perp_x*4+2, nose_cy-perp_y*4+2], fill=(10, 8, 5))
-
-            # Panting tongue
-            tongue_phase = math.sin(sim_time * 1.5) * 0.3 + 0.7
-            if tongue_phase > 0.4:
-                t_len = 16 * tongue_phase
-                t_base = (snout_cx + cos_a * 2, snout_cy + sin_a * 2)
-                t_tip = (t_base[0] + cos_a * t_len, t_base[1] + sin_a * t_len)
-                draw.line([t_base, t_tip], fill=(230, 80, 100), width=10)
-                draw.ellipse([t_tip[0]-5, t_tip[1]-5, t_tip[0]+5, t_tip[1]+5], fill=(220, 70, 90))
-                draw.line([t_base, t_tip], fill=(200, 60, 80), width=2)
-
-            # Eyes with iris + pupil + highlight
-            eye_l = (hx + cos_a * 10 + perp_x * 17, hy + sin_a * 10 + perp_y * 17)
-            eye_r = (hx + cos_a * 10 - perp_x * 17, hy + sin_a * 10 - perp_y * 17)
-            for eye_pt in [eye_l, eye_r]:
-                draw.ellipse([eye_pt[0]-8, eye_pt[1]-7, eye_pt[0]+8, eye_pt[1]+7],
-                             fill=(30, 18, 5), outline=fur_dark, width=2)
-                draw.ellipse([eye_pt[0]-6, eye_pt[1]-5.5, eye_pt[0]+6, eye_pt[1]+5.5], fill=eye_amber)
-                draw.ellipse([eye_pt[0]-2.5, eye_pt[1]-4, eye_pt[0]+2.5, eye_pt[1]+4], fill=(5, 3, 1))
-                draw.ellipse([eye_pt[0]+2.5, eye_pt[1]-3.5, eye_pt[0]+5, eye_pt[1]-1], fill=(255, 255, 240))
-
-            # Eyebrow spots
-            brow_l = (hx - cos_a * 4 + perp_x * 16, hy - sin_a * 4 + perp_y * 16)
-            brow_r = (hx - cos_a * 4 - perp_x * 16, hy - sin_a * 4 - perp_y * 16)
-            draw.ellipse([brow_l[0]-3, brow_l[1]-2, brow_l[0]+3, brow_l[1]+2], fill=fur_dark)
-            draw.ellipse([brow_r[0]-3, brow_r[1]-2, brow_r[0]+3, brow_r[1]+2], fill=fur_dark)
-
-        elif class_type == "arachnid":
-            # 1. 8 Articulated Walking Legs with 3-Segment IK & Tarsal Claws
-            for leg in sim.legs8:
-                h_p = leg["hip"]
-                foot_p = (leg["cur"][0], leg["cur"][1])
-                h_p, j1_p, j2_p, f_p = solve_ik_3segment(h_p, foot_p, leg["l1"], leg["l2"], leg["l3"], leg["side"])
-                draw.line([h_p, j1_p], fill=(20, 24, 32), width=12)
-                draw.line([h_p, j1_p], fill=(35, 42, 54), width=8)
-                draw.line([j1_p, j2_p], fill=(28, 36, 48), width=10)
-                draw.line([j1_p, j2_p], fill=(45, 55, 72), width=6)
-                draw.line([j2_p, f_p], fill=(15, 20, 28), width=7)
-                draw.ellipse([j1_p[0]-5, j1_p[1]-5, j1_p[0]+5, j1_p[1]+5], fill=accent_color)
-                draw.ellipse([j2_p[0]-5, j2_p[1]-5, j2_p[0]+5, j2_p[1]+5], fill=accent_color)
-                # Sharp curved needle claw at foot
-                draw.ellipse([f_p[0]-4, f_p[1]-4, f_p[0]+4, f_p[1]+4], fill=(10, 12, 16))
-                claw_tip = (f_p[0] + cos_a * 6 + perp_x * (4 * leg["side"]), f_p[1] + sin_a * 6 + perp_y * (4 * leg["side"]))
-                draw.line([f_p, claw_tip], fill=accent_color, width=2)
-
-            # 2. Chelae (3-Joint Pincer Arms Extending Forward)
-            for side in [-1, 1]:
-                arm_sock = (sim.x + cos_a * 36 + perp_x * (26 * side), sim.y + sin_a * 36 + perp_y * (26 * side))
-                palm_target = (sim.x + cos_a * 95 + perp_x * (55 * side), sim.y + sin_a * 95 + perp_y * (55 * side))
-                _, elbow_p, palm_p = solve_forelimb_ik(arm_sock, palm_target, 42, 48, side)
-                draw.line([arm_sock, elbow_p], fill=(25, 30, 40), width=14)
-                draw.line([elbow_p, palm_p], fill=(30, 38, 50), width=16)
-                draw.ellipse([elbow_p[0]-6, elbow_p[1]-6, elbow_p[0]+6, elbow_p[1]+6], fill=accent_color)
-                # Muscular Palm & Snapping Pincers
-                draw.ellipse([palm_p[0]-12, palm_p[1]-12, palm_p[0]+12, palm_p[1]+12], fill=(18, 22, 30), outline=accent_color, width=2)
-                c_angle = math.atan2(palm_p[1] - elbow_p[1], palm_p[0] - elbow_p[0])
-                pinch_open = 0.28 + math.sin(sim_time * 4) * 0.12
-                p1_tip = (palm_p[0] + math.cos(c_angle - pinch_open) * 28, palm_p[1] + math.sin(c_angle - pinch_open) * 28)
-                p2_tip = (palm_p[0] + math.cos(c_angle + pinch_open) * 28, palm_p[1] + math.sin(c_angle + pinch_open) * 28)
-                draw.line([palm_p, p1_tip], fill=accent_color, width=5)
-                draw.line([palm_p, p2_tip], fill=accent_color, width=5)
-
-            # 3. 7 Mesosoma Tergite Plates
-            for i in range(1, 8):
-                seg = sim.spine[i]
-                s_cos, s_sin = math.cos(seg["angle"]), math.sin(seg["angle"])
-                s_perp_x, s_perp_y = -s_sin, s_cos
-                half_w = max(20, 52 - i * 4.4)
-                half_h = 12
-                p1 = (seg["x"] - s_cos * half_h + s_perp_x * half_w, seg["y"] - s_sin * half_h + s_perp_y * half_w)
-                p2 = (seg["x"] + s_cos * half_h + s_perp_x * (half_w * 0.92), seg["y"] + s_sin * half_h + s_perp_y * (half_w * 0.92))
-                p3 = (seg["x"] + s_cos * half_h - s_perp_x * (half_w * 0.92), seg["y"] + s_sin * half_h - s_perp_y * (half_w * 0.92))
-                p4 = (seg["x"] - s_cos * half_h - s_perp_x * half_w, seg["y"] - s_sin * half_h - s_perp_y * half_w)
-                draw.polygon([p1, p2, p3, p4], fill=(16, 22, 30), outline=(40, 50, 65), width=2)
-                draw.line([(seg["x"] + s_perp_x * (half_w*0.8), seg["y"] + s_perp_y * (half_w*0.8)),
-                           (seg["x"] - s_perp_x * (half_w*0.8), seg["y"] - s_perp_y * (half_w*0.8))], fill=accent_color, width=2)
-
-            # 4. Sculpted Prosoma Carapace with Median Ocular Tubercle
-            c_front = (sim.x + cos_a * 52, sim.y + sin_a * 52)
-            c_r1 = (sim.x + cos_a * 28 + perp_x * 44, sim.y + sin_a * 28 + perp_y * 44)
-            c_r2 = (sim.x - cos_a * 26 + perp_x * 48, sim.y - sin_a * 26 + perp_y * 48)
-            c_l2 = (sim.x - cos_a * 26 - perp_x * 48, sim.y - sin_a * 26 - perp_y * 48)
-            c_l1 = (sim.x + cos_a * 28 - perp_x * 44, sim.y + sin_a * 28 - perp_y * 44)
-            draw.polygon([c_front, c_r1, c_r2, c_l2, c_l1], fill=(12, 16, 24), outline=accent_color, width=3)
-            # Median eyes
-            draw.ellipse([sim.x + cos_a * 15 - 4, sim.y + sin_a * 15 - 4, sim.x + cos_a * 15 + 4, sim.y + sin_a * 15 + 4], fill=accent_color)
-
-            # 5. Curling Metasoma Tail with Venom Telson & Stinger Needle
-            tail_start = sim.spine[7]
-            t_prev = (tail_start["x"], tail_start["y"])
-            tail_curve = math.sin(sim_time * 3.5) * 0.45
-            for t_idx in range(6):
-                t_ang = tail_start["angle"] + math.pi + tail_curve * (t_idx / 5)
-                seg_len = 24 - t_idx * 1.5
-                tx = t_prev[0] + math.cos(t_ang) * seg_len
-                ty = t_prev[1] + math.sin(t_ang) * seg_len
-                t_w = max(6, int(20 - t_idx * 2.2))
-                draw.line([t_prev, (tx, ty)], fill=(22, 28, 38), width=t_w)
-                draw.ellipse([tx - t_w//2, ty - t_w//2, tx + t_w//2, ty + t_w//2], fill=(30, 40, 55), outline=accent_color, width=1)
-                t_prev = (tx, ty)
-        
-            # Bulbous Telson & Venom Needle
-            draw.ellipse([t_prev[0]-10, t_prev[1]-10, t_prev[0]+10, t_prev[1]+10], fill=(200, 140, 10), outline=accent_color, width=2)
-            needle_tip = (t_prev[0] + math.cos(sim.angle + 0.6) * 22, t_prev[1] + math.sin(sim.angle + 0.6) * 22)
-            draw.line([t_prev, needle_tip], fill=(255, 230, 100), width=3)
-            draw.ellipse([needle_tip[0]-2, needle_tip[1]-2, needle_tip[0]+2, needle_tip[1]+2], fill=(255, 255, 255))
-
-        elif class_type == "serpent":
-            # 1. 24-Segment Undulating Biological Snake Body
-            num_v = min(24, len(sim.spine))
-            for i in range(num_v - 1, 0, -1):
-                p1 = (sim.spine[i]["x"], sim.spine[i]["y"])
-                p0 = (sim.spine[i - 1]["x"], sim.spine[i - 1]["y"])
-                norm = i / num_v
-                v_width = max(6, int(38 * (1.0 - norm * 0.78)))
-                # Dorsal scales (Dark emerald/black with metallic rim)
-                draw.line([p0, p1], fill=(12, 24, 18), width=v_width)
-                draw.line([p0, p1], fill=(24, 48, 36), width=max(2, v_width - 6))
-                draw.ellipse([p1[0]-v_width//2, p1[1]-v_width//2, p1[0]+v_width//2, p1[1]+v_width//2],
-                             fill=(20, 40, 30), outline=accent_color, width=1)
-
-            # 2. Flaring Cobra Cervical Hood (Vertebrae 2 to 5)
-            h_pt = sim.spine[2]
-            h_cos, h_sin = math.cos(h_pt["angle"]), math.sin(h_pt["angle"])
-            h_perp_x, h_perp_y = -h_sin, h_cos
-            hood_l = (h_pt["x"] + h_perp_x * 46, h_pt["y"] + h_perp_y * 46)
-            hood_r = (h_pt["x"] - h_perp_x * 46, h_pt["y"] - h_perp_y * 46)
-            hood_f = (sim.x + cos_a * 18, sim.y + sin_a * 18)
-            hood_b = (sim.spine[5]["x"], sim.spine[5]["y"])
-            draw.polygon([hood_f, hood_l, hood_b, hood_r], fill=(15, 30, 22), outline=accent_color, width=3)
-            # Dorsal chevron spectacle mark
-            draw.line([hood_l, (h_pt["x"], h_pt["y"])], fill=accent_color, width=2)
-            draw.line([hood_r, (h_pt["x"], h_pt["y"])], fill=accent_color, width=2)
-
-            # 3. Sculpted Diamond Viper Skull
-            snout = (sim.x + cos_a * 46, sim.y + sin_a * 46)
-            j1 = (sim.x - cos_a * 15 + perp_x * 24, sim.y - sin_a * 15 + perp_y * 24)
-            j2 = (sim.x - cos_a * 15 - perp_x * 24, sim.y - sin_a * 15 - perp_y * 24)
-            crown = (sim.x - cos_a * 32, sim.y - sin_a * 32)
-            draw.polygon([snout, j1, crown, j2], fill=(10, 20, 15), outline=accent_color, width=3)
-
-            # Golden Slit Predatory Eyes with Highlight
-            eye_l = (sim.x + cos_a * 12 + perp_x * 14, sim.y + sin_a * 12 + perp_y * 14)
-            eye_r = (sim.x + cos_a * 12 - perp_x * 14, sim.y + sin_a * 12 - perp_y * 14)
-            draw.ellipse([eye_l[0]-4.5, eye_l[1]-4.5, eye_l[0]+4.5, eye_l[1]+4.5], fill=(234, 179, 8))
-            draw.ellipse([eye_r[0]-4.5, eye_r[1]-4.5, eye_r[0]+4.5, eye_r[1]+4.5], fill=(234, 179, 8))
-            draw.line([(eye_l[0], eye_l[1]-3.5), (eye_l[0], eye_l[1]+3.5)], fill=(0, 0, 0), width=2)
-            draw.line([(eye_r[0], eye_r[1]-3.5), (eye_r[0], eye_r[1]+3.5)], fill=(0, 0, 0), width=2)
-            draw.ellipse([eye_l[0]+1, eye_l[1]-1, eye_l[0]+2.5, eye_l[1]+0.5], fill=(255, 255, 255))
-            draw.ellipse([eye_r[0]+1, eye_r[1]-1, eye_r[0]+2.5, eye_r[1]+0.5], fill=(255, 255, 255))
-
-            # 4. Animated Flicking Red Forked Tongue
-            t_cycle = math.sin(sim_time * 8.0)
-            if t_cycle > 0.1:
-                t_len = 28 * min(1.0, t_cycle * 1.5)
-                t_base = snout
-                t_mid = (snout[0] + cos_a * t_len, snout[1] + sin_a * t_len)
-                fork_a = 0.35
-                f1 = (t_mid[0] + math.cos(sim.angle + fork_a) * 12, t_mid[1] + math.sin(sim.angle + fork_a) * 12)
-                f2 = (t_mid[0] + math.cos(sim.angle - fork_a) * 12, t_mid[1] + math.sin(sim.angle - fork_a) * 12)
-                draw.line([t_base, t_mid], fill=(239, 68, 68), width=3)
-                draw.line([t_mid, f1], fill=(239, 68, 68), width=2)
-                draw.line([t_mid, f2], fill=(239, 68, 68), width=2)
-
-        elif class_type == "reptile":
-            # 1. 4 Sprawling 2-Joint IK Limbs with 5 Spread Claws
-            for leg in sim.legs4:
-                s_pt = sim.spine[leg["spine_i"]]
-                b_ang = s_pt["angle"]
-                hip_ang = b_ang + (math.pi / 2) * leg["side"]
-                hip = (s_pt["x"] + math.cos(hip_ang) * 26, s_pt["y"] + math.sin(hip_ang) * 26)
-                foot_x = leg["cur"][0]
-                foot_y = leg["cur"][1]
-                hp, kp, fp = solve_ik_2joint(hip, (foot_x, foot_y), leg["l1"], leg["l2"], leg["side"])
-                draw.line([hp, kp], fill=(24, 32, 24), width=16)
-                draw.line([hp, kp], fill=(45, 65, 45), width=10)
-                draw.line([kp, fp], fill=(30, 45, 30), width=12)
-                draw.line([kp, fp], fill=(55, 85, 55), width=8)
-                draw.ellipse([kp[0]-6, kp[1]-6, kp[0]+6, kp[1]+6], fill=accent_color)
-                draw.ellipse([fp[0]-8, fp[1]-8, fp[0]+8, fp[1]+8], fill=(15, 22, 15))
-                # 5 Spread Claws
-                for c_i in [-0.5, -0.25, 0.0, 0.25, 0.5]:
-                    claw_tip = (fp[0] + math.cos(b_ang + c_i) * 14, fp[1] + math.sin(b_ang + c_i) * 14)
-                    draw.line([fp, claw_tip], fill=(240, 200, 120), width=2)
-
-            # 2. Armored Osteoderm Spine & Muscular Body
-            for i in range(len(sim.spine) - 1, 0, -1):
-                p1 = (sim.spine[i]["x"], sim.spine[i]["y"])
-                p0 = (sim.spine[i - 1]["x"], sim.spine[i - 1]["y"])
-                norm = i / len(sim.spine)
-                v_width = max(8, int(42 * (1.0 - norm * 0.72)))
-                draw.line([p0, p1], fill=(20, 30, 20), width=v_width)
-                draw.line([p0, p1], fill=(40, 60, 40), width=max(2, v_width - 8))
-                draw.ellipse([p1[0]-v_width//2, p1[1]-v_width//2, p1[0]+v_width//2, p1[1]+v_width//2], fill=(30, 48, 30), outline=accent_color, width=2)
-
-            # 3. Predatory Reptile Skull with Nostrils & Slit Eyes
-            snout = (sim.x + cos_a * 50, sim.y + sin_a * 50)
-            j1 = (sim.x - cos_a * 18 + perp_x * 28, sim.y - sin_a * 18 + perp_y * 28)
-            j2 = (sim.x - cos_a * 18 - perp_x * 28, sim.y - sin_a * 18 - perp_y * 28)
-            crown = (sim.x - cos_a * 36, sim.y - sin_a * 36)
-            draw.polygon([snout, j1, crown, j2], fill=(16, 26, 18), outline=accent_color, width=3)
-            draw.ellipse([snout[0]+cos_a*2-3, snout[1]+sin_a*2-3, snout[0]+cos_a*2+3, snout[1]+sin_a*2+3], fill=(0, 0, 0))
-            # Eyes
-            eye_l = (sim.x + cos_a * 10 + perp_x * 16, sim.y + sin_a * 10 + perp_y * 16)
-            eye_r = (sim.x + cos_a * 10 - perp_x * 16, sim.y + sin_a * 10 - perp_y * 16)
-            draw.ellipse([eye_l[0]-5, eye_l[1]-5, eye_l[0]+5, eye_l[1]+5], fill=(234, 179, 8))
-            draw.ellipse([eye_r[0]-5, eye_r[1]-5, eye_r[0]+5, eye_r[1]+5], fill=(234, 179, 8))
-            draw.ellipse([eye_l[0]+1, eye_l[1]-1, eye_l[0]+3, eye_l[1]+1], fill=(255, 255, 255))
-            draw.ellipse([eye_r[0]+1, eye_r[1]-1, eye_r[0]+3, eye_r[1]+1], fill=(255, 255, 255))
-
-        elif class_type == "crustacean":
-            # Peacock Mantis Shrimp: Iridescent Turquoise Carapace & Dactyl Strike Clubs
-            # 1. Pleopods / Swimming Gill Paddles along Abdomen
-            for i in range(2, 10):
-                seg = sim.spine[i]
-                s_cos, s_sin = math.cos(seg["angle"]), math.sin(seg["angle"])
-                s_perp_x, s_perp_y = -s_sin, s_cos
-                paddle_phase = math.sin(sim_time * 8 + i * 0.6) * 16
-                draw.line([(seg["x"] + s_perp_x * 28, seg["y"] + s_perp_y * 28),
-                           (seg["x"] + s_perp_x * 46 + s_cos * paddle_phase, seg["y"] + s_perp_y * 46 + s_sin * paddle_phase)],
-                          fill=(239, 68, 68), width=3)
-                draw.line([(seg["x"] - s_perp_x * 28, seg["y"] - s_perp_y * 28),
-                           (seg["x"] - s_perp_x * 46 + s_cos * paddle_phase, seg["y"] - s_perp_y * 46 + s_sin * paddle_phase)],
-                          fill=(239, 68, 68), width=3)
-
-            # 2. Segmented Carapace with Neon Green/Cyan Highlights
-            for i in range(12, 0, -1):
-                seg = sim.spine[i]
-                s_cos, s_sin = math.cos(seg["angle"]), math.sin(seg["angle"])
-                s_perp_x, s_perp_y = -s_sin, s_cos
-                half_w = max(16, 44 - i * 2.5)
-                draw.ellipse([seg["x"] - half_w, seg["y"] - 14, seg["x"] + half_w, seg["y"] + 14], fill=(6, 78, 99), outline=accent_color, width=2)
-
-            # 3. Springloaded Raptorial Strike Clubs
-            for side in [-1, 1]:
-                c_sock = (sim.x + cos_a * 22 + perp_x * (20 * side), sim.y + sin_a * 22 + perp_y * (20 * side))
-                club_t = (sim.x + cos_a * 68 + perp_x * (34 * side), sim.y + sin_a * 68 + perp_y * (34 * side))
-                draw.line([c_sock, club_t], fill=(234, 88, 12), width=10)
-                draw.ellipse([club_t[0]-10, club_t[1]-10, club_t[0]+10, club_t[1]+10], fill=(239, 68, 68), outline=(255, 230, 100), width=3)
-
-            # 4. Mobile Trinocular Compound Eyes
-            eye1 = (sim.x + cos_a * 44 + perp_x * 16, sim.y + sin_a * 44 + perp_y * 16)
-            eye2 = (sim.x + cos_a * 44 - perp_x * 16, sim.y + sin_a * 44 - perp_y * 16)
-            draw.ellipse([eye1[0]-8, eye1[1]-8, eye1[0]+8, eye1[1]+8], fill=(234, 179, 8), outline=(6, 182, 212), width=2)
-            draw.ellipse([eye2[0]-8, eye2[1]-8, eye2[0]+8, eye2[1]+8], fill=(234, 179, 8), outline=(6, 182, 212), width=2)
-            draw.ellipse([eye1[0]+1, eye1[1]-1, eye1[0]+3, eye1[1]+1], fill=(255, 255, 255))
-            draw.ellipse([eye2[0]+1, eye2[1]-1, eye2[0]+3, eye2[1]+1], fill=(255, 255, 255))
-
-        elif class_type == "insect":
-            # Giant Praying Mantis: Triangular Head, Raptorial Forearms & Slender Wings
-            # 1. 4 Walking Legs
-            for side in [-1, 1]:
-                for offset in [0, -35]:
-                    h_p = (sim.x + cos_a * offset + perp_x * (20 * side), sim.y + sin_a * offset + perp_y * (20 * side))
-                    knee_p = (h_p[0] + perp_x * (55 * side) - cos_a * 15, h_p[1] + perp_y * (55 * side) - sin_a * 15)
-                    foot_p = (knee_p[0] + perp_x * (35 * side) + cos_a * 25, knee_p[1] + perp_y * (35 * side) + sin_a * 25)
-                    draw.line([h_p, knee_p], fill=(74, 110, 40), width=5)
-                    draw.line([knee_p, foot_p], fill=(132, 204, 22), width=3)
-                    draw.ellipse([knee_p[0]-3, knee_p[1]-3, knee_p[0]+3, knee_p[1]+3], fill=(234, 179, 8))
-
-            # 2. Slender Elongated Prothorax & Wings
-            for i in range(12, 0, -1):
-                seg = sim.spine[i]
-                half_w = max(10, 28 - i * 1.5)
-                draw.ellipse([seg["x"] - half_w, seg["y"] - 10, seg["x"] + half_w, seg["y"] + 10], fill=(24, 45, 18), outline=(132, 204, 22), width=2)
-
-            # 3. Folded Raptorial Strike Arms
-            for side in [-1, 1]:
-                r_sock = (sim.x + cos_a * 35 + perp_x * (15 * side), sim.y + sin_a * 35 + perp_y * (15 * side))
-                femur_tip = (sim.x + cos_a * 75 + perp_x * (28 * side), sim.y + sin_a * 75 + perp_y * (28 * side))
-                tibia_tip = (sim.x + cos_a * 55 + perp_x * (10 * side), sim.y + sin_a * 55 + perp_y * (10 * side))
-                draw.line([r_sock, femur_tip], fill=(101, 163, 13), width=7)
-                draw.line([femur_tip, tibia_tip], fill=(132, 204, 22), width=5)
-                draw.ellipse([femur_tip[0]-4, femur_tip[1]-4, femur_tip[0]+4, femur_tip[1]+4], fill=(234, 179, 8))
-
-            # 4. Mobile Triangular Head with Bulging Compound Eyes
-            h_tip = (sim.x + cos_a * 58, sim.y + sin_a * 58)
-            e_l = (sim.x + cos_a * 40 + perp_x * 24, sim.y + sin_a * 40 + perp_y * 24)
-            e_r = (sim.x + cos_a * 40 - perp_x * 24, sim.y + sin_a * 40 - perp_y * 24)
-            draw.polygon([h_tip, e_l, e_r], fill=(30, 60, 20), outline=(132, 204, 22), width=2)
-            draw.ellipse([e_l[0]-8, e_l[1]-8, e_l[0]+8, e_l[1]+8], fill=(132, 204, 22), outline=(200, 250, 50), width=2)
-            draw.ellipse([e_r[0]-8, e_r[1]-8, e_r[0]+8, e_r[1]+8], fill=(132, 204, 22), outline=(200, 250, 50), width=2)
-
-        elif class_type == "cephalopod":
-            # Blue-Ringed Octopus: 8 Sinusoidal Undulating Tentacles with Glowing Cyan Rings
-            # 1. 8 Independent Multi-Joint Tentacles
-            for arm_i in range(8):
-                base_ang = (arm_i / 8) * math.pi * 2 + sim.angle
-                a_prev = (sim.x + math.cos(base_ang) * 28, sim.y + math.sin(base_ang) * 28)
-                wave_f = math.sin(sim_time * 5 + arm_i * 0.75) * 0.5
-                for j in range(8):
-                    ang_j = base_ang + wave_f * ((j + 1) / 8)
-                    ax = a_prev[0] + math.cos(ang_j) * 18
-                    ay = a_prev[1] + math.sin(ang_j) * 18
-                    a_w = max(4, int(18 - j * 1.8))
-                    draw.line([a_prev, (ax, ay)], fill=(120, 80, 40), width=a_w)
-                    draw.line([a_prev, (ax, ay)], fill=(180, 130, 70), width=max(2, a_w - 4))
-                    # Glowing Cyan Blue Rings
-                    if j in [2, 4, 6]:
-                        draw.ellipse([ax-6, ay-6, ax+6, ay+6], fill=(0, 0, 0), outline=(0, 230, 255), width=2)
-                        draw.ellipse([ax-2, ay-2, ax+2, ay+2], fill=(0, 230, 255))
-                    a_prev = (ax, ay)
-
-            # 2. Domed Muscular Mantle & Golden Horizontal Eyes
-            draw.ellipse([sim.x - 38, sim.y - 38, sim.x + 38, sim.y + 38], fill=(140, 90, 45), outline=(100, 60, 30), width=3)
-            for ring_off in [(-16, -12), (16, -12), (0, 16)]:
-                rx, ry = sim.x + ring_off[0], sim.y + ring_off[1]
-                draw.ellipse([rx-8, ry-8, rx+8, ry+8], fill=(10, 10, 20), outline=(0, 230, 255), width=2)
-                draw.ellipse([rx-3, ry-3, rx+3, ry+3], fill=(0, 230, 255))
-            # Eyes
-            draw.ellipse([sim.x - 22, sim.y - 18, sim.x - 12, sim.y - 8], fill=(234, 179, 8))
-            draw.ellipse([sim.x + 12, sim.y - 18, sim.x + 22, sim.y - 8], fill=(234, 179, 8))
-            draw.line([(sim.x - 20, sim.y - 13), (sim.x - 14, sim.y - 13)], fill=(0, 0, 0), width=2)
-            draw.line([(sim.x + 14, sim.y - 13), (sim.x + 20, sim.y - 13)], fill=(0, 0, 0), width=2)
-
-        else:
-            # Aquatic Class: Distinct Kinematics for Swimming Fish vs Expansive Wing Rays
-            is_ray = ("ray" in sp_id or "manta" in sp_id or "skate" in sp_id)
-
-            if is_ray:
-                # Oceanic Manta / Eagle Ray: Undulating Pectoral Wing Fins & Cephalic Lobes
-                flap_wave = math.sin(sim_time * 3.5) * 26
-                w_nose = (sim.x + cos_a * 55, sim.y + sin_a * 55)
-                w_left = (sim.x - cos_a * 15 + perp_x * 90, sim.y - sin_a * 15 + perp_y * 90 + flap_wave)
-                w_right = (sim.x - cos_a * 15 - perp_x * 90, sim.y - sin_a * 15 - perp_y * 90 - flap_wave)
-                w_tail = (sim.x - cos_a * 50, sim.y - sin_a * 50)
-                draw.polygon([w_nose, w_left, w_tail, w_right], fill=(14, 28, 48), outline=accent_color, width=3)
-                # White dorsal shoulder markings
-                draw.polygon([(sim.x + cos_a * 10, sim.y + sin_a * 10),
-                              (sim.x - cos_a * 10 + perp_x * 45, sim.y - sin_a * 10 + perp_y * 45 + flap_wave*0.5),
-                              (sim.x - cos_a * 25, sim.y - sin_a * 25)], fill=(240, 248, 255))
-                draw.polygon([(sim.x + cos_a * 10, sim.y + sin_a * 10),
-                              (sim.x - cos_a * 10 - perp_x * 45, sim.y - sin_a * 10 - perp_y * 45 - flap_wave*0.5),
-                              (sim.x - cos_a * 25, sim.y - sin_a * 25)], fill=(240, 248, 255))
-
-                # Cephalic Horns at Mouth
-                draw.ellipse([w_nose[0] + perp_x * 16 - 6, w_nose[1] + perp_y * 16 - 6, w_nose[0] + perp_x * 16 + 6, w_nose[1] + perp_y * 16 + 6], fill=(14, 28, 48), outline=accent_color, width=2)
-                draw.ellipse([w_nose[0] - perp_x * 16 - 6, w_nose[1] - perp_y * 16 - 6, w_nose[0] - perp_x * 16 + 6, w_nose[1] - perp_y * 16 + 6], fill=(14, 28, 48), outline=accent_color, width=2)
-
-                # Trailing Whip Tail
-                t_prev = w_tail
-                for i in range(12):
-                    tx = t_prev[0] - cos_a * 14 + math.sin(sim_time * 4 + i * 0.4) * 5
-                    ty = t_prev[1] - sin_a * 14 + math.cos(sim_time * 4 + i * 0.4) * 5
-                    draw.line([t_prev, (tx, ty)], fill=(14, 28, 48), width=max(2, 6 - i // 2))
-                    t_prev = (tx, ty)
-            else:
-                # Swimming Fish / Shark / Eel / Koi: Lateral Undulation, Flowing Caudal Fin & Pectoral Flippers
-                swim_wave = math.sin(sim_time * 6)
-            
-                # 1. Pectoral Side Swimming Fins (Left & Right)
-                for side in [-1, 1]:
-                    f_root = (sim.x + cos_a * 10 + perp_x * (22 * side), sim.y + sin_a * 10 + perp_y * (22 * side))
-                    fin_flap = math.sin(sim_time * 6 + side * 0.5) * 12
-                    f_tip = (f_root[0] - cos_a * 28 + perp_x * ((38 + fin_flap) * side),
-                             f_root[1] - sin_a * 28 + perp_y * ((38 + fin_flap) * side))
-                    f_mid = (f_root[0] - cos_a * 14 + perp_x * (28 * side), f_root[1] - sin_a * 14 + perp_y * (28 * side))
-                    draw.polygon([f_root, f_mid, f_tip], fill=(240, 240, 245), outline=accent_color, width=2)
-
-                # 2. Streamlined Multi-Vertebrae Fuselage Body
-                body_pts_l, body_pts_r = [], []
-                spine_chain = []
-                for i in range(14):
-                    seg_wave = math.sin(sim_time * 6 - i * 0.45) * (i * 2.2)
-                    sx = sim.x - cos_a * (i * 15) + perp_x * seg_wave
-                    sy = sim.y - sin_a * (i * 15) + perp_y * seg_wave
-                    spine_chain.append((sx, sy))
-                
-                    # Fish Body Profile Width
-                    if i < 4:
-                        hw = 20 + i * 4
-                    elif i < 9:
-                        hw = 32 - (i - 4) * 3.5
-                    else:
-                        hw = max(6, 16 - (i - 9) * 2.5)
-
-                    body_pts_l.append((sx + perp_x * hw, sy + perp_y * hw))
-                    body_pts_r.append((sx - perp_x * hw, sy - perp_y * hw))
-
-                # Render Fish Torso
-                h_nose = (sim.x + cos_a * 35, sim.y + sin_a * 35)
-                fish_poly = [h_nose] + body_pts_l + list(reversed(body_pts_r))
-                draw.polygon(fish_poly, fill=(25, 35, 50), outline=accent_color, width=3)
-
-                # Dorsal Spine Accent Stripe
-                for i in range(len(spine_chain) - 1):
-                    draw.line([spine_chain[i], spine_chain[i+1]], fill=accent_color, width=3)
-
-                # 3. Flowing 2-Lobe Caudal Tail Fin (Fish Tail)
-                tail_base = spine_chain[-1]
-                tail_wave = math.sin(sim_time * 6 - 6.0) * 24
-                t_tip_top = (tail_base[0] - cos_a * 45 + perp_x * (32 + tail_wave),
-                             tail_base[1] - sin_a * 45 + perp_y * (32 + tail_wave))
-                t_tip_bot = (tail_base[0] - cos_a * 45 - perp_x * (32 - tail_wave),
-                             tail_base[1] - sin_a * 45 - perp_y * (32 - tail_wave))
-                t_mid_notch = (tail_base[0] - cos_a * 25 + perp_x * (tail_wave * 0.5),
-                               tail_base[1] - sin_a * 25 + perp_y * (tail_wave * 0.5))
-            
-                draw.polygon([tail_base, t_tip_top, t_mid_notch, t_tip_bot], fill=(245, 245, 250), outline=accent_color, width=2)
-
-                # 4. Fish Head: Eyes & Gill Cover Arch
-                eye_l = (sim.x + cos_a * 20 + perp_x * 16, sim.y + sin_a * 20 + perp_y * 16)
-                eye_r = (sim.x + cos_a * 20 - perp_x * 16, sim.y + sin_a * 20 - perp_y * 16)
-                draw.ellipse([eye_l[0]-6, eye_l[1]-6, eye_l[0]+6, eye_l[1]+6], fill=(245, 245, 250), outline=accent_color, width=2)
-                draw.ellipse([eye_r[0]-6, eye_r[1]-6, eye_r[0]+6, eye_r[1]+6], fill=(245, 245, 250), outline=accent_color, width=2)
-                draw.ellipse([eye_l[0]-3, eye_l[1]-3, eye_l[0]+3, eye_l[1]+3], fill=(10, 15, 25))
-                draw.ellipse([eye_r[0]-3, eye_r[1]-3, eye_r[0]+3, eye_r[1]+3], fill=(10, 15, 25))
-                draw.ellipse([eye_l[0]+1, eye_l[1]-1, eye_l[0]+2.5, eye_l[1]+0.5], fill=(255, 255, 255))
-                draw.ellipse([eye_r[0]+1, eye_r[1]-1, eye_r[0]+2.5, eye_r[1]+0.5], fill=(255, 255, 255))
-
-                # Gill Operculum Arch
-                draw.arc([sim.x + cos_a * 8 - 18, sim.y + sin_a * 8 - 18, sim.x + cos_a * 8 + 18, sim.y + sin_a * 8 + 18],
-                         start=int(math.degrees(sim.angle) + 60), end=int(math.degrees(sim.angle) + 300), fill=accent_color, width=2)
-
-
-    # ─────────────────────────────────────────────────────────────
-    # LOWER SECTION: macOS DARK CODE WINDOW (YOUTUBE SHORTS SAFE ZONE: y=905..1515)
-    # Leaves 110px margins on left and right, completely clear of YouTube action buttons!
-    # ─────────────────────────────────────────────────────────────
-    card_w, card_h = 860, 610
-    card_x = (WIDTH - card_w) // 2
-    card_y = 905
-
-    draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + card_h], radius=20, fill=theme["card_fill"], outline=theme["card_border"], width=2)
-
-    title_h = 54
-    draw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + title_h], radius=20, fill=theme["card_header"])
-    draw.rectangle([card_x, card_y + 24, card_x + card_w, card_y + title_h], fill=theme["card_header"])
-
-    # macOS Window Buttons
-    draw.ellipse([card_x + 24, card_y + 20, card_x + 38, card_y + 34], fill=(255, 95, 86))
-    draw.ellipse([card_x + 48, card_y + 20, card_x + 62, card_y + 34], fill=(255, 189, 46))
-    draw.ellipse([card_x + 72, card_y + 20, card_x + 86, card_y + 34], fill=(39, 201, 63))
-
-    # File Tag
-    draw.rounded_rectangle([card_x + 115, card_y + 12, card_x + 146, card_y + 42], radius=4, fill=(247, 223, 30))
-    draw.text((card_x + 120, card_y + 15), "JS", font=get_font(16, bold=True), fill=(20, 20, 20))
-    draw.text((card_x + 156, card_y + 16), species["file_name"], font=get_font(21, bold=True), fill=(160, 175, 195))
-
-    # Active solver indicator on title bar
-    draw.text((card_x + card_w - 20, card_y + 17), "⚡ Active IK Rig", font=get_font(16, bold=True, mono=True), fill=accent_color, anchor="rt")
-
-    all_lines = species.get("code_lines")
-    if not all_lines:
-        all_lines = _generate_js_code_for_animal(species.get("name", "Creature"), species.get("class_type", "quadruped"), species.get("scientific", ""))
-    total_lines = len(all_lines)
-    
-    line_h = 46
-    code_font = get_font(25, mono=True, bold=True)
-    line_num_font = get_font(21, mono=True)
-    
-    visible_lines = int((card_h - title_h - 24) / line_h)
-    max_scroll_lines = max(0, total_lines - visible_lines)
-    scroll_factor = 0.5 - math.cos(progress * math.pi) / 2
-    curr_scroll = scroll_factor * max_scroll_lines
-
-    start_line_idx = int(curr_scroll)
-    line_pixel_offset = (curr_scroll - start_line_idx) * line_h
-
-    code_box_top = card_y + title_h + 12
-    code_box_bottom = card_y + card_h - 16
-
-    active_idx = min(total_lines - 1, start_line_idx + 2)
-
-    for idx in range(visible_lines + 2):
-        actual_line_idx = start_line_idx + idx
-        if actual_line_idx >= total_lines:
-            break
-        
-        line_text = all_lines[actual_line_idx]
-        y_pos = code_box_top + (idx * line_h) - int(line_pixel_offset)
-
-        if y_pos < code_box_top - 12 or y_pos > code_box_bottom:
-            continue
-
-        # Soft active line background highlight
-        if actual_line_idx == active_idx:
-            draw.rounded_rectangle([card_x + 12, y_pos - 4, card_x + card_w - 12, y_pos + line_h - 6], radius=6, fill=(24, 34, 48))
-
-        draw.text((card_x + 30, y_pos), f"{actual_line_idx + 1:2d}", font=line_num_font, fill=(140, 160, 185) if actual_line_idx == active_idx else (80, 100, 125))
-
-        indent_x = card_x + 85
-        _draw_highlighted_js_line(draw, indent_x, y_pos, line_text, code_font)
-
-        # Blinking cursor on active line
-        if actual_line_idx == active_idx and (frame_idx // 10) % 2 == 0:
-            cursor_x = indent_x + int(len(line_text) * 15.0)
-            if cursor_x < card_x + card_w - 25:
-                draw.rectangle([cursor_x, y_pos + 4, cursor_x + 3, y_pos + 28], fill=accent_color)
-
-    # 3. Progress Bar (y=1528..1538 — strictly above YouTube bottom overlay y=1560)
-    bar_w = 860
-    bar_x = (WIDTH - bar_w) // 2
-    bar_y = 1528
-    draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_w, bar_y + 10], radius=5, fill=(35, 46, 62))
-    fill_w = max(10, int(bar_w * progress))
-    draw.rounded_rectangle([bar_x, bar_y, bar_x + fill_w, bar_y + 10], radius=5, fill=accent_color)
-
-    # 4. Safe Subtitle Tag (y=1552)
-    draw.text((WIDTH // 2, 1552), "✨ Creative Coding • JavaScript Canvas Engine", font=get_font(18, bold=True), fill=(148, 163, 184), anchor="mt")
-
-    # Bottom area (y=1580..1920) is left completely unobstructed for YouTube's native title & channel overlay!
+    theme_name = next(key for key, value in ANIMAL_THEMES.items() if value is theme)
+    img = _studio_background(theme_name).copy()
+    d = ImageDraw.Draw(img)
+    accent = theme["canvas_border"]
+    d.text((110, 153), "BIO / MOTION LAB", font=get_font(19, bold=True, mono=True), fill=theme["badge_color"])
+    d.text((970, 153), f"2D  /  {FPS} FPS", font=get_font(18, mono=True), fill=(161, 176, 195), anchor="rt")
+    name = species["name"]
+    d.text((540, 198), name, font=_fit_font(name, 850, 48, bold=True), fill=(245, 249, 255), anchor="mt")
+    subtitle = species.get("scientific", name) + "  /  " + species.get("class_type", "creature").upper()
+    d.text((540, 254), subtitle, font=_fit_font(subtitle, 830, 19, mono=True), fill=(165, 183, 200), anchor="mt")
+    d.rounded_rectangle((108, 283, 972, 887), radius=18, fill=theme["canvas_fill"], outline=theme["card_border"], width=2)
+    grid = tuple(min(255, c+7) for c in theme["canvas_fill"])
+    for gx in range(140, 960, 40):
+        for gy in range(345, 839, 40):
+            d.ellipse((gx, gy, gx+1, gy+1), fill=grid)
+    # Ambient particles stay in the side gutters, away from the hero silhouette.
+    if species.get("class_type") in ("aquatic", "cephalopod"):
+        for idx in range(12):
+            px = 128 + (idx % 2) * 817
+            py = 350 + ((idx * 79 - sim_time * 24) % 465)
+            radius = 2 + idx % 3
+            d.ellipse((px-radius, py-radius, px+radius, py+radius), outline=theme["card_border"], width=1)
+    sim = _simulation_for_frame(species, frame_idx)
+    tx, ty, distance = _draw_creature_stage(img, species, sim, sim_time, theme)
+    d = ImageDraw.Draw(img)
+    d.rectangle((125, 298, 955, 338), fill=theme["canvas_fill"])
+    d.rectangle((125, 832, 955, 876), fill=theme["canvas_fill"])
+    d.ellipse((132, 307, 140, 315), fill=accent)
+    d.text((151, 302), "PROCEDURAL KINEMATICS", font=get_font(16, mono=True), fill=(207, 221, 236))
+    d.text((948, 302), theme_name, font=get_font(16, mono=True), fill=theme["badge_color"], anchor="rt")
+    d.line((130, 335, 950, 335), fill=theme["card_border"])
+    d.line((130, 834, 950, 834), fill=theme["card_border"])
+    d.text((132, 848), f"TARGET [{int(tx)}, {int(ty)}]   DIST {int(distance)}px", font=get_font(15, mono=True), fill=(156, 174, 195))
+    d.text((948, 848), f"ROT {math.degrees(sim.angle)%360:03.0f} deg", font=get_font(15, mono=True), fill=theme["badge_color"], anchor="rt")
+    _draw_code_panel(img, species, progress, frame_idx, theme)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle((110, 1530, 970, 1536), radius=3, fill=theme["card_border"])
+    if progress > 0:
+        d.rounded_rectangle((110, 1530, 110+max(6, round(860*progress)), 1536), radius=3, fill=accent)
+    d.text((110, 1550), "ANATOMY / MOTION / CODE", font=get_font(15, mono=True), fill=(155, 170, 192))
+    d.text((970, 1550), f"{frame_idx/FPS:04.1f}s / {total_frames/FPS:04.1f}s", font=get_font(15, mono=True), fill=(155, 170, 192), anchor="rt")
     return img.convert("RGB")
-

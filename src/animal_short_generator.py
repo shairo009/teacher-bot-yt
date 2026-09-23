@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -34,6 +35,7 @@ from src.animal_researcher import (
     research_animal,
     is_already_used,
     mark_used,
+    _load_used,
 )
 
 DATA_DIR = ROOT / "data"
@@ -44,6 +46,10 @@ DEFAULT_DURATION = 25.0
 LAST_FRAME_FILE = DATA_DIR / "last_uploaded_frame.jpg"
 RECENT_FRAMES_DIR = DATA_DIR / "recent_frames"
 MAX_RECENT_FRAMES = 5
+CREATURE_CROP = (110, 285, 970, 885)
+HASH_SCOPE = "creature-viewport-v2"
+MIN_VISUAL_DIFFERENCE = 20.0
+MIN_HASH_DISTANCE = 10
 
 _BASE_IGNORE_WORDS = {
     "CYBER", "VOLT", "QUANTUM", "SOLAR", "LASER", "PULSE", "VOID", "HEXA",
@@ -65,7 +71,8 @@ def extract_base_noun(name: str) -> str:
 def get_used_base_nouns() -> set[str]:
     """Returns all base animal nouns that have already been uploaded."""
     history = _load_json(HISTORY_FILE, [])
-    return {extract_base_noun(h["species"]) for h in history if h.get("species")}
+    return ({extract_base_noun(h["species"]) for h in history if h.get("species")}
+            | {extract_base_noun(name) for name in _load_used()})
 
 
 def compute_visual_difference(img1, img2) -> float:
@@ -99,60 +106,33 @@ def compute_dhash(img, hash_size: int = 8) -> str:
 
 def hamming_distance(h1: str, h2: str) -> int:
     """Bitwise distance between two 64-bit hashes (0 = identical, 64 = completely inverted)."""
-    try:
-        return bin(int(h1, 16) ^ int(h2, 16)).count("1")
-    except Exception:
-        return 64
+    if any(len(h) != 16 or any(c not in "0123456789abcdefABCDEF" for c in h) for h in (h1, h2)):
+        raise ValueError("Invalid 64-bit perceptual hash")
+    return (int(h1, 16) ^ int(h2, 16)).bit_count()
+
 
 def verify_candidate_against_recent_buffer(species: dict) -> tuple[bool, float, int]:
-    """
-    Multi-level verification focusing on the CREATURE VIEWPORT ONLY:
-      1. Renders test frame and crops creature display box (x=110..970, y=285..885)
-      2. Pixel-diff checks against recent creature frames (must be >= 10.0%)
-      3. Perceptual dHash check against last 10 uploads (Hamming distance must be >= 10)
-    Returns (is_ok, min_pixel_diff, min_hamming_dist)
-    """
-    try:
-        from PIL import Image
-        CROP_BOX = (110, 285, 970, 885)
-        full_frame = render_generative_frame(species, 0, 100)
-        candidate_crop = full_frame.crop(CROP_BOX)
-        candidate_hash = compute_dhash(candidate_crop)
+    """Fail closed: compare the same viewport and pose against uploaded frames."""
+    from PIL import Image
+    candidate = render_generative_frame(species, 15, 100).crop(CREATURE_CROP)
+    candidate_hash = compute_dhash(candidate)
+    min_pixel_diff, min_hamming = 100.0, 64
+    references = sorted(RECENT_FRAMES_DIR.glob("recent_*.jpg"))
+    if not references and LAST_FRAME_FILE.exists():
+        references = [LAST_FRAME_FILE]
+    for path in references:
+        # A corrupt reference must stop publishing, not silently disable the guard.
+        with Image.open(path) as reference:
+            crop = reference.crop(CREATURE_CROP)
+            min_pixel_diff = min(min_pixel_diff, compute_visual_difference(crop, candidate))
+            min_hamming = min(min_hamming, hamming_distance(compute_dhash(crop), candidate_hash))
+    for item in _load_json(HISTORY_FILE, [])[-10:]:
+        # Historical full-frame hashes cannot be compared to viewport hashes.
+        if item.get("dhash") and item.get("hash_scope") == HASH_SCOPE:
+            min_hamming = min(min_hamming, hamming_distance(candidate_hash, item["dhash"]))
+    return (min_pixel_diff > MIN_VISUAL_DIFFERENCE and min_hamming > MIN_HASH_DISTANCE,
+            min_pixel_diff, min_hamming)
 
-        # 1. Check against physical rolling buffer of last 5 frames
-        min_pixel_diff = 100.0
-        if RECENT_FRAMES_DIR.exists():
-            for f_path in sorted(RECENT_FRAMES_DIR.glob("recent_*.jpg")):
-                try:
-                    p_img = Image.open(f_path).crop(CROP_BOX)
-                    p_diff = compute_visual_difference(p_img, candidate_crop)
-                    if p_diff < min_pixel_diff:
-                        min_pixel_diff = p_diff
-                except Exception:
-                    pass
-        elif LAST_FRAME_FILE.exists():
-            try:
-                p_img = Image.open(LAST_FRAME_FILE).crop(CROP_BOX)
-                min_pixel_diff = compute_visual_difference(p_img, candidate_crop)
-            except Exception:
-                pass
-
-        # 2. Check dHash against last 10 uploads in history
-        history = _load_json(HISTORY_FILE, [])
-        min_hamming = 64
-        for past_item in history[-10:]:
-            past_hash = past_item.get("dhash")
-            if past_hash:
-                dist = hamming_distance(candidate_hash, past_hash)
-                if dist < min_hamming:
-                    min_hamming = dist
-
-        # Criteria: must be visually distinct on both pixel & perceptual levels
-        is_ok = (min_pixel_diff >= 2.5) and (min_hamming >= 14)
-        return is_ok, min_pixel_diff, min_hamming
-    except Exception as exc:
-        print(f"  ⚠ Visual buffer verification check error: {exc}")
-        return True, 100.0, 64
 
 def update_rolling_frame_buffer(new_frame_path: Path):
     """
@@ -185,8 +165,10 @@ def update_rolling_frame_buffer(new_frame_path: Path):
 def _load_json(path: Path, default):
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except FileNotFoundError:
         return default
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"Cannot read state ledger: {path.name}") from exc
 
 
 def _encode_video(frames_dir: Path, output_path: Path, audio_path: Path | None = None) -> None:
@@ -206,7 +188,7 @@ def _encode_video(frames_dir: Path, output_path: Path, audio_path: Path | None =
             "-shortest"
         ])
     cmd.extend([
-        "-c:v", "libx264", "-preset", "slow", "-crf", "17", "-pix_fmt", "yuv420p",
+        "-c:v", "libx264", "-threads", "2", "-preset", "slow", "-crf", "17", "-pix_fmt", "yuv420p",
         "-movflags", "+faststart", str(output_path)
     ])
     result = subprocess.run(cmd, text=True, capture_output=True)
@@ -311,6 +293,8 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
             target_class = c
             break
 
+    examined = set()
+
     def search_candidates(candidate_indices: list[int], pass_label: str) -> tuple[int, dict] | None:
         if not candidate_indices:
             return None
@@ -318,6 +302,9 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
         stride_offset = (start_id * 17) % pool_len
         for step in range(pool_len):
             idx = candidate_indices[(stride_offset + step) % pool_len]
+            if idx in examined or len(examined) >= max_search:
+                continue
+            examined.add(idx)
             sp = encyclopedia[idx]
             cand_sp = get_species_for_id(idx)
             is_ok, p_diff, h_dist = verify_candidate_against_recent_buffer(cand_sp)
@@ -380,14 +367,7 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
     if res:
         return res
 
-    # Pass 5: Hard fallback (only if almost all 687 species uploaded)
-    for offset in range(total):
-        idx = (start_id + offset) % total
-        sp = encyclopedia[idx]
-        if not is_already_used(sp["name"]):
-            return idx, get_species_for_id(idx)
-
-    raise RuntimeError("Koi naya animal nahi mila encyclopedia mein!")
+    raise RuntimeError("No unused, visually distinct animal passed the quality gates; nothing uploaded.")
 
 
 def generate(
@@ -396,6 +376,10 @@ def generate(
     dry_run: bool = False,
     force_research: bool = True,
 ) -> Path:
+    if not math.isfinite(duration) or not 0.1 <= duration <= 180:
+        raise ValueError("Duration must be finite and between 0.1 and 180 seconds")
+    if animal_id is not None and animal_id < 0:
+        raise ValueError("Animal ID must be non-negative")
     DATA_DIR.mkdir(exist_ok=True)
     progress = _load_json(PROGRESS_FILE, {"current_id": 0})
     start_id = int(progress.get("current_id", 0)) if animal_id is None else animal_id
@@ -455,16 +439,24 @@ def generate(
     species["fur_highlight"] = tuple(research.get("fur_highlight", [255, 248, 210]))
     species["proportions"]   = research.get("proportions", {})
 
+    if not dry_run:
+        passed, pixel_diff, distance = verify_candidate_against_recent_buffer(species)
+        if not passed:
+            raise RuntimeError(f"Final researched animal failed visual gates: {pixel_diff:.1f}%, hash {distance}")
+
     # ── STEP 4: Render frames ──
     run_dir = TMP_DIR / f"reel_{current_id:04d}"
     frames_dir = run_dir / "frames"
     frames_dir.mkdir(parents=True, exist_ok=True)
+    # A shorter rerun must never encode leftover frames from a previous render.
+    for stale_frame in frames_dir.glob("frame_*.jpg"):
+        stale_frame.unlink()
 
     total_frames = max(1, round(duration * FPS))
     print(f"\n🎬 Rendering {total_frames} Full HD (1080×1920) frames @ {FPS} FPS...")
     for number in range(total_frames):
         frame = render_generative_frame(species, number, total_frames)
-        frame.save(frames_dir / f"frame_{number:04d}.jpg", quality=95, optimize=True)
+        frame.save(frames_dir / f"frame_{number:04d}.jpg", quality=97, subsampling=0)
         if number % 60 == 0:
             print(f"   Frame {number}/{total_frames} rendered...")
 
@@ -483,6 +475,8 @@ def generate(
     video_id = None
     if not dry_run:
         video_id = _upload_to_youtube(output_file, species, dry_run)
+        if not video_id:
+            raise RuntimeError("Upload was not confirmed; video retained and all publication ledgers unchanged")
 
     # ── STEP 8: Mark animal as USED (no-repeat guarantee) ──
     if not dry_run:
@@ -501,11 +495,12 @@ def generate(
     if source_frame.exists():
         try:
             from PIL import Image
-            curr_frame_img = Image.open(source_frame)
+            with Image.open(source_frame) as source:
+                curr_frame_img = source.crop(CREATURE_CROP)
             frame_dhash = compute_dhash(curr_frame_img)
             if LAST_FRAME_FILE.exists():
-                prev_img = Image.open(LAST_FRAME_FILE)
-                diff_score = compute_visual_difference(prev_img, curr_frame_img)
+                with Image.open(LAST_FRAME_FILE) as previous:
+                    diff_score = compute_visual_difference(previous.crop(CREATURE_CROP), curr_frame_img)
         except Exception:
             pass
 
@@ -516,6 +511,7 @@ def generate(
         history = _load_json(HISTORY_FILE, [])
         history_entry = {
             "dhash":        frame_dhash,
+            "hash_scope":   HASH_SCOPE,
             "last_frame":   "data/last_uploaded_frame.jpg",
             "visual_diff":  round(diff_score, 1),
             "id":           current_id,

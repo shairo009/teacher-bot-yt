@@ -21,20 +21,30 @@ def _brighten(rgb: tuple[int, int, int], amount: int = 30) -> tuple[int, int, in
 def _darken(rgb: tuple[int, int, int], amount: int = 30) -> tuple[int, int, int]:
     return (_clamp(rgb[0] - amount), _clamp(rgb[1] - amount), _clamp(rgb[2] - amount))
 
+def solve_two_bone_ik(origin, target, l1, l2, bend_side=1):
+    """Project unreachable targets onto the limb's annulus, preserving both bones."""
+    if not all(math.isfinite(v) for v in (*origin, *target, l1, l2, bend_side)) or min(l1, l2) <= 0:
+        raise ValueError("IK requires finite coordinates and positive bone lengths")
+    dx, dy = target[0] - origin[0], target[1] - origin[1]
+    distance = math.hypot(dx, dy)
+    angle = math.atan2(dy, dx) if distance > 1e-9 else 0.0
+    reach = max(abs(l1 - l2), min(distance, l1 + l2))
+    if reach < 1e-9:
+        return origin, (origin[0], origin[1] + l1), origin
+    endpoint = (origin[0] + math.cos(angle) * reach, origin[1] + math.sin(angle) * reach)
+    cosine = (l1 * l1 + reach * reach - l2 * l2) / (2 * l1 * reach)
+    joint_angle = angle + (1 if bend_side >= 0 else -1) * math.acos(max(-1.0, min(1.0, cosine)))
+    joint = (origin[0] + math.cos(joint_angle) * l1, origin[1] + math.sin(joint_angle) * l1)
+    return origin, joint, endpoint
+
+
 def solve_forelimb_ik(shoulder, paw, l1, l2, side):
-    dx = paw[0] - shoulder[0]
-    dy = paw[1] - shoulder[1]
-    dist = math.hypot(dx, dy)
-    clamped = min(dist, l1 + l2 - 0.001)
-    base = math.atan2(dy, dx)
-    cos_a = (l1 * l1 + clamped * clamped - l2 * l2) / (2 * l1 * clamped)
-    ang = base - math.acos(max(-1.0, min(1.0, cos_a))) * side * 0.92
-    elbow = (shoulder[0] + math.cos(ang) * l1, shoulder[1] + math.sin(ang) * l1)
-    return shoulder, elbow, paw
+    return solve_two_bone_ik(shoulder, paw, l1, l2, -side)
+
 
 def draw_bio_quadruped(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float, cos_a: float, sin_a: float, perp_x: float, perp_y: float) -> None:
     sp_id = species.get("id", "").lower()
-    name = species.get("name", "").upper()
+    name = species.get("name", "").lower()
     
     fur_dark   = tuple(species.get("fur_dark",      [120, 60,  5]))
     fur_mid    = tuple(species.get("fur_mid",       [190, 110, 20]))
@@ -88,7 +98,7 @@ def draw_bio_quadruped(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: 
         paw_pos = (leg["cur"][0], leg["cur"][1])
         sock = leg["socket"]
         side = leg["side"]
-        _, elbow, _ = solve_forelimb_ik(sock, paw_pos, leg["l1"], leg["l2"], side)
+        _, elbow, paw_pos = solve_forelimb_ik(sock, paw_pos, leg["l1"], leg["l2"], side)
         draw_limb(sock, elbow, leg_width + 2, fur_dark, fur_mid)
         draw.ellipse([elbow[0]-10, elbow[1]-10, elbow[0]+10, elbow[1]+10], fill=fur_dark)
         draw_limb(elbow, paw_pos, leg_width, fur_dark, fur_gold)
@@ -112,7 +122,9 @@ def draw_bio_quadruped(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: 
 
     for i, seg in enumerate(sim.spine[:16]):
         s_px = -math.sin(seg["angle"]); s_py = math.cos(seg["angle"])
-        hw = max(10, body_widths[i] if i < len(body_widths) else 14)
+        # Subtle respiration stays concentrated in the rib cage, not the skull.
+        breath = 1.0 + 0.025 * math.sin(sim_time * 3.0) * math.exp(-((i - 5) / 3.0) ** 2)
+        hw = max(10, body_widths[i] if i < len(body_widths) else 14) * breath
         left_out.append((seg["x"] + s_px * (hw + 4), seg["y"] + s_py * (hw + 4)))
         right_out.append((seg["x"] - s_px * (hw + 4), seg["y"] - s_py * (hw + 4)))
 
@@ -165,7 +177,7 @@ def draw_bio_quadruped(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: 
 
     # E. TAIL
     tail_prev = spine_pts[-1]
-    wag = math.sin(sim_time * 6.5) * (0.3 if is_bear or is_rhino else 0.7)
+    wag = math.sin(sim_time * 3.2) * (0.18 if is_bear or is_rhino else 0.48)
     
     if is_bear:
         tx = tail_prev[0] - cos_a * 14 + wag * 5
@@ -185,7 +197,7 @@ def draw_bio_quadruped(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: 
         draw.ellipse([tail_prev[0]-12, tail_prev[1]-12, tail_prev[0]+12, tail_prev[1]+12], fill=(25, 18, 10), outline=fur_dark, width=2)
     elif is_fox or is_wolf:
         for i in range(12):
-            t_ang = sim.angle + math.pi + wag * ((i + 1) / 12)
+            t_ang = sim.spine[15]["angle"] + math.pi + math.sin(sim_time * 3.2 - i * 0.16) * wag * ((i + 1) / 12)
             tx = tail_prev[0] + math.cos(t_ang) * 18
             ty = tail_prev[1] + math.sin(t_ang) * 18
             bw = int(14 + math.sin(i / 12 * math.pi) * 16)
@@ -196,7 +208,7 @@ def draw_bio_quadruped(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: 
             draw.ellipse([tail_prev[0]-9, tail_prev[1]-9, tail_prev[0]+9, tail_prev[1]+9], fill=(250, 245, 235))
     else:
         for i in range(12):
-            t_ang = sim.angle + math.pi + wag * ((i + 1) / 12)
+            t_ang = sim.spine[15]["angle"] + math.pi + math.sin(sim_time * 3.2 - i * 0.16) * wag * ((i + 1) / 12)
             tx = tail_prev[0] + math.cos(t_ang) * 18
             ty = tail_prev[1] + math.sin(t_ang) * 18
             w = max(4, int(20 - i * 1.4))
@@ -2397,7 +2409,7 @@ def draw_bio_creature(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: f
         return True
 
     # 10. Tropical & Bony Fish
-    if class_type == "aquatic" or any(k in name for k in ("FISH", "KOI", "TUNA", "SALMON", "TROUT", "BARRACUDA", "SWORDFISH", "MARLIN", "EEL", "TANG", "CLOWNFISH", "ANGELFISH")):
+    if class_type == "aquatic":
         draw_tropical_fish(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
         return True
 
@@ -2418,7 +2430,7 @@ def draw_bio_creature(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: f
         return True
 
     # 13. Lizards & Geckos
-    if morphology == "lizard" or any(k in name for k in ("LIZARD", "GECKO", "IGUANA", "KOMODO", "MONITOR", "CHUCKWALLA", "SKINK", "DRAGON")):
+    if "CHAMELEON" not in name and (morphology == "lizard" or (class_type == "reptile" and any(k in name for k in ("LIZARD", "GECKO", "IGUANA", "KOMODO", "MONITOR", "CHUCKWALLA", "SKINK", "DRAGON")))):
         draw_lizard_gecko(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
         return True
 
@@ -2453,7 +2465,7 @@ def draw_bio_creature(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: f
         return True
 
     # 20. Insects: Ants
-    if any(k in name for k in ("ANT", "TERMITE")) and "VELVET ANT" not in name:
+    if class_type == "insect" and any(k in name.split() for k in ("ANT", "TERMITE")) and "VELVET ANT" not in name:
         draw_ant(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
         return True
 

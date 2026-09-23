@@ -1,37 +1,46 @@
 {
   "version": 1,
-  "head": "771e8a4b7c9d0da96628460326d1ddceebbf7c07ac5a65659241777406c5c200",
-  "sequence": 1,
+  "head": "7d4083faff3847e541dcf0324ed8c1cd7713ccd99ab9e6a6aa562d6f396c9f3f",
+  "sequence": 3,
   "species_usage": {
     "AMERICAN KESTREL": 1
   },
   "records": [
     {
+      "file": "tmp/reel_0051_f9281d146820f0f466b13f42976ac619/american_kestrel_short.mp4",
+      "fingerprint": "e318cd87d9f98150963a0e92de162d4b17e7df7abf432f009ad2e17294ba9cf2",
+      "generation_timestamp": "2026-09-23T04:27:50.803435+00:00",
       "id": "f9281d146820f0f466b13f42976ac619",
+      "output_hash": "f1e0c8af374b6062b81667a242c6e4b82f3b68a6879ed5320340e28614439686",
       "plan": {
-        "species": "AMERICAN KESTREL",
-        "subspecies": "unspecified",
-        "age": "adult",
-        "size": "compact",
-        "body_appearance": "bird",
-        "color_pattern": "(239, 68, 68); cool natural",
-        "pose": "locomotion",
         "action": "walk",
-        "expression": "neutral species anatomy",
+        "age": "adult",
+        "animation": "walk",
+        "body_appearance": "bird",
         "camera_angle": "front oblique",
         "camera_movement": "orbit",
-        "environment": "forest",
-        "lighting": "daylight",
-        "weather": "clear",
-        "props": "plants",
-        "animation": "walk",
-        "story": "enter traverse pause",
+        "color_pattern": "(239, 68, 68); cool natural",
         "composition": "center",
-        "seed": 8895242943605587731
+        "environment": "forest",
+        "expression": "neutral species anatomy",
+        "lighting": "daylight",
+        "pose": "locomotion",
+        "props": "plants",
+        "seed": 8895242943605587731,
+        "size": "compact",
+        "species": "AMERICAN KESTREL",
+        "story": "enter traverse pause",
+        "subspecies": "unspecified",
+        "weather": "clear"
       },
-      "fingerprint": "e318cd87d9f98150963a0e92de162d4b17e7df7abf432f009ad2e17294ba9cf2",
-      "status": "reserved",
-      "generation_timestamp": "2026-09-23T04:27:50.803435+00:00"
+      "status": "publishing",
+      "updated_at": "2026-09-23T04:30:10.690853+00:00",
+      "validated": true,
+      "visual_hashes": [
+        "64d493a2d4d49414",
+        "66d49382d4d41114",
+        "66d493a2d4d41114"
+      ]
     }
   ]
 }

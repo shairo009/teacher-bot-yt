@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "head": "771e8a4b7c9d0da96628460326d1ddceebbf7c07ac5a65659241777406c5c200",
+  "sequence": 1,
+  "species_usage": {
+    "AMERICAN KESTREL": 1
+  },
+  "records": [
+    {
+      "id": "f9281d146820f0f466b13f42976ac619",
+      "plan": {
+        "species": "AMERICAN KESTREL",
+        "subspecies": "unspecified",
+        "age": "adult",
+        "size": "compact",
+        "body_appearance": "bird",
+        "color_pattern": "(239, 68, 68); cool natural",
+        "pose": "locomotion",
+        "action": "walk",
+        "expression": "neutral species anatomy",
+        "camera_angle": "front oblique",
+        "camera_movement": "orbit",
+        "environment": "forest",
+        "lighting": "daylight",
+        "weather": "clear",
+        "props": "plants",
+        "animation": "walk",
+        "story": "enter traverse pause",
+        "composition": "center",
+        "seed": 8895242943605587731
+      },
+      "fingerprint": "e318cd87d9f98150963a0e92de162d4b17e7df7abf432f009ad2e17294ba9cf2",
+      "status": "reserved",
+      "generation_timestamp": "2026-09-23T04:27:50.803435+00:00"
+    }
+  ]
+}

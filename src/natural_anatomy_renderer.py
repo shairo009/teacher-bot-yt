@@ -58,6 +58,55 @@ class Pen:
         self.poly(left + right[::-1], fill, outline, curved=True)
 
 
+def gait_parameters(profile):
+    """Shared stride and stance timing for the renderer and diagnostic timeline."""
+    return min(profile.stride, profile.legs * 0.90), (0.54 if profile.gait == "bound" else 0.67)
+
+
+def mammal_head_geometry(p, bob):
+    """Common head envelope for the skin and diagnostic skull/jaw outline.
+
+    This is a simplified silhouette-aligned guide, not a measured skull.
+    Felids get a short, broad muzzle rather than a tapered canid snout.
+    """
+    hx, hy = p.body*.40+p.neck, -p.depth*.28-p.neck_rise+bob
+    h = p.head
+    skull = [(hx-h*.45,hy-h*.26),(hx-h*.14,hy-h*.47),(hx+h*.28,hy-h*.31),
+             (hx+h*.48,hy),(hx+h*.25,hy+h*.36),(hx-h*.2,hy+h*.40),(hx-h*.49,hy+h*.11)]
+    my = hy+h*.13
+    if p.family == "feline":
+        muzzle = [(hx+h*.10,hy-h*.08),(hx+h*.34+p.muzzle,my-h*.16),
+                  (hx+h*.43+p.muzzle,my+h*.02),(hx+h*.36+p.muzzle,my+h*.24),
+                  (hx+h*.12,my+h*.25)]
+    else:
+        muzzle = [(hx+h*.06,hy-h*.09),(hx+h*.32+p.muzzle,my-11),
+                  (hx+h*.38+p.muzzle,my+8),(hx+h*.20,my+h*.23)]
+    return dict(center=(hx,hy), skull=skull, muzzle=muzzle, muzzle_y=my,
+                nose=(hx+h*.35+p.muzzle,my-3))
+
+
+def mammal_tail_geometry(p, bob, time):
+    """Shared sacral-to-tip centerline; tail-less animals have no invented bones."""
+    if not p.tail:
+        return [], []
+    points = []
+    for i in range(15):
+        u = i/14
+        x = -p.body*.45-p.tail*u*.79
+        y = -p.depth*.26+bob + math.sin(u*2.8)*p.tail*.30 + math.sin(time*2-u*3)*u*13
+        if p.trait == "squirrel":
+            y = -p.depth*.26+bob-math.sin(u*2.2)*p.tail*.72
+        if p.family in {"equine", "giraffe"}:
+            x, y = -p.body*.45-u*p.tail*.28, -p.depth*.26+bob+u*p.tail
+        if p.family == "kangaroo":
+            y = bob+u*p.legs*.95
+        points.append((x,y))
+    widths = [max(2,p.tail_width*(1-i/17)) for i in range(15)]
+    if p.trait == "paddle_tail":
+        widths = [8+math.sin(i/14*math.pi)*p.tail_width for i in range(15)]
+    return points, widths
+
+
 def mammal_pose(species, time, travel=None):
     """A fixed-length 3-bone rig with explicit stance/swing contact states.
 
@@ -68,13 +117,12 @@ def mammal_pose(species, time, travel=None):
     if travel is None: travel = time * 72
     # Small, short-legged species must keep the contact target inside the IK
     # reach annulus; otherwise a 'planted' foot is projected above the floor.
-    stride = min(p.stride, p.legs * 0.90)
+    stride, duty = gait_parameters(p)
     metadata = species.get("bone_structure", {}).get("limbs", {})
     upper_ratio = finite_ratio(metadata.get("upper_bone_len"), 1, 0.01, 500)
     lower_ratio = finite_ratio(metadata.get("lower_bone_len"), 1, 0.01, 500)
     split = finite_ratio(upper_ratio / lower_ratio, 1, 0.8, 1.25)
     cycle = travel / stride
-    duty = 0.67 if p.gait != "bound" else 0.54
     bob = math.sin(cycle * math.tau * 2) * min(p.legs * 0.025, 1.5 if p.family in {"elephant", "rhino", "hippo"} else 3)
     limbs = []
     for side in (-1, 1):
@@ -177,26 +225,17 @@ def draw_mammal(draw, sim, species, time, *unused):
     pen=Pen(draw,sim.x,sim.y)
     base=p.coat; dark=blend(base,(23,22,20),.56); light=blend(base,(249,230,192),.32)
     b,d=p.body,p.depth
+    head_geometry = mammal_head_geometry(p, bob)
+    tail, widths = mammal_tail_geometry(p, bob, time)
+    hx, hy = head_geometry["center"]
     if species.get("render_mode") == "skeleton":
-        hx=b*.40+p.neck;hy=-d*.28-p.neck_rise+bob
-        _mammal_skeleton(pen,p,bob,limbs,hx,hy)
+        _mammal_skeleton(pen,p,bob,limbs,head_geometry,tail)
         return
     # Far-side feet, near-side feet, muscles and bones all share this one pose.
     for limb in limbs:
         if limb["side"]==-1: _draw_mammal_limb(pen,limb,p,blend(base,(17,23,28),.24),dark)
     # Tail emerges from the sacrum, not the end of a caterpillar torso.
-    if p.tail:
-        tail=[]
-        for i in range(15):
-            u=i/14
-            tx=-b*.45-p.tail*u*.79
-            ty=-d*.26+bob + math.sin(u*2.8)*p.tail*.30 + math.sin(time*2-u*3)*u*13
-            if p.trait=="squirrel": ty=-d*.26 - math.sin(u*2.2)*p.tail*.72
-            if p.family in {"equine", "giraffe"}: tx=-b*.45-u*p.tail*.28;ty=-d*.26+bob+u*p.tail
-            if p.family=="kangaroo": ty=bob+u*p.legs*.95
-            tail.append((tx,ty))
-        widths=[max(2,p.tail_width*(1-i/17)) for i in range(15)]
-        if p.trait=="paddle_tail": widths=[8+math.sin(i/14*math.pi)*p.tail_width for i in range(15)]
+    if tail:
         pen.taper(tail,widths,base,dark)
         if p.trait in {"fox", "mane"} or p.family=="giraffe":
             pen.taper(tail[-4:],[widths[-4]+5, widths[-3]+8,widths[-2]+4,2],light if p.trait=="fox" else dark)
@@ -218,7 +257,6 @@ def draw_mammal(draw, sim, species, time, *unused):
     # Pelvic crest and scapular muscle edges, intentionally subtle.
     pen.line([(-b*.36,-d*.29+bob),(-b*.23,-d*.04+bob),(-b*.30,d*.23+bob)],blend(base,dark,.25),2)
     pen.line([(b*.21,-d*.41+bob),(b*.34,-d*.15+bob),(b*.23,d*.28+bob)],blend(base,dark,.30),2)
-    hx=b*.40+p.neck;hy=-d*.28-p.neck_rise+bob
     pen.poly([(b*.18,-d*.45+bob),(b*.36,-d*.57+bob),(hx-p.head*.22,hy-p.head*.37),(hx+p.head*.18,hy+p.head*.12),(hx-p.head*.20,hy+p.head*.48),(b*.34,d*.24+bob)],base,dark,2)
     if p.family=="giraffe" and p.pattern=="patches":
         for i in range(8):
@@ -247,10 +285,10 @@ def draw_mammal(draw, sim, species, time, *unused):
         for i in range(22):
             a=i*math.tau/22
             pen.line([(hx-head*.25+math.cos(a)*head*.52,hy+math.sin(a)*head*.52),(hx-head*.25+math.cos(a)*head*.78,hy+math.sin(a)*head*.78)],(127,83,40),2)
-    pen.poly([(hx-head*.45,hy-head*.26),(hx-head*.14,hy-head*.47),(hx+head*.28,hy-head*.31),(hx+head*.48,hy),(hx+head*.25,hy+head*.36),(hx-head*.2,hy+head*.40),(hx-head*.49,hy+head*.11)],base,dark,2)
-    muzzle_y=hy+head*.13
-    pen.poly([(hx+head*.06,hy-head*.09),(hx+head*.32+p.muzzle,muzzle_y-11),(hx+head*.38+p.muzzle,muzzle_y+8),(hx+head*.20,muzzle_y+head*.23)],light,dark,1)
-    nx=hx+head*.35+p.muzzle
+    pen.poly(head_geometry["skull"],base,dark,2)
+    muzzle_y=head_geometry["muzzle_y"]
+    pen.poly(head_geometry["muzzle"],light,dark,1)
+    nx=head_geometry["nose"][0]
     if p.family != "elephant":
         pen.oval(nx,muzzle_y-3,6,4,(38,34,29))
         pen.line([(nx,muzzle_y+9),(hx+head*.30,muzzle_y+14)],dark,2)
@@ -301,12 +339,16 @@ def draw_mammal(draw, sim, species, time, *unused):
     if p.family in {"feline","canine","small_mammal"}:
         for i in range(3): pen.line([(hx+head*.46,muzzle_y+6),(hx+head*.61+p.muzzle*.5,muzzle_y+3+i*6)],blend(dark,light,.3),1)
     if species.get("render_mode") in {"skeleton","overlay"}:
-        _mammal_skeleton(pen,p,bob,limbs,hx,hy)
+        _mammal_skeleton(pen,p,bob,limbs,head_geometry,tail)
 
 
-def _mammal_skeleton(pen,p,bob,limbs,hx,hy):
+def _mammal_skeleton(pen,p,bob,limbs,head_geometry,tail):
     bone=(232,230,201);joint=(98,220,209)
-    spine=[(-p.body*.36,-p.depth*.20+bob),(-p.body*.10,-p.depth*.31+bob),(p.body*.32,-p.depth*.32+bob),(hx-p.head*.25,hy)]
+    hx,hy = head_geometry["center"]
+    spine=[(-p.body*.45,-p.depth*.26+bob),(-p.body*.10,-p.depth*.31+bob),(p.body*.32,-p.depth*.32+bob),(hx-p.head*.25,hy)]
+    if tail:
+        pen.line(tail,bone,2)
+        for x,y in tail[1::2]: pen.oval(x,y,2,2,joint)
     pen.line(spine,bone,4)
     for i in range(11):
         x=-p.body*.25+i*p.body*.05;y=-p.depth*.28+bob
@@ -314,7 +356,9 @@ def _mammal_skeleton(pen,p,bob,limbs,hx,hy):
         pen.oval(x,y,3,3,joint)
     pen.poly([(-p.body*.41,-16+bob),(-p.body*.22,-27+bob),(-p.body*.25,17+bob)],None,bone,3)
     pen.poly([(p.body*.18,-p.depth*.42+bob),(p.body*.36,-p.depth*.35+bob),(p.body*.34,-7+bob)],None,bone,3)
-    pen.oval(hx,hy,p.head*.37,p.head*.29,None,bone,2)
+    pen.poly(head_geometry["skull"],None,bone,2)
+    pen.poly(head_geometry["muzzle"],None,bone,2)
+    pen.oval(hx+p.head*.15,hy-p.head*.10,5,4,None,joint,1)
     for limb in limbs:
         color=bone if limb['side']==1 else (140,158,156)
         pen.line(limb['points'],color,3,False)
@@ -436,6 +480,45 @@ def draw_shell_special(draw,sim,species,time,*unused):
         for i in range(10):
             y=(i-5)*5
             pen.line([(49,y),(81,y*1.6),(107+math.sin(time*3+i*.2)*7,y*2.8)],(180,153,102),2)
+
+
+def draw_shrimp(draw, sim, species, time, *unused):
+    """Dorsal decapod study: five walking-leg pairs, abdomen and tail fan.
+
+    Ordinary shrimp do not inherit a stomatopod's striking clubs. Appendage
+    proportions remain illustrative; pistol shrimp get one enlarged chela.
+    """
+    pen = Pen(draw, sim.x, sim.y, sim.angle)
+    base = (184, 130, 98)
+    dark = (81, 64, 51)
+    light = (218, 184, 150)
+    for side in (-1, 1):
+        for i in range(5):
+            root = (-9-i*13, side*19)
+            phase = time*5-i*.8+side*math.pi
+            knee = (root[0]-15, side*(45+i*3))
+            foot = (root[0]-34+math.sin(phase)*8, side*(69+i*3))
+            pen.taper([root, knee, foot], [5, 3, 1], base, dark)
+        # Antennules and the much longer sensory antennae.
+        pen.line([(23, side*9), (74, side*28), (126, side*(50+math.sin(time*2)*4))], light, 2)
+        pen.line([(27, side*6), (64, side*10), (93, side*17)], base, 2)
+    points = [(-65-i*22, math.sin(time*3-i*.35)*i*1.4) for i in range(7)]
+    ex, ey = points[-1]
+    for side in (-1, 1):
+        pen.poly([(ex+9, ey), (ex-12, ey+side*39), (ex-44, ey+side*36), (ex-29, ey)], light, dark)
+    pen.poly([(ex, ey-9), (ex-39, ey-12), (ex-52, ey), (ex-39, ey+12), (ex, ey+9)], base, dark)
+    for i in reversed(range(7)):
+        x, y = points[i]
+        pen.oval(x, y, 19, 29-i*2.8, base, dark, 2)
+        pen.line([(x-4, y-18+i*2), (x+3, y), (x-4, y+18-i*2)], light, 1)
+    pen.taper([(35, 0), (8, 0), (-33, 0), (-75, 0)], [10, 49, 62, 44], base, dark)
+    pen.poly([(9, -5), (66, 0), (9, 5)], light, dark, curved=False)
+    for side in (-1, 1):
+        pen.line([(16, side*17), (33, side*28)], base, 4)
+        pen.oval(34, side*29, 6, 6, (32, 34, 29), light)
+    if "pistol" in words(species):
+        pen.taper([(0, 21), (27, 51), (64, 57)], [8, 11, 15], base, dark)
+        pen.poly([(53, 48), (83, 39), (96, 51), (81, 54), (93, 64), (68, 69)], base, dark, curved=False)
 
 
 def draw_special_insect(draw,sim,species,time,*unused):

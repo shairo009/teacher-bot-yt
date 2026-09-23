@@ -46,7 +46,9 @@ def resolve_body_plan(species):
             return "marine_mammal"
         if morph == "eel": return "eel"
         return morph if morph in {"shark", "ray", "seahorse", "jellyfish"} else "fish"
-    if cls == "crustacean": return morph if morph in {"crab", "lobster", "shrimp"} else "crab"
+    if cls == "crustacean":
+        if "mantis" in w and "shrimp" in w: return "mantis_shrimp"
+        return morph if morph in {"crab", "lobster", "shrimp"} else "crab"
     if cls == "insect":
         if "cicada" in w: return "cicada"
         if "stick" in w: return "stick_insect"
@@ -63,7 +65,7 @@ class MammalProfile:
     neck: float = 60
     neck_rise: float = 42
     head: float = 64
-    muzzle: float = 30
+    muzzle: float = 18
     ear: float = 22
     tail: float = 175
     tail_width: float = 12
@@ -154,7 +156,7 @@ def natural_palette(species):
 def anatomy_summary(species):
     plan = resolve_body_plan(species)
     support = "endoskeleton"
-    if plan in {"arachnid", "myriapod", "horseshoe", "crab", "lobster", "shrimp", "barnacle", "beetle", "bee_wasp", "mantis", "ant", "dragonfly", "butterfly", "orthoptera", "stick_insect", "cicada", "insect"}: support = "exoskeleton"
+    if plan in {"arachnid", "myriapod", "horseshoe", "crab", "lobster", "shrimp", "mantis_shrimp", "barnacle", "beetle", "bee_wasp", "mantis", "ant", "dragonfly", "butterfly", "orthoptera", "stick_insect", "cicada", "insect"}: support = "exoskeleton"
     if plan in {"octopus", "squid", "vampire_squid", "cuttlefish", "jellyfish"}: support = "hydrostatic / soft tissue"
     if plan == "nautilus": support = "shell + muscular arms"
     issues = []
@@ -162,7 +164,7 @@ def anatomy_summary(species):
         issues.append("Catalogue taxonomy corrected for rendering; source ledger preserved.")
     if words(species) & {"cyber", "quantum", "volt", "neon", "laser", "phantom"}:
         issues.append("Stylized catalogue name; identity requires manual review.")
-    if plan in {"insect", "vampire_squid", "barnacle"}:
+    if plan in {"insect", "vampire_squid", "barnacle", "mantis_shrimp"}:
         issues.append("Specialized body form is approximated by a family-level rig.")
     return {"body_plan": plan, "support": support, "confidence": "family-level procedural approximation", "specimen_validated": False,
             "diagnostic_modes": ["surface", "overlay", "skeleton"] if plan == "mammal" else ["surface"],

@@ -1,10 +1,11 @@
 """
 Bio Bone & Anatomy Renderer
 ============================
-Renders distinct, anatomically accurate biological creatures for Code Reels.
+Renders distinct family-level 2D approximations for motion studies.
+No rig is a specimen-validated anatomical reconstruction.
 Provides unique skeletons, heads, tails, and surface patterns for:
 - Quadrupeds: Lion, Tiger, Giraffe, Rhinoceros, Elephant, Bear, Cheetah/Leopard, Wolf, Fox, Canine
-- Serpents: Cobra (flared hood), Viper (triangular head & rattle), Sea Snake
+- Serpents: species-dependent hood and head; rattles only on rattlesnakes
 - Arachnids: Spider (bulbous abdomen, fangs), Scorpion (chelae, stinger tail)
 """
 from __future__ import annotations
@@ -2358,7 +2359,7 @@ def draw_bio_creature(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: f
     from src.anatomy_profiles import resolve_body_plan
     from src.natural_anatomy_renderer import (
         draw_mammal, draw_elongated, draw_myriapod, draw_special_insect,
-        draw_marine_body, draw_pinniped, draw_shell_special,
+        draw_marine_body, draw_pinniped, draw_shell_special, draw_shrimp,
     )
     plan = resolve_body_plan(species)
     registry = {
@@ -2368,7 +2369,7 @@ def draw_bio_creature(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: f
         "marine_mammal": draw_marine_body, "pinniped": draw_pinniped,
         "horseshoe": draw_shell_special, "nautilus": draw_shell_special, "barnacle": draw_shell_special,
         "turtle": draw_turtle, "crab": draw_crab, "lobster": draw_lobster,
-        "shrimp": draw_mantis_shrimp, "seahorse": draw_seahorse,
+        "shrimp": draw_shrimp, "mantis_shrimp": draw_mantis_shrimp, "seahorse": draw_seahorse,
         "jellyfish": draw_jellyfish, "shark": draw_shark, "ray": draw_ray,
         "fish": draw_tropical_fish, "octopus": draw_octopus, "squid": draw_squid,
         "vampire_squid": draw_octopus, "cuttlefish": draw_cuttlefish,

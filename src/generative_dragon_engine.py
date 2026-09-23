@@ -21,6 +21,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 WIDTH, HEIGHT, FPS = 1080, 1920, 30
+MOTION_RATE = 0.4
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "data"
 FONTS_DIR = ROOT_DIR / "assets" / "fonts"
@@ -792,12 +793,12 @@ def _simulation_for_frame(species: dict, frame_idx: int) -> MasterSimulator:
         sim = MasterSimulator(540, 585, 245, 150, seed=(key[1] * 10007) & 0xFFFFFF, class_type=key[2], species=species)
         # Settle the initially straight chain and feet before the first visible frame.
         for step in range(-90, 0):
-            sim.update(step / FPS * 0.4)
+            sim.update(step / FPS * MOTION_RATE)
         last_frame = -1
     else:
         last_frame, sim = cached
     for step in range(last_frame + 1, frame_idx + 1):
-        sim.update(step / FPS * 0.4)
+        sim.update(step / FPS * MOTION_RATE)
     _SIM_CACHE[key] = (frame_idx, sim)
     while len(_SIM_CACHE) > MAX_SIMULATORS:
         _SIM_CACHE.popitem(last=False)
@@ -1003,14 +1004,16 @@ def _draw_code_panel(img, species, progress, frame_idx, theme):
 
 
 def render_generative_frame(species: dict, frame_idx: int, total_frames: int) -> Image.Image:
-    if total_frames < 1 or not 0 <= frame_idx < total_frames:
+    if (isinstance(total_frames, bool) or not isinstance(total_frames, int)
+            or isinstance(frame_idx, bool) or not isinstance(frame_idx, int)
+            or total_frames < 1 or not 0 <= frame_idx < total_frames):
         raise ValueError("Frame index must lie within a non-empty timeline")
     from src.anatomy_profiles import anatomy_summary
     mode = species.get("render_mode", "surface")
     if mode not in anatomy_summary(species)["diagnostic_modes"]:
         raise ValueError(f"Render mode {mode!r} is not supported for this body plan")
     progress = frame_idx / max(1, total_frames-1)
-    sim_time = frame_idx / FPS * 0.4
+    sim_time = frame_idx / FPS * MOTION_RATE
     theme = pick_animal_theme(species)
     theme_name = next(key for key, value in ANIMAL_THEMES.items() if value is theme)
     img = _studio_background(theme_name).copy()
@@ -1047,8 +1050,18 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     d.text((948, 302), theme_name, font=get_font(16, mono=True), fill=theme["badge_color"], anchor="rt")
     d.line((130, 335, 950, 335), fill=theme["card_border"])
     d.line((130, 834, 950, 834), fill=theme["card_border"])
-    d.text((132, 848), f"TARGET [{int(tx)}, {int(ty)}]   DIST {int(distance)}px", font=get_font(15, mono=True), fill=(156, 174, 195))
-    d.text((948, 848), f"ROT {math.degrees(sim.angle)%360:03.0f} deg", font=get_font(15, mono=True), fill=theme["badge_color"], anchor="rt")
+    if resolve_body_plan(species) == "mammal":
+        from src.natural_anatomy_renderer import gait_parameters
+        from src.anatomy_profiles import mammal_profile
+        profile = mammal_profile(species)
+        stride, duty = gait_parameters(profile)
+        status = f"{profile.gait.upper()} / PHASE {(sim_time*72/stride)%1:.2f} / STANCE {duty:.0%}"
+        orientation = "LATERAL / FIXED"
+    else:
+        status = f"TARGET [{int(tx)}, {int(ty)}]   DIST {int(distance)}px"
+        orientation = f"ROT {math.degrees(sim.angle)%360:03.0f} deg"
+    d.text((132, 848), status, font=get_font(15, mono=True), fill=(156, 174, 195))
+    d.text((948, 848), orientation, font=get_font(15, mono=True), fill=theme["badge_color"], anchor="rt")
     _draw_code_panel(img, species, progress, frame_idx, theme)
     d = ImageDraw.Draw(img)
     d.rounded_rectangle((110, 1530, 970, 1536), radius=3, fill=theme["card_border"])

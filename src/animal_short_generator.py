@@ -178,7 +178,10 @@ def _load_json(path: Path, default):
         raise RuntimeError(f"Cannot read state ledger: {path.name}") from exc
     if not isinstance(value, type(default)):
         raise RuntimeError(f"Invalid state ledger structure: {path.name}")
-    if isinstance(value, list) and any(not isinstance(item, dict) or not isinstance(item.get("species", ""), str) for item in value):
+    if isinstance(value, list) and any(
+        not isinstance(item, dict) or not isinstance(item.get("species"), str)
+        or not item["species"].strip() for item in value
+    ):
         raise RuntimeError(f"Invalid history entry: {path.name}")
     return value
 

@@ -421,16 +421,44 @@ def _generate_js_code_for_animal(name: str, class_type: str, scientific: str) ->
             "};"
         ]
 
+def study_code(species):
+    """Illustrative snippets share the renderer's taxonomy, never name substrings."""
+    from src.anatomy_profiles import resolve_body_plan, mammal_profile
+    plan = resolve_body_plan(species)
+    family = mammal_profile(species).family if plan == "mammal" else plan
+    return [
+        "// Illustrative JS; renderer is Python",
+        "// Family-level rig, not specimen data",
+        "const study = createMotionStudy({",
+        f'  bodyPlan: "{plan}",',
+        f'  profile: "{family}",',
+        "  dimensions: 2",
+        "});",
+        "",
+        "function animate(time) {",
+        "  const pose = study.sample(time);",
+        "  // Same pose drives skin and joints",
+        "  drawSurface(ctx, pose);",
+        "  if (debug) drawRig(ctx, pose);",
+        "  requestAnimationFrame(animate);",
+        "}",
+    ]
+
+
+@lru_cache(maxsize=1)
+def load_encyclopedia() -> list[dict]:
+    encyclopedia = json.loads(ENCYCLOPEDIA_FILE.read_text(encoding="utf-8"))
+    if not isinstance(encyclopedia, list) or not encyclopedia:
+        raise ValueError("Animal catalogue must be a non-empty list; no silent dog fallback")
+    return encyclopedia
+
+
 def get_species_for_id(animal_id: int) -> dict:
-    try:
-        encyclopedia = json.loads(ENCYCLOPEDIA_FILE.read_text(encoding="utf-8"))
-    except Exception:
-        encyclopedia = []
-
-    if not encyclopedia:
-        encyclopedia = [{"name": "GOLDEN SHEPHERD DOG", "scientific": "Canis lupus familiaris", "class_type": "quadruped", "accent": [245, 158, 11], "file_name": "GoldenShepherd.js"}]
-
-    idx = animal_id % len(encyclopedia)
+    from src.anatomy_profiles import prepare_species
+    encyclopedia = load_encyclopedia()
+    if isinstance(animal_id, bool) or not isinstance(animal_id, int) or not 0 <= animal_id < len(encyclopedia):
+        raise ValueError(f"Animal ID must be between 0 and {len(encyclopedia)-1}")
+    idx = animal_id
     entry = encyclopedia[idx]
 
     name = entry["name"]
@@ -441,7 +469,7 @@ def get_species_for_id(animal_id: int) -> dict:
     file_name = entry.get("file_name", "".join(w.capitalize() for w in name.split()) + ".js")
     spec_id = name.lower().replace(" ", "_")
 
-    code_lines = _generate_js_code_for_animal(name, class_type, scientific)
+    code_lines = study_code(entry)
 
     hooks = [
         f"I Built an Interactive {name} with Vanilla JS IK Physics 🤯 #Shorts #Coding",
@@ -451,9 +479,9 @@ def get_species_for_id(animal_id: int) -> dict:
         f"I Simulated a Realistic {name} in a 2D Motion Study 🤯 #Shorts #Tech",
         f"Interactive {name} Cursor in Vanilla JS ✨ #Shorts #CreativeCoding"
     ]
-    yt_title = hooks[animal_id % len(hooks)]
+    yt_title = f"{name}: 2D Procedural Motion Study | Python Animation #Shorts"[:100]
 
-    return {
+    return prepare_species({
         "id": spec_id,
         "name": name,
         "scientific": scientific,
@@ -466,11 +494,16 @@ def get_species_for_id(animal_id: int) -> dict:
         "bone_structure": entry.get("bone_structure", {}),
         "yt_title": yt_title,
         "yt_desc": f"✨ Realistic {name} ({scientific}) 2D procedural motion study rendered in Python, with illustrative JavaScript kinematics snippets!\n\n#JavaScript #WebDev #Shorts #Coding #Tech #Programming #Canvas"
-    }
+    })
 
 class MasterSimulator:
-    def __init__(self, cx: float, cy: float, rx: float, ry: float, seed: int = 0, class_type: str = "quadruped"):
+    def __init__(self, cx: float, cy: float, rx: float, ry: float, seed: int = 0, class_type: str = "quadruped", species: dict | None = None):
+        from src.anatomy_profiles import finite_ratio
         self.class_type = class_type
+        self.species = species or {}
+        vertebrae = self.species.get("bone_structure", {}).get("vertebrae", {})
+        self.flexibility = finite_ratio(vertebrae.get("flexibility_index"), 1.0, 0.5, 1.4)
+        self.distance_travelled = 0.0
         self.cx = cx
         self.cy = cy
         self.rx = rx
@@ -549,6 +582,7 @@ class MasterSimulator:
 
         self.x += math.cos(self.angle) * self.speed
         self.y += math.sin(self.angle) * self.speed
+        self.distance_travelled += self.speed
 
         cos_a = math.cos(self.angle)
         sin_a = math.sin(self.angle)
@@ -574,6 +608,7 @@ class MasterSimulator:
             limit = 0.30 if i < 3 else (0.12 if i < 10 else 0.20 + (i - 10) * 0.035)
             if self.class_type in ("serpent", "aquatic", "cephalopod"):
                 limit = 0.38
+            limit *= self.flexibility
             curr["angle"] = prev["angle"] + max(-limit, min(limit, turn))
             curr["x"] = prev["x"] - math.cos(curr["angle"]) * s_dist
             curr["y"] = prev["y"] - math.sin(curr["angle"]) * s_dist
@@ -750,10 +785,11 @@ MAX_SIMULATORS = 8
 
 def _simulation_for_frame(species: dict, frame_idx: int) -> MasterSimulator:
     """Deterministic seeking: frame N is identical in previews and sequential video."""
-    key = (species.get("id"), species.get("animal_id", 0), species.get("class_type", "quadruped"))
+    rig_key = json.dumps(species.get("bone_structure", {}), sort_keys=True, separators=(",", ":"))
+    key = (species.get("id"), species.get("animal_id", 0), species.get("class_type", "quadruped"), rig_key)
     cached = _SIM_CACHE.pop(key, None)
     if cached is None or frame_idx <= cached[0]:
-        sim = MasterSimulator(540, 585, 245, 150, seed=(key[1] * 10007) & 0xFFFFFF, class_type=key[2])
+        sim = MasterSimulator(540, 585, 245, 150, seed=(key[1] * 10007) & 0xFFFFFF, class_type=key[2], species=species)
         # Settle the initially straight chain and feet before the first visible frame.
         for step in range(-90, 0):
             sim.update(step / FPS * 0.4)
@@ -820,6 +856,25 @@ class _SupersampledDraw:
         return self._shape("arc", xy, start=start, end=end, **kwargs)
 
 
+def mammal_camera_bounds(species):
+    """Fixed envelope in rig coordinates, shared by surface and diagnostics.
+
+    Deliberately independent of time, pose and rendered alpha bounds.
+    """
+    from src.anatomy_profiles import mammal_profile
+    p = mammal_profile(species)
+    left = -p.body*.55 - p.tail*.90 - 40
+    right = p.body*.40 + p.neck + max(p.head*1.2, p.head*.5+p.muzzle) + 40
+    top = min(-p.depth*1.1-40,
+              -p.depth*.28-p.neck_rise-p.head*.62-max(p.ear, 115 if p.trait in {"antlers", "horns", "bovid", "curled_horns"} else 0)-35)
+    if p.trait == "squirrel":
+        top = min(top, -p.depth*.26-p.tail*.8-40)
+    bottom = p.legs + 30
+    if p.family in {"equine", "giraffe"}:
+        bottom = max(bottom, -p.depth*.26+p.tail+35)
+    return left, top, right, bottom
+
+
 def _draw_creature_stage(img, species, sim, sim_time, theme):
     from src.bio_bone_renderer import draw_bio_creature
     accent = theme["canvas_border"]
@@ -827,6 +882,8 @@ def _draw_creature_stage(img, species, sim, sim_time, theme):
     origin = (sim.x - 600, sim.y - 600)
     painter = _SupersampledDraw(layer, origin)
     ca, sa = math.cos(sim.angle), math.sin(sim.angle)
+    from src.anatomy_profiles import resolve_body_plan, mammal_profile
+    plan = resolve_body_plan(species)
     if not draw_bio_creature(painter, sim, species, sim_time, ca, sa, -sa, ca):
         raise ValueError(f"No biological rig registered for {species.get('name')}")
     bounds = layer.getbbox()
@@ -835,10 +892,17 @@ def _draw_creature_stage(img, species, sim, sim_time, theme):
     tx = sim.cx + math.cos(sim_time * sim.f1 + sim.p1) * sim.rx * 0.85 + math.sin(sim_time * sim.f2 + sim.p2) * sim.rx * 0.20
     ty = sim.cy + math.sin(sim_time * sim.f3 + sim.p1) * sim.ry * 0.80 + math.cos(sim_time * sim.f4 + sim.p2) * sim.ry * 0.18
     world = (bounds[0] / 2 + origin[0], bounds[1] / 2 + origin[1], bounds[2] / 2 + origin[0], bounds[3] / 2 + origin[1])
-    # Frame the animal AND its target together. No tails, antlers or wings under HUD.
-    left, top = min(world[0], tx - 35), min(world[1], ty - 35)
-    right, bottom = max(world[2], tx + 35), max(world[3], ty + 35)
-    zoom = min(1.45, 752 / (right - left), 462 / (bottom - top))
+    # Lateral mammals use a species-fixed envelope: no zoom pumping each stride.
+    if plan == "mammal":
+        p = mammal_profile(species)
+        left, top, right, bottom = mammal_camera_bounds(species)
+        left, right = left + sim.x, right + sim.x
+        top, bottom = top + sim.y, bottom + sim.y
+        tx, ty = right-25, sim.y
+    else:
+        left, top = min(world[0], tx - 35), min(world[1], ty - 35)
+        right, bottom = max(world[2], tx + 35), max(world[3], ty + 35)
+    zoom = min(1.65, 752 / max(1, right - left), 462 / max(1, bottom - top))
     def screen(x, y):
         return (540 + (x - (left + right) / 2) * zoom, 585 + (y - (top + bottom) / 2) * zoom)
     x, y = screen(world[0], world[1])
@@ -858,10 +922,14 @@ def _draw_creature_stage(img, species, sim, sim_time, theme):
         a, b = idx / count, min(1, (idx + 0.8) / count)
         d.line([(head[0] + (target[0] - head[0]) * a, head[1] + (target[1] - head[1]) * a),
                 (head[0] + (target[0] - head[0]) * b, head[1] + (target[1] - head[1]) * b)], fill=theme["card_border"], width=2)
+    if plan == "mammal":
+        ground_left = screen(left+18, sim.y+p.legs+4)
+        ground_right = screen(right-18, sim.y+p.legs+4)
+        d.line([ground_left, ground_right], fill=theme["card_border"], width=1)
     # Silhouette overlays its guide, never the other way around.
     img.alpha_composite(creature, (round(x), round(y)))
     d = ImageDraw.Draw(img)
-    for idx in range(1, 8):
+    for idx in range(1, 1 if plan == "mammal" else 8):
         past = sim_time - idx * 0.045
         px = sim.cx + math.cos(past * sim.f1 + sim.p1) * sim.rx * 0.85 + math.sin(past * sim.f2 + sim.p2) * sim.rx * 0.20
         py = sim.cy + math.sin(past * sim.f3 + sim.p1) * sim.ry * 0.80 + math.cos(past * sim.f4 + sim.p2) * sim.ry * 0.18
@@ -899,7 +967,7 @@ def _draw_code_panel(img, species, progress, frame_idx, theme):
     filename = species.get("file_name", "MotionStudy.js")
     d.text((x+108, y+18), filename, font=_fit_font(filename, 470, 21, mono=True), fill=(205, 216, 230))
     d.text((x+w-20, y+20), "ILLUSTRATIVE JS", font=get_font(15, mono=True), fill=theme["badge_color"], anchor="rt")
-    rows = _code_rows(species.get("code_lines") or _generate_js_code_for_animal(species["name"], species["class_type"], species.get("scientific", "")))
+    rows = _code_rows(species.get("code_lines") or study_code(species))
     font, num_font = get_font(26, mono=True), get_font(18, mono=True)
     line_h = 42
     # Hold a useful opening block, type the rest, then let viewers read the ending.
@@ -937,6 +1005,10 @@ def _draw_code_panel(img, species, progress, frame_idx, theme):
 def render_generative_frame(species: dict, frame_idx: int, total_frames: int) -> Image.Image:
     if total_frames < 1 or not 0 <= frame_idx < total_frames:
         raise ValueError("Frame index must lie within a non-empty timeline")
+    from src.anatomy_profiles import anatomy_summary
+    mode = species.get("render_mode", "surface")
+    if mode not in anatomy_summary(species)["diagnostic_modes"]:
+        raise ValueError(f"Render mode {mode!r} is not supported for this body plan")
     progress = frame_idx / max(1, total_frames-1)
     sim_time = frame_idx / FPS * 0.4
     theme = pick_animal_theme(species)
@@ -968,7 +1040,10 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     d.rectangle((125, 298, 955, 338), fill=theme["canvas_fill"])
     d.rectangle((125, 832, 955, 876), fill=theme["canvas_fill"])
     d.ellipse((132, 307, 140, 315), fill=accent)
-    d.text((151, 302), "PROCEDURAL KINEMATICS", font=get_font(16, mono=True), fill=(207, 221, 236))
+    from src.anatomy_profiles import resolve_body_plan
+    study_label = "LATERAL GAIT / LINKED RIG" if resolve_body_plan(species) == "mammal" else "DORSAL / PROCEDURAL MOTION"
+    if species.get("render_mode") in {"overlay", "skeleton"}: study_label = "ANATOMY / RIG DIAGNOSTIC"
+    d.text((151, 302), study_label, font=get_font(16, mono=True), fill=(207, 221, 236))
     d.text((948, 302), theme_name, font=get_font(16, mono=True), fill=theme["badge_color"], anchor="rt")
     d.line((130, 335, 950, 335), fill=theme["card_border"])
     d.line((130, 834, 950, 834), fill=theme["card_border"])
@@ -981,4 +1056,6 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
         d.rounded_rectangle((110, 1530, 110+max(6, round(860*progress)), 1536), radius=3, fill=accent)
     d.text((110, 1550), "ANATOMY / MOTION / CODE", font=get_font(15, mono=True), fill=(155, 170, 192))
     d.text((970, 1550), f"{frame_idx/FPS:04.1f}s / {total_frames/FPS:04.1f}s", font=get_font(15, mono=True), fill=(155, 170, 192), anchor="rt")
+    d.text((540, 1640), "FAMILY-LEVEL 2D APPROXIMATION", font=get_font(17, mono=True), fill=(165, 183, 200), anchor="mt")
+    d.text((540, 1670), "Not a specimen-validated anatomy model", font=get_font(16), fill=(137, 155, 175), anchor="mt")
     return img.convert("RGB")

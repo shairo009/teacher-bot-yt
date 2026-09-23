@@ -2354,188 +2354,34 @@ def draw_hippo(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float, c
 # 17. MASTER UNIFIED BIOLOGICAL DISPATCHER (100% COVERAGE)
 # ─────────────────────────────────────────────────────────────────────────────
 def draw_bio_creature(draw: ImageDraw.ImageDraw, sim, species: dict, sim_time: float, cos_a: float, sin_a: float, perp_x: float, perp_y: float) -> bool:
-    """
-    Renders the exact biological silhouette and mechanics for 680+ animal species.
-    Guarantees every animal has a distinct biological shape without repeating.
-    """
-    morphology = species.get("morphology", "").lower()
-    class_type = species.get("class_type", "").lower()
-    name = species.get("name", "").upper()
-    sp_id = species.get("id", "").lower()
-
-    # 1. Turtles & Tortoises
-    if morphology == "turtle" or any(k in name for k in ("TURTLE", "TORTOISE", "TERRAPIN")):
-        draw_turtle(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 2. Crabs
-    if morphology == "crab" or any(k in name for k in ("CRAB",)):
-        draw_crab(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 3. Lobsters & Crayfish
-    if morphology == "lobster" or any(k in name for k in ("LOBSTER", "CRAYFISH", "YABBY", "SCAMPI")):
-        draw_lobster(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 4. Mantis Shrimp
-    if morphology == "shrimp" or any(k in name for k in ("MANTIS SHRIMP", "SHRIMP", "PRAWN", "KRILL")):
-        draw_mantis_shrimp(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 5. Seahorse & Seadragon
-    if morphology == "seahorse" or any(k in name for k in ("SEAHORSE", "SEADRAGON", "PIPEFISH")):
-        draw_seahorse(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 6. Jellyfish
-    if morphology == "jellyfish" or any(k in name for k in ("JELLYFISH", "MAN O WAR", "SIPHONOPHORE")):
-        draw_jellyfish(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 7. Sharks
-    if morphology == "shark" or any(k in name for k in ("SHARK", "MEGALODON")):
-        draw_shark(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 8. Marine Mammals (Whales & Dolphins)
-    if morphology == "marine_mammal" or any(k in name for k in ("WHALE", "ORCA", "DOLPHIN", "PORPOISE", "NARWHAL", "BELUGA", "MANATEE", "DUGONG")):
-        draw_marine_mammal(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 9. Rays
-    if morphology == "ray" or any(k in name for k in ("RAY", "MANTA", "SKATE")):
-        draw_ray(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 10. Tropical & Bony Fish
-    if class_type == "aquatic":
-        draw_tropical_fish(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 11. Cephalopods (Octopus, Squid, Cuttlefish)
-    if morphology == "octopus" or "OCTOPUS" in name:
-        draw_octopus(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-    if morphology == "squid" or "SQUID" in name:
-        draw_squid(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-    if morphology == "cuttlefish" or "CUTTLEFISH" in name or class_type == "cephalopod":
-        draw_cuttlefish(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 12. Crocodilians
-    if morphology == "crocodile" or any(k in name for k in ("CROCODILE", "ALLIGATOR", "CAIMAN", "GHARIAL")):
-        draw_crocodile(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 13. Lizards & Geckos
-    if "CHAMELEON" not in name and (morphology == "lizard" or (class_type == "reptile" and any(k in name for k in ("LIZARD", "GECKO", "IGUANA", "KOMODO", "MONITOR", "CHUCKWALLA", "SKINK", "DRAGON")))):
-        draw_lizard_gecko(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 14. Chameleons
-    if "CHAMELEON" in name:
-        draw_chameleon(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 15. Insects: Butterflies & Moths
-    if morphology in ("butterfly", "lepidoptera") or any(k in name for k in ("BUTTERFLY", "MOTH")):
-        draw_butterfly(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 16. Insects: Beetles
-    if morphology == "beetle" or any(k in name for k in ("BEETLE", "LADYBUG", "FIREFLY", "WEEVIL")):
-        draw_beetle(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 17. Insects: Mantises
-    if morphology == "mantis" or any(k in name for k in ("MANTIS", "KATYDID")):
-        draw_praying_mantis(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 18. Insects: Bees & Wasps
-    if morphology == "bee_wasp" or any(k in name for k in ("BEE", "WASP", "HORNET", "YELLOWJACKET", "VELVET ANT")):
-        draw_bee_wasp(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 19. Insects: Dragonflies
-    if any(k in name for k in ("DRAGONFLY", "DAMSELFLY")):
-        draw_dragonfly(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 20. Insects: Ants
-    if class_type == "insect" and any(k in name.split() for k in ("ANT", "TERMITE")) and "VELVET ANT" not in name:
-        draw_ant(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # Fallback general insect
-    if class_type == "insect":
-        draw_praying_mantis(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 21. Amphibians: Axolotl & Salamanders
-    if any(k in name for k in ("AXOLOTL", "MUDPUPPY")):
-        draw_axolotl(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-    if any(k in name for k in ("SALAMANDER", "NEWT")):
-        draw_salamander(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 22. Amphibians: Frogs & Toads
-    if morphology == "frog" or class_type == "amphibian" or any(k in name for k in ("FROG", "TOAD")):
-        draw_frog(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 23. Birds
-    if morphology == "bird" or class_type == "bird" or any(k in name for k in ("EAGLE", "FALCON", "OWL", "HAWK", "PENGUIN", "TOUCAN", "MACAW", "FLAMINGO", "PEACOCK", "HERON", "STORK", "CRANE", "OSTRICH", "EMU", "KIWI", "DUCK", "GOOSE", "SWAN", "PARROT", "PUFFIN", "ALBATROSS", "VULTURE", "CONDOR")):
-        draw_bird(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 24. Kangaroos & Marsupials
-    if morphology == "kangaroo" or any(k in name for k in ("KANGAROO", "WALLABY", "QUOKKA")):
-        draw_kangaroo(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 25. Primates (Gorilla, Chimp, Baboon)
-    if any(k in name for k in ("GORILLA", "CHIMPANZEE", "ORANGUTAN", "BABOON", "MANDRILL", "MONKEY")):
-        draw_gorilla_primate(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 26. Hippopotamus
-    if "HIPPO" in name:
-        draw_hippo(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 27. Small Mammals (Rabbit, Badger, Otter, Meerkat)
-    if morphology == "small_mammal" or any(k in name for k in ("RABBIT", "HARE", "OTTER", "BADGER", "MEERKAT", "HEDGEHOG", "WEASEL", "FERRET", "MONGOOSE")):
-        draw_rabbit_small_mammal(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 28. Cervids & Bovids (Deer, Bison, Antelope, Gazelle, Ibex)
-    if morphology == "cervid_bovid" or any(k in name for k in ("DEER", "MOOSE", "ELK", "REINDEER", "CARIBOU", "BISON", "BUFFALO", "ANTELOPE", "GAZELLE", "IMPALA", "IBEX", "SHEEP", "GOAT", "ORYX", "KUDU", "WILDEBEEST")):
-        draw_cervid_bovid(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 29. Equines (Horse, Zebra, Mustang)
-    if morphology == "equine" or any(k in name for k in ("ZEBRA", "HORSE", "MUSTANG", "DONKEY", "ONAGER")):
-        draw_equine(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 30. Serpents (Snakes, Cobras, Vipers, Boas, Pythons)
-    if class_type == "serpent" or morphology == "serpent" or any(k in sp_id for k in ("snake", "cobra", "viper", "boa", "python", "mamba", "krait", "adder")):
-        draw_bio_serpent(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 31. Arachnids (Spiders, Scorpions, Tarantulas)
-    if class_type == "arachnid" or morphology in ("spider", "scorpion") or any(k in sp_id for k in ("spider", "scorpion", "tarantula", "harvestman", "vinegaroon", "solifugid")):
-        draw_bio_arachnid(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    # 32. Bio Quadrupeds (Lion, Tiger, Giraffe, Elephant, Rhino, Bear, Cheetah, Wolf, Fox, Dog, etc.)
-    if class_type == "quadruped" or any(k in sp_id for k in ("dog","wolf","tiger","lion","cat","leopard","cheetah","bear","fox","deer","horse","rabbit","hyena","panda","elephant","rhino","hippo","giraffe")):
-        draw_bio_quadruped(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-        return True
-
-    return False
-
+    """Taxonomy-first dispatch. Never infer a body plan from a substring."""
+    from src.anatomy_profiles import resolve_body_plan
+    from src.natural_anatomy_renderer import (
+        draw_mammal, draw_elongated, draw_myriapod, draw_special_insect,
+        draw_marine_body, draw_pinniped, draw_shell_special,
+    )
+    plan = resolve_body_plan(species)
+    registry = {
+        "mammal": draw_mammal, "eel": draw_elongated, "legless_lizard": draw_elongated,
+        "myriapod": draw_myriapod, "orthoptera": draw_special_insect,
+        "cicada": draw_special_insect, "stick_insect": draw_special_insect, "insect": draw_special_insect,
+        "marine_mammal": draw_marine_body, "pinniped": draw_pinniped,
+        "horseshoe": draw_shell_special, "nautilus": draw_shell_special, "barnacle": draw_shell_special,
+        "turtle": draw_turtle, "crab": draw_crab, "lobster": draw_lobster,
+        "shrimp": draw_mantis_shrimp, "seahorse": draw_seahorse,
+        "jellyfish": draw_jellyfish, "shark": draw_shark, "ray": draw_ray,
+        "fish": draw_tropical_fish, "octopus": draw_octopus, "squid": draw_squid,
+        "vampire_squid": draw_octopus, "cuttlefish": draw_cuttlefish,
+        "crocodile": draw_crocodile, "lizard": draw_lizard_gecko,
+        "chameleon": draw_chameleon, "butterfly": draw_butterfly,
+        "beetle": draw_beetle, "mantis": draw_praying_mantis, "bee_wasp": draw_bee_wasp,
+        "dragonfly": draw_dragonfly, "ant": draw_ant,
+        "axolotl": draw_axolotl, "salamander": draw_salamander,
+        "frog": draw_frog, "bird": draw_bird, "serpent": draw_bio_serpent,
+        "arachnid": draw_bio_arachnid,
+    }
+    renderer = registry.get(plan)
+    if renderer is None:
+        raise ValueError(f"No renderer for body plan {plan}")
+    renderer(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
+    return True

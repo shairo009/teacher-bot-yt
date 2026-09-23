@@ -68,6 +68,13 @@ def extract_base_noun(name: str) -> str:
     words = [w.upper() for w in re.findall(r"[a-zA-Z]+", name) if w.upper() not in _BASE_IGNORE_WORDS]
     return words[-1] if words else name.upper()
 
+def assert_unpublished(species: dict) -> None:
+    """Explicit IDs must pass the same permanent name/base-noun guard as rotation."""
+    name = species["name"]
+    if is_already_used(name) or extract_base_noun(name) in get_used_base_nouns():
+        raise RuntimeError(f"Publication blocked: {name} or its base animal was already used. Use an offline preview instead.")
+
+
 def get_used_base_nouns() -> set[str]:
     """Returns all base animal nouns that have already been uploaded."""
     history = _load_json(HISTORY_FILE, [])
@@ -164,11 +171,16 @@ def update_rolling_frame_buffer(new_frame_path: Path):
 
 def _load_json(path: Path, default):
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        value = json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
         return default
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"Cannot read state ledger: {path.name}") from exc
+    if not isinstance(value, type(default)):
+        raise RuntimeError(f"Invalid state ledger structure: {path.name}")
+    if isinstance(value, list) and any(not isinstance(item, dict) or not isinstance(item.get("species", ""), str) for item in value):
+        raise RuntimeError(f"Invalid history entry: {path.name}")
+    return value
 
 
 def _encode_video(frames_dir: Path, output_path: Path, audio_path: Path | None = None) -> None:
@@ -201,6 +213,7 @@ def _upload_to_youtube(video_path: Path, species: dict, dry_run: bool) -> str | 
         print("  [Dry run — skipping YouTube upload]")
         return None
 
+    assert_unpublished(species)
     token_json = os.environ.get("TOKEN_JSON", "").lstrip("\ufeff").strip()
     client_json = os.environ.get("CLIENT_SECRETS_JSON", "").lstrip("\ufeff").strip()
 
@@ -391,8 +404,8 @@ def generate(
     else:
         current_id = animal_id
         base_species = get_species_for_id(current_id)
-        if is_already_used(base_species["name"]) and not dry_run:
-            print(f"⚠ WARNING: '{base_species['name']}' pehle upload ho chuka hai! (--dry-run mode mein chalao test ke liye)")
+    if not dry_run:
+        assert_unpublished(base_species)
 
     animal_name = base_species["name"]
     scientific   = base_species.get("scientific", animal_name)
@@ -408,20 +421,11 @@ def generate(
         print(f"   Fur colors : {research['body_colors']}")
         print(f"   Anatomy    : {research['anatomy_notes'][:100]}...")
     else:
-        # Dry-run without internet: use encyclopedia data as-is
-        research = {
-            "class_type":    base_species.get("class_type", "quadruped"),
-            "accent":        list(base_species.get("accent", [245, 158, 11])),
-            "fur_dark":      [120, 60,  5],
-            "fur_mid":       [190, 110, 20],
-            "fur_gold":      [230, 160, 45],
-            "fur_light":     [255, 210, 100],
-            "fur_cream":     [255, 235, 170],
-            "fur_highlight": [255, 248, 210],
-            "anatomy_notes": "",
-            "proportions":   {"body_width_scale": 1.0, "leg_length_scale": 1.0,
-                               "head_size_scale": 1.0, "tail_wag": 0.65},
-        }
+        # Preserve per-family offline colors; never repaint everything orange.
+        from src.anatomy_profiles import natural_palette
+        research = {**natural_palette(base_species),
+                    "accent": base_species["accent"], "anatomy_notes": "",
+                    "proportions": {}}
 
     # ── STEP 3: Merge research into species dict ──
     # Research se mili real colors aur class_type override karti hain encyclopedia entry
@@ -431,12 +435,8 @@ def generate(
     species["accent"]        = tuple(research.get("accent") or base_species.get("accent", (245, 158, 11)))
     species["anatomy_notes"] = research.get("anatomy_notes", "")
     # Fur colors (used by renderer)
-    species["fur_dark"]      = tuple(research.get("fur_dark",      [120, 60,  5]))
-    species["fur_mid"]       = tuple(research.get("fur_mid",       [190, 110, 20]))
-    species["fur_gold"]      = tuple(research.get("fur_gold",      [230, 160, 45]))
-    species["fur_light"]     = tuple(research.get("fur_light",     [255, 210, 100]))
-    species["fur_cream"]     = tuple(research.get("fur_cream",     [255, 235, 170]))
-    species["fur_highlight"] = tuple(research.get("fur_highlight", [255, 248, 210]))
+    for key in ("fur_dark", "fur_mid", "fur_gold", "fur_light", "fur_cream", "fur_highlight"):
+        species[key] = tuple(research.get(key) or base_species[key])
     species["proportions"]   = research.get("proportions", {})
 
     if not dry_run:

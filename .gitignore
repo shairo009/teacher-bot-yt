@@ -2,9 +2,19 @@
 
 # Environment & credentials
 .env
+.env.*
+!.env.example
+.dev.vars
 *.pem
-client_secrets.json
-token.json
+client_secrets*.json
+token*.json
+
+# Local locks, caches and delivery archives (journals remain tracked)
+*.lock
+*.log
+.pytest_cache/
+*.zip
+*.tar.gz
 
 # Python
 __pycache__/

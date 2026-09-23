@@ -2,6 +2,7 @@
 
 # Image rendering (code editor, visualizations)
 pillow>=10.0.0
+numpy>=1.24.0
 
 # TTS — free, fast, high quality
 edge-tts>=6.1.0
@@ -15,3 +16,6 @@ google-auth-httplib2>=0.1.0
 python-dotenv>=1.0.0
 requests>=2.31.0
 aiofiles>=23.0.0
+
+# Offline workflow syntax and safety regression tests
+PyYAML>=6.0.1

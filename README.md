@@ -1,105 +1,146 @@
-# Real Animal Shorts Bot 🐾
+# Teacher Bot YT — procedural animal Shorts
 
-Creates polished 8.8-second vertical animal Shorts in a clean dark-teal poster style. Every run uses the next animal in a fixed rotation, puts its name clearly on screen, and uses a real wildlife photo with motion — no LLM or API key required.
+Offline Python + NumPy + Pillow + FFmpeg animal-video generation with optional YouTube publishing. Run on a Linux workstation or GitHub Actions runner. This needs filesystem access and subprocesses and is **not a Cloudflare application**.
 
-It uses Wikimedia Commons' public image search (no account or token); the first run for an animal needs an internet connection and later runs use the local cache.
+## Verified status — 2026-09-22
+
+- 1080x1920 vertical H.264/AAC MP4 at 30 FPS; default duration 25 seconds.
+- Actual analytical 3D for all **687 catalogue entries across 43 morphology profiles**, composited into the existing 2D poster. Five exact species retain dedicated rigs; others use metadata-driven family rigs. Geometry is stylized and primitive-based, **not photorealistic or 687 independently validated anatomical models**.
+- History-aware scene planning, checksummed event journal, isolated preview history and per-reservation output directories.
+- Imported baseline independently verified: **99 offline tests PASS**. Includes finite geometry for all 687 entries, visible animation across 43 morphology profiles, workflow checks and real local-git checkpoint tests; YouTube uploads are mocked.
+- Current continuation is validating consecutive unused-species MP4s on one isolated preview ledger. See `AI_HANDOFF.md` for current results; older Tiger/Turtle previews were not included in the uploaded source archive.
+- Production `data/` must remain untouched; byte-for-byte comparison against the input ZIP is required before delivery.
+- No YouTube uploads, workflow triggers, paid media generation, credential use or production deployment performed.
+
+## Setup and safe first run
+
+Use Python 3.11+ and FFmpeg/ffprobe on PATH. From **this folder**, not the outer Hono development wrapper:
 
 ```bash
-python src/animal_short_generator.py            # next animal, saves rotation
-python src/animal_short_generator.py --dry-run  # preview without advancing it
-python src/animal_short_generator.py --animal-id 0  # Tiger preview
+python -m pip install -r requirements.txt
+OPENBLAS_NUM_THREADS=1 python -m unittest discover -s tests -v
+OPENBLAS_NUM_THREADS=1 python src/animal_short_generator.py --animal-id 306 --renderer 3d --quality standard --duration 3 --dry-run --no-research --history-dir tmp/my-preview --max-unique-retries 1
+OPENBLAS_NUM_THREADS=1 python src/animal_short_generator.py --animal-id 401 --renderer 3d --quality standard --duration 3 --dry-run --no-research --history-dir tmp/my-preview --max-unique-retries 1
 ```
 
-Videos are saved under `tmp/animal_####/`. The GitHub Action uploads the Short directly to YouTube when `TOKEN_JSON` and `CLIENT_SECRETS_JSON` secrets are configured, and also saves an MP4 artifact for each run.
+The Animal Shorts preview needs no API key, never researches online and synthesizes audio locally. Full requirements include dependencies for legacy scripts, optional production research, YouTube publishing and PyYAML for workflow tests. Legacy paths may access the network even in preview.
 
----
+Run previews sequentially using the **same** `--history-dir`; do not clear it between animals. Rerunning against existing preview history may reject the requested plan; rejection is not permission to reset production history. A new preview directory is an isolated test sandbox, never evidence of production eligibility.
 
-# Legacy Tech Series Bot 🎮💻
+### Renderer coverage
 
-**Automated YouTube Shorts** teaching Computer Science & Programming with **game-style dark neon visuals**.
+Dedicated rigs (preserved unchanged):
 
-Every video is unique — different tech concept + different animated objects (fish, rockets, cars, robots, crystals...).
+| Catalogue ID | Species |
+|---|---|
+| 0 | African Lion |
+| 1 | Tiger |
+| 104 | Green Sea Turtle |
+| 122 | Leopard Gecko |
+| 465 | Mexican Redknee Tarantula |
 
-## What It Makes
+Other catalogue entries use reusable morphology-driven families: mammals, birds, fish, rays, seahorses, marine mammals, reptiles, amphibians, insects, arachnids, crustaceans, cephalopods and jellyfish. Proportions, colours and appendages come from catalogue metadata. Explicit morphology takes precedence over broad class; unknown explicit morphology fails closed in strict `3d` mode. Exact names, not a shared family name, select the five dedicated rigs.
 
-Each video:
-- 🌑 **Dark neon background** with animated grid
-- 🎮 **Game-style diagram** — nodes, glowing connections, counters
-- 🐟🚀 **Random animated objects** (fish, rockets, robots, crystals...) flowing through the concept
-- 🔊 **English narration** via Edge-TTS
-- ⚡ **30 FPS smooth animation** at 1080×1920
+`auto` chooses supported 3D and otherwise legacy 2D. `3d` requires an exact dedicated species or supported morphology/class metadata; `2d` explicitly retains the legacy renderer. Current catalogue indexes are 0–686. This does not invent arbitrary new species from free-form prompts or certify anatomical accuracy.
 
-## Topics Covered (500+)
+**Production constraints:** all five dedicated-rig base nouns are already used, but unused generic-rig species exist (for example 306 Pacific Seahorse, 401 Monarch Butterfly, 604 Indian Greater One Horned Rhino). Unused status alone is NOT publishing eligibility: production references, history, semantic/visual gates and upload safeguards still apply. Never delete history, rename a used animal or lower visual thresholds. Keep publishing disabled until visual diversity and recognizability are reviewed.
 
-| Series | Examples |
-|--------|----------|
-| **Python** | Variables, OOP, Decorators, asyncio, Generators... |
-| **DSA** | Binary Search, BFS/DFS, Dijkstra, DP, Sorting... |
-| **System Design** | API Gateway, Load Balancer, CAP Theorem, Kafka... |
-| **AI/ML** | Transformers, Backprop, CNN, LSTM, LoRA... |
-| **LLMs** | Tokens, Embeddings, RAG, Agents, Fine-tuning... |
-| **Web Dev** | REST, JWT, OAuth, WebSockets, GraphQL... |
-| **DevOps** | Docker, Kubernetes, CI/CD, Prometheus... |
-| **Databases** | SQL Joins, Indexes, CAP, NoSQL, Redis... |
-| **Networking** | OSI, TCP/UDP, TLS, DNS, HTTP/3... |
-| **Design Patterns** | Singleton, Observer, Strategy, CQRS... |
-| **Git** | Merge vs Rebase, Interactive Rebase, bisect... |
-| **CS Fundamentals** | Memory, Concurrency, OS, Crypto... |
+## CLI entry points
 
-Topics cycle infinitely — **never repeats** within a full cycle.
+No public web/API endpoints or production URLs exist for this bot. Main entry: `python src/animal_short_generator.py`.
 
-## Animated Objects (30+)
+| Parameter | Behavior |
+|---|---|
+| `--dry-run` | Render/audit locally without research, upload or production-state changes |
+| `--animal-id N` | Select a catalogue ID without overriding production duplicate bans |
+| `--renderer auto\|2d\|3d` | Default `auto`; `3d` requires a dedicated species or supported morphology metadata |
+| `--quality draft\|standard\|high` | Internal 3D resolution; default `standard`; final canvas unchanged |
+| `--duration SECONDS` | Positive finite duration up to 180; default 25 |
+| `--no-research` | Disable optional research; **alone this does not disable publishing** |
+| `--history-dir PATH` | Isolated preview ledger only; cannot overlap production `data/` |
+| `--max-unique-retries N` | Default 48; use 1 for small smoke tests |
+| `--similarity-threshold VALUE` | Semantic threshold, default 0.78; permanent base bans and visual gates remain |
 
-Every video randomly picks 2 objects from:
-`fish • rocket • car • robot • crystal • satellite • packet • bird • dragon • submarine • gear • lightning • diamond • comet • ufo • bug • train • airplane • bubble • star • turtle • cat • token • hexagon • molecule • flame • snowflake • leaf • virus • crown • shield • key • bolt • wave...`
+No arguments means a **production attempt**, not preview. CLI descriptions and examples now label this explicitly. The workflow publishing opt-ins do not guard direct CLI use.
 
-## How It Works
+## Outputs and data model
 
-```
-1. Pick next topic from 500+ ordered list (never repeats)
-2. Pick 2 random animated objects (different every run)
-3. LLM (DeepSeek free) generates unique scene layout + narration
-4. PIL renders dark-neon game-style frames (30fps)
-5. Edge-TTS generates English narration audio (free)
-6. FFmpeg composes final 1080×1920 MP4
-7. Upload to YouTube automatically
+Each reservation writes:
+
+```text
+tmp/reel_<animal-id>_<reservation-id>/
+  <species>_short.mp4
+  generation_manifest.json
+  quality_report.json
+  audio.wav
+  frames/frame_0000.jpg ...
 ```
 
-## Setup
+Manifest: plan, content fingerprint, encoded-file SHA-256, three perceptual hashes decoded from the MP4, preview flag and audit report. Audits check encoding and sampled frames; they do not certify biological accuracy or visual quality.
 
-### 1. Clone
-```bash
-git clone https://github.com/shairo009/teacher-bot-yt.git
-cd teacher-bot-yt
-```
+Permanent state:
 
-### 2. Add GitHub Secrets
-| Secret | Value |
-|--------|-------|
-| `OPENAI_API_KEY` | OpenCode API key (free at opencode.ai) |
-| `TOKEN_JSON` | YouTube OAuth token.json content |
-| `CLIENT_SECRETS_JSON` | YouTube client_secrets.json content |
+- `data/animal_encyclopedia.json`: catalogue and rendering descriptors.
+- `data/used_animals.json`: permanently uploaded names, normalized and base-noun deduplicated.
+- `data/animal_history.json`, `animal_progress.json`: confirmed uploads and progress.
+- `data/recent_frames/`, `last_uploaded_frame.jpg`: rolling visual reference buffer.
+- `data/unique_animal_history.jsonl`: authoritative checksummed append-only journal.
+- `data/unique_animal_history.json`: derived readable snapshot.
+- `data/unique_animal_history.initialized`: durable journal head detecting rollback/truncation.
 
-### 3. Run locally
-```bash
-pip install -r requirements.txt
-python main.py --dry-run   # test without uploading
-python main.py             # full run + upload
+The three production ledger files do not exist in the untouched input; they are created on first production reservation. Back them up together. Preview ledger is `tmp/unique-preview-history/`; locks serialize cooperating local processes. Storage uses files and git checkpoints, not D1/KV/R2.
 
-```
+## Safety gates and recovery
 
-## GitHub Actions Schedule
+1. Permanent base-noun bans include prefixed variants.
+2. Planner rejects reused seeds, duplicate content, repeated animal/action/scene combinations, cosmetic changes and high semantic similarity.
+3. Production visual gates require mean pixel difference at least 20% and dHash distance greater than 10. Previews skip only the legacy production-reference check, not their own ledger checks.
+4. Encoded video must pass canvas/duration/stream checks, full decode and sampled-frame checks before completion.
+5. Lifecycle: `reserved -> completed -> publishing -> published`; `reserved -> failed` also allowed. Failed plans retain semantic barriers. Incomplete/uncertain publishes are not automatically retried.
+6. CI pushes durable publish intent before contacting YouTube; checkpoint failure blocks upload. File SHA-256 is rechecked after that checkpoint.
+7. Missing/blank upload confirmation exits with code 1, leaving `publishing` intact. Legacy uploaded state advances only after confirmation.
 
-Runs **6 times daily** at IST: 6 AM, 10 AM, 2 PM, 6 PM, 10 PM, 2 AM
+After timeout/interruption, manually inspect the channel and journal. The remote may already have accepted the video. **Do not delete the record or rerun that animal.** Automated reconciliation is not implemented. If published state and legacy files disagree, reconcile from trusted records before resuming.
 
-## Cost: **Zero** 💰
+Corrupt state or a missing initialized journal blocks generation. Restore trusted backups, not an empty list. Checksums detect accidental corruption, not malicious rewriting. Rolling back all ledger files together requires an independent backup to detect.
 
-- Edge-TTS: free
-- PIL + FFmpeg: free
-- GitHub Actions: free tier
-- LLM: DeepSeek via OpenCode (free)
-- YouTube API: free
+## GitHub Actions
 
-## License
+For a standalone bot repository, place this folder's **contents at the repository root**, including `.github/`, on branch `main`. Nested workflows do not run from the outer development wrapper.
 
-MIT
+### Animal Shorts (`generate.yml`)
+
+- Manual preview defaults to true, without YouTube credentials.
+- Publishing requires repository variable `ENABLE_ANIMAL_PUBLISH=true` and valid `TOKEN_JSON`/`CLIENT_SECRETS_JSON` secrets. Keep opt-in unset until production eligibility and recovery are reviewed.
+- Main must permit workflow writes. Git identity and `UNIQUE_HISTORY_GIT=1` enable durable checkpoints; rejected pushes fail closed.
+- Concurrency serializes Animal Shorts jobs; regressions run before generation.
+- Schedule `17 2,7,12,17,21 * * *` UTC (five times daily) is skipped unless publishing is enabled. Schedules do not guarantee precise delivery time.
+- Seven-day artifacts include MP4s, manifests, audit reports and ledger files, never credentials or full frame sequences.
+
+### Legacy Real Draw (`generate_real_draw.yml`)
+
+Now preview-default with its own opt-in `ENABLE_REAL_DRAW_PUBLISH=true`. Preview does not receive YouTube secrets. Boolean-safe progress conditions, main checkout/full history, rebase before push and pre-generation regressions are configured.
+
+**Keep this publishing opt-in unset.** Workflow hardening does not fix the legacy generator: it may advance progress on missing upload confirmation, reset exhausted subjects, fail open on corrupt history, reuse output folders, and lacks the Animal Shorts durable-publishing/audit protections. Its preview fetches public web photos and is **not offline**. No Real Draw video was generated here. Review source-image licenses before publication.
+
+`main.py`, `generate_code_reel.py` and OAuth utilities remain for compatibility; they are not covered by Animal Shorts guarantees. OAuth utilities may modify credentials or trigger external services; do not run them as tests.
+
+### Validation scope
+
+Seven inherited workflow tests parse both YAML files, check explicit safety expressions, run `bash -n`, and execute generation shell blocks with an argv recorder instead of the real generator. Hostile input stays a literal argument; preview flags are verified. These tests do not evaluate all GitHub expression semantics or establish repository permissions. **Real GitHub Actions and YouTube authorization remain unverified.**
+
+## Delivery artifacts
+
+The delivery package is assembled after validation from this source tree and selected `preview_artifacts/` evidence. `AI_HANDOFF.md` lists the actual current videos and validation outcomes. Evidence ledgers are not automatically used by the default CLI. Never copy them into production `data/`.
+
+Delivery excludes credentials, caches, full generated frame sequences, raw WAV files and the outer Hono template. `AI_HANDOFF.md` records the exact continuation checkpoint. Local outputs remain under `tmp/` and are excluded from git.
+
+## Remaining work
+
+1. Review unused generic-rig species for anatomy/recognizability and refine species-specific features where reusable family geometry is insufficient.
+2. Review diversity against real production references without weakening safeguards.
+3. Improve intersecting primitive joints and ground integration; use properly licensed detailed rigs and an offline Blender/PBR pipeline if photorealism is required.
+4. Build a reviewed reconciliation tool for uncertain uploads/partially updated legacy state.
+5. Test GitHub Actions in a preview-only standalone repository; separately harden legacy generator internals before enabling Real Draw publishing.
+
+Update `AI_HANDOFF.md` after meaningful changes and before ending a continuation.

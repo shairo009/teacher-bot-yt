@@ -1,13 +1,13 @@
 """
-YouTube Uploader — Super Human Edition
-Smart metadata, custom thumbnails, playlists, scheduling.
-Looks like a real education creator, not a bot.
+YouTube uploader with truthful metadata and private-first publishing.
+Public or scheduled release requires a review bound to the exact video and metadata.
+Local checks cannot certify copyright clearance, policy compliance or monetization.
 """
 
 import os
 import json
 import random
-import time
+import hashlib
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
@@ -17,25 +17,25 @@ try:
     from google_auth_oauthlib.flow import InstalledAppFlow
     from google.auth.transport.requests import Request
 except ImportError:
-    print("Installing Google API libraries...")
-    os.system("pip install google-api-python-client google-auth-oauthlib google-auth-httplib2 -q")
-    from googleapiclient.http import MediaFileUpload
-    from googleapiclient.discovery import build
-    from google_auth_oauthlib.flow import InstalledAppFlow
-    from google.auth.transport.requests import Request
+    # Importing a module must never install packages or contact external services.
+    MediaFileUpload = build = InstalledAppFlow = Request = None
 
 
 class YouTubeUploader:
     SCOPES = ['https://www.googleapis.com/auth/youtube']
 
-    def __init__(self, token_path='token.json', secrets_path='client_secrets.json'):
+    def __init__(self, token_path='token.json', secrets_path='client_secrets.json', *,
+                 allow_interactive_auth=False):
         self.token_path = Path(token_path)
         self.secrets_path = Path(secrets_path)
         self.youtube = None
+        self.allow_interactive_auth = allow_interactive_auth
         self._playlist_cache = {}
 
     def authenticate(self):
         """Authenticate with YouTube API using OAuth2."""
+        if build is None:
+            raise RuntimeError('Install requirements.txt before using YouTube upload')
         creds = None
 
         if self.token_path.exists():
@@ -59,6 +59,9 @@ class YouTubeUploader:
                     creds = None
             
             if not creds or not creds.valid:
+                if not self.allow_interactive_auth:
+                    print('Valid OAuth credentials required; interactive authentication is disabled.')
+                    return False
                 if not self.secrets_path.exists():
                     print(f"ERROR: {self.secrets_path} not found!")
                     return False
@@ -67,15 +70,12 @@ class YouTubeUploader:
                 )
                 creds = flow.run_local_server(port=0)
 
-            with open(self.token_path, 'w') as f:
-                json.dump({
-                    'token': creds.token,
-                    'refresh_token': creds.refresh_token,
-                    'token_uri': creds.token_uri,
-                    'client_id': creds.client_id,
-                    'client_secret': creds.client_secret,
-                    'scopes': creds.scopes
-                }, f)
+            # Preserve expiry so future runs can refresh correctly.
+            self.token_path.parent.mkdir(parents=True, exist_ok=True)
+            fd = os.open(self.token_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                f.write(creds.to_json())
+            self.token_path.chmod(0o600)
 
         self.youtube = build('youtube', 'v3', credentials=creds)
         return True
@@ -122,31 +122,22 @@ class YouTubeUploader:
 
     def _generate_description(self, topic_name, class_num, chapter, subtopics):
         """Generate rich description with timestamps and hashtags."""
-        # Timestamps for subtopics
-        timestamp_lines = []
-        t = 15  # Start after intro
-        for i, sub in enumerate(subtopics[:6]):
-            m, s = divmod(t, 60)
-            timestamp_lines.append(f"{m}:{s:02d} {sub}")
-            t += random.randint(20, 40)
-
-        timestamps = "\n".join(timestamp_lines) if timestamp_lines else "0:15 Main lesson"
+        # Only actual edit timings can justify timestamps. List topics instead.
+        timestamps = "\n".join(str(sub) for sub in subtopics[:6]) or topic_name
 
         # Random intro lines
         intros = [
             f"📚 Class {class_num} - {chapter}",
             f"🎯 Topic: {topic_name}",
             "",
-            f"⏱️ Timestamps:",
+            "Topics covered:",
             timestamps,
             "",
             f"📝 This video is based on NCERT Class {class_num} Math curriculum.",
             "If you liked the video, hit Like 👍 and Subscribe!",
             "Don't forget to press the Bell 🔔 icon!",
             "",
-            "📌 More Class-wise Videos:",
-            "https://www.youtube.com/@shairo009/playlists",
-            "",
+
             "📖 NCERT Books: https://ncert.nic.in/textbook.php",
             "",
         ]
@@ -312,6 +303,53 @@ class YouTubeUploader:
         tomorrow = now + timedelta(days=1)
         return tomorrow.replace(hour=8, minute=random.randint(0, 30), second=0, microsecond=0)
 
+    @staticmethod
+    def review_fingerprint(video_path, metadata):
+        """Bind an editorial approval to both the media bytes and upload metadata."""
+        digest = hashlib.sha256()
+        with open(video_path, 'rb') as source:
+            for chunk in iter(lambda: source.read(1024 * 1024), b''):
+                digest.update(chunk)
+        fields = {k: v for k, v in metadata.items() if k != 'publication_review'}
+        digest.update(json.dumps(fields, sort_keys=True, ensure_ascii=False,
+                                 allow_nan=False).encode('utf-8'))
+        return digest.hexdigest()
+
+    @classmethod
+    def validate_upload(cls, video_path, metadata, schedule=False):
+        """Local guardrails, not a legal opinion or a YouTube approval."""
+        if not Path(video_path).is_file() or Path(video_path).stat().st_size == 0:
+            raise ValueError('Video file is missing or empty')
+        if not isinstance(metadata, dict):
+            raise ValueError('metadata must be an object')
+        for field in ('made_for_kids', 'contains_synthetic_media'):
+            if type(metadata.get(field)) is not bool:
+                raise ValueError(f'{field} requires an explicit boolean decision')
+        title, description = metadata.get('title', ''), metadata.get('description', '')
+        if not isinstance(title, str) or not title.strip() or len(title) > 100 or any(c in title for c in '<>'):
+            raise ValueError('Title must be 1-100 characters without angle brackets')
+        if not isinstance(description, str) or len(description.encode('utf-8')) > 5000 or any(c in description for c in '<>'):
+            raise ValueError('Description must be at most 5000 UTF-8 bytes without angle brackets')
+        tags = metadata.get('tags', [])
+        if not isinstance(tags, list) or any(not isinstance(t, str) or not t.strip() or any(c in t for c in '<>') for t in tags):
+            raise ValueError('Tags must be a list of nonempty strings without angle brackets')
+        # YouTube counts separators and quotation marks around tags containing spaces.
+        tag_length = sum(len(t) + (2 if ' ' in t else 0) for t in tags) + max(0, len(tags) - 1)
+        if tag_length > 500:
+            raise ValueError('Combined tags exceed the YouTube 500-character limit')
+        privacy = metadata.get('privacy_status', 'private')
+        if privacy not in ('private', 'unlisted', 'public'):
+            raise ValueError('Invalid privacy_status')
+        if privacy != 'private' or schedule:
+            review = metadata.get('publication_review')
+            if not isinstance(review, dict) or not str(review.get('reviewed_by', '')).strip():
+                raise ValueError('Public, unlisted and scheduled release require editorial review')
+            for check in ('rights_cleared', 'original_value', 'metadata_accurate', 'audience_checked', 'disclosure_checked'):
+                if review.get(check) is not True:
+                    raise ValueError(f'Publication review missing: {check}')
+            if review.get('fingerprint') != cls.review_fingerprint(video_path, metadata):
+                raise ValueError('Publication review does not match this video and metadata')
+
     # ─── MAIN UPLOAD ───────────────────────────────────────────────
 
     def upload_video(self, video_path, metadata, thumbnail_path=None,
@@ -328,31 +366,25 @@ class YouTubeUploader:
         Returns:
             video_id on success, None on failure
         """
+        # Validate before OAuth or any network call; never silently truncate claims.
+        self.validate_upload(video_path, metadata, schedule)
         if not self.youtube:
             if not self.authenticate():
                 return None
 
-        if not os.path.exists(video_path):
-            print(f"Video file not found: {video_path}")
-            return None
-
-        title = metadata.get('title', 'Math Lesson')[:100]
-        description = metadata.get('description', '')[:5000]
+        title = metadata['title']
+        description = metadata.get('description', '')
         tags = metadata.get('tags', [])
 
         # Determine privacy & publish time
         if schedule:
             privacy = 'private'
             publish_at = self.get_next_peak_hour()
-            publish_iso = publish_at.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+            publish_iso = publish_at.astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.000Z')
             print(f"  Scheduled for: {publish_at.strftime('%d %b %I:%M %p IST')}")
         else:
-            privacy = 'public'
+            privacy = metadata.get('privacy_status', 'private')
             publish_iso = None
-
-        # Recording date: 1-3 days ago (not suspiciously same-day)
-        days_ago = random.randint(1, 3)
-        recording_date = (datetime.now(timezone.utc) - timedelta(days=days_ago)).strftime('%Y-%m-%dT00:00:00Z')
 
         body = {
             'snippet': {
@@ -360,34 +392,29 @@ class YouTubeUploader:
                 'description': description,
                 'tags': tags,
                 'categoryId': str(metadata.get('categoryId', metadata.get('category_id', '15'))),
-                'defaultLanguage': 'en',
-                'defaultAudioLanguage': 'en',
+                'defaultLanguage': metadata.get('language', 'en'),
             },
             'status': {
                 'privacyStatus': privacy,
-                'selfDeclaredMadeForKids': False,
+                'selfDeclaredMadeForKids': metadata['made_for_kids'],
+                'containsSyntheticMedia': metadata['contains_synthetic_media'],
                 'embeddable': True,
                 'license': 'youtube',
                 'publicStatsViewable': True,
             },
-            'recordingDetails': {
-                'recordingDate': recording_date,
-            }
         }
+        if metadata.get('audio_language'):
+            body['snippet']['defaultAudioLanguage'] = metadata['audio_language']
 
         # Add publishAt for scheduled videos
         if publish_iso:
             body['status']['publishAt'] = publish_iso
 
         try:
-            # Random pre-upload delay (2-15 seconds, simulates human)
-            delay = random.randint(2, 15)
-            print(f"  Preparing upload... ({delay}s)")
-            time.sleep(delay)
-
-            media = MediaFileUpload(video_path, chunksize=-1, resumable=True)
+            media = MediaFileUpload(video_path, mimetype='video/mp4',
+                                    chunksize=8 * 1024 * 1024, resumable=True)
             request = self.youtube.videos().insert(
-                part='snippet,status,recordingDetails',
+                part='snippet,status',
                 body=body,
                 media_body=media
             )
@@ -395,6 +422,8 @@ class YouTubeUploader:
             print(f"  Uploading: {title}")
             response = request.execute()
             video_id = response.get('id')
+            if not isinstance(video_id, str) or not video_id.strip():
+                return None
             print(f"  Uploaded! Video ID: {video_id}")
             print(f"  https://youtu.be/{video_id}")
 
@@ -413,14 +442,19 @@ class YouTubeUploader:
             return None
 
     def upload(self, video_path, title, description="", tags=None,
-               thumbnail_path=None, category_id="27", made_for_kids=False,
-               playlist_id=None, schedule=False):
+               thumbnail_path=None, category_id="27", made_for_kids=None,
+               playlist_id=None, schedule=False, privacy_status='private',
+               contains_synthetic_media=False, publication_review=None):
         """Upload video directly with individual parameter arguments."""
         metadata = {
             'title': title,
             'description': description,
             'tags': tags or [],
             'categoryId': category_id,
+            'made_for_kids': made_for_kids,
+            'contains_synthetic_media': contains_synthetic_media,
+            'privacy_status': privacy_status,
+            'publication_review': publication_review,
         }
         return self.upload_video(video_path, metadata, thumbnail_path=thumbnail_path,
                                  playlist_id=playlist_id, schedule=schedule)
@@ -428,5 +462,5 @@ class YouTubeUploader:
 
 
 if __name__ == "__main__":
-    print("YouTube Uploader — Super Human Edition")
+    print('YouTube Uploader — private-first, reviewed publication')
     print("Usage: Import and use YouTubeUploader class")

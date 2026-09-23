@@ -63,7 +63,9 @@ def solve_forelimb_ik(shoulder: tuple[float, float], paw: tuple[float, float], l
     dx = paw[0] - shoulder[0]
     dy = paw[1] - shoulder[1]
     dist = math.hypot(dx, dy)
-    clamped = min(dist, l1 + l2 - 0.001)
+    if l1 <= 0 or l2 <= 0:
+        raise ValueError("IK segment lengths must be positive")
+    clamped = max(abs(l1 - l2) + 1e-6, min(dist, l1 + l2 - 1e-6))
     base = math.atan2(dy, dx)
     cos_a = (l1 * l1 + clamped * clamped - l2 * l2) / (2 * l1 * clamped)
     ang = base - math.acos(max(-1.0, min(1.0, cos_a))) * side * 0.92
@@ -74,7 +76,9 @@ def solve_ik_2joint(origin: tuple[float, float], target: tuple[float, float], l1
     dx = target[0] - origin[0]
     dy = target[1] - origin[1]
     dist = math.hypot(dx, dy)
-    clamped_dist = min(dist, l1 + l2 - 0.001)
+    if l1 <= 0 or l2 <= 0:
+        raise ValueError("IK segment lengths must be positive")
+    clamped_dist = max(abs(l1 - l2) + 1e-6, min(dist, l1 + l2 - 1e-6))
     base_angle = math.atan2(dy, dx)
     cos_a = (l1 * l1 + clamped_dist * clamped_dist - l2 * l2) / (2 * l1 * clamped_dist)
     angle_a = math.acos(max(-1.0, min(1.0, cos_a)))
@@ -89,7 +93,9 @@ def solve_ik_3segment(origin: tuple[float, float], target: tuple[float, float], 
     coxa_ang = base_angle + side * 0.35
     j1 = (origin[0] + math.cos(coxa_ang) * l1, origin[1] + math.sin(coxa_ang) * l1)
     d2 = math.hypot(target[0] - j1[0], target[1] - j1[1])
-    clamped_d2 = min(d2, l2 + l3 - 0.001)
+    if min(l1, l2, l3) <= 0:
+        raise ValueError("IK segment lengths must be positive")
+    clamped_d2 = max(abs(l2 - l3) + 1e-6, min(d2, l2 + l3 - 1e-6))
     base_ang2 = math.atan2(target[1] - j1[1], target[0] - j1[0])
     cos_a = (l2 * l2 + clamped_d2 * clamped_d2 - l3 * l3) / (2 * l2 * clamped_d2)
     angle_a = math.acos(max(-1.0, min(1.0, cos_a)))
@@ -99,7 +105,7 @@ def solve_ik_3segment(origin: tuple[float, float], target: tuple[float, float], 
 
 def _draw_highlighted_js_line(draw: ImageDraw.ImageDraw, x: int, y: int, line: str, font: ImageFont.FreeTypeFont) -> None:
     stripped = line.strip()
-    if stripped.startswith("//"):
+    if stripped.startswith(("//", "#")):
         draw.text((x, y), line, font=font, fill=(100, 116, 139))
         return
 
@@ -462,15 +468,7 @@ def get_species_for_id(animal_id: int) -> dict:
 
     code_lines = _generate_js_code_for_animal(name, class_type, scientific)
 
-    hooks = [
-        f"I Built an Interactive {name} with Vanilla JS IK Physics 🤯 #Shorts #Coding",
-        f"Realistic {name} in JavaScript Canvas (60 FPS Simulation) ✨ #Shorts #WebDev",
-        f"How to Code an Interactive {name} Cursor in JavaScript ⚡ #Shorts #Programming",
-        f"Coding an Interactive {name} with Joint Kinematics ✨ #Shorts #Coding",
-        f"I Simulated a Realistic {name} in 100% Pure JavaScript 🤯 #Shorts #Tech",
-        f"Interactive {name} Cursor in Vanilla JS ✨ #Shorts #CreativeCoding"
-    ]
-    yt_title = hooks[animal_id % len(hooks)]
+    yt_title = f"{name} | Procedural Python Animal Animation #Shorts"[:100]
 
     return {
         "id": spec_id,
@@ -484,7 +482,7 @@ def get_species_for_id(animal_id: int) -> dict:
         "animal_id": animal_id,
         "bone_structure": entry.get("bone_structure", {}),
         "yt_title": yt_title,
-        "yt_desc": f"✨ Realistic {name} ({scientific}) with biologically accurate joint kinematics in Vanilla JavaScript!\n\n#JavaScript #WebDev #Shorts #Coding #Tech #Programming #Canvas"
+        "yt_desc": f"Illustrative procedural model of {name} ({scientific}), rendered offline in Python. Not real wildlife footage or a runnable JavaScript tutorial."
     }
 
 class MasterSimulator:
@@ -760,11 +758,49 @@ def pick_animal_theme(species: dict) -> dict:
     else:
         return ANIMAL_THEMES["SAVANNA"]
 
+def fit_text_font(text, max_width, size, **style):
+    """Fit headings by measured pixels, not character counts."""
+    for candidate in range(size, 11, -1):
+        font = get_font(candidate, **style)
+        if font.getlength(text) <= max_width:
+            return font
+    raise ValueError('Heading cannot fit the safe text area')
+
+
+def wrap_measured(text, font, max_width):
+    lines, current = [], ''
+    for word in text.split():
+        if font.getlength(word) > max_width:
+            raise ValueError('Unbreakable caption exceeds safe width')
+        candidate = (current + ' ' + word).strip()
+        if current and font.getlength(candidate) > max_width:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    if len(lines) > 5:
+        raise ValueError('Caption exceeds safe height')
+    return lines
+
+
 _SIM_CACHE = {}
 
 def render_generative_frame(species: dict, frame_idx: int, total_frames: int) -> Image.Image:
-    progress = frame_idx / total_frames
+    from src.animal_3d_renderer import configure_species, render_animal_layer
+    if total_frames < 1 or not 0 <= frame_idx < total_frames:
+        raise ValueError("Frame index must be within a non-empty frame sequence")
+    species = configure_species(species)
+    use_3d = species["resolved_renderer"] == "3d"
+    progress = frame_idx / max(1, total_frames - 1)
     sim_time = (frame_idx / FPS) * 0.4
+    plan = species.get('unique_plan')
+    if plan:
+        from src.animal_scene_variation import motion_state
+        motion_time, composition_x = motion_state(plan, frame_idx / FPS, progress)
+        sim_time = motion_time * 0.4
+        species = {**species, 'motion_time': motion_time, 'composition_x': composition_x}
 
     theme = pick_animal_theme(species)
     img = Image.new("RGBA", (WIDTH, HEIGHT), theme["bg"] + (255,))
@@ -786,10 +822,11 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     by1 = 162
     draw.rounded_rectangle([bx1, by1, bx1 + badge_w, by1 + badge_h], radius=18, fill=theme["card_header"], outline=accent_color, width=2)
     badge_font = get_font(18, bold=True, mono=True)
-    draw.text((WIDTH // 2, by1 + 9), "⚡ 100% VANILLA JS CANVAS • 60 FPS", font=badge_font, fill=accent_color, anchor="mt")
+    badge = "3D ANATOMY / 2D SCENE / 30 FPS" if use_3d else "2D PROCEDURAL ANIMATION / 30 FPS"
+    draw.text((WIDTH // 2, by1 + 9), badge, font=badge_font, fill=accent_color, anchor="mt")
 
     # Animal Name (Prominent, High-Contrast Typography)
-    name_font = get_font(44, bold=True)
+    name_font = fit_text_font(species["name"], 840, 44, bold=True)
     # Subtle drop shadow
     draw.text((WIDTH // 2 + 2, 207), species["name"], font=name_font, fill=(0, 0, 0), anchor="mt")
     draw.text((WIDTH // 2, 205), species["name"], font=name_font, fill=(255, 255, 255), anchor="mt")
@@ -799,10 +836,10 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     cls_tag = species.get("class_type", "quadruped").upper()
     morph_tag = species.get("morphology", "").upper()
     sub_text = f"// {sci_name} • [{cls_tag}]"
-    draw.text((WIDTH // 2, 256), sub_text, font=get_font(20, mono=True), fill=(148, 163, 184), anchor="mt")
+    draw.text((WIDTH // 2, 256), sub_text, font=fit_text_font(sub_text, 820, 20, mono=True), fill=(148, 163, 184), anchor="mt")
 
     # 2. Upper Section: Framed Creature Hologram Display (y=285..885, w=860, h=600)
-    # Leaves 110px margins on left and right, completely clear of YouTube's Like/Comment buttons!
+    # Conservative layout margins; actual YouTube overlays vary by device.
     box_w, box_h = 860, 600
     box_x = (WIDTH - box_w) // 2
     box_y = 285
@@ -823,6 +860,11 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     for gy in range(box_y + 40, box_y + box_h, 40):
         draw.line([(box_x, gy), (box_x + box_w, gy)], fill=grid_col, width=1)
 
+    if plan:
+        from src.animal_scene_variation import draw_habitat
+        img.alpha_composite(draw_habitat(plan, frame_idx / FPS, (box_w, box_h)), (box_x, box_y))
+        draw = ImageDraw.Draw(img)
+
     # Cyber Corner Brackets on Display Viewport
     cw, ch = 24, 24
     draw.line([(box_x, box_y + ch), (box_x, box_y), (box_x + cw, box_y)], fill=accent_color, width=3)
@@ -832,8 +874,8 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
 
     # Viewport HUD Badges
     hud_font = get_font(16, bold=True, mono=True)
-    draw.text((box_x + 18, box_y + 14), "🔴 LIVE CANVAS API", font=hud_font, fill=(239, 68, 68))
-    draw.text((box_x + box_w - 18, box_y + 14), "🧬 IK SOLVER: 60 FPS", font=hud_font, fill=accent_color, anchor="rt")
+    draw.text((box_x + 18, box_y + 14), "3D PROCEDURAL RIG" if use_3d else "2D ANATOMY PREVIEW", font=hud_font, fill=(190, 200, 212))
+    draw.text((box_x + box_w - 18, box_y + 14), "DEPTH + MATERIALS" if use_3d else "IK SOLVER / 30 FPS", font=hud_font, fill=accent_color, anchor="rt")
 
     cb_x = box_x + box_w // 2
     cb_y = box_y + box_h // 2
@@ -843,10 +885,18 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     sp_id = species.get("id", "golden_shepherd_dog")
     animal_id = species.get("animal_id", 0)
     class_type = species.get("class_type", "quadruped")
-    seed = (animal_id * 10007) & 0xFFFFFF
+    seed = species.get('generation_seed', (animal_id * 10007) & 0xFFFFFF)
+    if plan:
+        cb_x += composition_x * box_w
+        if plan['camera_movement'] == 'tracking':
+            rad_x *= .5
+        if plan['size'] == 'compact':
+            rad_y *= .8
 
-    sim_key = f"{sp_id}_{animal_id}_{total_frames}"
+    sim_key = f"{sp_id}_{animal_id}_{total_frames}_{seed}"
     if frame_idx == 0 or sim_key not in _SIM_CACHE:
+        if len(_SIM_CACHE) > 64:
+            _SIM_CACHE.clear()
         _SIM_CACHE[sim_key] = MasterSimulator(cb_x, cb_y, rad_x, rad_y, seed=seed, class_type=class_type)
     
     sim = _SIM_CACHE[sim_key]
@@ -864,36 +914,44 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     tgt_x = sim.cx + math.cos(t_c * sim.f1 + sim.p1) * (rad_x * 0.85) + math.sin(t_c * sim.f2 + sim.p2) * (rad_x * 0.20)
     tgt_y = sim.cy + math.sin(t_c * sim.f3 + sim.p1) * (rad_y * 0.80) + math.cos(t_c * sim.f4 + sim.p2) * (rad_y * 0.18)
 
-    # 1. Fading luminous particle embers trailing behind cursor
-    for pt_i in range(1, 7):
-        past_t = t_c - pt_i * 0.04
-        px = sim.cx + math.cos(past_t * sim.f1 + sim.p1) * (rad_x * 0.85) + math.sin(past_t * sim.f2 + sim.p2) * (rad_x * 0.20)
-        py = sim.cy + math.sin(past_t * sim.f3 + sim.p1) * (rad_y * 0.80) + math.cos(past_t * sim.f4 + sim.p2) * (rad_y * 0.18)
-        alpha_r = max(2, 7 - pt_i)
-        draw.ellipse([px - alpha_r, py - alpha_r, px + alpha_r, py + alpha_r], fill=accent_color)
+    if not use_3d:
+        # 1. Fading luminous particle embers trailing behind cursor
+        for pt_i in range(1, 7):
+            past_t = t_c - pt_i * 0.04
+            px = sim.cx + math.cos(past_t * sim.f1 + sim.p1) * (rad_x * 0.85) + math.sin(past_t * sim.f2 + sim.p2) * (rad_x * 0.20)
+            py = sim.cy + math.sin(past_t * sim.f3 + sim.p1) * (rad_y * 0.80) + math.cos(past_t * sim.f4 + sim.p2) * (rad_y * 0.18)
+            alpha_r = max(2, 7 - pt_i)
+            draw.ellipse([px - alpha_r, py - alpha_r, px + alpha_r, py + alpha_r], fill=accent_color)
 
-    # 2. Dual Crosshair Reticle & Ripple Waves
-    pulse_r = 12 + math.sin(sim_time * 8) * 3
-    draw.ellipse([tgt_x - pulse_r, tgt_y - pulse_r, tgt_x + pulse_r, tgt_y + pulse_r], outline=(239, 68, 68), width=2)
-    # Crosshair ticks
-    draw.line([(tgt_x - pulse_r - 6, tgt_y), (tgt_x - pulse_r + 2, tgt_y)], fill=(239, 68, 68), width=2)
-    draw.line([(tgt_x + pulse_r - 2, tgt_y), (tgt_x + pulse_r + 6, tgt_y)], fill=(239, 68, 68), width=2)
-    draw.line([(tgt_x, tgt_y - pulse_r - 6), (tgt_x, tgt_y - pulse_r + 2)], fill=(239, 68, 68), width=2)
-    draw.line([(tgt_x, tgt_y + pulse_r - 2), (tgt_x, tgt_y + pulse_r + 6)], fill=(239, 68, 68), width=2)
+        # 2. Dual Crosshair Reticle & Ripple Waves
+        pulse_r = 12 + math.sin(sim_time * 8) * 3
+        draw.ellipse([tgt_x - pulse_r, tgt_y - pulse_r, tgt_x + pulse_r, tgt_y + pulse_r], outline=(239, 68, 68), width=2)
+        # Crosshair ticks
+        draw.line([(tgt_x - pulse_r - 6, tgt_y), (tgt_x - pulse_r + 2, tgt_y)], fill=(239, 68, 68), width=2)
+        draw.line([(tgt_x + pulse_r - 2, tgt_y), (tgt_x + pulse_r + 6, tgt_y)], fill=(239, 68, 68), width=2)
+        draw.line([(tgt_x, tgt_y - pulse_r - 6), (tgt_x, tgt_y - pulse_r + 2)], fill=(239, 68, 68), width=2)
+        draw.line([(tgt_x, tgt_y + pulse_r - 2), (tgt_x, tgt_y + pulse_r + 6)], fill=(239, 68, 68), width=2)
 
-    ripple_r = 16 + (frame_idx % 30) * 1.2
-    draw.ellipse([tgt_x - ripple_r, tgt_y - ripple_r, tgt_x + ripple_r, tgt_y + ripple_r], outline=(251, 113, 133), width=1)
-    draw.ellipse([tgt_x - 4, tgt_y - 4, tgt_x + 4, tgt_y + 4], fill=(239, 68, 68))
+        ripple_r = 16 + (frame_idx % 30) * 1.2
+        draw.ellipse([tgt_x - ripple_r, tgt_y - ripple_r, tgt_x + ripple_r, tgt_y + ripple_r], outline=(251, 113, 133), width=1)
+        draw.ellipse([tgt_x - 4, tgt_y - 4, tgt_x + 4, tgt_y + 4], fill=(239, 68, 68))
 
 
 
     # ── Try NEW bio bone renderer first (realistic skeleton + muscle + skin) ──
-    _bio_rendered = False
-    try:
-        from src.bio_bone_renderer import draw_bio_creature
-        _bio_rendered = draw_bio_creature(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
-    except Exception as _bio_err:
-        print(f"  ⚠ Bio renderer error: {_bio_err} — falling back to legacy renderer")
+    _bio_rendered = use_3d
+    if use_3d:
+        # Isolated XYZ renderer; retain the existing 2D grid, frame and code card.
+        layer = render_animal_layer(species, frame_idx / FPS, (box_w - 24, box_h - 72),
+                                    quality=species.get("render_quality", "standard"))
+        img.alpha_composite(layer, (box_x + 12, box_y + 52))
+        draw = ImageDraw.Draw(img)
+    else:
+        try:
+            from src.bio_bone_renderer import draw_bio_creature
+            _bio_rendered = draw_bio_creature(draw, sim, species, sim_time, cos_a, sin_a, perp_x, perp_y)
+        except Exception as _bio_err:
+            raise RuntimeError("Legacy anatomy renderer failed; refusing generic animal substitution") from _bio_err
 
     if not _bio_rendered:
         if (class_type == "quadruped" or "dog" in sp_id or "wolf" in sp_id or "tiger" in sp_id):
@@ -1469,7 +1527,7 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
 
     # ─────────────────────────────────────────────────────────────
     # LOWER SECTION: macOS DARK CODE WINDOW (YOUTUBE SHORTS SAFE ZONE: y=905..1515)
-    # Leaves 110px margins on left and right, completely clear of YouTube action buttons!
+    # Keep important text further inset; UI overlays vary by device.
     # ─────────────────────────────────────────────────────────────
     card_w, card_h = 860, 610
     card_x = (WIDTH - card_w) // 2
@@ -1488,59 +1546,27 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
 
     # File Tag
     draw.rounded_rectangle([card_x + 115, card_y + 12, card_x + 146, card_y + 42], radius=4, fill=(247, 223, 30))
-    draw.text((card_x + 120, card_y + 15), "JS", font=get_font(16, bold=True), fill=(20, 20, 20))
-    draw.text((card_x + 156, card_y + 16), species["file_name"], font=get_font(21, bold=True), fill=(160, 175, 195))
+    draw.text((card_x + 120, card_y + 15), "PY", font=get_font(16, bold=True), fill=(20, 20, 20))
+    draw.text((card_x + 156, card_y + 16), "MODEL BREAKDOWN", font=get_font(21, bold=True), fill=(160, 175, 195))
 
     # Active solver indicator on title bar
-    draw.text((card_x + card_w - 20, card_y + 17), "⚡ Active IK Rig", font=get_font(16, bold=True, mono=True), fill=accent_color, anchor="rt")
+    draw.text((card_x + card_w - 20, card_y + 17), "3D MODEL" if use_3d else "2D MODEL", font=get_font(16, bold=True, mono=True), fill=accent_color, anchor="rt")
 
-    all_lines = species.get("code_lines")
-    if not all_lines:
-        all_lines = _generate_js_code_for_animal(species.get("name", "Creature"), species.get("class_type", "quadruped"), species.get("scientific", ""))
-    total_lines = len(all_lines)
-    
-    line_h = 46
-    code_font = get_font(25, mono=True, bold=True)
-    line_num_font = get_font(21, mono=True)
-    
-    visible_lines = int((card_h - title_h - 24) / line_h)
-    max_scroll_lines = max(0, total_lines - visible_lines)
-    scroll_factor = 0.5 - math.cos(progress * math.pi) / 2
-    curr_scroll = scroll_factor * max_scroll_lines
-
-    start_line_idx = int(curr_scroll)
-    line_pixel_offset = (curr_scroll - start_line_idx) * line_h
-
-    code_box_top = card_y + title_h + 12
-    code_box_bottom = card_y + card_h - 16
-
-    active_idx = min(total_lines - 1, start_line_idx + 2)
-
-    for idx in range(visible_lines + 2):
-        actual_line_idx = start_line_idx + idx
-        if actual_line_idx >= total_lines:
-            break
-        
-        line_text = all_lines[actual_line_idx]
-        y_pos = code_box_top + (idx * line_h) - int(line_pixel_offset)
-
-        if y_pos < code_box_top - 12 or y_pos > code_box_bottom:
-            continue
-
-        # Soft active line background highlight
-        if actual_line_idx == active_idx:
-            draw.rounded_rectangle([card_x + 12, y_pos - 4, card_x + card_w - 12, y_pos + line_h - 6], radius=6, fill=(24, 34, 48))
-
-        draw.text((card_x + 30, y_pos), f"{actual_line_idx + 1:2d}", font=line_num_font, fill=(140, 160, 185) if actual_line_idx == active_idx else (80, 100, 125))
-
-        indent_x = card_x + 85
-        _draw_highlighted_js_line(draw, indent_x, y_pos, line_text, code_font)
-
-        # Blinking cursor on active line
-        if actual_line_idx == active_idx and (frame_idx // 10) % 2 == 0:
-            cursor_x = indent_x + int(len(line_text) * 15.0)
-            if cursor_x < card_x + card_w - 25:
-                draw.rectangle([cursor_x, y_pos + 4, cursor_x + 3, y_pos + 28], fill=accent_color)
+    # Three readable, timed beats replace tiny scrolling pseudo-code. This is a
+    # model explanation, not a certified biological lesson or real footage.
+    stage = 0 if progress < .22 else (1 if progress < .70 else 2)
+    labels = ("LOOK CLOSER", "HOW THIS MODEL WORKS", "THE TAKEAWAY")
+    draw.text((card_x + 35, 990), labels[stage], font=get_font(23, bold=True), fill=accent_color)
+    story_font = get_font(39, bold=True)
+    lines = wrap_measured(species['story_beats'][stage], story_font, 700)
+    for i, line in enumerate(lines):
+        draw.text((card_x + 35, 1040 + i * 54), line, font=story_font, fill=(242, 245, 250))
+    draw.text((card_x + 35, 1320), "ILLUSTRATIVE MODEL / NOT WILDLIFE FOOTAGE",
+              font=get_font(20, bold=True), fill=(155, 173, 196))
+    draw.text((card_x + 35, 1380), "Python + NumPy" if use_3d else "Python + Pillow",
+              font=get_font(29, bold=True), fill=accent_color)
+    draw.text((card_x + 35, 1430), "Geometry > pose > light > frame" if use_3d else "Joints > pose > drawing > frame",
+              font=get_font(24, mono=True), fill=(200, 210, 225))
 
     # 3. Progress Bar (y=1528..1538 — strictly above YouTube bottom overlay y=1560)
     bar_w = 860
@@ -1551,7 +1577,8 @@ def render_generative_frame(species: dict, frame_idx: int, total_frames: int) ->
     draw.rounded_rectangle([bar_x, bar_y, bar_x + fill_w, bar_y + 10], radius=5, fill=accent_color)
 
     # 4. Safe Subtitle Tag (y=1552)
-    draw.text((WIDTH // 2, 1552), "✨ Creative Coding • JavaScript Canvas Engine", font=get_font(18, bold=True), fill=(148, 163, 184), anchor="mt")
+    footer = "Procedural 3D / Python + NumPy / 2D compositing" if use_3d else "Procedural 2D / Python + Pillow"
+    draw.text((WIDTH // 2, 1552), footer, font=get_font(18, bold=True), fill=(148, 163, 184), anchor="mt")
 
     # Bottom area (y=1580..1920) is left completely unobstructed for YouTube's native title & channel overlay!
     return img.convert("RGB")

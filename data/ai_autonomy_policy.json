@@ -1,0 +1,11 @@
+{
+  "mode": "autonomous_continuation",
+  "ask_user_for_routine_continuation": false,
+  "missing_preview_ledger": "create_new_isolated_ledger",
+  "new_preview_ledger": "tmp/continuation-auto-preview",
+  "never_modify_production_state_during_preview": true,
+  "never_upload_during_preview": true,
+  "never_use_credentials_during_preview": true,
+  "never_use_external_generation_api_during_preview": true,
+  "handoff_update_required_after_each_meaningful_step": true
+}

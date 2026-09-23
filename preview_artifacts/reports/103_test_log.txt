@@ -1,0 +1,187 @@
+test_decode_failure_fails_gate_even_with_good_sampled_frames (test_animal_pipeline.AuditTests.test_decode_failure_fails_gate_even_with_good_sampled_frames) ... ok
+test_garbage_is_not_an_encoded_video (test_animal_pipeline.AuditTests.test_garbage_is_not_an_encoded_video) ... ok
+test_invalid_audit_arguments (test_animal_pipeline.AuditTests.test_invalid_audit_arguments) ... ok
+test_all_687_catalog_rigs_have_finite_positive_geometry (test_animal_pipeline.GenericRendererTests.test_all_687_catalog_rigs_have_finite_positive_geometry) ... ok
+test_arthropod_limb_counts_and_claws (test_animal_pipeline.GenericRendererTests.test_arthropod_limb_counts_and_claws) ... ok
+test_cephalopods_have_arms_not_quadruped_feet (test_animal_pipeline.GenericRendererTests.test_cephalopods_have_arms_not_quadruped_feet) ... ok
+test_dedicated_name_not_morphology_controls_rig_dispatch (test_animal_pipeline.GenericRendererTests.test_dedicated_name_not_morphology_controls_rig_dispatch) ... ok
+test_each_morphology_renders_visible_rgba (test_animal_pipeline.GenericRendererTests.test_each_morphology_renders_visible_rgba) ... ok
+test_elephant_and_rhino_distinctive_anatomy (test_animal_pipeline.GenericRendererTests.test_elephant_and_rhino_distinctive_anatomy) ... ok
+test_every_morphology_animates_geometry_not_just_camera (test_animal_pipeline.GenericRendererTests.test_every_morphology_animates_geometry_not_just_camera) ... ok
+test_jellyfish_has_bell_tentacles_and_no_fish_parts (test_animal_pipeline.GenericRendererTests.test_jellyfish_has_bell_tentacles_and_no_fish_parts) ... ok
+test_marine_mammal_has_horizontal_flukes (test_animal_pipeline.GenericRendererTests.test_marine_mammal_has_horizontal_flukes) ... ok
+test_metadata_proportions_are_used_deterministically (test_animal_pipeline.GenericRendererTests.test_metadata_proportions_are_used_deterministically) ... ok
+test_nonfinite_motion_timestamp_fails_before_geometry (test_animal_pipeline.GenericRendererTests.test_nonfinite_motion_timestamp_fails_before_geometry) ... ok
+test_unknown_morphology_does_not_hide_behind_class (test_animal_pipeline.GenericRendererTests.test_unknown_morphology_does_not_hide_behind_class) ... ok
+test_checkpoint_persists_intent_in_real_remote (test_animal_pipeline.GitCheckpointTests.test_checkpoint_persists_intent_in_real_remote) ... ok
+test_checkpoint_rebases_unrelated_remote_changes (test_animal_pipeline.GitCheckpointTests.test_checkpoint_rebases_unrelated_remote_changes) ... ok
+test_rejected_push_raises_and_keeps_local_intent (test_animal_pipeline.GitCheckpointTests.test_rejected_push_raises_and_keeps_local_intent) ... ok
+test_unrelated_staged_file_prevents_checkpoint (test_animal_pipeline.GitCheckpointTests.test_unrelated_staged_file_prevents_checkpoint) ... ok
+test_aquatic_catalog_cannot_be_redirected_by_name_fragments (test_animal_pipeline.HabitatProfileTests.test_aquatic_catalog_cannot_be_redirected_by_name_fragments) ... ok
+test_seahorse_cowfish_and_lionfish_keep_aquatic_habitats (test_animal_pipeline.HabitatProfileTests.test_seahorse_cowfish_and_lionfish_keep_aquatic_habitats) ... ok
+test_seahorse_plan_has_underwater_weather_without_rewriting_history (test_animal_pipeline.HabitatProfileTests.test_seahorse_plan_has_underwater_weather_without_rewriting_history) ... ok
+test_terrestrial_word_overrides_do_not_match_other_classes (test_animal_pipeline.HabitatProfileTests.test_terrestrial_word_overrides_do_not_match_other_classes) ... ok
+test_audio_seed_is_deterministic_and_short_audio_safe (test_animal_pipeline.PipelineTests.test_audio_seed_is_deterministic_and_short_audio_safe) ... ok
+test_audit_failure_never_uploads (test_animal_pipeline.PipelineTests.test_audit_failure_never_uploads) ... ok
+test_base_variant_upload_is_rejected (test_animal_pipeline.PipelineTests.test_base_variant_upload_is_rejected) ... ok
+test_blank_upload_id_is_unconfirmed (test_animal_pipeline.PipelineTests.test_blank_upload_id_is_unconfirmed) ... ok
+test_cli_reports_unconfirmed_upload_as_failure (test_animal_pipeline.PipelineTests.test_cli_reports_unconfirmed_upload_as_failure) ... ok
+test_corrupt_history_blocks_duplicate_guard_and_visual_guard (test_animal_pipeline.PipelineTests.test_corrupt_history_blocks_duplicate_guard_and_visual_guard) ... ok
+test_corrupt_recent_frame_fails_closed (test_animal_pipeline.PipelineTests.test_corrupt_recent_frame_fails_closed) ... ok
+test_corrupt_registry_blocks_upload_before_render (test_animal_pipeline.PipelineTests.test_corrupt_registry_blocks_upload_before_render) ... ok
+test_dry_run_never_uploads_or_changes_state (test_animal_pipeline.PipelineTests.test_dry_run_never_uploads_or_changes_state) ... ok
+test_duration_rejected_before_any_render (test_animal_pipeline.PipelineTests.test_duration_rejected_before_any_render) ... ok
+test_exhausted_selection_has_no_unsafe_fallback (test_animal_pipeline.PipelineTests.test_exhausted_selection_has_no_unsafe_fallback) ... ok
+test_ffmpeg_failure_does_not_upload_or_change_state (test_animal_pipeline.PipelineTests.test_ffmpeg_failure_does_not_upload_or_change_state) ... ok
+test_forced_used_species_upload_is_rejected (test_animal_pipeline.PipelineTests.test_forced_used_species_upload_is_rejected) ... ok
+test_invalid_hash_not_accepted_as_novel (test_animal_pipeline.PipelineTests.test_invalid_hash_not_accepted_as_novel) ... ok
+test_invalid_history_structure_is_rejected (test_animal_pipeline.PipelineTests.test_invalid_history_structure_is_rejected) ... ok
+test_invalid_progress_is_rejected (test_animal_pipeline.PipelineTests.test_invalid_progress_is_rejected) ... ok
+test_invalid_registry_structure_blocks_mark_used (test_animal_pipeline.PipelineTests.test_invalid_registry_structure_blocks_mark_used) ... ok
+test_invalid_species_index (test_animal_pipeline.PipelineTests.test_invalid_species_index) ... ok
+test_legacy_full_frame_hash_not_compared (test_animal_pipeline.PipelineTests.test_legacy_full_frame_hash_not_compared) ... ok
+test_matching_recent_frame_rejected (test_animal_pipeline.PipelineTests.test_matching_recent_frame_rejected) ... ok
+test_matching_scoped_hash_rejected (test_animal_pipeline.PipelineTests.test_matching_scoped_hash_rejected) ... ok
+test_missing_credentials_stops_before_reserving_or_rendering (test_animal_pipeline.PipelineTests.test_missing_credentials_stops_before_reserving_or_rendering) ... ok
+test_new_reservation_does_not_reuse_or_delete_old_frames (test_animal_pipeline.PipelineTests.test_new_reservation_does_not_reuse_or_delete_old_frames) ... ok
+test_preupload_checkpoint_failure_prevents_upload (test_animal_pipeline.PipelineTests.test_preupload_checkpoint_failure_prevents_upload) ... ok
+test_preview_cannot_point_at_production_or_ancestor (test_animal_pipeline.PipelineTests.test_preview_cannot_point_at_production_or_ancestor) ... ok
+test_preview_never_researches_even_without_no_research_flag (test_animal_pipeline.PipelineTests.test_preview_never_researches_even_without_no_research_flag) ... ok
+test_production_cannot_use_preview_ledger (test_animal_pipeline.PipelineTests.test_production_cannot_use_preview_ledger) ... ok
+test_registry_contributes_to_base_noun_guard (test_animal_pipeline.PipelineTests.test_registry_contributes_to_base_noun_guard) ... ok
+test_registry_normalizes_existing_names (test_animal_pipeline.PipelineTests.test_registry_normalizes_existing_names) ... ok
+test_render_verification_error_fails_closed (test_animal_pipeline.PipelineTests.test_render_verification_error_fails_closed) ... ok
+test_success_records_used_and_viewport_hash (test_animal_pipeline.PipelineTests.test_success_records_used_and_viewport_hash) ... ok
+test_unconfirmed_upload_keeps_legacy_state_and_blocks_retry (test_animal_pipeline.PipelineTests.test_unconfirmed_upload_keeps_legacy_state_and_blocks_retry) ... ok
+test_unreadable_json_is_not_an_empty_first_run (test_animal_pipeline.PipelineTests.test_unreadable_json_is_not_an_empty_first_run) ... ok
+test_video_changed_during_checkpoint_never_uploads (test_animal_pipeline.PipelineTests.test_video_changed_during_checkpoint_never_uploads) ... ok
+test_wrong_width_hashes_fail_closed (test_animal_pipeline.PipelineTests.test_wrong_width_hashes_fail_closed) ... ok
+test_auto_3d_and_truthful_labels (test_animal_pipeline.RendererTests.test_auto_3d_and_truthful_labels) ... ok
+test_camera_rotation_changes_depth_view (test_animal_pipeline.RendererTests.test_camera_rotation_changes_depth_view) ... ok
+test_compositor_dimensions (test_animal_pipeline.RendererTests.test_compositor_dimensions) ... ok
+test_deterministic_out_of_order_sampling (test_animal_pipeline.RendererTests.test_deterministic_out_of_order_sampling) ... ok
+test_explicit_2d_retained (test_animal_pipeline.RendererTests.test_explicit_2d_retained) ... ok
+test_invalid_frame_and_quality (test_animal_pipeline.RendererTests.test_invalid_frame_and_quality) ... ok
+test_invalid_ik_lengths (test_animal_pipeline.RendererTests.test_invalid_ik_lengths) ... ok
+test_rigs_animate (test_animal_pipeline.RendererTests.test_rigs_animate) ... ok
+test_supported_rigs_are_nonempty_rgba (test_animal_pipeline.RendererTests.test_supported_rigs_are_nonempty_rgba) ... ok
+test_truthful_metadata_in_both_modes (test_animal_pipeline.RendererTests.test_truthful_metadata_in_both_modes) ... ok
+test_unsupported_3d_refuses_generic_substitution (test_animal_pipeline.RendererTests.test_unsupported_3d_refuses_generic_substitution) ... ok
+test_zero_distance_ik_is_finite (test_animal_pipeline.RendererTests.test_zero_distance_ik_is_finite) ... ok
+test_checksum_corruption_blocks (test_animal_pipeline.UniquenessTests.test_checksum_corruption_blocks) ... ok
+test_ci_checkpoint_requires_explicit_durable_push (test_animal_pipeline.UniquenessTests.test_ci_checkpoint_requires_explicit_durable_push) ... ok
+test_completion_requires_true_validation_and_three_hashes (test_animal_pipeline.UniquenessTests.test_completion_requires_true_validation_and_three_hashes) ... ok
+test_concurrent_same_plan_only_one_reservation (test_animal_pipeline.UniquenessTests.test_concurrent_same_plan_only_one_reservation) ... ok
+test_cosmetic_species_swap_is_not_new_scene (test_animal_pipeline.UniquenessTests.test_cosmetic_species_swap_is_not_new_scene) ... ok
+test_empty_store_does_not_initialize_fake_history (test_animal_pipeline.UniquenessTests.test_empty_store_does_not_initialize_fake_history) ... ok
+test_identical_output_hash_rejected_for_different_plan (test_animal_pipeline.UniquenessTests.test_identical_output_hash_rejected_for_different_plan) ... ok
+test_invalid_planner_configuration_is_rejected (test_animal_pipeline.UniquenessTests.test_invalid_planner_configuration_is_rejected) ... ok
+test_missing_initialized_journal_blocks (test_animal_pipeline.UniquenessTests.test_missing_initialized_journal_blocks) ... ok
+test_partial_append_blocks_instead_of_truncating (test_animal_pipeline.UniquenessTests.test_partial_append_blocks_instead_of_truncating) ... ok
+test_plan_really_changes_renderer_pixels (test_animal_pipeline.UniquenessTests.test_plan_really_changes_renderer_pixels) ... ok
+test_planner_exhaustion_never_forces_candidate (test_animal_pipeline.UniquenessTests.test_planner_exhaustion_never_forces_candidate) ... ok
+test_planner_simulation_has_unique_fingerprints_and_species_rotation (test_animal_pipeline.UniquenessTests.test_planner_simulation_has_unique_fingerprints_and_species_rotation) ... ok
+test_rollback_behind_head_blocks (test_animal_pipeline.UniquenessTests.test_rollback_behind_head_blocks) ... ok
+test_same_species_action_scene_cannot_be_disguised (test_animal_pipeline.UniquenessTests.test_same_species_action_scene_cannot_be_disguised) ... ok
+test_scalar_event_and_head_fail_closed (test_animal_pipeline.UniquenessTests.test_scalar_event_and_head_fail_closed) ... ok
+test_seed_and_aliases_do_not_hide_same_content (test_animal_pipeline.UniquenessTests.test_seed_and_aliases_do_not_hide_same_content) ... ok
+test_seed_cannot_be_reused_for_different_species (test_animal_pipeline.UniquenessTests.test_seed_cannot_be_reused_for_different_species) ... ok
+test_similar_decoded_sequence_rejected (test_animal_pipeline.UniquenessTests.test_similar_decoded_sequence_rejected) ... ok
+test_snapshot_is_rebuilt_from_journal (test_animal_pipeline.UniquenessTests.test_snapshot_is_rebuilt_from_journal) ... ok
+test_successful_lifecycle_survives_restart (test_animal_pipeline.UniquenessTests.test_successful_lifecycle_survives_restart) ... ok
+test_transition_cannot_rewrite_validated_output (test_animal_pipeline.UniquenessTests.test_transition_cannot_rewrite_validated_output) ... ok
+test_unknown_and_terminal_transitions_fail (test_animal_pipeline.UniquenessTests.test_unknown_and_terminal_transitions_fail) ... ok
+test_valid_append_before_snapshot_crash_recovers (test_animal_pipeline.UniquenessTests.test_valid_append_before_snapshot_crash_recovers) ... ok
+test_valid_checksum_does_not_bypass_replay_schema (test_animal_pipeline.UniquenessTests.test_valid_checksum_does_not_bypass_replay_schema) ... ok
+test_validator_error_is_not_success (test_animal_pipeline.UniquenessTests.test_validator_error_is_not_success) ... ok
+test_all_workflow_shell_blocks_parse (test_animal_pipeline.WorkflowTests.test_all_workflow_shell_blocks_parse) ... ok
+test_animal_durable_checkpoint_configuration (test_animal_pipeline.WorkflowTests.test_animal_durable_checkpoint_configuration) ... ok
+test_both_workflows_run_regressions_before_generation (test_animal_pipeline.WorkflowTests.test_both_workflows_run_regressions_before_generation) ... ok
+test_checkout_main_and_rebase_before_every_push (test_animal_pipeline.WorkflowTests.test_checkout_main_and_rebase_before_every_push) ... ok
+test_manual_previews_are_default_and_publishing_is_opt_in (test_animal_pipeline.WorkflowTests.test_manual_previews_are_default_and_publishing_is_opt_in) ... ok
+test_preview_credentials_are_not_injected (test_animal_pipeline.WorkflowTests.test_preview_credentials_are_not_injected) ... ok
+test_user_input_is_literal_and_preview_flags_are_present (test_animal_pipeline.WorkflowTests.test_user_input_is_literal_and_preview_flags_are_present) ... ok
+
+----------------------------------------------------------------------
+Ran 103 tests in 11.028s
+
+OK
+Unique plan f307ba2f0ab2: TIGER / walk / forest
+
+🎬 Rendering 3 Full HD (1080×1920) frames @ 30 FPS...
+   Frame 0/3 rendered...
+🔊 Synthesizing ASMR mechanical typing clicks & cursor SFX...
+📦 Encoding Full HD 1080×1920 video with FFmpeg...
+✅ Video created: /tmp/tmpwg0j41yv/tmp/reel_0001_b445f200a341cb4af32dd7bd09563ec9/tiger_short.mp4
+Unique plan f307ba2f0ab2: TIGER / walk / forest
+
+🎬 Rendering 3 Full HD (1080×1920) frames @ 30 FPS...
+   Frame 0/3 rendered...
+🔊 Synthesizing ASMR mechanical typing clicks & cursor SFX...
+📦 Encoding Full HD 1080×1920 video with FFmpeg...
+✅ Video created: /tmp/tmpw4uwrhs6/tmp/reel_0001_7b8c97be4091536183ba5435c75775eb/tiger_short.mp4
+  ⚠ Visual buffer verification check error: Cannot read state animal_history.json; restore a valid backup before retrying
+  ⚠ Visual buffer verification check error: Unreadable reference frame: /tmp/tmppmp_r4mk/data/recent_frames/recent_0.jpg
+Unique plan f307ba2f0ab2: TIGER / walk / forest
+
+🎬 Rendering 3 Full HD (1080×1920) frames @ 30 FPS...
+   Frame 0/3 rendered...
+🔊 Synthesizing ASMR mechanical typing clicks & cursor SFX...
+📦 Encoding Full HD 1080×1920 video with FFmpeg...
+✅ Video created: /tmp/tmpdxw3j_3t/tmp/reel_0001_eb9ae50a8970b6c59144122f72af0887/tiger_short.mp4
+
+📁 Done! Animal: TIGER | Used: False
+Unique plan f307ba2f0ab2: TIGER / walk / forest
+
+🎬 Rendering 3 Full HD (1080×1920) frames @ 30 FPS...
+   Frame 0/3 rendered...
+🔊 Synthesizing ASMR mechanical typing clicks & cursor SFX...
+📦 Encoding Full HD 1080×1920 video with FFmpeg...
+Unique plan f307ba2f0ab2: TIGER / walk / forest
+
+🎬 Rendering 3 Full HD (1080×1920) frames @ 30 FPS...
+   Frame 0/3 rendered...
+🔊 Synthesizing ASMR mechanical typing clicks & cursor SFX...
+📦 Encoding Full HD 1080×1920 video with FFmpeg...
+✅ Video created: /tmp/tmpic3ru0e3/tmp/reel_0001_2038c38801d810d64380024ed6c4d3ad/tiger_short.mp4
+
+📁 Done! Animal: TIGER | Used: False
+Unique plan f307ba2f0ab2: TIGER / walk / forest
+
+🎬 Rendering 3 Full HD (1080×1920) frames @ 30 FPS...
+   Frame 0/3 rendered...
+🔊 Synthesizing ASMR mechanical typing clicks & cursor SFX...
+📦 Encoding Full HD 1080×1920 video with FFmpeg...
+✅ Video created: /tmp/tmpdglbaqmi/tmp/reel_0001_038107892eee423c85114600f834e097/tiger_short.mp4
+Unique plan f307ba2f0ab2: TIGER / walk / forest
+
+🎬 Rendering 1 Full HD (1080×1920) frames @ 30 FPS...
+   Frame 0/1 rendered...
+🔊 Synthesizing ASMR mechanical typing clicks & cursor SFX...
+📦 Encoding Full HD 1080×1920 video with FFmpeg...
+  ⚠ Visual buffer verification check error: render error
+Unique plan f307ba2f0ab2: TIGER / walk / forest
+
+🎬 Rendering 3 Full HD (1080×1920) frames @ 30 FPS...
+   Frame 0/3 rendered...
+🔊 Synthesizing ASMR mechanical typing clicks & cursor SFX...
+📦 Encoding Full HD 1080×1920 video with FFmpeg...
+✅ Video created: /tmp/tmpdlbsrdx6/tmp/reel_0001_ce6bd15188b220d1ad7d09bd2d7daf59/tiger_short.mp4
+  ✅ Marked as used (no-repeat): TIGER
+📸 Rolling frame buffer updated: recent_0.jpg saved, oldest dropped (Last 5 frames active)
+
+🚀 Done! Animal: TIGER | Used: True
+Unique plan f307ba2f0ab2: TIGER / walk / forest
+
+🎬 Rendering 3 Full HD (1080×1920) frames @ 30 FPS...
+   Frame 0/3 rendered...
+🔊 Synthesizing ASMR mechanical typing clicks & cursor SFX...
+📦 Encoding Full HD 1080×1920 video with FFmpeg...
+✅ Video created: /tmp/tmp20552n5d/tmp/reel_0001_03fcf1db9a4395fc4479dfcb993cb5dc/tiger_short.mp4
+Unique plan f307ba2f0ab2: TIGER / walk / forest
+
+🎬 Rendering 3 Full HD (1080×1920) frames @ 30 FPS...
+   Frame 0/3 rendered...
+🔊 Synthesizing ASMR mechanical typing clicks & cursor SFX...
+📦 Encoding Full HD 1080×1920 video with FFmpeg...
+✅ Video created: /tmp/tmpj4pz3rht/tmp/reel_0001_63af20009d75a6dbb2c9393b23558e54/tiger_short.mp4

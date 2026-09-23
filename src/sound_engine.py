@@ -20,8 +20,8 @@ SAMPLE_RATE = 44100
 def _sin(freq: float, t: float) -> float:
     return math.sin(2 * math.pi * freq * t)
 
-def _noise() -> float:
-    return random.uniform(-1.0, 1.0)
+def _noise(rng: random.Random) -> float:
+    return rng.uniform(-1.0, 1.0)
 
 def _clip(s: float) -> float:
     return math.tanh(s)
@@ -39,21 +39,23 @@ def _gen_startup_chime() -> list[float]:
         out.append(sample * 0.5)
     return out
 
-def _gen_key_click(duration: float = 0.045) -> list[float]:
+def _gen_key_click(duration: float = 0.045, rng: random.Random | None = None) -> list[float]:
     """Crisp two-stage mechanical switch click (Cherry MX Blue style)."""
     n = int(SAMPLE_RATE * duration)
     out = []
-    freq1 = random.uniform(2800, 3600)
-    freq2 = random.uniform(1400, 1800)
+    rng = rng or random.Random()
+    freq1 = rng.uniform(2800, 3600)
+    freq2 = rng.uniform(1400, 1800)
     for i in range(n):
         t = i / SAMPLE_RATE
         decay1 = math.exp(-i / (SAMPLE_RATE * 0.005))
         decay2 = math.exp(-max(0, i - int(SAMPLE_RATE * 0.015)) / (SAMPLE_RATE * 0.008))
-        sample = (_sin(freq1, t) * 0.5 + _noise() * 0.5) * decay1 + (_sin(freq2, t) * 0.3 + _noise() * 0.4) * decay2
+        sample = (_sin(freq1, t) * 0.5 + _noise(rng) * 0.5) * decay1 + (_sin(freq2, t) * 0.3 + _noise(rng) * 0.4) * decay2
         out.append(sample * 0.40)
     return out
 
-def _gen_whoosh(duration: float = 0.5) -> list[float]:
+def _gen_whoosh(duration: float = 0.5, rng: random.Random | None = None) -> list[float]:
+    rng = rng or random.Random()
     n = int(SAMPLE_RATE * duration)
     out = []
     for i in range(n):
@@ -61,7 +63,7 @@ def _gen_whoosh(duration: float = 0.5) -> list[float]:
         progress = i / n
         env = math.sin(progress * math.pi) ** 2
         freq = 200 + math.sin(progress * math.pi) * 450
-        sample = (_sin(freq, t) * 0.35 + _noise() * 0.65) * env * 0.38
+        sample = (_sin(freq, t) * 0.35 + _noise(rng) * 0.65) * env * 0.38
         out.append(sample)
     return out
 
@@ -78,6 +80,8 @@ def _gen_ambient_drone(duration: float) -> list[float]:
     return out
 
 def generate_reel_audio(output_wav: Path, duration: float = 25.0, typing_events: int = 24, seed: int = 0) -> Path:
+    if not math.isfinite(duration) or duration <= 0:
+        raise ValueError("Audio duration must be positive and finite")
     rng = random.Random(seed)
     total_samples = int(SAMPLE_RATE * duration)
     master = _gen_ambient_drone(duration)
@@ -89,7 +93,7 @@ def generate_reel_audio(output_wav: Path, duration: float = 25.0, typing_events:
         if chime_idx + j < len(master):
             master[chime_idx + j] = _clip(master[chime_idx + j] + s * 0.55)
 
-    whoosh = _gen_whoosh(0.50)
+    whoosh = _gen_whoosh(0.50, rng)
 
     # Periodic whooshes when cursor turns
     whoosh_interval = 4.0
@@ -103,13 +107,13 @@ def generate_reel_audio(output_wav: Path, duration: float = 25.0, typing_events:
 
     # Periodic mechanical typing clicks during code window scrolling
     t_start = 0.8
-    t_step = (duration - 2.0) / max(1, typing_events)
+    t_step = max(0.0, duration - 2.0) / max(1, typing_events)
     for k in range(typing_events):
         k_time = t_start + k * t_step + rng.uniform(-0.03, 0.03)
         k_idx = int(k_time * SAMPLE_RATE)
-        click = _gen_key_click(0.045)
+        click = _gen_key_click(0.045, rng)
         for j, s in enumerate(click):
-            if k_idx + j < len(master):
+            if 0 <= k_idx + j < len(master):
                 master[k_idx + j] = _clip(master[k_idx + j] + s * 0.32)
 
     # Save to 16-bit PCM WAV

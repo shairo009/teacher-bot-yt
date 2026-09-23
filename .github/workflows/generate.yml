@@ -7,14 +7,37 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Create the video artifact without advancing the animal rotation"
+        description: "Safe preview: no YouTube upload, credentials or upload-state changes"
         required: false
-        default: false
+        default: true
         type: boolean
       animal_id:
-        description: "Optional animal index (0 = Tiger, 1 = Red Panda, …)"
+        description: "Catalog ID 0-686; examples: 42 Eagle, 306 Seahorse, 339 Jellyfish. History bans still apply."
         required: false
         default: ""
+        type: string
+      renderer:
+        description: "auto uses dedicated or catalog morphology 3D; 3d requires supported metadata"
+        required: false
+        default: auto
+        type: choice
+        options:
+          - auto
+          - 3d
+          - 2d
+      quality:
+        description: "Internal 3D quality; output stays 1080x1920 at 30 FPS"
+        required: false
+        default: standard
+        type: choice
+        options:
+          - draft
+          - standard
+          - high
+      duration:
+        description: "Duration in seconds (greater than 0, maximum 180); try 3 for preview"
+        required: false
+        default: "25"
         type: string
 
 concurrency:
@@ -26,12 +49,23 @@ permissions:
 
 jobs:
   generate-animal-short:
+    # Publishing is opt-in; previews require no credentials or repository variable.
+    if: ${{ inputs.dry_run || vars.ENABLE_ANIMAL_PUBLISH == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure durable history commits
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -46,37 +80,57 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Generate and upload animal Short
+      - name: Offline regression tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Generate and optionally upload animal Short
         env:
-          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
           ANIMAL_ID: ${{ inputs.animal_id || '' }}
-          TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
-          CLIENT_SECRETS_JSON: ${{ secrets.CLIENT_SECRETS_JSON }}
+          RENDERER: ${{ inputs.renderer || 'auto' }}
+          QUALITY: ${{ inputs.quality || 'standard' }}
+          DURATION: ${{ inputs.duration || '25' }}
+          OPENBLAS_NUM_THREADS: "1"
+          UNIQUE_HISTORY_GIT: "1"
+          TOKEN_JSON: ${{ !inputs.dry_run && secrets.TOKEN_JSON || '' }}
+          CLIENT_SECRETS_JSON: ${{ !inputs.dry_run && secrets.CLIENT_SECRETS_JSON || '' }}
         run: |
-          command=(python src/animal_short_generator.py)
-          if [ "$DRY_RUN" = "true" ]; then command+=(--dry-run); fi
+          command=(python src/animal_short_generator.py --renderer "$RENDERER" --quality "$QUALITY" --duration "$DURATION")
+          if [ "$DRY_RUN" = "true" ]; then command+=(--dry-run --no-research); fi
           if [ -n "$ANIMAL_ID" ]; then command+=(--animal-id "$ANIMAL_ID"); fi
           printf 'Running:'
           printf ' %q' "${command[@]}"
           echo
           "${command[@]}"
 
-      - name: Upload video artifact
+      - name: Upload video and audit artifacts
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: cyber-reel-${{ github.run_number }}
-          path: tmp/*/*.mp4
-          retention-days: 2
-          if-no-files-found: error
+          name: animal-reel-${{ github.run_number }}
+          path: |
+            tmp/reel_*/*.mp4
+            tmp/reel_*/generation_manifest.json
+            tmp/reel_*/quality_report.json
+            tmp/unique-preview-history/*.json
+            tmp/unique-preview-history/*.jsonl
+            tmp/unique-preview-history/*.initialized
+            data/unique_animal_history.json
+            data/unique_animal_history.jsonl
+            data/unique_animal_history.initialized
+          retention-days: 7
+          if-no-files-found: warn
 
-      - name: Save animal rotation
-        if: inputs.dry_run != 'true'
+      - name: Save durable history and confirmed upload state
+        if: ${{ always() && !inputs.dry_run }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/animal_progress.json data/animal_history.json data/used_animals.json data/last_uploaded_frame.jpg data/recent_frames/
-          git diff --cached --quiet && exit 0
-          next=$(python -c "import json; print(json.load(open('data/animal_progress.json'))['current_id'])")
-          git commit -m "Animal Short #${next} complete [skip ci]"
+          for path in data/animal_progress.json data/animal_history.json data/used_animals.json data/last_uploaded_frame.jpg data/recent_frames/ data/unique_animal_history.json data/unique_animal_history.jsonl data/unique_animal_history.initialized; do
+            if [ -e "$path" ]; then git add -- "$path"; fi
+          done
+          if ! git diff --cached --quiet; then
+            git commit -m "Persist animal generation state [skip ci]"
+          fi
           git pull --rebase origin main
           git push origin HEAD:main

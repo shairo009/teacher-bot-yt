@@ -35,9 +35,14 @@ def _load_used() -> set[str]:
     """Return set of animal IDs that have already been uploaded."""
     try:
         data = json.loads(USED_FILE.read_text(encoding="utf-8"))
-        return set(data.get("used", []))
-    except (OSError, json.JSONDecodeError):
+    except FileNotFoundError:
         return set()
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise RuntimeError("Cannot read used_animals.json; restore a valid backup before retrying") from exc
+    if (not isinstance(data, dict) or not isinstance(data.get("used"), list)
+            or any(not isinstance(name, str) or not name.strip() for name in data["used"])):
+        raise RuntimeError("Invalid used_animals.json structure; restore a valid backup before retrying")
+    return {_normalise_id(name) for name in data["used"]}
 
 
 def _save_used(used: set[str]) -> None:

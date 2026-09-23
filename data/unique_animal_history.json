@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "head": "7d4083faff3847e541dcf0324ed8c1cd7713ccd99ab9e6a6aa562d6f396c9f3f",
-  "sequence": 3,
+  "head": "f382228fb23b1c3defb18cad5a6d93be523df8f30f1492227e7d38f4bda372e4",
+  "sequence": 4,
   "species_usage": {
     "AMERICAN KESTREL": 1
   },
@@ -33,14 +33,15 @@
         "subspecies": "unspecified",
         "weather": "clear"
       },
-      "status": "publishing",
-      "updated_at": "2026-09-23T04:30:10.690853+00:00",
+      "status": "published",
+      "updated_at": "2026-09-23T04:30:15.463569+00:00",
       "validated": true,
       "visual_hashes": [
         "64d493a2d4d49414",
         "66d49382d4d41114",
         "66d493a2d4d41114"
-      ]
+      ],
+      "video_id": "5u3dUUgPyX0"
     }
   ]
 }

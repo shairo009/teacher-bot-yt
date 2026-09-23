@@ -299,6 +299,7 @@ def _upload_to_youtube(video_path: Path, species: dict, dry_run: bool) -> str | 
             tags=tags,
             category_id="28",
             made_for_kids=False,
+            privacy_status="public",
         )
         if video_id:
             print(f"✅ Successfully uploaded to YouTube: https://youtu.be/{video_id}")

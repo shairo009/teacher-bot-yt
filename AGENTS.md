@@ -21,3 +21,7 @@
 
 ## 4. Git & Workflow Push Reliability
 - In `.github/workflows/generate.yml`, ensure `git pull --rebase origin main` is always executed prior to `git push origin HEAD:main` to prevent push rejection conflicts.
+
+## 5. AI Handover & Session Continuity
+- For full instructions on resuming an interrupted session, quality improvement guidelines, and 2D procedural architecture rules, read `AI_HANDOFF.md`.
+- All uploads must remain **PUBLIC**. Never introduce 3D renderers.

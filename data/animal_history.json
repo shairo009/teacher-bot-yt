@@ -2463,5 +2463,28 @@
     "dry_run": false,
     "video_id": "2y6NRKBM3vE",
     "youtube_url": "https://youtu.be/2y6NRKBM3vE"
+  },
+  {
+    "dhash": "c1ca2521910180d0",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.4,
+    "id": 417,
+    "species": "EASTERN YELLOWJACKET",
+    "scientific": "Vespula maculifrons",
+    "class_type": "insect",
+    "morphology": "bee_wasp",
+    "accent": [
+      230,
+      200,
+      30
+    ],
+    "anatomy_notes": "The eastern yellowjacket is a wasp found in eastern North America. Although most of their nests are subterranean, they are often considered a pest due to their nesting in recreational areas and buildi",
+    "file": "tmp/reel_0417/eastern_yellowjacket_short.mp4",
+    "timestamp": "2026-09-25T04:44:52.879109+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "M2w0_Kh9nms",
+    "youtube_url": "https://youtu.be/M2w0_Kh9nms"
   }
 ]

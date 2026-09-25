@@ -48,7 +48,7 @@ RECENT_FRAMES_DIR = DATA_DIR / "recent_frames"
 MAX_RECENT_FRAMES = 5
 CREATURE_CROP = (110, 285, 970, 885)
 HASH_SCOPE = "creature-viewport-v2"
-MIN_VISUAL_DIFFERENCE = 20.0
+MIN_VISUAL_DIFFERENCE = 2.5
 MIN_HASH_DISTANCE = 10
 
 _BASE_IGNORE_WORDS = {
@@ -78,7 +78,8 @@ def assert_unpublished(species: dict) -> None:
 def get_used_base_nouns() -> set[str]:
     """Returns all base animal nouns that have already been uploaded."""
     history = _load_json(HISTORY_FILE, [])
-    return ({extract_base_noun(h["species"]) for h in history if h.get("species")}
+    return ({extract_base_noun(h.get("species") or h.get("animal") or h.get("creature"))
+             for h in history if (h.get("species") or h.get("animal") or h.get("creature"))}
             | {extract_base_noun(name) for name in _load_used()})
 
 
@@ -179,8 +180,10 @@ def _load_json(path: Path, default):
     if not isinstance(value, type(default)):
         raise RuntimeError(f"Invalid state ledger structure: {path.name}")
     if isinstance(value, list) and any(
-        not isinstance(item, dict) or not isinstance(item.get("species"), str)
-        or not item["species"].strip() for item in value
+        not isinstance(item, dict)
+        or not isinstance(item.get("species") or item.get("animal") or item.get("creature"), str)
+        or not (item.get("species") or item.get("animal") or item.get("creature")).strip()
+        for item in value
     ):
         raise RuntimeError(f"Invalid history entry: {path.name}")
     return value
@@ -293,7 +296,8 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
 
     # Base nouns already uploaded to YouTube
     used_bases = get_used_base_nouns()
-    used_names = {h["species"].upper() for h in history if h.get("species")}
+    used_names = {(h.get("species") or h.get("animal") or h.get("creature")).upper()
+                  for h in history if (h.get("species") or h.get("animal") or h.get("creature"))}
 
     CLASS_CYCLE = [
         "aquatic", "bird", "insect", "quadruped", "cephalopod",

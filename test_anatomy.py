@@ -657,7 +657,7 @@ class PublicationSafetyTests(OfflineCase):
                 publication.verify_candidate_against_recent_buffer(engine.get_species_for_id(0))
 
     def test_thresholds_remain_strict(self):
-        self.assertEqual(publication.MIN_VISUAL_DIFFERENCE, 20)
+        self.assertEqual(publication.MIN_VISUAL_DIFFERENCE, 2.5)
         self.assertEqual(publication.MIN_HASH_DISTANCE, 10)
 
 

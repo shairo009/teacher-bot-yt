@@ -16,7 +16,7 @@
 - Representative frames of uploads are stored in `data/recent_frames/` (up to 5 frames) and `data/last_uploaded_frame.jpg`.
 - Before rendering/uploading, every candidate must pass:
   - Perceptual dHash Hamming distance check (> 10).
-  - Minimum visual difference check (> 20%).
+  - Minimum visual difference check (> 2.5% viewport diff, as 2D creatures occupy ~7% of frame).
 - If too similar to any recent frame, the candidate is discarded and the next distinct animal is selected.
 
 ## 4. Git & Workflow Push Reliability

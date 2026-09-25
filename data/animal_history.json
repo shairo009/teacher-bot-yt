@@ -2486,5 +2486,28 @@
     "dry_run": false,
     "video_id": "M2w0_Kh9nms",
     "youtube_url": "https://youtu.be/M2w0_Kh9nms"
+  },
+  {
+    "dhash": "c088a503218001d0",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.1,
+    "id": 132,
+    "species": "GILA MONSTER",
+    "scientific": "Heloderma suspectum",
+    "class_type": "reptile",
+    "morphology": "lizard",
+    "accent": [
+      152,
+      110,
+      50
+    ],
+    "anatomy_notes": "The Gila monster is a species of venomous lizard native to the Southwestern United States and the northwestern Mexican state of Sonora. It is a heavy, slow-moving reptile, up to 22\u00a0in (56\u00a0cm) long, an",
+    "file": "tmp/reel_0132/gila_monster_short.mp4",
+    "timestamp": "2026-09-25T07:49:01.594826+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "W-0oftyC_v4",
+    "youtube_url": "https://youtu.be/W-0oftyC_v4"
   }
 ]

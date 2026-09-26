@@ -2509,5 +2509,28 @@
     "dry_run": false,
     "video_id": "W-0oftyC_v4",
     "youtube_url": "https://youtu.be/W-0oftyC_v4"
+  },
+  {
+    "dhash": "c00bc6262b258342",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 2.8,
+    "id": 647,
+    "species": "EUROPEAN FALLOW DEER",
+    "scientific": "Dama dama",
+    "class_type": "quadruped",
+    "morphology": "cervid_bovid",
+    "accent": [
+      140,
+      108,
+      50
+    ],
+    "anatomy_notes": "Fallow deer is the common name for species of deer in the genus Dama of subfamily Cervinae. The two living species are the European fallow deer, native to Europe and Anatolia, and the Persian fallow d",
+    "file": "tmp/reel_0647/european_fallow_deer_short.mp4",
+    "timestamp": "2026-09-26T07:41:53.345672+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "61fZZu3KquY",
+    "youtube_url": "https://youtu.be/61fZZu3KquY"
   }
 ]

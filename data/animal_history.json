@@ -2532,5 +2532,28 @@
     "dry_run": false,
     "video_id": "61fZZu3KquY",
     "youtube_url": "https://youtu.be/61fZZu3KquY"
+  },
+  {
+    "dhash": "c0084117138100d0",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 9.6,
+    "id": 356,
+    "species": "RED SWAMP CRAYFISH",
+    "scientific": "Procambarus clarkii",
+    "class_type": "crustacean",
+    "morphology": "lobster",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "Procambarus clarkii, known variously as the red swamp crayfish, Louisiana crawfish or mudbug, is a species of cambarid crayfish native to freshwater bodies of northern Mexico, and southern and southea",
+    "file": "tmp/reel_0356/red_swamp_crayfish_short.mp4",
+    "timestamp": "2026-09-27T08:10:24.722610+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "tZfOUw9J4kQ",
+    "youtube_url": "https://youtu.be/tZfOUw9J4kQ"
   }
 ]

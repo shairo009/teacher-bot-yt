@@ -268,6 +268,30 @@ class GeometryTests(OfflineCase):
 
 
 class FramingTests(OfflineCase):
+    def test_stage_roams_both_axes_with_constant_scale_and_safe_margins(self):
+        representatives = {}
+        for i, entry in enumerate(engine.load_encyclopedia()):
+            representatives.setdefault(entry['class_type'], i)
+        for cls, animal_id in representatives.items():
+            species = engine.get_species_for_id(animal_id)
+            camera = engine.fixed_camera_bounds(species)
+            positions, scales = [], set()
+            for frame in range(0, 750, 15):
+                sim = engine._simulation_for_frame(species, frame)
+                zoom, ox, oy = engine.stage_projection(camera, sim)
+                scales.add(zoom)
+                left, top, right, bottom = camera
+                box = ((sim.x+left)*zoom+ox, (sim.y+top)*zoom+oy,
+                       (sim.x+right)*zoom+ox, (sim.y+bottom)*zoom+oy)
+                positions.append(((box[0]+box[2])/2, (box[1]+box[3])/2))
+                self.assertGreaterEqual(box[0], 164-1e-8, cls)
+                self.assertLessEqual(box[2], 916+1e-8, cls)
+                self.assertGreaterEqual(box[1], 374-1e-8, cls)
+                self.assertLessEqual(box[3], 796+1e-8, cls)
+            self.assertEqual(len(scales), 1, cls)
+            self.assertGreater(max(x for x,y in positions)-min(x for x,y in positions), 130, cls)
+            self.assertGreater(max(y for x,y in positions)-min(y for x,y in positions), 65, cls)
+
     def test_geometry_probe_covers_strokes_and_rejects_nonfinite(self):
         probe = engine._GeometryBounds()
         probe.line([(0, 0), (10, 20)], width=10)
@@ -605,6 +629,29 @@ class PreviewTests(OfflineCase):
 
 
 class PublicationSafetyTests(OfflineCase):
+    def test_daily_guard_counts_only_confirmed_uploads_in_utc(self):
+        from datetime import datetime, timezone
+        now = datetime(2026, 10, 3, 12, tzinfo=timezone.utc)
+        good = dict(species='Test', uploaded=True, video_id='abc', timestamp='2026-10-03T00:10:00Z')
+        for changes, expected in (({}, True), ({'uploaded': False}, False),
+                                  ({'video_id': ''}, False), ({'dry_run': True}, False),
+                                  ({'timestamp': '2026-10-03T00:10:00+05:30'}, False)):
+            with patch.object(publication, '_load_json', return_value=[{**good, **changes}]):
+                self.assertEqual(publication.published_today(now), expected)
+
+    def test_daily_cli_skips_before_generation(self):
+        with patch('sys.argv', ['generator', '--daily']), \
+             patch.object(publication, 'published_today', return_value=True), \
+             patch.object(publication, 'generate') as generate:
+            publication.main()
+            generate.assert_not_called()
+        with patch('sys.argv', ['generator', '--daily', '--dry-run']), \
+             patch.object(publication, 'published_today') as daily, \
+             patch.object(publication, 'generate') as generate:
+            publication.main()
+            generate.assert_called_once()
+            daily.assert_not_called()
+
     def test_researched_rejection_tries_another_candidate_without_writes(self):
         candidates = [(306, engine.get_species_for_id(306)), (307, engine.get_species_for_id(307))]
         exclusions = []

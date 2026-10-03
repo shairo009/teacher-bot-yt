@@ -970,6 +970,25 @@ def mammal_camera_bounds(species):
     return left, top, right, bottom
 
 
+def stage_projection(camera, sim):
+    """A constant scale with bounded roaming, rather than a root-locked camera.
+
+    Reserve space for travel on both axes using the *fixed* anatomical envelope,
+    not this frame's alpha box. Smooth saturation keeps even overshooting rigs
+    inside the stage; all anatomy, shadows and cursor use the same transform.
+    """
+    left, top, right, bottom = camera
+    zoom = camera_zoom(camera) * 0.60
+    half_w = (right-left) * zoom / 2
+    half_h = (bottom-top) * zoom / 2
+    travel_x = max(0, 376-half_w)
+    travel_y = max(0, 211-half_h)
+    center_x = 540 + travel_x * math.tanh((sim.x-sim.cx) / max(1, sim.rx * .60))
+    center_y = 585 + travel_y * math.tanh((sim.y-sim.cy) / max(1, sim.ry * .60))
+    return (zoom, center_x-(sim.x+(left+right)/2)*zoom,
+            center_y-(sim.y+(top+bottom)/2)*zoom)
+
+
 def _draw_creature_stage(img, species, sim, sim_time, theme):
     from src.bio_bone_renderer import draw_bio_creature
     accent = theme["canvas_border"]
@@ -997,12 +1016,11 @@ def _draw_creature_stage(img, species, sim, sim_time, theme):
     top, bottom = top + sim.y, bottom + sim.y
     if plan == "mammal":
         p = mammal_profile(species)
-        tx, ty = right-25, sim.y
-    elif geometry[0] < left or geometry[1] < top or geometry[2] > right or geometry[3] > bottom:
+    if geometry[0] < left or geometry[1] < top or geometry[2] > right or geometry[3] > bottom:
         raise ValueError("Rig exceeds fixed camera envelope; review framing instead of silently clipping or zooming")
-    zoom = camera_zoom(camera)
+    zoom, offset_x, offset_y = stage_projection(camera, sim)
     def screen(x, y):
-        return (540 + (x - (left + right) / 2) * zoom, 585 + (y - (top + bottom) / 2) * zoom)
+        return (x * zoom + offset_x, y * zoom + offset_y)
     x, y = screen(world[0], world[1])
     creature = layer.crop(bounds).resize((max(1, round((world[2] - world[0]) * zoom)), max(1, round((world[3] - world[1]) * zoom))), Image.Resampling.LANCZOS)
     alpha = creature.getchannel("A")
@@ -1028,7 +1046,7 @@ def _draw_creature_stage(img, species, sim, sim_time, theme):
     # Silhouette overlays its guide, never the other way around.
     img.alpha_composite(creature, (round(x), round(y)))
     d = ImageDraw.Draw(img)
-    for idx in range(1, 1 if plan == "mammal" else 8):
+    for idx in range(1, 8):
         past = sim_time - idx * 0.045
         px = sim.cx + math.cos(past * sim.f1 + sim.p1) * sim.rx * 0.85 + math.sin(past * sim.f2 + sim.p2) * sim.rx * 0.20
         py = sim.cy + math.sin(past * sim.f3 + sim.p1) * sim.ry * 0.80 + math.cos(past * sim.f4 + sim.p2) * sim.ry * 0.18

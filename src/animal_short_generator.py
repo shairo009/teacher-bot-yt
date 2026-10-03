@@ -509,6 +509,14 @@ def generate(
         if not video_id:
             raise RuntimeError("Upload was not confirmed; video retained and all publication ledgers unchanged")
 
+    # A non-secret recovery receipt survives later ledger/push failures as an artifact.
+    if video_id:
+        (run_dir / "publication_receipt.json").write_text(json.dumps({
+            "animal_id": current_id, "species": animal_name, "video_id": video_id,
+            "youtube_url": f"https://youtu.be/{video_id}", "requested_privacy": "public",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }, indent=2), encoding="utf-8")
+
     # ── STEP 8: Mark animal as USED (no-repeat guarantee) ──
     if not dry_run:
         mark_used(animal_name)
@@ -568,6 +576,20 @@ def generate(
     return output_file
 
 
+def published_today(now: datetime | None = None) -> bool:
+    """Primary, backup and deploy runs share one confirmed upload per UTC day."""
+    today = (now or datetime.now(timezone.utc)).astimezone(timezone.utc).date()
+    for item in _load_json(HISTORY_FILE, []):
+        if item.get("uploaded") is not True or item.get("dry_run") or not item.get("video_id"):
+            continue
+        timestamp = datetime.fromisoformat(item["timestamp"].replace("Z", "+00:00"))
+        if timestamp.tzinfo is None:
+            raise RuntimeError("Confirmed publication timestamp must include a timezone")
+        if timestamp.astimezone(timezone.utc).date() == today:
+            return True
+    return False
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Research-First Realistic Animal Code-Reel Generator",
@@ -587,9 +609,14 @@ Examples:
                         help="Create video but do NOT upload or mark as used")
     parser.add_argument("--no-research",  action="store_true",
                         help="Skip internet research (use stored encyclopedia data)")
+    parser.add_argument("--daily", action="store_true",
+                        help="Skip if a confirmed upload exists for today's UTC date")
     args = parser.parse_args()
 
     try:
+        if (args.daily or os.environ.get("GITHUB_EVENT_NAME") == "schedule") and not args.dry_run and published_today():
+            print("Daily publication already confirmed; nothing rendered or uploaded")
+            return
         generate(
             animal_id=args.animal_id,
             duration=args.duration,

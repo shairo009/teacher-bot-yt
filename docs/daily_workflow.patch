@@ -1,0 +1,140 @@
+diff --git a/.github/workflows/generate.yml b/.github/workflows/generate.yml
+index 798f33c..4a13f45 100644
+--- a/.github/workflows/generate.yml
++++ b/.github/workflows/generate.yml
+@@ -1,9 +1,16 @@
+ name: Animal Shorts
+ 
+ on:
++  # Deploying changes also checks today's publication; state-only commits do not.
++  push:
++    branches: [main]
++    paths:
++      - "src/**"
++      - ".github/workflows/generate.yml"
++      - "requirements.txt"
+   schedule:
+-    # Once daily at 07:47 IST (02:17 UTC), offset from the top of the hour to reduce schedule congestion
+-    - cron: "17 2 * * *"
++    # Primary 07:47 IST; backup 19:47 IST. --daily permits one confirmed upload/day.
++    - cron: "17 2,14 * * *"
+   workflow_dispatch:
+     inputs:
+       dry_run:
+@@ -27,11 +34,14 @@ permissions:
+ jobs:
+   generate-animal-short:
+     runs-on: ubuntu-latest
+-    timeout-minutes: 20
++    timeout-minutes: 35
+ 
+     steps:
+       - name: Checkout
+         uses: actions/checkout@v4
++        with:
++          ref: ${{ github.ref_name }}
++          fetch-depth: 0
+ 
+       - name: Set up Python
+         uses: actions/setup-python@v5
+@@ -46,14 +56,28 @@ jobs:
+           python -m pip install --upgrade pip
+           python -m pip install -r requirements.txt
+ 
++      - name: Offline safety regression tests
++        run: python -m unittest test_anatomy -q
++
+       - name: Generate and upload animal Short
++        id: generate
+         env:
++          PYTHONUNBUFFERED: "1"
+           DRY_RUN: ${{ inputs.dry_run || 'false' }}
+           ANIMAL_ID: ${{ inputs.animal_id || '' }}
+           TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
+           CLIENT_SECRETS_JSON: ${{ secrets.CLIENT_SECRETS_JSON }}
+         run: |
++          if [ "$DRY_RUN" != "true" ] && [ "$GITHUB_REF" != "refs/heads/main" ]; then
++            echo "::error::Publication is only allowed from main; use dry_run on branches"
++            exit 1
++          fi
++          if [ "$DRY_RUN" != "true" ] && { [ -z "$TOKEN_JSON" ] || [ -z "$CLIENT_SECRETS_JSON" ]; }; then
++            echo "::error::TOKEN_JSON and CLIENT_SECRETS_JSON are required for publication"
++            exit 1
++          fi
+           command=(python src/animal_short_generator.py)
++          if [ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ]; then command+=(--daily); fi
+           if [ "$DRY_RUN" = "true" ]; then command+=(--dry-run); fi
+           if [ -n "$ANIMAL_ID" ]; then command+=(--animal-id "$ANIMAL_ID"); fi
+           printf 'Running:'
+@@ -61,16 +85,8 @@ jobs:
+           echo
+           "${command[@]}"
+ 
+-      - name: Upload video artifact
+-        uses: actions/upload-artifact@v4
+-        with:
+-          name: cyber-reel-${{ github.run_number }}
+-          path: tmp/*/*.mp4
+-          retention-days: 2
+-          if-no-files-found: error
+-
+       - name: Save animal rotation
+-        if: inputs.dry_run != 'true'
++        if: ${{ always() && !cancelled() && steps.generate.outcome == 'success' && inputs.dry_run != true && github.ref == 'refs/heads/main' }}
+         run: |
+           git config user.name "github-actions[bot]"
+           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+@@ -78,5 +94,51 @@ jobs:
+           git diff --cached --quiet && exit 0
+           next=$(python -c "import json; print(json.load(open('data/animal_progress.json'))['current_id'])")
+           git commit -m "Animal Short #${next} complete [skip ci]"
+-          git pull --rebase origin main
+-          git push origin HEAD:main
++          for attempt in 1 2 3; do
++            git pull --rebase origin main
++            if git push origin HEAD:main; then exit 0; fi
++            sleep $((attempt * 5))
++          done
++          echo "::error::Publication completed but state push failed; restore ledgers from recovery artifact before rerunning"
++          exit 1
++
++      # Save state before large artifact uploads; artifact service failures cannot
++      # lose the publication ledger and cause tomorrow to repeat today's animal.
++      - name: Preserve recovery state and publication receipt
++        if: ${{ always() && !cancelled() && steps.generate.outcome != 'skipped' }}
++        uses: actions/upload-artifact@v4
++        with:
++          name: publication-state-${{ github.run_id }}
++          path: |
++            data/animal_progress.json
++            data/animal_history.json
++            data/used_animals.json
++            data/last_uploaded_frame.jpg
++            data/recent_frames/
++            tmp/*/publication_receipt.json
++          retention-days: 14
++
++      - name: Upload video artifact
++        if: ${{ always() && !cancelled() && hashFiles('tmp/*/*.mp4') != '' }}
++        uses: actions/upload-artifact@v4
++        with:
++          name: cyber-reel-${{ github.run_number }}
++          path: tmp/*/*.mp4
++          retention-days: 7
++          if-no-files-found: error
++
++      - name: Write run summary
++        if: always()
++        run: |
++          python - <<'PYTHON'
++          import json, os
++          from pathlib import Path
++          history = json.loads(Path('data/animal_history.json').read_text())
++          latest = next((item for item in reversed(history) if item.get('uploaded') and item.get('video_id')), None)
++          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
++              summary.write('## Animal Shorts publication status\n')
++              if latest:
++                  summary.write(f"Last confirmed ledger entry: {latest['species']} — https://youtu.be/{latest['video_id']}\n")
++                  summary.write(f"Recorded at: {latest['timestamp']}\n")
++              summary.write('See generation logs for whether this run published or skipped. Recovery artifacts never include OAuth credentials.\n')
++          PYTHON

@@ -1,3 +1,15 @@
+## Live repair checkpoint — 2026-10-03
+
+- Repository: `shairo009/teacher-bot-yt`; repair PR: https://github.com/shairo009/teacher-bot-yt/pull/2.
+- Verified failure: https://github.com/shairo009/teacher-bot-yt/actions/runs/37108471149. Daily runs failed September 28–October 3 before upload: Pacific Seahorse passed the catalogue image gate but its researched palette scored only 1.4% (minimum remains strictly >2%). State remained at 357, so the same candidate was chosen every day.
+- Implemented bounded final-research selection retries (20 candidates), per-run excluded IDs, strict explicit-ID rejection; no lowering of dHash/difference or duplicate guards. Publication ledgers are untouched by failed candidates.
+- Prior open PR branch archived as `archive/genspark-before-2026-10-03`; repair starts from latest main to preserve newer anatomy work.
+- Still in progress: visible canvas roaming (current camera subtracts the animal root each frame), workflow artifact/state-save hardening, full rendering regression and live upload verification.
+- Workflow is active. GitHub secret-list API returned 403 for this integration; existing Action logs confirm both YouTube secrets are supplied. Never print/download credentials. Test authentication only inside the normal GitHub workflow.
+- Resume: inspect PR status, `git fetch origin main`, run `python -m unittest test_anatomy.PublicationSafetyTests -v`, finish movement/workflow improvements, merge tested PR and dispatch `generate.yml` on main; confirm the YouTube ID and committed ledgers from the run. Do not claim live upload success until confirmed.
+
+---
+
 # 🤖 AI Handover & Continuity Architecture (AI_HANDOFF.md)
 
 > **FOR ANY INCOMING AI / AGENT / LLM:**  

@@ -605,6 +605,47 @@ class PreviewTests(OfflineCase):
 
 
 class PublicationSafetyTests(OfflineCase):
+    def test_researched_rejection_tries_another_candidate_without_writes(self):
+        candidates = [(306, engine.get_species_for_id(306)), (307, engine.get_species_for_id(307))]
+        exclusions = []
+        def choose(start, *, excluded_ids):
+            exclusions.append(set(excluded_ids))
+            return candidates[len(exclusions)-1]
+        with patch.object(publication, '_find_next_unused_id', side_effect=choose), \
+             patch.object(publication, 'assert_unpublished'), \
+             patch.object(publication, 'verify_candidate_against_recent_buffer',
+                          side_effect=[(False, 1.4, 15), (True, 3.1, 18)]), \
+             patch.object(publication, '_upload_to_youtube') as upload:
+            chosen, species = publication.select_publishable_species(357, force_research=False)
+        self.assertEqual(chosen, 307)
+        self.assertEqual(exclusions, [set(), {306}])
+        upload.assert_not_called()
+
+    def test_researched_retries_are_bounded_and_explicit_ids_fail_closed(self):
+        candidate = engine.get_species_for_id(306)
+        with patch.object(publication, '_find_next_unused_id', return_value=(306, candidate)) as select, \
+             patch.object(publication, 'assert_unpublished'), \
+             patch.object(publication, 'verify_candidate_against_recent_buffer', return_value=(False, 1.4, 15)):
+            with self.assertRaisesRegex(RuntimeError, 'after 2 attempts'):
+                publication.select_publishable_species(357, force_research=False, max_attempts=2)
+            self.assertEqual(select.call_count, 2)
+            select.reset_mock()
+            with self.assertRaisesRegex(RuntimeError, 'Final researched animal failed'):
+                publication.select_publishable_species(306, animal_id=306, force_research=False)
+            select.assert_not_called()
+
+    def test_selection_excludes_failed_ids_before_visual_work(self):
+        candidates = [engine.get_species_for_id(i) for i in (306, 307)]
+        with patch.object(publication, '_load_json', return_value=[]), \
+             patch.object(publication, 'get_used_base_nouns', return_value=set()), \
+             patch.object(publication, 'is_already_used', return_value=False), \
+             patch('json.loads', return_value=candidates), \
+             patch.object(engine, 'get_species_for_id', side_effect=lambda i: candidates[i]), \
+             patch.object(publication, 'verify_candidate_against_recent_buffer', return_value=(True, 3, 20)) as verify:
+            index, species = publication._find_next_unused_id(0, excluded_ids={0})
+        self.assertEqual(index, 1)
+        verify.assert_called_once_with(candidates[1])
+
     def test_explicit_id_is_blocked_before_render_or_research(self):
         with patch.object(publication, 'is_already_used', return_value=True), \
              patch.object(publication, 'research_animal') as research, \

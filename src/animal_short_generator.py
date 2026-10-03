@@ -274,7 +274,8 @@ def _upload_to_youtube(video_path: Path, species: dict, dry_run: bool) -> str | 
         return None
 
 
-def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dict]:
+def _find_next_unused_id(start_id: int, max_search: int = 600, *,
+                         excluded_ids: set[int] | None = None) -> tuple[int, dict]:
     """
     Guarantees MAXIMUM visual variety using:
       1. Base-Noun De-duplication (NO variants of Scorpions, Crabs, Spiders once uploaded!)
@@ -314,6 +315,7 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
             break
 
     examined = set()
+    excluded_ids = excluded_ids or set()
 
     def search_candidates(candidate_indices: list[int], pass_label: str) -> tuple[int, dict] | None:
         if not candidate_indices:
@@ -322,7 +324,7 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
         stride_offset = (start_id * 17) % pool_len
         for step in range(pool_len):
             idx = candidate_indices[(stride_offset + step) % pool_len]
-            if idx in examined or len(examined) >= max_search:
+            if idx in excluded_ids or idx in examined or len(examined) >= max_search:
                 continue
             examined.add(idx)
             sp = encyclopedia[idx]
@@ -390,6 +392,71 @@ def _find_next_unused_id(start_id: int, max_search: int = 600) -> tuple[int, dic
     raise RuntimeError("No unused, visually distinct animal passed the quality gates; nothing uploaded.")
 
 
+def select_publishable_species(start_id: int, animal_id: int | None = None, *,
+                               dry_run: bool = False, force_research: bool = True,
+                               max_attempts: int = 20) -> tuple[int, dict]:
+    """Retry rejected researched candidates, never uploads or publication ledgers.
+
+    A web-derived palette can change the final quality score. Remember rejected
+    IDs for this run so tomorrow's deterministic selection cannot trap the bot.
+    Explicit IDs fail closed rather than silently publishing a different animal.
+    """
+    rejected: set[int] = set()
+    for attempt in range(max_attempts):
+        # ── STEP 1: Find next animal that hasn't been used yet ──
+        if animal_id is None:
+            print(f"\n🔎 Unused animal dhundh raha hoon (ID {start_id} se)...")
+            current_id, base_species = _find_next_unused_id(start_id, excluded_ids=rejected)
+        else:
+            current_id = animal_id
+            base_species = get_species_for_id(current_id)
+        if not dry_run:
+            assert_unpublished(base_species)
+
+        animal_name = base_species["name"]
+        scientific   = base_species.get("scientific", animal_name)
+
+        print(f"\n⚡ [Research-First Engine] Animal #{current_id}: {animal_name} ({scientific})")
+
+        # ── STEP 2: Internet se real anatomy research karo ──
+        if force_research:
+            research = research_animal(animal_name, scientific)
+            print(f"\n📊 Research Summary:")
+            print(f"   Class      : {research['class_type']}")
+            print(f"   Accent RGB : {research['accent']}")
+            print(f"   Fur colors : {research['body_colors']}")
+            print(f"   Anatomy    : {research['anatomy_notes'][:100]}...")
+        else:
+            # Preserve per-family offline colors; never repaint everything orange.
+            from src.anatomy_profiles import natural_palette
+            research = {**natural_palette(base_species),
+                        "accent": base_species["accent"], "anatomy_notes": "",
+                        "proportions": {}}
+
+        # ── STEP 3: Merge research into species dict ──
+        # Research se mili real colors aur class_type override karti hain encyclopedia entry
+        species = {**base_species}
+        species["class_type"]    = base_species.get("class_type") or research.get("class_type", "quadruped")
+        species["morphology"]    = base_species.get("morphology", "small_mammal")
+        species["accent"]        = tuple(research.get("accent") or base_species.get("accent", (245, 158, 11)))
+        species["anatomy_notes"] = research.get("anatomy_notes", "")
+        # Fur colors (used by renderer)
+        for key in ("fur_dark", "fur_mid", "fur_gold", "fur_light", "fur_cream", "fur_highlight"):
+            species[key] = tuple(research.get(key) or base_species[key])
+        species["proportions"]   = research.get("proportions", {})
+
+        if not dry_run:
+            passed, pixel_diff, distance = verify_candidate_against_recent_buffer(species)
+            if not passed:
+                if animal_id is not None:
+                    raise RuntimeError(f"Final researched animal failed visual gates: {pixel_diff:.1f}%, hash {distance}")
+                rejected.add(current_id)
+                print(f"Skipping researched candidate {current_id}: {pixel_diff:.1f}%, hash {distance}; trying another unused animal")
+                continue
+        return current_id, species
+    raise RuntimeError(f"No researched candidate passed visual gates after {max_attempts} attempts; nothing uploaded")
+
+
 def generate(
     animal_id: int | None = None,
     duration: float = DEFAULT_DURATION,
@@ -404,52 +471,9 @@ def generate(
     progress = _load_json(PROGRESS_FILE, {"current_id": 0})
     start_id = int(progress.get("current_id", 0)) if animal_id is None else animal_id
 
-    # ── STEP 1: Find next animal that hasn't been used yet ──
-    if animal_id is None:
-        print(f"\n🔎 Unused animal dhundh raha hoon (ID {start_id} se)...")
-        current_id, base_species = _find_next_unused_id(start_id)
-    else:
-        current_id = animal_id
-        base_species = get_species_for_id(current_id)
-    if not dry_run:
-        assert_unpublished(base_species)
-
-    animal_name = base_species["name"]
-    scientific   = base_species.get("scientific", animal_name)
-
-    print(f"\n⚡ [Research-First Engine] Animal #{current_id}: {animal_name} ({scientific})")
-
-    # ── STEP 2: Internet se real anatomy research karo ──
-    if force_research:
-        research = research_animal(animal_name, scientific)
-        print(f"\n📊 Research Summary:")
-        print(f"   Class      : {research['class_type']}")
-        print(f"   Accent RGB : {research['accent']}")
-        print(f"   Fur colors : {research['body_colors']}")
-        print(f"   Anatomy    : {research['anatomy_notes'][:100]}...")
-    else:
-        # Preserve per-family offline colors; never repaint everything orange.
-        from src.anatomy_profiles import natural_palette
-        research = {**natural_palette(base_species),
-                    "accent": base_species["accent"], "anatomy_notes": "",
-                    "proportions": {}}
-
-    # ── STEP 3: Merge research into species dict ──
-    # Research se mili real colors aur class_type override karti hain encyclopedia entry
-    species = {**base_species}
-    species["class_type"]    = base_species.get("class_type") or research.get("class_type", "quadruped")
-    species["morphology"]    = base_species.get("morphology", "small_mammal")
-    species["accent"]        = tuple(research.get("accent") or base_species.get("accent", (245, 158, 11)))
-    species["anatomy_notes"] = research.get("anatomy_notes", "")
-    # Fur colors (used by renderer)
-    for key in ("fur_dark", "fur_mid", "fur_gold", "fur_light", "fur_cream", "fur_highlight"):
-        species[key] = tuple(research.get(key) or base_species[key])
-    species["proportions"]   = research.get("proportions", {})
-
-    if not dry_run:
-        passed, pixel_diff, distance = verify_candidate_against_recent_buffer(species)
-        if not passed:
-            raise RuntimeError(f"Final researched animal failed visual gates: {pixel_diff:.1f}%, hash {distance}")
+    current_id, species = select_publishable_species(
+        start_id, animal_id, dry_run=dry_run, force_research=force_research)
+    animal_name = species["name"]
 
     # ── STEP 4: Render frames ──
     run_dir = TMP_DIR / f"reel_{current_id:04d}"

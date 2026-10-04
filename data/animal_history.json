@@ -2555,5 +2555,28 @@
     "dry_run": false,
     "video_id": "tZfOUw9J4kQ",
     "youtube_url": "https://youtu.be/tZfOUw9J4kQ"
+  },
+  {
+    "dhash": "c008c02d0ea428d2",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 2.1,
+    "id": 338,
+    "species": "SEA OTTER",
+    "scientific": "Enhydra lutris",
+    "class_type": "aquatic",
+    "morphology": "marine_mammal",
+    "accent": [
+      132,
+      109,
+      50
+    ],
+    "anatomy_notes": "The sea otter is a marine mammal native to the coasts of the northern and eastern North Pacific Ocean. Adult sea otters typically weigh between 14 and 45\u00a0kg (30\u2013100\u00a0lb), making them the heaviest membe",
+    "file": "tmp/reel_0338/sea_otter_short.mp4",
+    "timestamp": "2026-10-04T06:08:28.175176+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "L0PxGq6EDkI",
+    "youtube_url": "https://youtu.be/L0PxGq6EDkI"
   }
 ]

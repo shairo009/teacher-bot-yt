@@ -2578,5 +2578,28 @@
     "dry_run": false,
     "video_id": "L0PxGq6EDkI",
     "youtube_url": "https://youtu.be/L0PxGq6EDkI"
+  },
+  {
+    "dhash": "c28c0b2ba7a142d0",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 7.4,
+    "id": 401,
+    "species": "MONARCH BUTTERFLY",
+    "scientific": "Danaus plexippus",
+    "class_type": "insect",
+    "morphology": "butterfly",
+    "accent": [
+      220,
+      110,
+      20
+    ],
+    "anatomy_notes": "The monarch butterfly or simply monarch is a milkweed butterfly in the family Nymphalidae. Other common names, depending on region, include milkweed, common tiger, wanderer, and black-veined brown. It",
+    "file": "tmp/reel_0401/monarch_butterfly_short.mp4",
+    "timestamp": "2026-10-04T08:28:31.865439+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "Px-2ZvjlKVw",
+    "youtube_url": "https://youtu.be/Px-2ZvjlKVw"
   }
 ]

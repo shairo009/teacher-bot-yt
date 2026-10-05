@@ -2601,5 +2601,28 @@
     "dry_run": false,
     "video_id": "Px-2ZvjlKVw",
     "youtube_url": "https://youtu.be/Px-2ZvjlKVw"
+  },
+  {
+    "dhash": "c0088001434200d0",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 2.3,
+    "id": 163,
+    "species": "EASTERN DIAMONDBACK RATTLESNAKE",
+    "scientific": "Crotalus adamanteus",
+    "class_type": "serpent",
+    "morphology": "serpent",
+    "accent": [
+      68,
+      110,
+      50
+    ],
+    "anatomy_notes": "The eastern diamondback rattlesnake is a species of pit viper in the family Viperidae. The species is endemic to the Southeastern United States. It is the largest rattlesnake species and one of the he",
+    "file": "tmp/reel_0163/eastern_diamondback_rattlesnake_short.mp4",
+    "timestamp": "2026-10-05T09:04:35.752675+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "Am4b4w94u0Q",
+    "youtube_url": "https://youtu.be/Am4b4w94u0Q"
   }
 ]

@@ -2624,5 +2624,28 @@
     "dry_run": false,
     "video_id": "Am4b4w94u0Q",
     "youtube_url": "https://youtu.be/Am4b4w94u0Q"
+  },
+  {
+    "dhash": "c2094b0b0323a5e2",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 5.4,
+    "id": 85,
+    "species": "LAUGHING KOOKABURRA",
+    "scientific": "Dacelo novaeguineae",
+    "class_type": "bird",
+    "morphology": "bird",
+    "accent": [
+      50,
+      130,
+      200
+    ],
+    "anatomy_notes": "The laughing kookaburra is a bird in the kingfisher subfamily Halcyoninae. It is a large kingfisher with a whitish head and a brown eye-stripe. The upperparts are mostly dark brown but there is a mott",
+    "file": "tmp/reel_0085/laughing_kookaburra_short.mp4",
+    "timestamp": "2026-10-06T08:59:33.806413+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "avUd6woUHag",
+    "youtube_url": "https://youtu.be/avUd6woUHag"
   }
 ]

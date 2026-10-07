@@ -2647,5 +2647,28 @@
     "dry_run": false,
     "video_id": "avUd6woUHag",
     "youtube_url": "https://youtu.be/avUd6woUHag"
+  },
+  {
+    "dhash": "c08a442f0fa684c2",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.1,
+    "id": 518,
+    "species": "EASTERN SPOTTED SKUNK",
+    "scientific": "Spilogale putorius",
+    "class_type": "quadruped",
+    "morphology": "small_mammal",
+    "accent": [
+      109,
+      110,
+      50
+    ],
+    "anatomy_notes": "The eastern spotted skunk is a small, relatively slender skunk found in North America, in the central and parts of the southeastern United States and in small areas of Canada and Mexico.",
+    "file": "tmp/reel_0518/eastern_spotted_skunk_short.mp4",
+    "timestamp": "2026-10-07T08:40:49.123238+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "aGR6hMZQ-9k",
+    "youtube_url": "https://youtu.be/aGR6hMZQ-9k"
   }
 ]

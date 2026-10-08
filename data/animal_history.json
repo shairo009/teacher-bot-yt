@@ -2670,5 +2670,28 @@
     "dry_run": false,
     "video_id": "aGR6hMZQ-9k",
     "youtube_url": "https://youtu.be/aGR6hMZQ-9k"
+  },
+  {
+    "dhash": "c009802323a50150",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 3.5,
+    "id": 222,
+    "species": "COMMON MUDPUPPY",
+    "scientific": "Necturus maculosus",
+    "class_type": "amphibian",
+    "morphology": "frog",
+    "accent": [
+      160,
+      70,
+      20
+    ],
+    "anatomy_notes": "The common mudpuppy is a species of salamander in the family Proteidae. It lives an entirely aquatic lifestyle in parts of North America in lakes, rivers, and ponds. It goes through paedomorphosis and",
+    "file": "tmp/reel_0222/common_mudpuppy_short.mp4",
+    "timestamp": "2026-10-08T08:58:59.702887+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "SmCVYcTATn4",
+    "youtube_url": "https://youtu.be/SmCVYcTATn4"
   }
 ]

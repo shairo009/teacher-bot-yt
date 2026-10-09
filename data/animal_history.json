@@ -2693,5 +2693,28 @@
     "dry_run": false,
     "video_id": "SmCVYcTATn4",
     "youtube_url": "https://youtu.be/SmCVYcTATn4"
+  },
+  {
+    "dhash": "c209c64a018001d0",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 9.7,
+    "id": 293,
+    "species": "REGAL BLUE TANG",
+    "scientific": "Paracanthurus hepatus",
+    "class_type": "aquatic",
+    "morphology": "fish",
+    "accent": [
+      50,
+      130,
+      200
+    ],
+    "anatomy_notes": "Blue tang is the common name of several species of surgeonfish.",
+    "file": "tmp/reel_0293/regal_blue_tang_short.mp4",
+    "timestamp": "2026-10-09T09:04:00.852965+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "lyU58T2JEqU",
+    "youtube_url": "https://youtu.be/lyU58T2JEqU"
   }
 ]

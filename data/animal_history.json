@@ -2716,5 +2716,28 @@
     "dry_run": false,
     "video_id": "lyU58T2JEqU",
     "youtube_url": "https://youtu.be/lyU58T2JEqU"
+  },
+  {
+    "dhash": "43c8232b2b238053",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 6.9,
+    "id": 408,
+    "species": "DEATHS HEAD HAWKMOTH",
+    "scientific": "Acherontia atropos",
+    "class_type": "insect",
+    "morphology": "butterfly",
+    "accent": [
+      188,
+      110,
+      50
+    ],
+    "anatomy_notes": "The Sphingidae are a family of moths commonly called sphinx moths, also colloquially known as hawk moths; many of their caterpillars are known as hornworms. The family includes about 1,450 species. It",
+    "file": "tmp/reel_0408/deaths_head_hawkmoth_short.mp4",
+    "timestamp": "2026-10-10T08:30:18.466282+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "lB8jU23_ndw",
+    "youtube_url": "https://youtu.be/lB8jU23_ndw"
   }
 ]

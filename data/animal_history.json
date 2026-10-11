@@ -2739,5 +2739,28 @@
     "dry_run": false,
     "video_id": "lB8jU23_ndw",
     "youtube_url": "https://youtu.be/lB8jU23_ndw"
+  },
+  {
+    "dhash": "c249a5260b8140e2",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 5.3,
+    "id": 69,
+    "species": "INDIAN PEACOCK",
+    "scientific": "Pavo cristatus",
+    "class_type": "bird",
+    "morphology": "bird",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The Indian peafowl, also known as the common peafowl, or blue peafowl, is a species of peafowl native to the Indian subcontinent. While it originated in the Indian subcontinent, it has since been intr",
+    "file": "tmp/reel_0069/indian_peacock_short.mp4",
+    "timestamp": "2026-10-11T08:50:29.551416+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "Y0uDBFVdmZY",
+    "youtube_url": "https://youtu.be/Y0uDBFVdmZY"
   }
 ]

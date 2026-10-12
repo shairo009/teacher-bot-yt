@@ -2762,5 +2762,28 @@
     "dry_run": false,
     "video_id": "Y0uDBFVdmZY",
     "youtube_url": "https://youtu.be/Y0uDBFVdmZY"
+  },
+  {
+    "dhash": "c20902969f1352e0",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 3.7,
+    "id": 497,
+    "species": "GRIZZLY BEAR",
+    "scientific": "Ursus arctos horribilis",
+    "class_type": "quadruped",
+    "morphology": "bear",
+    "accent": [
+      130,
+      75,
+      30
+    ],
+    "anatomy_notes": "The grizzly bear, also known as the North American brown bear or simply grizzly, is a population or subspecies of the brown bear inhabiting North America.",
+    "file": "tmp/reel_0497/grizzly_bear_short.mp4",
+    "timestamp": "2026-10-12T09:20:54.449916+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "mbKU9wAG8ag",
+    "youtube_url": "https://youtu.be/mbKU9wAG8ag"
   }
 ]

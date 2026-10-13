@@ -2785,5 +2785,28 @@
     "dry_run": false,
     "video_id": "mbKU9wAG8ag",
     "youtube_url": "https://youtu.be/mbKU9wAG8ag"
+  },
+  {
+    "dhash": "c20986a61b0b83c0",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.5,
+    "id": 620,
+    "species": "ROCKY MOUNTAIN BIGHORN SHEEP",
+    "scientific": "Ovis canadensis",
+    "class_type": "quadruped",
+    "morphology": "cervid_bovid",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The bighorn sheep or bighorn is a species of sheep native to North America. It is named for its large horns, a pair of them may weigh up to 14\u00a0kg (30\u00a0lb); the sheep altogether typically weigh up to 14",
+    "file": "tmp/reel_0620/rocky_mountain_bighorn_sheep_short.mp4",
+    "timestamp": "2026-10-13T09:26:40.471378+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "F2KZHUZBKfo",
+    "youtube_url": "https://youtu.be/F2KZHUZBKfo"
   }
 ]

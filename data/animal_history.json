@@ -2808,5 +2808,28 @@
     "dry_run": false,
     "video_id": "F2KZHUZBKfo",
     "youtube_url": "https://youtu.be/F2KZHUZBKfo"
+  },
+  {
+    "dhash": "c088402193c021d0",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 4.1,
+    "id": 137,
+    "species": "BLUE TONGUED SKINK",
+    "scientific": "Tiliqua scincoides",
+    "class_type": "reptile",
+    "morphology": "lizard",
+    "accent": [
+      137,
+      111,
+      50
+    ],
+    "anatomy_notes": "Skinks are lizards that constitute the family Scincidae, which is part of the infraorder Scincomorpha. With more than 1,500 described species across 100 different taxonomic genera, the family Scincida",
+    "file": "tmp/reel_0137/blue_tongued_skink_short.mp4",
+    "timestamp": "2026-10-14T07:39:18.087121+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "Z52uaqrs_HU",
+    "youtube_url": "https://youtu.be/Z52uaqrs_HU"
   }
 ]

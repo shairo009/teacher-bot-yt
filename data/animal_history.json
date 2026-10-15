@@ -2831,5 +2831,28 @@
     "dry_run": false,
     "video_id": "Z52uaqrs_HU",
     "youtube_url": "https://youtu.be/Z52uaqrs_HU"
+  },
+  {
+    "dhash": "c284474b13a542d1",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 8.8,
+    "id": 307,
+    "species": "LEAFY SEADRAGON",
+    "scientific": "Phycodurus eques",
+    "class_type": "aquatic",
+    "morphology": "seahorse",
+    "accent": [
+      119,
+      108,
+      50
+    ],
+    "anatomy_notes": "The leafy seadragon or Glauert's seadragon, is a marine fish. It is the only member of the genus Phycodurus in the family Syngnathidae, which includes seadragons, pipefish, and seahorses.",
+    "file": "tmp/reel_0307/leafy_seadragon_short.mp4",
+    "timestamp": "2026-10-15T07:27:18.860556+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "0v9_Bb-bwAA",
+    "youtube_url": "https://youtu.be/0v9_Bb-bwAA"
   }
 ]

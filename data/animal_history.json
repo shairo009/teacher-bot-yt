@@ -2854,5 +2854,28 @@
     "dry_run": false,
     "video_id": "0v9_Bb-bwAA",
     "youtube_url": "https://youtu.be/0v9_Bb-bwAA"
+  },
+  {
+    "dhash": "c28c4313a542a0d0",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 6.0,
+    "id": 411,
+    "species": "WESTERN HONEYBEE",
+    "scientific": "Apis mellifera",
+    "class_type": "insect",
+    "morphology": "bee_wasp",
+    "accent": [
+      71,
+      161,
+      50
+    ],
+    "anatomy_notes": "The western honey bee is the most common of the 7\u201312 species of honey bees worldwide. The genus name Apis is Latin for 'bee', and mellifera is the Latin for 'honey-bearing' or 'honey-carrying', referr",
+    "file": "tmp/reel_0411/western_honeybee_short.mp4",
+    "timestamp": "2026-10-16T07:10:32.878643+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "TKRx2GIGlqg",
+    "youtube_url": "https://youtu.be/TKRx2GIGlqg"
   }
 ]

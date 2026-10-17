@@ -2877,5 +2877,28 @@
     "dry_run": false,
     "video_id": "TKRx2GIGlqg",
     "youtube_url": "https://youtu.be/TKRx2GIGlqg"
+  },
+  {
+    "dhash": "c0066d0e072b8641",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 6.9,
+    "id": 480,
+    "species": "GOLDEN JACKAL",
+    "scientific": "Canis aureus",
+    "class_type": "quadruped",
+    "morphology": "canine",
+    "accent": [
+      230,
+      200,
+      30
+    ],
+    "anatomy_notes": "The golden jackal, also called the common jackal, is a wolf-like canid that is native to Eurasia. The golden jackal's coat varies in color from a pale creamy yellow in summer to a dark tawny beige in ",
+    "file": "tmp/reel_0480/golden_jackal_short.mp4",
+    "timestamp": "2026-10-17T06:58:27.208650+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "p5r5pijUxuM",
+    "youtube_url": "https://youtu.be/p5r5pijUxuM"
   }
 ]

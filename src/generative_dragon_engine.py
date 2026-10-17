@@ -1001,10 +1001,21 @@ def _draw_creature_stage(img, species, sim, sim_time, theme):
     elif geometry[0] < left or geometry[1] < top or geometry[2] > right or geometry[3] > bottom:
         raise ValueError("Rig exceeds fixed camera envelope; review framing instead of silently clipping or zooming")
     zoom = camera_zoom(camera)
-    def screen(x, y):
-        return (540 + (x - (left + right) / 2) * zoom, 585 + (y - (top + bottom) / 2) * zoom)
+    if plan == "mammal":
+        def screen(x, y):
+            return (540 + (x - (left + right) / 2) * zoom, 585 + (y - (top + bottom) / 2) * zoom)
+        scale = zoom
+    else:
+        cam_half_w = (camera[2] - camera[0]) * 0.5 * zoom
+        cam_half_h = (camera[3] - camera[1]) * 0.5 * zoom
+        roam_scale = min(1.0, (380 - cam_half_w * 0.7) / max(1, sim.rx * zoom),
+                              (230 - cam_half_h * 0.7) / max(1, sim.ry * zoom))
+        roam_scale = max(0.4, min(1.0, roam_scale))
+        scale = zoom * roam_scale
+        def screen(x, y):
+            return (540 + (x - sim.cx) * scale, 585 + (y - sim.cy) * scale)
     x, y = screen(world[0], world[1])
-    creature = layer.crop(bounds).resize((max(1, round((world[2] - world[0]) * zoom)), max(1, round((world[3] - world[1]) * zoom))), Image.Resampling.LANCZOS)
+    creature = layer.crop(bounds).resize((max(1, round((world[2] - world[0]) * scale)), max(1, round((world[3] - world[1]) * scale))), Image.Resampling.LANCZOS)
     alpha = creature.getchannel("A")
     contact = Image.new("RGBA", creature.size, (0, 0, 0, 0))
     contact.putalpha(alpha.point(lambda value: value * 100 // 255))

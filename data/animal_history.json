@@ -2900,5 +2900,28 @@
     "dry_run": false,
     "video_id": "p5r5pijUxuM",
     "youtube_url": "https://youtu.be/p5r5pijUxuM"
+  },
+  {
+    "dhash": "c20bc6262b258342",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 3.5,
+    "id": 618,
+    "species": "ALPINE IBEX",
+    "scientific": "Capra ibex",
+    "class_type": "quadruped",
+    "morphology": "cervid_bovid",
+    "accent": [
+      130,
+      75,
+      30
+    ],
+    "anatomy_notes": "The Alpine ibex, also known as the steinbock, is a European species of goat which lives in the Alps. It is one of ten species in the genus Capra, and its closest living relative is the Iberian ibex. T",
+    "file": "tmp/reel_0618/alpine_ibex_short.mp4",
+    "timestamp": "2026-10-18T07:14:42.127250+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "7tipGQxJ82I",
+    "youtube_url": "https://youtu.be/7tipGQxJ82I"
   }
 ]

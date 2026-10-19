@@ -2923,5 +2923,28 @@
     "dry_run": false,
     "video_id": "7tipGQxJ82I",
     "youtube_url": "https://youtu.be/7tipGQxJ82I"
+  },
+  {
+    "dhash": "c4826d2f07a6a643",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 10.8,
+    "id": 493,
+    "species": "FISHING CAT",
+    "scientific": "Prionailurus viverrinus",
+    "class_type": "quadruped",
+    "morphology": "feline",
+    "accent": [
+      230,
+      200,
+      30
+    ],
+    "anatomy_notes": "The fishing cat is a medium-sized wild cat of South and Southeast Asia. It has a deep yellowish-grey fur with black lines and spots. Adults have a head-to-body length of 57 to 78\u00a0cm, with a 20 to 30\u00a0c",
+    "file": "tmp/reel_0493/fishing_cat_short.mp4",
+    "timestamp": "2026-10-19T07:47:47.026275+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "PiTyIzdlvdc",
+    "youtube_url": "https://youtu.be/PiTyIzdlvdc"
   }
 ]

@@ -2946,5 +2946,28 @@
     "dry_run": false,
     "video_id": "PiTyIzdlvdc",
     "youtube_url": "https://youtu.be/PiTyIzdlvdc"
+  },
+  {
+    "dhash": "c0080384860201d2",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 11.6,
+    "id": 75,
+    "species": "COMMON OSTRICH",
+    "scientific": "Struthio camelus",
+    "class_type": "bird",
+    "morphology": "bird",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The common ostrich, or simply ostrich, is a species of flightless bird native to certain areas of Africa and is the largest living species of bird. The common ostrich is one of two extant species of o",
+    "file": "tmp/reel_0075/common_ostrich_short.mp4",
+    "timestamp": "2026-10-20T07:33:38.377454+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "MWDGFJExXDM",
+    "youtube_url": "https://youtu.be/MWDGFJExXDM"
   }
 ]

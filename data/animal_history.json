@@ -2969,5 +2969,28 @@
     "dry_run": false,
     "video_id": "MWDGFJExXDM",
     "youtube_url": "https://youtu.be/MWDGFJExXDM"
+  },
+  {
+    "dhash": "c00a8142020100d0",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 8.5,
+    "id": 303,
+    "species": "DEEP SEA ANGLERFISH",
+    "scientific": "Melanocetus johnsonii",
+    "class_type": "aquatic",
+    "morphology": "fish",
+    "accent": [
+      200,
+      60,
+      40
+    ],
+    "anatomy_notes": "The anglerfish are ray-finned fish in the order Lophiiformes. Both the order's common and scientific name come from the characteristic mode of predation, in which a modified dorsal fin ray acts as a l",
+    "file": "tmp/reel_0303/deep_sea_anglerfish_short.mp4",
+    "timestamp": "2026-10-21T07:39:17.324364+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "STL_xFN6BFI",
+    "youtube_url": "https://youtu.be/STL_xFN6BFI"
   }
 ]

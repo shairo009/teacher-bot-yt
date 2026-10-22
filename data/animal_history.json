@@ -2992,5 +2992,28 @@
     "dry_run": false,
     "video_id": "STL_xFN6BFI",
     "youtube_url": "https://youtu.be/STL_xFN6BFI"
+  },
+  {
+    "dhash": "c0084080210380d0",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 5.2,
+    "id": 186,
+    "species": "CALIFORNIA KINGSNAKE",
+    "scientific": "Lampropeltis californiae",
+    "class_type": "serpent",
+    "morphology": "serpent",
+    "accent": [
+      91,
+      110,
+      50
+    ],
+    "anatomy_notes": "The California King Snake is a nonvenomous colubrid snake endemic to the western United States and northern Mexico, and is found in a variety of habitats. Due to ease of care and a wide range of color",
+    "file": "tmp/reel_0186/california_kingsnake_short.mp4",
+    "timestamp": "2026-10-22T07:35:07.172301+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "r2AJuOG8HmE",
+    "youtube_url": "https://youtu.be/r2AJuOG8HmE"
   }
 ]

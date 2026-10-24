@@ -3015,5 +3015,28 @@
     "dry_run": false,
     "video_id": "r2AJuOG8HmE",
     "youtube_url": "https://youtu.be/r2AJuOG8HmE"
+  },
+  {
+    "dhash": "c009e00d8ea452c2",
+    "hash_scope": "creature-viewport-v2",
+    "last_frame": "data/last_uploaded_frame.jpg",
+    "visual_diff": 5.4,
+    "id": 512,
+    "species": "EUROPEAN POLECAT",
+    "scientific": "Mustela putorius",
+    "class_type": "quadruped",
+    "morphology": "small_mammal",
+    "accent": [
+      130,
+      75,
+      30
+    ],
+    "anatomy_notes": "The European polecat, also known as the western polecat, is a mustelid species occurring in Europe and the Rif mountains. It is of a generally dark brown colour, with a pale underbelly and a dark mask",
+    "file": "tmp/reel_0512/european_polecat_short.mp4",
+    "timestamp": "2026-10-24T07:19:04.388004+00:00",
+    "uploaded": true,
+    "dry_run": false,
+    "video_id": "BSfwfdhNLJU",
+    "youtube_url": "https://youtu.be/BSfwfdhNLJU"
   }
 ]
